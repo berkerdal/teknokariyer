@@ -91,28 +91,27 @@ Her oturumun başında okunur. Önemli bir karar alındığında veya yeni bir b
 **Arka plan:** Eski kariyer portalı atıl durumdaydı ve kaldırıldı. Yeni portalın tasarımı, tüm süreçleri ve yönetim paneli
 Claude tarafından yapılacak.
 
-**ÖNEMLİ:** Kurumun portal için epey detaylı talimatları var ve bunlar henüz iletilmedi. Talimatlar gelmeden kapsam,
-kullanıcı tipleri, süreçler ve teknoloji hakkında varsayım yapma; aşağıdaki açık soruları kendi tahminlerinle doldurma.
-Talimatlar gelince "docs/talimatlar.md" dosyasına aynen kaydet, bu bölümü ona göre güncelle.
-
 - Depo: https://github.com/berkerdal/teknokariyer
-- Talimatlar öncelikli kaynaktır. Bu dosyadaki öneriler ve denetim dersleriyle çelişirse talimat geçerlidir; çelişkiyi kullanıcıya bildir.
+
+**Talimatlar:**
+
+- **Ana kaynak:** `docs/talimatlar.md`. Kurumun ham notlarından ve Claude'un eklemelerinden oluşturuldu. Her maddenin kaynağı
+  işaretli: [K] kurumdan, [E] Claude ekledi, [?] kurumun kararını bekliyor.
+- **Kurumun kendi ifadesi:** `docs/ham-notlar.md`. Kurumun ilettiği "AI kokan tasarım" listesi de bu dosyada.
+- **Öncelik sırası:** Talimatlar bu dosyadaki genel önerilerden önce gelir. Ham notlar talimatlarla çelişirse kullanıcıya sor.
+- **[?] işaretli konular:** Bu konularda kendi tahmininle karar verme. Açık soruların listesi talimatların 19. bölümünde.
+  Koda geçmeden bu soruları kullanıcıya sor.
+
+**En kritik beklentiler (özet):**
+
+- Tasarım: jenerik/"AI kokan" tasarım kesinlikle istenmiyor (talimatlar 15. bölüm). Mobil sıfırdan düşünülmeli.
+- Paneller: Aday, firma ve Yönetici A.Ş. panelleri ayrı amaçlara hizmet etmeli ve ayrı tasarlanmalı.
+- Filtre ve eşleştirme: ürünün kalbi. Taksonomiye dayalı olmalı ve sonucun nedenini açıklamalı.
+- KVKK: CV havuzu ayrı açık rızayla çalışır; firma, adayın iletişim bilgisini adayın onayıyla görür.
 
 **Alınan kararlar:**
 
-- (henüz yok)
-
-**Açık sorular:**
-
-- Kullanıcı tipleri: aday (öğrenci, mezun, deneyimli), teknokent firması, teknokent yönetimi (moderasyon), akademisyen?
-- Firma hesapları nasıl doğrulanacak? Firmalar listesiyle eşleştirme mi, ARGEPORTAL ile tek oturum açma mı?
-- Kapsam: staj, yarı zamanlı, tam zamanlı, uzun dönem stajı ve proje bazlı işler; PAÜ öğrencilerine özel ilanlar.
-- İlanlar yayından önce teknokent yönetiminin onayından geçecek mi?
-- Dil: TR ve EN.
-- Barındırma ve alan adı: örneğin kariyer.pauteknokent.com.tr. Teknoloji tercihi ve kurum BT ekibinin kısıtları.
-- Bildirimler için hangi e-posta altyapısı kullanılacak?
-- Başarı ölçütleri: aylık ilan sayısı, başvuru sayısı, aktif firma oranı.
-- Eski portalın neden atıl kaldığı (ders çıkarmak için).
+- (henüz yok; 19. bölümdeki sorular cevaplandıkça buraya tarihiyle eklenecek)
 
 ## 7. Teknoloji yığını — değerlendirme (karar değil)
 
