@@ -160,7 +160,10 @@ Claude tarafından yapılacak.
   - Kılavuz: https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR
   - Ayrıntı: `docs/kimlik/README.md`
   - Claude B'yi önermişti; kurum A'yı seçti.
-- **Adım 3:** Referans panosu, tasarım sistemi ve prototipler. `docs/tasarim/` altında.
+- **Adım 3: Referans panosu, tasarım sistemi ve prototip.** Taslak 1 hazır ve onay bekliyor.
+  - Prototip: https://claude.ai/artifact/67TJq45XmkYsvCAfpoitva
+  - Ayrıntı ve kurumun kararını bekleyen konular: `docs/tasarim/README.md`
+  - Teknoloji yığınına (adım 4) prototip onaylanmadan geçilmez.
 
 **Öğrenilenler:**
 
@@ -177,6 +180,11 @@ Claude tarafından yapılacak.
 - **Yazı tipi kontrolleri:**
   - Lexend'de eşit genişlikli rakam yok; tablolarda kullanılmamalı.
   - Atkinson Hyperlegible Next ve Hanken Grotesk'te ₺ glifi yok.
+- **Prototipten öğrenilenler:**
+  - `.tk a` gibi genel bağlantı kuralları düğme biçimli bağlantıların rengini ezer. Temel kurallar `:where()` ile sıfır özgüllükte yazılmalı.
+  - Tablolardaki ve kuyruklardaki sayılar elle yazılmamalı, veriden hesaplanmalı; elle yazılan sayılar prototipte hemen tutarsızlaştı.
+  - Farklı büyüklükteki iki ölçü aynı çubukta gösterilmez (pano, yetenek ihtiyacı). Gerekirse tablo kullanılır.
+  - Firma logosu gelene kadar firmalar blok/oda kodlu karoyla gösterilir (ör. "D208"). Baş harf avatarı kullanılmaz.
 - **Kontrast:** Camgöbeği beyaz üzerinde 2,9:1 verir; arayüz çizgisi ve odak halkası için de yetmez (3:1 altı).
   Odak halkası lacivert olacak.
 
