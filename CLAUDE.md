@@ -109,9 +109,26 @@ Claude tarafından yapılacak.
 - Filtre ve eşleştirme: ürünün kalbi. Taksonomiye dayalı olmalı ve sonucun nedenini açıklamalı.
 - KVKK: CV havuzu ayrı açık rızayla çalışır; firma, adayın iletişim bilgisini adayın onayıyla görür.
 
-**Alınan kararlar:**
+**Alınan kararlar (13.11.2026):** Ayrıntısı `docs/talimatlar.md` 0. bölümde (K1–K13).
 
-- (henüz yok; 19. bölümdeki sorular cevaplandıkça buraya tarihiyle eklenecek)
+- **K1:** Eski portalda firmalar ilan girmekte zorlanıyordu ve ilanlarını tam yönetemiyordu.
+  İlan yönetimi ürünün en özenli kısmı olacak; firma ilan üzerinde tam kontrole sahip olacak.
+- **K2:** Geliştirme ve test Cloudflare'da (D1/R2) yapılacak. Kod sağlayıcıdan bağımsız yazılacak.
+  Türkiye'de bir sunucuya geçiş kolay olmalı ve `docs/goc-rehberi.md` ile belgelenmeli.
+- **K3:** ARGEPORTAL entegrasyonu yok. Yönetici A.Ş. iskelet firma kayıtları oluşturacak, firmalar devralıp profilini dolduracak.
+  Bunun için sağlam bir kurulum iş akışı kurulacak: davet, sihirbaz, hatırlatmalar, takip hunisi.
+- **K4:** Her firmanın ilk 3 ilanı Yönetici A.Ş. onayından geçer; sonra "güvenilir" firmalar doğrudan yayınlar.
+- **K5:** CV havuzunda aday, profilini görüntüleyen firmaların adını değil yalnızca sayısını görür.
+- **K6:** İndirilen CV'ye küçük bir filigran eklenir: firma adı ve tarih.
+- **K7:** Herkese açık ilan sayfasında sayaç olacak. Biçimi prototipte gösterilip kurumla kesinleştirilecek.
+  Sahte baskı ifadeleri kullanılmayacak.
+- **K8:** İkinci renk kullanılabilir. TeknoKariyer için bir alt marka kimliği oluşturulacak ve ekran tasarımlarından önce onaya sunulacak.
+- **K9:** Adaylara "sen", firmalara ve profesyonellere "siz" denir.
+- **K10:** Alan adı kariyer.pauteknokent.com.tr, gönderen e-posta kariyer@pauteknokent.com.tr.
+  DNS'i kimin yöneteceği sonra netleşecek.
+- **K11:** Başlangıçta Yönetici A.Ş. kullanıcılarının hepsi tam yetkili. Rol sistemi hazır kurulacak; roller paneller somutlaşınca konuşulacak.
+- **K12:** Fotoğraflar sonra gelecek; o zamana kadar stok fotoğraf kullanılmayacak. Tasarım fotoğrafsız da düzgün görünmeli.
+- **K13:** Önce kurum içi test yapılacak (test ortamı, örnek veri, test senaryoları dokümanı). Ardından yayın ve birkaç firmayla pilot.
 
 ## 7. Teknoloji yığını — değerlendirme (karar değil)
 

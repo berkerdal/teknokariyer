@@ -15,6 +15,187 @@ Bu talimatlar `CLAUDE.md`'deki genel önerilerden önce gelir. Bir çelişki gö
 
 ---
 
+## 0. Kurum kararları (13 Kasım 2026)
+
+Kurum 19. bölümdeki soruları cevapladı. Bu bölüm, belgenin geri kalanındaki **[?]** işaretli maddelerden önce gelir. Bir çelişki
+olursa bu bölüm geçerlidir.
+
+| No | Konu | Karar |
+| --- | --- | --- |
+| K1 | Eski portalın sorunu | Firmalar ilan girmekte zorlanıyordu; ilanlarını tam olarak yönetemiyorlardı. → İlan oluşturma ve yönetimi ürünün en özenli kısmı olacak (bkz. 0.1). |
+| K2 | KVKK ve verinin yeri | Geliştirme ve iç test aşamasında Cloudflare (D1 + R2) kullanılacak. KVKK gerekçesiyle Türkiye'deki bir sunucuya geçmek gerekirse bu kolay olmalı ve dokümante edilmeli (bkz. 0.2). |
+| K3 | Firma verisinin kaynağı | ARGEPORTAL başka bir sağlayıcıya ait olduğu için şimdilik entegrasyon yapılmayacak. Yönetici A.Ş., elindeki bilgilerle firmaların iskelet kayıtlarını oluşturacak; firmalar giriş yapıp ayrıntıları kendileri dolduracak. Bunun için sağlam bir iş akışı kurulacak (bkz. 0.3). ARGEPORTAL entegrasyonu ileriye bırakıldı. |
+| K4 | İlan onayı | Öneri kabul edildi: her firmanın ilk 3 ilanı onaydan geçer. Sonra Yönetici A.Ş.'nin "güvenilir" olarak işaretlediği firmalar doğrudan yayınlar. Hedef onay süresi 1 iş günü. |
+| K5 | Profil görüntüleme bilgisi | Aday, profilini görüntüleyen firmaların adlarını değil yalnızca sayısını görür: "Son 30 günde 4 firma görüntüledi". |
+| K6 | CV filigranı | Kabul edildi. İndirilen CV'nin altına küçük ve göze batmayan bir filigran eklenir: firma adı ve indirme tarihi. |
+| K7 | İlan sayaçları | Herkese açık ilan sayfasında sayaç **gösterilecek**. Sayacın biçimi (kesin sayı mı aralık mı, görüntülenme de dahil mi) prototipte gösterilip kurumla kesinleştirilecek. Baskı yaratan sahte ifadeler kullanılmaz: "şu an 12 kişi bakıyor", "son şans!" gibi. Sayılar yalnızca gerçek veriden gelir. |
+| K8 | İkinci renk ve kimlik | İkinci renk kullanılabilir. **TeknoKariyer için bir alt marka kimliği oluşturulacak** (bkz. 0.4). |
+| K9 | Hitap | Adaylara "sen", firmalara ve profesyonellere "siz" denir. Kural: aday arayüzü ve aday e-postaları "sen"; firma paneli, yönetim paneli ve firma e-postaları "siz". |
+| K10 | Alan adı ve e-posta | kariyer.pauteknokent.com.tr ve kariyer@pauteknokent.com.tr. DNS'i kimin yöneteceği sonra netleşecek; kod, alan adından bağımsız yapılandırılır. |
+| K11 | Yönetici A.Ş. kullanıcıları | Genel Müdür, Genel Müdür Yardımcısı, kurumsal iletişim ve teknokent süreç yöneticileri kullanacak. **Başlangıçta Yönetici A.Ş. kullanıcılarının hepsi tam yetkili "Yönetici" olur.** Sistem rol tabanlı kurulur; moderatör ve raporlayıcı rolleri hazır tutulur ama varsayılan olarak kullanılmaz. Kullanıcı tipleri ve yetkiler, paneller somutlaşınca kurumla birlikte netleştirilecek. |
+| K12 | Fotoğraflar | Teknokent fotoğrafları daha sonra verilecek; firma fotoğrafları yayına hazırlık aşamasında toplanacak. Tasarım ve geliştirme sırasında stok fotoğraf **kullanılmaz**. Fotoğraf alanları, fotoğraf olmadan da düzgün görünecek şekilde tasarlanır: firma logosu, tipografi, kare motifi. |
+| K13 | Yayın ve pilot | Önce kurum içi test yapılacak: personel test firmaları kurup test kullanıcılarıyla süreçleri deneyecek. Onaylanırsa uygun sunucu ve alan adında yayına alınacak, birkaç firma pilot olarak dahil edilecek (bkz. 0.5). |
+
+### 0.1 İlan yönetiminde tam kontrol (K1'den)
+
+Eski portalın asıl sorunu bu olduğu için ilan yönetimi en özenli tasarlanacak kısımdır. Firma kendi ilanı üzerinde tam
+kontrole sahip olur.
+
+**Firmanın ilan üzerinde yapabildikleri:**
+
+- İlanı oluşturur, taslak olarak kaydeder, önizler, yayına gönderir.
+- Yayındaki ilanı düzenler.
+  - Ufak düzeltmeler (yazım, tarih, açıklama) doğrudan yayına yansır.
+  - Esaslı değişiklikler (pozisyon adı, ilan türü, ücret) onay kuralına tabidir; güvenilir firmalarda bu değişiklikler de doğrudan yayına yansır.
+  - Neyin esaslı değişiklik sayılacağı kodda tanımlanır ve firmaya açıkça söylenir.
+- Yayını duraklatır ve yeniden başlatır: "Başvuru almayı geçici olarak durdur".
+- Son başvuru tarihini uzatır (en fazla 60 güne kadar).
+- İlanı erken kapatır. Kapatma nedeni seçilir: "pozisyon doldu", "iptal edildi"…
+- Kapanmış ilanı yeniden yayınlar.
+- İlanı kopyalar; kopyalama şablon olarak kullanılabilir.
+
+**Görünürlük:**
+
+- Her ilanın durumu tek bakışta anlaşılır: taslak, onayda, yayında, duraklatıldı, süresi doldu, kapandı.
+- Onaydaki ilanlarda tahmini onay süresi gösterilir.
+- Reddedilen ilanda red gerekçesi ve düzeltme yolu gösterilir.
+
+**İş akışı yardımcıları:**
+
+- Firma birden çok ilanı tek ekrandan yönetir. Toplu işlemler yapılabilir: süre uzatma, kapatma.
+
+**Kullanılabilirlik testi:** Kurum içi testte, ilk kez kullanan bir personelin ilanı yardım almadan 5 dakikadan kısa sürede
+yayına göndermesi ölçülecek ve raporlanacak.
+
+### 0.2 Veri taşınabilirliği ve göç dokümantasyonu (K2'den)
+
+- **Kod, veritabanı ve dosya depolama sağlayıcısından bağımsız yazılır:**
+  - Payload'un veritabanı adaptörü (D1 ↔ PostgreSQL) ve depolama adaptörü (R2 ↔ S3 uyumlu) değiştirilebilir olmalı.
+  - Uygulama kodunda doğrudan D1'e özgü SQL ve R2'ye özgü çağrı kullanılmaz. Bunlar gerekiyorsa tek bir katmanda toplanır.
+  - Arama, PostgreSQL'e geçişte de çalışacak bir arayüzün arkasına konur.
+- **Cloudflare'a özgü servisler** (Turnstile, kuyruklar, cron) tek bir dosyada sarmalanır. Her birinin yerel karşılığı belgelenir.
+- **Docker ile yerel kurulum** her zaman çalışır durumda tutulur: PostgreSQL + S3 uyumlu depolama (MinIO). CI'da bu kurulumla da test edilir.
+- **`docs/goc-rehberi.md` yazılır ve güncel tutulur.** İçeriği:
+  - Hedef mimari: Türkiye'de bir sunucu veya üniversite altyapısı
+  - Gereken sunucu kaynakları
+  - Veri dışa aktarma ve içe aktarma adımları: D1 → PostgreSQL, R2 → S3 uyumlu depolama
+  - DNS geçişi ve kesinti planı
+  - Geri dönüş planı
+  - Kontrol listesi
+- Göç adımları en az bir kez test ortamında baştan sona denenir; sonuç rehbere yazılır.
+- Yedekler sağlayıcıdan bağımsız biçimde de alınır: SQL dökümü ve dosya arşivi.
+
+### 0.3 Firma kurulumu (onboarding) iş akışı (K3'ten)
+
+**Amaç:** Yönetici A.Ş. iskelet firma kayıtlarını oluşturur, firmalar kendi hesaplarını devralıp profillerini tamamlar. Hiçbir
+firma ara adımda takılıp unutulmamalı.
+
+**1. İskelet kayıtlar**
+
+- Mevcut sitedeki firma rehberinden (121 firma) veri içe aktarılır: unvan, sektör, e-posta, web sitesi, adres, blok ve oda.
+- İçe aktarma ekranında Yönetici A.Ş. kayıtları gözden geçirir ve düzeltir:
+  - Eksik veya genel e-posta adresleri ("info@") işaretlenir.
+  - Aynı firmanın tekrarları işaretlenir.
+- Her kayıt "İskelet" durumunda başlar.
+
+**2. Yetkili kişinin belirlenmesi**
+
+- Davetin doğru kişiye gitmesi için her firmaya bir yetkili adı ve kişisel iş e-postası girilir.
+- Yetkili e-postası olmayan firmalar ayrı bir listede görünür. Yönetici A.Ş. bu listeyi telefonla tamamlar; liste dışa aktarılabilir.
+
+**3. Davet**
+
+- Davet tek tek veya toplu gönderilir.
+- Davet bağlantısı kişiye özeldir, tek kullanımlıktır ve 14 gün geçerlidir. Süresi dolarsa yeniden gönderilebilir.
+- Davet e-postası kurumsaldır. "Siz" hitabıyla, kısa ve net yazılır: neden davet edildikleri, ne kadar süreceği, kimin
+  arayabilecekleri.
+
+**4. Devralma (sahiplenme)**
+
+- Yetkili bağlantıya tıklar, firma adını ve bilgilerini doğrular, şifresini oluşturur ve iki aşamalı doğrulamayı açar.
+- Bilgilerde hata varsa "Bu bilgilerde hata var" diyerek Yönetici A.Ş.'ye not bırakabilir.
+
+**5. Kurulum sihirbazı**
+
+- Adım adım ilerler, her adım kaydedilir, yarıda bırakılıp sonra devam edilebilir:
+  1. Temel bilgiler (iskeletten dolu gelir)
+  2. Logo ve kapak görseli
+  3. Tanıtım metni
+  4. Faaliyet alanları ve teknolojiler
+  5. Çalışma modeli ve yan haklar
+  6. Ekip üyelerini davet etme (isteğe bağlı)
+  7. İlk ilan (isteğe bağlı)
+- **Profil "yayına hazır" kriteri:** logo, kısa tanıtım ve sektör. Kriter sağlanınca firma profili portalda görünür hâle gelir.
+
+**6. Hatırlatmalar**
+
+- Daveti kabul etmeyen veya sihirbazı yarıda bırakan firmalara 3., 7. ve 14. günde otomatik hatırlatma gider.
+- Sonra Yönetici A.Ş.'nin listesine "kişisel takip gerekiyor" olarak düşer.
+
+**7. Takip ekranı (Yönetici A.Ş.)**
+
+- Firma kurulum hunisi gösterilir: İskelet → Davet gönderildi → Devralındı → Profil tamam → İlk ilan verildi.
+- Her aşamada kaç firma olduğu ve kimlerin takıldığı görülür.
+- Ekrandan tek tıkla hatırlatma gönderilir veya not düşülür: "Aradım, haftaya dolduracak".
+
+**8. Yetkili değişikliği**
+
+- Firmanın yetkilisi işten ayrılırsa firma içindeki başka bir yönetici yetkiyi devralabilir.
+- Firmada başka yönetici yoksa Yönetici A.Ş. yeni yetkiliye davet gönderir. Eski yetkilinin erişimi kapanır.
+- Her adım işlem kaydına yazılır.
+
+**9. Gelecek**
+
+- ARGEPORTAL'dan veri alınabilirse içe aktarma adımı onunla değiştirilir.
+- İçe aktarmayı tek bir modül olarak tasarla; sonradan değiştirmek kolay olsun.
+
+### 0.4 TeknoKariyer alt marka kimliği (K8'den)
+
+TeknoKariyer, Pamukkale Teknokent'in bir alt markası olarak kendi kimliğini taşır; ama ana kimlikle bağı açıkça görünür.
+
+**Hazırlanacaklar:**
+
+1. **Logotype:**
+   - "TeknoKariyer" yazımı. Ana logodaki "tekno" yazısının karakterine bağlı kalınır.
+   - Yanında veya altında "Pamukkale Teknokent" imzası.
+   - Pikselli kare motifinden türetilmiş bir işaret: örneğin kareler, yukarı doğru ilerleyen bir yol oluşturur.
+   - Kare motif içinde tek başına kullanılabilecek bir sembol: favicon ve uygulama ikonu.
+   - SVG olarak hazırlanır. Renkli, negatif ve tek renk sürümleri olur.
+2. **Renk paleti:**
+   - Ana kimlikten gelenler: lacivert #2155AD ve camgöbeği #05A1E6.
+   - TeknoKariyer'e özgü ikinci renk (öneri: sıcak kiremit/toprak tonu).
+   - Nötrler: sıcak kırık beyaz zemin, nötr koyu gri metin.
+   - Durum renkleri: başarı, uyarı, hata. Bunlar yalnızca işlevsel kullanılır.
+   - Her renk çifti için WCAG kontrast değerleri tablo hâlinde verilir.
+3. **Tipografi:** Başlık ve metin yazı tipleri; ölçek ve satır aralıkları; Türkçe glif kontrolü.
+4. **Kare ızgara ve grafik dil:** Kare motifinin düzen, işaret, bölüm ayırıcı ve grafiklerde nasıl kullanılacağı.
+5. **Ses tonu:** "Sen/siz" kuralı (K9), yasak ifadeler listesi ve örnek metinler: buton, hata, boş durum, e-posta.
+6. **Uygulama örnekleri:** İlan paylaşım kartı (LinkedIn önizlemesi), e-posta şablonu, sosyal medya duyuru görseli şablonu.
+
+**Teslim şekli:**
+
+- Kimlik dokümanı `docs/kimlik/` altında olur.
+- Tasarım değişkenleri (token) kodda olur.
+- Kimlik, ekran tasarımlarından önce kurumun onayına sunulur. Önerinin 2 alternatifi gösterilir.
+- Kimlik, 15. bölümdeki jenerik tasarım yasaklarına tabidir. Hazır şablon logo kullanılmaz; bir harf ve bir ikonun yan yana konmasıyla yetinilmez.
+
+### 0.5 Kurum içi test ortamı (K13'ten)
+
+- **Ortamlar:** Yayın ortamından ayrı bir "test" ortamı kurulur; kurum personeli burada dener.
+- **Örnek veri:** Test ortamı için tek komutla kurulabilen bir örnek veri seti hazırlanır.
+  - Test firmaları, test adaylar, farklı durumlarda ilanlar ve başvurular bulunur.
+  - Örnek veri gerçekçidir ama gerçek kişisel veri içermez.
+  - Test firmaları açıkça "TEST" olarak işaretlenir.
+- **Test e-postaları:** Test ortamında giden e-postalar gerçek alıcılara gitmez. Bir test posta kutusunda toplanır ve panelden görüntülenir.
+- **Test senaryoları dokümanı (`docs/test-senaryolari.md`):**
+  - Personelin adım adım uygulayacağı senaryolar: firma kurulumu, ilan verme, başvuru, havuz iletişim talebi, onay, KVKK talepleri.
+  - Her senaryoda beklenen sonuç yazılır.
+  - Geri bildirimin nasıl iletileceği de yazılır.
+- **Yayın hazırlığı:** Test ortamındaki veri yayına taşınmaz. Yayın ortamı temiz başlar; içine yalnızca firma iskeletleri aktarılır.
+- **Kurulum ve yayın rehberi (`docs/kurulum.md`):** "Uygun sunucuya ve alan adına yayına alma" adımları. Hem Cloudflare hem yerel sunucu seçeneği için yazılır.
+
+---
+
 ## 1. Ürünün tanımı
 
 **[K]** TeknoKariyer, Pamukkale Teknokent'in kariyer portalıdır.
@@ -696,12 +877,14 @@ Kurumun ilettiği listeye eleştirel yaklaşıldı. Liste çoğunlukla doğru te
 | Faz | Kapsam |
 | --- | --- |
 | 0. Netleştirme | [?] işaretli soruların cevaplanması, KVKK ve veri yeri kararı, eski portal dersleri |
-| 1. Tasarım | Referans panosu, tasarım sistemi, prototipler, kurum onayı |
+| 1. Kimlik ve tasarım | TeknoKariyer alt marka kimliği (0.4) ve onayı → referans panosu → tasarım sistemi → prototipler (sayaç biçimi dahil, K7) → kurum onayı |
 | 2. MVP | Firma daveti ve profili; ilan oluşturma, onay ve yayın; aday profili ve başvuru; firmanın başvuru yönetimi ve CV indirme; CV havuzu (rıza, arama, iletişim talebi); filtreler ve kayıtlı aramalar; Yönetici A.Ş. kuyrukları ve temel pano; e-posta bildirimleri; TR/EN; KVKK araçları |
-| 3. Yayın hazırlığı | 121 firmanın aktarılması, gerçek içerikle test, sızma testi, firma pilot kullanımı (5–10 firma), eğitim dokümanı |
+| 3. Kurum içi test ve yayın hazırlığı | Test ortamı ve örnek veri (0.5), personel testleri, düzeltmeler, göç rehberinin denenmesi (0.2), 121 firma iskeletinin aktarılması ve davetler (0.3), sızma testi, ardından birkaç firmayla pilot |
 | 4. Faz 2 | LinkedIn API, CV'den otomatik profil doldurma, platform içi mesajlaşma, PWA ve anlık bildirim, görüşme planlama, ARGEPORTAL ile tek oturum açma |
 
 ## 19. Kurumun cevaplaması gereken sorular
+
+**Bu sorular 13 Kasım 2026'da cevaplandı; kararlar 0. bölümde.** Liste kayıt amacıyla duruyor.
 
 1. Eski portal neden atıl kaldı? Kimler kullanıyordu, ne eksikti?
 2. KVKK ve veri yeri: Kurumun KVKK sorumlusu kim? Yurt dışında barındırma (Cloudflare) kabul edilebilir mi?
