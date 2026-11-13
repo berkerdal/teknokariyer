@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { alanSadeceYonetici, kullanici, kurumKullanicisiMi, sistemIslemiMi, yoneticiMi } from '../erisim'
+import { dogrulamaEpostasi, sifreSifirlamaEpostasi } from '../altyapi/epostaSablonlari'
 
 /**
  * Kullanıcılar: aday, firma kullanıcısı ve Yönetici A.Ş. personeli tek koleksiyonda, role göre ayrılır.
@@ -16,6 +17,16 @@ export const Kullanicilar: CollectionConfig = {
     lockTime: 15 * 60 * 1000,
     tokenExpiration: 60 * 60 * 8, // 8 saat
     cookies: { sameSite: 'Lax', secure: process.env.NODE_ENV === 'production' },
+    // E-posta doğrulanmadan giriş yapılamaz. Davetle açılan firma ve kurum hesapları doğrulanmış olarak açılır.
+    verify: {
+      generateEmailSubject: ({ user }) => dogrulamaEpostasi(user as never, '').konu,
+      generateEmailHTML: ({ token, user }) => dogrulamaEpostasi(user as never, token ?? '').html,
+    },
+    forgotPassword: {
+      expiration: 60 * 60 * 1000, // 1 saat
+      generateEmailSubject: (a) => sifreSifirlamaEpostasi((a?.user ?? {}) as never, '').konu,
+      generateEmailHTML: (a) => sifreSifirlamaEpostasi((a?.user ?? {}) as never, a?.token ?? '').html,
+    },
   },
   access: {
     // Kişi kendini, kurum herkesi okur.

@@ -5,10 +5,14 @@
 import type { Payload } from 'payload'
 import type { Adaylar, Ilanlar } from '@/payload-types'
 import { adayMi } from '@/erisim'
+import { surum } from '@/metinler'
+import { basvuruEksikleri, type BasvuruIlani, type BasvuruProfili } from '@/alan/basvuru'
+import { FormHatasi } from './hesap'
+import { basvuruAlindiEpostasi } from '@/altyapi/epostaSablonlari'
 import { IslemHatasi, istekOlustur, kimlik, type Kullanici } from './ortak'
 
-/** Yürürlükteki metin sürümleri. Metin değişince sürüm artırılır; eski onaylar eski sürümle kayıtlı kalır. */
-export const METIN_SURUMLERI = { basvuruAydinlatma: '1.0', havuzRiza: '1.0' } as const
+/** Yürürlükteki metin sürümleri (src/metinler). Metin değişince sürüm artırılır; eski onaylar eski sürümle kayıtlı kalır. */
+export const METIN_SURUMLERI = { basvuruAydinlatma: surum('basvuru-aydinlatma'), havuzRiza: surum('havuz') } as const
 
 export interface BasvuruGirdisi {
   ilanId: number | string
@@ -44,6 +48,20 @@ export function profilKopyasi(kullanici: Kullanici, aday: Adaylar) {
   }
 }
 
+/** Eksik hesabı için ilan ve profil: diller kimlikle karşılaştırılır. */
+export const basvuruIlani = (i: Pick<Ilanlar, 'tur' | 'diller'>): BasvuruIlani => ({
+  tur: i.tur as 'is' | 'staj',
+  diller: (i.diller ?? []).map((d) => ({ dil: String(kimlik(d.dil)), seviye: d.seviye })),
+})
+export const basvuruProfili = (a: Adaylar): BasvuruProfili => ({
+  okul: a.okul ? String(kimlik(a.okul)) : null,
+  bolum: a.bolum ? String(kimlik(a.bolum)) : null,
+  deneyim: a.deneyimSeviyesi,
+  sinif: a.sinif,
+  mezuniyet: a.mezuniyet,
+  diller: (a.diller ?? []).map((d) => ({ dil: String(kimlik(d.dil)) })),
+})
+
 /** Ön eleme cevaplarını denetler: zorunlu cevaplar ve eleyici soruya beklenmeyen cevap. */
 export function cevaplariDenetle(ilan: Ilanlar, cevaplar: Record<string, string>) {
   const sorular = ilan.onElemeSorulari ?? []
@@ -73,13 +91,15 @@ export async function basvur(payload: Payload, kullanici: Kullanici, girdi: Basv
   const aday = docs[0]
   if (!aday) throw new IslemHatasi('Başvurmadan önce profilini oluştur.')
 
+  const profilEksikleri = basvuruEksikleri(basvuruIlani(ilan), basvuruProfili(aday))
+  if (profilEksikleri.length) throw new IslemHatasi('Başvurmadan önce bu ilanın gerektirdiği profil bilgilerini tamamla.', 400)
+
   const { eksik, eleyiciUyari } = cevaplariDenetle(ilan, girdi.cevaplar)
   if (eksik.length) throw new IslemHatasi(`Şu soruları cevapla: ${eksik.join(' · ')}`)
 
-  if (girdi.cvDosyaId) {
-    const cvSahibi = (aday.cvler ?? []).some((c) => kimlik(c.dosya) === Number(girdi.cvDosyaId))
-    if (!cvSahibi) throw new IslemHatasi('Seçilen CV senin CV’lerin arasında değil.', 403)
-  }
+  if (!girdi.cvDosyaId) throw new FormHatasi({ cv: 'Gönderilecek CV’yi seç veya yeni bir CV yükle.' })
+  const cvSahibi = (aday.cvler ?? []).some((c) => kimlik(c.dosya) === Number(girdi.cvDosyaId))
+  if (!cvSahibi) throw new IslemHatasi('Seçilen CV senin CV’lerin arasında değil.', 403)
 
   const req = await istekOlustur(payload, kullanici)
   // Rızalar ayrı ayrı ve sürümüyle (talimatlar 12).
@@ -139,6 +159,11 @@ export async function basvur(payload: Payload, kullanici: Kullanici, girdi: Basv
     overrideAccess: true,
     req,
   })
+
+  // Zorunlu bildirim: başvuru alındı (yayın dışında test posta kutusuna yazılır).
+  const firma = await payload.findByID({ collection: 'firmalar', id: kimlik(ilan.firma), depth: 0, overrideAccess: true, select: { kisaAd: true } })
+  const e = basvuruAlindiEpostasi(kullanici, { pozisyonAdi: ilan.pozisyonAdi, firma: firma.kisaAd })
+  await payload.sendEmail({ to: kullanici.email, subject: e.konu, html: e.html, text: e.metin })
   return basvuru
 }
 

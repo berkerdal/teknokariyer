@@ -11,6 +11,21 @@ const nextConfig: NextConfig = {
   // İki kök düzen var (site ve yönetim paneli); eşleşmeyen adresler için tek ve gerçek 404 sayfası.
   experimental: { globalNotFound: true },
   poweredByHeader: false,
+  // Güvenlik başlıkları (talimatlar 12). Betik kaynağı kısıtı (nonce'lu CSP) ayrı bir adımda eklenecek.
+  async headers() {
+    return [
+      {
+        source: '/:yol*',
+        headers: [
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'" },
+        ],
+      },
+    ]
+  },
   images: {
     localPatterns: [
       {

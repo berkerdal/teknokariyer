@@ -96,3 +96,31 @@ dialog.alt-panel::backdrop { background: rgba(19, 40, 79, .42); }
 /* Test ortamı şeridi (K13, K17): yayın dışındaki her ortamda her sayfanın en üstünde. */
 .ortam-serit { background: var(--uyari); color: #FFFFFF; font-size: 14px; line-height: 1.35; padding: 6px 16px; text-align: center; }
 .ortam-serit strong { letter-spacing: .04em; }
+
+/* Giriş ekranı: yan bilgi yalnızca masaüstünde */
+.giris-yan--masa { display: none; }
+@media (min-width: 900px) { .giris-yan--masa { display: grid; } }
+.giris-kutu .sekmeler { margin: calc(var(--b5) * -1) calc(var(--b5) * -1) 0; padding: 0 var(--b4); }
+
+/* Başvuru akışı: mobilde yalnızca geçerli adımın adı yazar */
+@media (max-width: 899px) { .bv-adimlar .adim-ad { display: none; } }
+.kontrol-dl .dugme { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+
+/* Aday paneli: tek işaretleme. Mobilde yan menü yok (alt menü var). */
+.ap { padding: var(--b4) 16px var(--b6); display: grid; gap: var(--b5); }
+.ap .ap-menu { display: none; }
+@media (min-width: 900px) {
+  .ap { max-width: 1200px; margin: 0 auto; padding: var(--b5) 32px; grid-template-columns: 220px minmax(0, 1fr); gap: var(--b6); align-items: start; width: 100%; }
+  .ap .ap-menu { display: grid; }
+}
+.bv-kart form { display: contents; }
+dialog.pencere-dialog { border: 0; padding: var(--b5); border-radius: var(--kose-panel); box-shadow: var(--golge-katman); width: min(520px, calc(100% - 32px)); background: var(--yuzey); color: var(--metin); }
+dialog.pencere-dialog::backdrop { background: rgba(19, 40, 79, .42); }
+
+/* Profil: beceri ve dil satırları */
+.beceri-duzen { display: grid; }
+.beceri-duzen li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--cizgi); }
+.beceri-duzen li > span { font-weight: 600; }
+.beceri-duzen .ikon-dugme { margin: 0; }
+.profil-bolum { scroll-margin-top: 80px; }
+.dosya-satiri form { margin-left: auto; }

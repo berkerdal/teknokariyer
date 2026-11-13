@@ -161,7 +161,12 @@ export async function ornekVeriYukle(payload: Payload, simdi = new Date()): Prom
     const a = veri.aday
     const { docs } = await payload.find({ collection: 'kullanicilar', where: { email: { equals: a.eposta } }, limit: 1, overrideAccess: true })
     if (!docs[0]) {
-      const k = await payload.create({ collection: 'kullanicilar', overrideAccess: true, data: { email: a.eposta, password: sifre, ad: a.ad, rol: 'aday' } as never })
+      const k = await payload.create({
+        collection: 'kullanicilar',
+        overrideAccess: true,
+        disableVerificationEmail: true,
+        data: { email: a.eposta, password: sifre, ad: a.ad, rol: 'aday', _verified: true } as never,
+      })
       await payload.create({
         collection: 'adaylar',
         overrideAccess: true,

@@ -7,12 +7,15 @@ import config from '@/payload.config'
 import { duraklat, duzeltmeIste, kapat, kopyala, onayla, sureUzat, suresiDolanlariKapat, yayinaGonder } from '@/servisler/ilanIslemleri'
 import { basvur } from '@/servisler/basvuru'
 import { goruntuleyenFirmaSayisi, havuzAra, havuzProfiliAc } from '@/servisler/havuz'
+import { cvYukle, profilGuncelle } from '@/servisler/profil'
+
+const PDF = new TextEncoder().encode('%PDF-1.4\n1 0 obj<< /Type /Catalog >>endobj\nxref\n0 2\n0000000000 65535 f \n0000000009 00000 n \ntrailer<< /Size 2 /Root 1 0 R >>\nstartxref\n47\n%%EOF\n')
 
 let payload: Payload
 const ek = `s${Date.now().toString(36)}`
 const gun = (n: number) => new Date(Date.now() + n * 86_400_000)
 let firma: any, digerFirma: any, firmaKullanici: any, digerKullanici: any, yonetici: any, adayK: any, aday: any
-let aile: number, beceri: number
+let aile: number, beceri: number, okul: number, bolum: number
 
 async function taslakIlan(firmaId: number, ad = 'Flutter Geliştirici', ekVeri: Record<string, unknown> = {}) {
   return payload.create({
@@ -30,6 +33,8 @@ beforeAll(async () => {
   payload = await getPayload({ config })
   aile = (await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'pozisyon-ailesi', ad: `Yazılım ${ek}` } as any })).id
   beceri = (await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'beceri', ad: `Dart ${ek}` } as any })).id
+  okul = (await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'universite', ad: `PAÜ ${ek}` } as any })).id
+  bolum = (await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'bolum', ad: `Bilgisayar ${ek}` } as any })).id
   const f = (ad: string) => payload.create({ collection: 'firmalar', overrideAccess: true, data: { unvan: ad, kisaAd: ad, slug: `${ad}-${ek}`.toLowerCase(), konum: 'D Blok 208' } as any })
   firma = await f('Kodpit')
   digerFirma = await f('Bulutfon')
@@ -104,6 +109,7 @@ describe('ilan işlemleri (K1)', () => {
 
 describe('başvuru ve havuz (K24, K25, K5)', () => {
   let ilan: any
+  let cvId: number
   beforeAll(async () => {
     ilan = await taslakIlan(firma.id, 'Başvurulacak', {
       onElemeSorulari: [{ soru: 'Haftada 2 gün ofiste çalışabilir misin?', tip: 'evet-hayir', eleyici: true, beklenenCevap: 'Evet' }],
@@ -111,13 +117,25 @@ describe('başvuru ve havuz (K24, K25, K5)', () => {
     await yayinaGonder(payload, firmaKullanici, ilan.id)
     ilan = await payload.findByID({ collection: 'ilanlar', id: ilan.id, overrideAccess: true })
   })
+  it('profil eksikse ve CV seçilmemişse başvurulamaz; CV yalnızca gerçek PDF olabilir', async () => {
+    const soruId = ilan.onElemeSorulari[0].id
+    const g = { ilanId: ilan.id, cevaplar: { [soruId]: 'Evet' }, aydinlatmaOnay: true, havuzaKatil: false }
+    await expect(basvur(payload, adayK, g)).rejects.toThrow(/profil bilgilerini tamamla/)
+    await profilGuncelle(payload, adayK, { okul, bolum, deneyimSeviyesi: '1-3' })
+    await expect(basvur(payload, adayK, g)).rejects.toThrow(/CV/)
+    await expect(cvYukle(payload, adayK, { ad: 'Sahte', dosya: { veri: new TextEncoder().encode('<html>'), boyut: 6 } })).rejects.toThrow(/Yalnızca PDF/)
+    cvId = (await cvYukle(payload, adayK, { ad: 'CV – Türkçe', dosya: { veri: PDF, boyut: PDF.length } })).id
+    const dosya = await payload.findByID({ collection: 'dosyalar', id: cvId, overrideAccess: true })
+    expect(dosya).toMatchObject({ tur: 'cv', taramaDurumu: 'bekliyor' })
+    expect(dosya.filename).not.toContain('Kişi')
+  })
   it('aydınlatma onayı ve sorular cevaplanmadan başvurulamaz', async () => {
     await expect(basvur(payload, adayK, { ilanId: ilan.id, cevaplar: {}, aydinlatmaOnay: false, havuzaKatil: false })).rejects.toThrow(/aydınlatma/)
     await expect(basvur(payload, adayK, { ilanId: ilan.id, cevaplar: {}, aydinlatmaOnay: true, havuzaKatil: false })).rejects.toThrow(/soruları cevapla/)
   })
   it('başvuru profil kopyasını dondurur, eleyici cevabı işaretler, havuz rızasını kaydeder', async () => {
     const soruId = ilan.onElemeSorulari[0].id
-    const b = await basvur(payload, adayK, { ilanId: ilan.id, cevaplar: { [soruId]: 'Hayır' }, aydinlatmaOnay: true, havuzaKatil: true })
+    const b = await basvur(payload, adayK, { ilanId: ilan.id, cvDosyaId: cvId, cevaplar: { [soruId]: 'Hayır' }, aydinlatmaOnay: true, havuzaKatil: true })
     expect(b.eleyiciUyari).toBe(true)
     expect((b.profilKopyasi as any).ad).toBe(adayK.ad)
     expect((b.profilKopyasi as any).tercihler.ucretBeklentisi).toBeUndefined()
@@ -126,7 +144,7 @@ describe('başvuru ve havuz (K24, K25, K5)', () => {
     const a = await payload.findByID({ collection: 'adaylar', id: aday.id, overrideAccess: true })
     expect(a.havuz?.gorunurluk).toBe('acik')
     expect((await payload.findByID({ collection: 'ilanlar', id: ilan.id, overrideAccess: true })).basvuruSayisi).toBe(1)
-    await expect(basvur(payload, adayK, { ilanId: ilan.id, cevaplar: { [soruId]: 'Evet' }, aydinlatmaOnay: true, havuzaKatil: false })).rejects.toThrow(/daha önce/)
+    await expect(basvur(payload, adayK, { ilanId: ilan.id, cvDosyaId: cvId, cevaplar: { [soruId]: 'Evet' }, aydinlatmaOnay: true, havuzaKatil: false })).rejects.toThrow(/daha önce/)
   })
   it('havuz araması anonimdir ve cinsiyete göre filtrelenemez', async () => {
     await expect(havuzAra(payload, firmaKullanici, { cinsiyet: 'kadin' })).rejects.toThrow(/arama yapılamaz/)
