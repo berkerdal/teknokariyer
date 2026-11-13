@@ -6,6 +6,7 @@ import { basvuruEksikleri, type EksikAlan } from '@/alan/basvuru'
 import { basvuruIlani, basvuruProfili } from '@/servisler/basvuru'
 import { kimlik, type Kullanici } from '@/servisler/ortak'
 import { payloadAl } from './payload'
+import { firmalariAl } from './ilanlar'
 
 const ad = (x: unknown) => (x && typeof x === 'object' ? ((x as Taksonomiler).ad ?? '') : '')
 
@@ -83,9 +84,12 @@ export async function basvurularim(kullanici: Kullanici): Promise<BasvuruKarti[]
     user: kullanici,
     populate: { ilanlar: { pozisyonAdi: true, durum: true, firma: true }, firmalar: { kisaAd: true, konum: true } },
   })
-  return docs.map((b) => {
-    const i = typeof b.ilan === 'object' ? (b.ilan as Ilanlar) : null
-    const f = i && typeof i.firma === 'object' ? i.firma : null
+  const ilanlar = docs.map((b) => (typeof b.ilan === 'object' ? (b.ilan as Ilanlar) : null))
+  const firmalar = await firmalariAl(ilanlar.flatMap((i) => (i ? [kimlik(i.firma)] : [])))
+  return docs.map((b, n) => {
+    const i = ilanlar[n]
+    const fo = i ? firmalar.get(kimlik(i.firma)) : undefined
+    const f = fo ? { kisaAd: fo.ad, konum: fo.konum } : null
     return {
       id: b.id,
       durum: b.durum,

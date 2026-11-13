@@ -7,7 +7,7 @@ import { useActionState, useEffect, useState } from 'react'
 import { cvSilEylemi, cvYukleEylemi, profilKaydetEylemi } from '@/eylemler/aday'
 import { CEFR } from '@/alan/eslesme'
 import { Ikon } from '../Ikon'
-import { GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
+import { DosyaSecici, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 
 export function ProfilBolumu(props: { ad: string; baslik: string; children: React.ReactNode }) {
   const [durum, eylem] = useActionState<FormDurumu, FormData>(profilKaydetEylemi, {})
@@ -151,9 +151,8 @@ export function CvYukleFormu({ kalan }: { kalan: number }) {
         <strong>Yalnızca PDF, en fazla 5 MB.</strong> {kalan} CV daha ekleyebilirsin.
       </p>
       <div className={durum.hatalar?.cvDosya ? 'alan alan--hata' : 'alan'}>
-        <label htmlFor="cv-dosya">PDF dosyası</label>
         {durum.hatalar?.cvDosya && <p className="hata-metni">{durum.hatalar.cvDosya}</p>}
-        <input id="cv-dosya" name="cvDosya" type="file" accept="application/pdf,.pdf" required />
+        <DosyaSecici id="cv-dosya" ad="cvDosya" />
       </div>
       <div className="alan">
         <label htmlFor="cv-ad">

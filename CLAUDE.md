@@ -196,7 +196,15 @@ Claude tarafından yapılacak.
     - Örnek veri: `pnpm ornek-veri` (prototip verisinden; firmalar “test firması” işaretli, yayında görünmez).
       Giriş yapılabilen örnek aday hesabı yalnızca `ORNEK_SIFRE` verilirse açılır.
     - Yayın dışı ortamlarda her sayfanın üstünde “TEST ORTAMI” şeridi var (K17 örnek işareti).
-  - **Sırada M4b-2:** Giriş/kayıt, başvuru akışı, aday paneli; ardından firma paneli ve Yönetici A.Ş. paneli.
+  - **M4b-2 aday tarafı:** Kayıt (e-posta doğrulamalı), giriş, şifre sıfırlama, başvuru akışı (yalnızca ilanın gerektirdiği
+    eksikler sorulur, CV zorunlu ve yalnızca geçerli PDF), başarı sayfası ve “başvurun alındı” e-postası, aday paneli
+    (başvurularım, profil ve CV’ler, CV havuzu ayarları, hesap ve gizlilik, veri indirme). Tarayıcıda uçtan uca denendi.
+    - KVKK metinleri `src/metinler/` altında, sürümlü ve **taslak** (`onayli: false`); hukuk birimi onayı bekliyor.
+    - Hesap silme şimdilik kvkk@ adresine e-postayla. Silinen hesabın başvurularının firmada nasıl görüneceği kurumla
+      konuşulacak (talimatlar 12: “aday hesabını sildi”).
+    - Kaydedilen ilanlar ve kayıtlı aramalar henüz yok (veri modelinde koleksiyon yok).
+  - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
+    Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç (migration) henüz oluşturulmadı:** Şema oturunca ve ilk dağıtımdan önce `pnpm payload migrate:create` ile oluşturulacak.
 
 **Öğrenilenler:**
@@ -244,6 +252,14 @@ Claude tarafından yapılacak.
     Gerekirse ileride bir rota işleyicisiyle çözülür.
   - Workers UTC'de çalışır. Takvim günü hesapları (`gunFarki`, `kalanGun`, `suresiDolduMu`) Türkiye saatine bağlandı;
     birim testleri `TZ=Europe/Istanbul` ile koşar, ayrıca UTC anlarıyla ayrı test var.
+  - **Düzen ve sayfa paralel çalışır.** Düzendeki `redirect` sayfa kodunun çalışmasını engellemez; korumalı her sayfa
+    oturumu kendisi denetler (`adayOturumu()`). Aksi hâlde oturumsuz istekte sayfa `null` kullanıcıyla çalışıp çöküyordu.
+  - Sunucu eylemi sonrası sayfa sunucuda yeniden çizilir; başarı ekranı istemci durumunda tutulursa kaybolur. Başarı
+    ekranları ayrı adrese yönlendirilir (`/basvuru-tamam`).
+  - Ziyaretçi erişim kuralıyla okunan ilişkilerde, yayına hazır olmayan firmanın bilgisi düşer. Firma adı/konumu için
+    `firmalariAl()` (yalnızca herkese açık alanlar) kullanılır.
+  - Payload, yüklenen PDF'in başında `%PDF-`, son 1 KB'ında `xref` ve `%%EOF` arar; servis aynı denetimi Türkçe hatayla
+    önce yapar. Tarayıcının dosya seçicisi kendi dilinde yazdığı için Türkçe `DosyaSecici` kullanılır.
   - Yazı tipleri depoda, alt kümeye indirilmiş WOFF2 (Türkçe ve ₺ dahil, 4 dosya toplam 55 KB). Dış yazı tipi CDN'i yok.
 - **Kontrast:** Camgöbeği beyaz üzerinde 2,9:1 verir; arayüz çizgisi ve odak halkası için de yetmez (3:1 altı).
   Odak halkası lacivert olacak.

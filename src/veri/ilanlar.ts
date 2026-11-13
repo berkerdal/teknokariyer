@@ -37,7 +37,8 @@ const firmaOzeti = (f: Firmalar): FirmaOzeti => ({
   sektor: ad(f.sektor),
 })
 
-async function firmalariAl(idler: number[]): Promise<Map<number, FirmaOzeti>> {
+/** Firmaların herkese açık özetleri (kimlik → özet). Görünmeyen (pasif) firma dönmez. */
+export async function firmalariAl(idler: number[]): Promise<Map<number, FirmaOzeti>> {
   if (!idler.length) return new Map()
   const payload = await payloadAl()
   const { docs } = await payload.find({

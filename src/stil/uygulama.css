@@ -124,3 +124,6 @@ dialog.pencere-dialog::backdrop { background: rgba(19, 40, 79, .42); }
 .beceri-duzen .ikon-dugme { margin: 0; }
 .profil-bolum { scroll-margin-top: 80px; }
 .dosya-satiri form { margin-left: auto; }
+.dosya-secici { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.dosya-secici span { overflow-wrap: anywhere; }
+.dosya-secici:has(input:focus-visible) label { outline: 3px solid var(--lacivert); outline-offset: 2px; }

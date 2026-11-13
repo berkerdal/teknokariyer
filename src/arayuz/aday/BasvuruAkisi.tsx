@@ -12,7 +12,7 @@ import { basvurEylemi, type BasvuruDurumu } from '@/eylemler/aday'
 import { CEFR, DENEYIM_ADI, DENEYIM_SIRASI } from '@/alan/eslesme'
 import { SINIFLAR } from '@/alan/basvuru'
 import { Ikon } from '../Ikon'
-import { GonderDugmesi, HataOzeti } from '../form'
+import { DosyaSecici, GonderDugmesi, HataOzeti } from '../form'
 
 const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
 const EKSIK_ADI: Record<string, string> = { okul: 'okul', bolum: 'bölüm', deneyim: 'deneyim düzeyi', sinif: 'sınıf', mezuniyet: 'mezuniyet tarihi' }
@@ -227,10 +227,7 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
                 )}
                 {cvSecim === 'yeni' && (
                   <div className="dosya">
-                    <label htmlFor="cvDosya">
-                      <strong>PDF dosyası</strong>
-                    </label>
-                    <input id="cvDosya" name="cvDosya" type="file" accept="application/pdf,.pdf" />
+                    <DosyaSecici id="cvDosya" ad="cvDosya" />
                     <div className="alan">
                       <label htmlFor="cvAd">
                         CV’ye bir ad ver <span className="istege-bagli">(isteğe bağlı)</span>

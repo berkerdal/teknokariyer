@@ -4,7 +4,7 @@
  * - Formun üstünde hata özeti; odak oraya taşınır; her madde ilgili alana götürür (GOV.UK kalıbı).
  * - Her alanın altında ne yapılacağını söyleyen mesaj.
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 
 export interface FormDurumu {
@@ -77,5 +77,21 @@ export function GonderDugmesi({ children, bekleme = 'Gönderiliyor…', classNam
     <button className={className} type="submit" disabled={pending} aria-disabled={pending}>
       {pending ? bekleme : children}
     </button>
+  )
+}
+
+/** Dosya seçici: tarayıcının kendi (dili değişebilen) düğmesi yerine Türkçe düğme ve seçilen dosyanın adı. */
+export function DosyaSecici({ id, ad, kabul = 'application/pdf,.pdf', etiket = 'PDF seç' }: { id: string; ad: string; kabul?: string; etiket?: string }) {
+  const [dosya, setDosya] = useState('')
+  return (
+    <div className="dosya-secici">
+      <input id={id} name={ad} type="file" accept={kabul} className="gizli" onChange={(e) => setDosya(e.target.files?.[0]?.name ?? '')} />
+      <label htmlFor={id} className="dugme dugme--ikincil dugme--kucuk">
+        {etiket}
+      </label>
+      <span className="kucuk" aria-live="polite">
+        {dosya || 'Dosya seçilmedi'}
+      </span>
+    </div>
   )
 }

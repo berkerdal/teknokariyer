@@ -5,6 +5,8 @@ import { yonelmeEki } from '@/alan/metin'
 import { Ust } from '@/arayuz/Ust'
 import { adayOturumu } from '@/veri/aday'
 import { payloadAl } from '@/veri/payload'
+import { firmalariAl } from '@/veri/ilanlar'
+import { kimlik } from '@/servisler/ortak'
 
 export const metadata: Metadata = { title: 'Başvurun iletildi', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -20,7 +22,7 @@ export default async function BasvuruTamamSayfasi({ searchParams }: Props) {
     .findByID({ collection: 'basvurular', id: Number(p.b), depth: 2, overrideAccess: false, user: k, populate: { ilanlar: { pozisyonAdi: true, firma: true }, firmalar: { kisaAd: true } } })
     .catch((): null => null)
   if (!b || typeof b.ilan !== 'object') notFound()
-  const firma = typeof b.ilan.firma === 'object' ? b.ilan.firma.kisaAd : ''
+  const firma = (await firmalariAl([kimlik(b.ilan.firma)])).get(kimlik(b.ilan.firma))?.ad ?? ''
   return (
     <>
       <Ust />

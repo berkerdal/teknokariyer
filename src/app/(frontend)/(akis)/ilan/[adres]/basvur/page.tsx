@@ -11,6 +11,8 @@ import { METINLER } from '@/metinler'
 import { EN_FAZLA_CV } from '@/servisler/profil'
 import { basvuruHazirligi, taksonomiSecenekleri } from '@/veri/basvuru'
 import { oturum } from '@/veri/payload'
+import { firmalariAl } from '@/veri/ilanlar'
+import { kimlik } from '@/servisler/ortak'
 
 export const metadata: Metadata = { title: 'Başvuru', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -35,7 +37,7 @@ export default async function BasvuruSayfasi({ params }: Props) {
   const h = await basvuruHazirligi(k, id)
   if (!h) notFound()
   const { ilan, aday } = h
-  const firma = typeof ilan.firma === 'object' ? ilan.firma : null
+  const firma = (await firmalariAl([kimlik(ilan.firma)])).get(kimlik(ilan.firma))
   const adresi = ilanAdresi(ilan)
   if (ilan.durum !== 'yayinda' || suresiDolduMu(new Date(ilan.sonBasvuru), new Date())) redirect(adresi)
   if (h.oncekiBasvuru)
@@ -51,7 +53,7 @@ export default async function BasvuruSayfasi({ params }: Props) {
     h.eksikler.includes('bolum') ? taksonomiSecenekleri('bolum') : [],
   ])
   const ad = (x: unknown) => (x && typeof x === 'object' ? (x as { ad?: string }).ad : undefined)
-  const firmaAd = firma?.kisaAd ?? ''
+  const firmaAd = firma?.ad ?? ''
   return (
     <BasvuruAkisi
       ilan={{ id: ilan.id, pozisyonAdi: ilan.pozisyonAdi, firmaAd, firmaAdIlgi: `${firmaAd}${ilgiEki(firmaAd)}`, adres: adresi }}
