@@ -149,15 +149,18 @@ Claude tarafından yapılacak.
   Firma verisinin tek doğru kaynağı portal olur. Yeni site gerekirse portalın sunacağı salt okunur bir firma beslemesini
   (JSON) kullanabilir.
 - **K21 — Hedef tarih:** "En kısa zamanda". Sabit tarih yok.
+- **K22 — Kimlik onaylandı: A · Küme (13.11.2026).**
+  - Piksel kümesi tek başına kullanılmaz; kurumun ifadesiyle "tek başına çok bir şey ifade etmiyor". Yalnızca logonun parçasıdır.
+  - Favicon: ana logodaki "t" harfi ve kiremit kare. Uygulama ikonu: "tekno / KARİYER" yığını.
+  - Ayrıntı: `docs/kimlik/README.md`.
 
 **İlerleme (13.11.2026):**
 
-- **Adım 2, alt marka kimliği:** Taslak 1 hazır ve onay bekliyor.
-  - Sunum: https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR
+- **Adım 2, alt marka kimliği: tamamlandı.** A · Küme onaylandı (K22).
+  - Kılavuz: https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR
   - Ayrıntı: `docs/kimlik/README.md`
-  - Alternatifler: A · Küme (kiremit, Lexend + Source Sans 3) ve B · Yuva (okra, Schibsted Grotesk + IBM Plex Mono).
-    Claude B'yi önerdi.
-  - Onay gelmeden referans panosu ve prototiplere geçilmez.
+  - Claude B'yi önermişti; kurum A'yı seçti.
+- **Adım 3:** Referans panosu, tasarım sistemi ve prototipler. `docs/tasarim/` altında.
 
 **Öğrenilenler:**
 

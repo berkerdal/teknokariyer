@@ -1,22 +1,22 @@
 {
   "renk": {
-    "Zemin": "#F4F4F1",
+    "Zemin": "#F7F6F3",
     "Yüzey": "#FFFFFF",
-    "Metin": "#1C1D1F",
+    "Metin": "#1E1E1C",
     "Lacivert": "#2155AD",
     "Camgöbeği": "#05A1E6",
-    "Okra": "#F2B230",
-    "Okra açık": "#FCEDC4",
+    "Kiremit": "#B04E26",
     "Gece": "#13284F",
-    "İkincil metin": "#585A5E",
+    "İkincil metin": "#5B5852",
     "Durum: Başarı": "#25734A",
-    "Durum: Uyarı": "#B4540A",
-    "Durum: Hata": "#BF1F2F"
+    "Durum: Uyarı": "#9A5B00",
+    "Durum: Hata": "#BF1F2F",
+    "Kiremit (koyu zemin)": "#F7A27C"
   },
   "yazi": {
-    "baslik_font": "Schibsted Grotesk",
-    "govde_font": "Schibsted Grotesk",
-    "veri_font": "IBM Plex Mono"
+    "baslik_font": "Lexend",
+    "govde_font": "Source Sans 3",
+    "veri_font": "Source Sans 3"
   },
   "kose": {
     "kontrol": 4,

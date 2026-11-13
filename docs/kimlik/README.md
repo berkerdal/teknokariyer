@@ -1,41 +1,45 @@
 # TeknoKariyer alt marka kimliği
 
-**Durum:** Taslak 1 · kurum onayı bekliyor (13 Kasım 2026)
+**Durum:** Onaylandı · A · Küme · 13 Kasım 2026
 
-- **Sunum:** https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR (kaynağı: `sunum.html`)
-- **Konu:** İki alternatif aynı başlıklar altında gösteriliyor: fikir, logo sürümleri, kullanım kuralları, renk ve kontrast,
-  tipografi, kare dili, uygulama örnekleri ve eleştirel denetim.
+- **Kılavuz sayfası:** https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR (kaynağı: `sunum.html`)
+- **İlk sürüm:** İki alternatifin (A · Küme, B · Yuva) karşılaştırıldığı sürüm git geçmişindedir: `e89de93`.
 
-## Alternatifler
+## Kimlik özeti
 
-| | A · Küme | B · Yuva |
-| --- | --- | --- |
-| Fikir | Ana logoda "t" harfinden dağılan pikseller toplanır, bir kare yükselir. | Lacivert blokta bir yuva, okra parça o yuvaya girer: eşleşme. |
-| Logotype | Ana logodaki "tekno" + ince "KARİYER" (Lexend ExtraLight) + "PAMUKKALE TEKNOKENT" imzası | "teknokariyer": 8 harf ana logodan birebir, 4 harf aynı çizimlerden türetildi. |
-| İkinci renk | Kiremit #B04E26 | Okra #F2B230 |
-| Yazı tipleri | Lexend (başlık), Source Sans 3 (metin ve tablo) | Schibsted Grotesk (başlık ve metin), IBM Plex Mono (kod ve veri) |
-| Klasör | `a-kume/` | `b-yuva/` |
+| Öğe | Değer |
+| --- | --- |
+| Logo | Piksel kümesi + "PAMUKKALE TEKNOKENT / tekno / KARİYER" yığını. "tekno" ana logodan birebir. |
+| Renkler | Lacivert #2155AD, camgöbeği #05A1E6, kiremit #B04E26, gece #13284F, zemin #F7F6F3, metin #1E1E1C |
+| Yazı tipleri | Lexend (başlık), Source Sans 3 (metin ve tablo) |
+| Değişkenler | `tokenlar.json` |
 
-Claude'un önerisi B'dir; gerekçesi sunumun "Karar" bölümünde.
+## Kurallar
 
-## Dosyalar
+- **Küme tek başına kullanılmaz (K22).** Piksel kümesi yalnızca logonun parçası olarak görünür.
+  Ayrı bir sembol, profil görseli veya süs olarak kullanılmaz.
+- **Küçük boylar:**
+  - 16–32 px: `favicon.svg`. Ana logodaki "t" harfi ve kiremit kare.
+  - 64 px ve üstü: `uygulama-ikonu.svg`. "tekno / KARİYER" yığını, lacivert zeminde.
+- **En küçük boy:** Yatay logo 160 px, kompakt logo 120 px genişliğin altına inmez.
+- **Koruma alanı:** Logonun çevresinde en az kiremit karenin boyu kadar boşluk bırakılır.
+- **Kiremit uyarı anlamında kullanılmaz.** Hata ve uyarı her zaman ikon ve açıklama metniyle verilir.
 
-Her alternatif klasöründe:
+## Dosyalar (`logo/`)
 
 | Dosya | Kullanım |
 | --- | --- |
 | `logo-yatay-{renkli,negatif,tekrenk}.svg` | Ana logo |
 | `logo-kompakt-{renkli,negatif,tekrenk}.svg` | Site başlığı ve dar alanlar |
-| `sembol-{renkli,negatif,tekrenk}.svg` | Sembol (profil görseli, uygulama ikonu) |
-| `favicon.svg` | 16 px ızgaraya oturan favicon |
-| `tokenlar.json` | Renk, yazı tipi, köşe ve boşluk değişkenleri (onaydan sonra koda aktarılacak) |
+| `favicon.svg` | Tarayıcı sekmesi (16–32 px) |
+| `uygulama-ikonu.svg` | Uygulama ikonu, sosyal medya profil görseli (64 px ve üstü) |
 
 - Negatif dosyalar saydam zeminlidir; lacivert (#2155AD) veya gece (#13284F) zemin üzerine konur.
-- Tüm yazılar eğriye çevrilmiştir; dosyalar yazı tipi kurulu olmayan bilgisayarda da aynı görünür.
+- Yazılar eğriye çevrilmiştir.
 
 ## Yeniden üretme
 
-Dosyaların hepsi betikle üretilir; SVG'ler elle düzenlenmez.
+Dosyalar betikle üretilir; SVG'ler elle düzenlenmez.
 
 ```bash
 pip install fonttools
@@ -43,12 +47,6 @@ python3 tools/kimlik/uret.py
 python3 tools/kimlik/sunum.py
 ```
 
-- `tools/kimlik/ana-logo.json`: Ana logodan alınan "tekno" ve piksel çizimleri. Kaynağı `docs/logo-teknokent.pdf`,
-  `pdftocairo -svg` ile çıkarıldı.
-- `tools/kimlik/fontlar/`: Logoda kullanılan yazı tipleri ve OFL lisansları.
+## Açık işler
 
-## Onaydan sonra
-
-1. Seçilmeyen alternatifin klasörü silinir; seçilen klasördeki dosyalar `docs/kimlik/` köküne taşınır.
-2. `tokenlar.json` uygulamanın tasarım değişkenlerine (CSS değişkenleri / Tailwind teması) aktarılır.
-3. Baskı için CMYK değerleri matbaa provasıyla belirlenir. Ana renklerin CMYK karşılıkları CLAUDE.md 2. bölümde.
+- Baskı için CMYK değerleri matbaa provasıyla belirlenecek. Ana renklerin CMYK karşılıkları CLAUDE.md 2. bölümde.

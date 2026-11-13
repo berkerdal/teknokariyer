@@ -1,4 +1,6 @@
-"""TeknoKariyer kimlik önerisi sunum sayfasını üretir: docs/kimlik/sunum.html
+"""TeknoKariyer kimlik sayfasını üretir: docs/kimlik/sunum.html
+
+Onaylanan kimlik: A · Küme (13 Kasım 2026). Karşılaştırmalı ilk sürüm git geçmişinde (e89de93).
 
 Kullanım (depo kökünden):
     python3 tools/kimlik/uret.py     # önce logolar
@@ -19,7 +21,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import uret  # noqa: E402
 
-KIMLIK = uret.CIKTI
+KIMLIK = uret.CIKTI  # docs/kimlik/logo
+KOK_KIMLIK = os.path.dirname(uret.CIKTI)
 
 
 # --- Renk ve kontrast ----------------------------------------------------------------------------------------------
@@ -46,22 +49,11 @@ PALET = {
         ("Kiremit", "#B04E26", "Alt marka vurgusu: logo, sayfa başına bir öğe. Uyarı veya hata anlamında kullanılmaz.", 2),
         ("Gece", "#13284F", "Yönetim paneli çerçevesi ve koyu zeminler.", 1),
     ],
-    "b-yuva": [
-        ("Zemin", "#F4F4F1", "Sayfa zemini. Nötre yakın kırık beyaz.", 62),
-        ("Yüzey", "#FFFFFF", "Liste satırı, form, panel.", 18),
-        ("Metin", "#1C1D1F", "Gövde metni ve başlıklar.", 9),
-        ("Lacivert", "#2155AD", "Ana eylem, bağlantı, seçili durum. Geniş yüzeyde kullanılmaz.", 6),
-        ("Camgöbeği", "#05A1E6", "Çizgi, grafik, ikon. Metin rengi olarak kullanılmaz.", 2),
-        ("Okra", "#F2B230", "Logodaki yuva parçası; koyu zeminde vurgu. Beyaz üstünde metin olarak kullanılmaz.", 1),
-        ("Okra açık", "#FCEDC4", "Eşleşme vurgusu: adayın sahip olduğu beceri, fosforlu kalem gibi.", 1),
-        ("Gece", "#13284F", "Yönetim paneli çerçevesi ve koyu zeminler.", 1),
-    ],
 }
 DURUM = {
     "a-kume": [("Başarı", "#25734A"), ("Uyarı", "#9A5B00"), ("Hata", "#BF1F2F")],
-    "b-yuva": [("Başarı", "#25734A"), ("Uyarı", "#B4540A"), ("Hata", "#BF1F2F")],
 }
-IKINCIL_METIN = {"a-kume": "#5B5852", "b-yuva": "#585A5E"}
+IKINCIL_METIN = {"a-kume": "#5B5852"}
 
 
 def kontrast_ciftleri(alt: str) -> list[tuple[str, str, str, str, str]]:
@@ -78,18 +70,10 @@ def kontrast_ciftleri(alt: str) -> list[tuple[str, str, str, str, str]]:
         ("Camgöbeği", p["Camgöbeği"], "Yüzey", p["Yüzey"], "yalnızca süs çizgisi; odak halkası olamaz"),
         ("Beyaz", "#FFFFFF", "Gece", p["Gece"], "yönetim paneli"),
     ]
-    if alt == "a-kume":
-        ciftler += [
+    ciftler += [
             ("Kiremit", p["Kiremit"], "Yüzey", p["Yüzey"], "vurgu metni"),
             ("Beyaz", "#FFFFFF", "Kiremit", p["Kiremit"], "vurgu düğmesi"),
             ("Kiremit (koyu zemin)", "#F7A27C", "Gece", p["Gece"], "negatif logo, koyu panel"),
-        ]
-    else:
-        ciftler += [
-            ("Metin", p["Metin"], "Okra açık", p["Okra açık"], "eşleşen beceri"),
-            ("Okra", p["Okra"], "Gece", p["Gece"], "koyu panelde vurgu"),
-            ("Okra", p["Okra"], "Lacivert", p["Lacivert"], "negatif logo"),
-            ("Okra", p["Okra"], "Yüzey", p["Yüzey"], "kullanılmaz: metin olamaz"),
         ]
     ciftler += [(ad, hx, "Yüzey", "#FFFFFF", "durum metni ve ikonu") for ad, hx in DURUM[alt]]
     return ciftler
@@ -97,7 +81,7 @@ def kontrast_ciftleri(alt: str) -> list[tuple[str, str, str, str, str]]:
 
 # --- Yardımcılar ---------------------------------------------------------------------------------------------------
 def svg_oku(alt: str, ad: str, sinif: str = "", etiket: str | None = None) -> str:
-    s = open(os.path.join(KIMLIK, alt, ad), encoding="utf-8").read().strip()
+    s = open(os.path.join(KIMLIK, ad), encoding="utf-8").read().strip()
     s = s.replace("<svg ", f'<svg class="{sinif}" ', 1) if sinif else s
     if etiket:
         s = re.sub(r'aria-label="[^"]*"', f'aria-label="{etiket}"', s, count=1)
@@ -117,25 +101,9 @@ def ana_logo_parcasi() -> str:
                        f'aria-label="Ana logodaki piksel kümesi ve tekno yazısı">{yollar}</svg>')
 
 
-def turetilmis_kelime() -> str:
-    """'teknokariyer': ana logodan gelen harfler lacivert, türetilenler camgöbeği; altlarında açıklama."""
-    parcalar, imlec, onceki = [], 0.0, None
-    etiketler = []
-    turetilen = {7: "a = o + düz gövde", 8: "r = n’nin omzu", 9: "i = gövde + kare nokta", 10: "Y = k’nin kol açısı"}
-    for i, ch in enumerate("teknokariyer"):
-        if onceki:
-            imlec += uret.ARALIK.get(onceki + ch, 20)
-        renk = "#05A1E6" if i in turetilen else "#2155AD"
-        svg, w = uret.harf(ch, imlec, renk, "#F2B230")
-        parcalar.append(svg)
-        if i in turetilen:
-            etiketler.append((imlec + w / 2, turetilen[i]))
-        imlec += w
-        onceki = ch
-    ust = -uret.NOKTA_UST
-    g = f'<g transform="translate(0 {ust})">{"".join(parcalar)}</g>'
-    return uret.kisalt(f'<svg viewBox="-20 -10 {imlec + 40:.0f} {ust + uret.H + 30:.0f}" class="sema-svg" role="img" '
-                       f'aria-label="teknokariyer: ana logodan gelen ve türetilen harfler">{g}</svg>'), etiketler, imlec
+def kume_tek() -> str:
+    svg, w = uret.kume(0, 0, 80, "#2155AD", "#B04E26")
+    return f'<svg class="kume-tek" viewBox="0 0 {w:.0f} 80" role="img" aria-label="Küme işareti tek başına: kullanılmaz">{svg}</svg>'
 
 
 # --- Örnek içerik (gerçek firmalar, kurgusal ilanlar) ---------------------------------------------------------------
@@ -158,11 +126,7 @@ def telefon(alt: str) -> str:
             f'<span class="firma">{e(firma)} <span class="konum">{e(konum)}</span></span>'
             f'<span class="alt-satir"><span>{e(tur)}</span><span class="{tarih_sinif}">{e(tarih)}</span></span></a></li>')
     eslesme = ""
-    if alt == "b-yuva":
-        eslesme = ('<p class="eslesme">Senin profilinle: <mark>C</mark> <mark>FreeRTOS</mark> <mark>Git</mark> var · '
-                   'eksik: <span class="eksik">CAN bus</span></p>')
-    else:
-        eslesme = ('<p class="eslesme">Senin profilinle: zorunlu 4 becerinin 3’ü var · eksik: '
+    eslesme = ('<p class="eslesme">Senin profilinle: zorunlu 4 becerinin 3’ü var · eksik: '
                    '<span class="eksik">CAN bus</span></p>')
     ilk = satirlar[0].replace('</a></li>', f'{eslesme}</a></li>')
     satirlar[0] = ilk
@@ -177,7 +141,7 @@ def telefon(alt: str) -> str:
 
 
 def linkedin_karti(alt: str) -> str:
-    sembol = svg_oku(alt, "sembol-negatif.svg", "lk-sembol")
+    sembol = '<span class="lk-kare" aria-hidden="true"></span>'
     return f'''<div class="lk k-ekran" role="img" aria-label="LinkedIn paylaşım kartı örneği, 1200 × 627">
   <div class="lk-sol">
     <p class="lk-firma">Pinova Elektronik <span>· B Blok G12, Pamukkale Teknokent</span></p>
@@ -247,18 +211,6 @@ ALT_BILGI = {
              "rakamları eşit genişlikte. Lexend’in yanında sakin kalır."),
         ],
     },
-    "b-yuva": {
-        "harf": "B", "ad": "Yuva",
-        "ozet": "Kendi sesi olan alt marka. “teknokariyer” baştan sona ana logodaki harf çizimlerinden türetilmiş tek bir "
-                "logotype; “i”nin noktası ve sembolün yuvaya giren parçası aynı okra kare. Vurgu rengi okra.",
-        "baslik_font": "Schibsted Grotesk", "govde_font": "Schibsted Grotesk", "veri_font": "IBM Plex Mono",
-        "font_gerekce": [
-            ("Schibsted Grotesk (başlık ve metin)", "Bir haber kuruluşu için tasarlanmış, yoğun bilgi taşıyan arayüzlerde "
-             "net kalan bir grotesk. Logotype’ın ağır ve sert harfleriyle aynı aileden görünür; tek aile, daha az yük."),
-            ("IBM Plex Mono (kod ve veri)", "Ofis kodları (D Blok 208), ilan numaraları ve tablolardaki tarihler için. "
-             "Teknokent’in mühendislik tarafını sessizce taşır; yalnızca küçük boyutta ve az kullanılır."),
-        ],
-    },
 }
 
 FIKIR = {
@@ -268,25 +220,15 @@ FIKIR = {
       <p>Yazı da ana logonun kurgusunu izler. Orada “PAMUKKALE / tekno / KENT” vardı; burada
       “PAMUKKALE TEKNOKENT / tekno / KARİYER”. “tekno” harfleri ana logodan birebir alınmıştır. Ana markadan gelen her şey
       lacivert, alt markaya ait olan her şey kiremit.</p>''',
-    "b-yuva": '''<p>Logotype’ın 12 harfinin 8’i ana logodaki “tekno” çizimlerinin kendisi. Eksik dört harf aynı çizimlerden
-      türetildi: “a”, “o”ya düz bir gövde eklenerek; “r”, “n”nin omzundan; “Y”, “k”nin kol açısıyla. “k” harfi ana logoda
-      üst uzantısız çizildiği için “Y” de tek kasa kaldı. Böylece logotype başka hiçbir yazı tipine benzemiyor.</p>
-      <p>“i” harfinin noktası kare ve okra. Aynı kare sembolde, lacivert bloğun yuvasına yarıya kadar girmiş parçadır.
-      Lacivert blok Teknokent’teki bir firma, okra parça aday: ürünün özü olan eşleşme.</p>''',
 }
 
 KULLANIM = {
     "a-kume": [
         ("Koruma alanı", "Logonun çevresinde en az kiremit karenin boyu kadar boşluk bırakılır."),
-        ("En küçük boy", "Yatay logo 160 px, kompakt logo 120 px genişliğin altına inmez. Daha küçük yerlerde sembol kullanılır."),
+        ("En küçük boy", "Yatay logo 160 px, kompakt logo 120 px genişliğin altına inmez. Daha küçük yerlerde favicon (16–32 px) veya uygulama ikonu (64 px ve üstü) kullanılır."),
+        ("Küme tek başına kullanılmaz", "Piksel kümesi logonun parçasıdır; tek başına anlam taşımaz. Profil görseli, ikon veya süs olarak ayrı kullanılmaz (kurum kararı, 13.11.2026)."),
         ("Zemin", "Renkli logo beyaz veya kırık beyaz zeminde, negatif logo lacivert veya gece zemininde. Fotoğraf üstüne konmaz."),
         ("Değiştirilmez", "“tekno” harfleri yeniden yazılmaz, renkler yer değiştirmez, logo eğilmez veya gölgelenmez."),
-    ],
-    "b-yuva": [
-        ("Koruma alanı", "Logonun çevresinde en az “i” noktasının boyu kadar boşluk bırakılır."),
-        ("En küçük boy", "Yatay logo 180 px, kompakt logo 120 px genişliğin altına inmez. Daha küçük yerlerde sembol kullanılır."),
-        ("Zemin", "Renkli logo beyaz veya kırık beyaz zeminde, negatif logo lacivert veya gece zemininde. Fotoğraf üstüne konmaz."),
-        ("Değiştirilmez", "Harfler bir yazı tipiyle yeniden yazılmaz; okra nokta kaldırılmaz veya başka renge boyanmaz."),
     ],
 }
 
@@ -306,21 +248,6 @@ DENETIM = {
             "Üç satırlı yatay logo yüksek; site başlığında kompakt sürüm kullanılacak.",
         ],
     },
-    "b-yuva": {
-        "logo_testi": "Logo kaldırılsa bile logotype’ın harfleri Teknokent’e ait: “tekno” ana logonun çizimi, diğer harfler "
-                      "ondan türedi. Okra kare sistemin her yerinde aynı işi görüyor: eşleşen beceriyi işaretlemek. Böylece "
-                      "renk kaldırıldığında bile kare imleç ve eşleşme dili kalıyor.",
-        "riskler": [
-            "Logotype uzun (yaklaşık 11’e 1). Dar ekranlarda kompakt sürüm bile 120 px’i doldurur; mobil başlıkta yer sıkışık.",
-            "Tek kasa “Y” ilk bakışta yadırganabilir. Ana logodaki üst uzantısız “k” ile aynı mantıkta. Kendi bakışımla "
-            "“teknokariyer” olarak okunuyor; ama bunu bir okunurluk testi saymıyorum, kurum içinde birkaç kişiye "
-            "logoyu bir saniye gösterip ne okuduklarını sormak gerekir.",
-            "Okra beyaz zeminde metin olamaz (kontrast 1,9:1). Yalnızca vurgu zemini, logo öğesi ve koyu zeminde kullanılır; "
-            "bu kural bileşenlerde kodla korunacak.",
-            "Sembol bazı bakışlarda “U” harfine veya gelen kutusu ikonuna benzetilebilir. Okra parça yuvaya girdiği sürece "
-            "bu okuma zayıf kalıyor.",
-        ],
-    },
 }
 
 YASAK_KONTROL = [
@@ -331,7 +258,7 @@ YASAK_KONTROL = [
     ("Inter, Poppins, Montserrat", "Kullanılmadı. Seçimlerin gerekçesi tipografi bölümünde."),
     ("Kaynaksız istatistik", "Örneklerdeki sayılar “örnek” diye işaretli; ekranda yalnızca veritabanından gelecek."),
     ("Klişe slogan, “Daha fazla bilgi”", "Yok. Düğmeler ne yaptığını söylüyor: “Hesabı devral”, “Filtrele”."),
-    ("Harf + ikon yan yana logo", "Yok. Her iki sembol de ana logonun karelerinden türedi; logotype’lar ana logonun çizimlerini kullanıyor."),
+    ("Harf + ikon yan yana logo", "Yok. Küme ana logonun piksellerinden türedi; “tekno” ana logonun kendi çizimi."),
 ]
 
 SES_HITAP = [
@@ -363,18 +290,11 @@ def bolum_alternatif(alt: str) -> str:
     sinif = "alt-a" if alt == "a-kume" else "alt-b"
     harf = b["harf"]
 
-    if alt == "a-kume":
-        sema = f'''<div class="sema">
+    sema = f'''<div class="sema">
           <figure><div class="numune beyaz">{ana_logo_parcasi()}</div><figcaption>Ana logo: “t” piksellere dağılır</figcaption></figure>
           <span class="sema-ok" aria-hidden="true">→</span>
-          <figure><div class="numune beyaz">{svg_oku(alt, "sembol-renkli.svg", "sema-sembol", "TeknoKariyer sembolü, A")}</div>
+          <figure><div class="numune beyaz">{svg_oku(alt, "logo-yatay-renkli.svg", "sema-svg", "TeknoKariyer yatay logo")}</div>
           <figcaption>TeknoKariyer: pikseller toplanır, bir kare yükselir</figcaption></figure></div>'''
-    else:
-        kelime_svg, etiketler, genislik = turetilmis_kelime()
-        etiket_html = "".join(f"<li><strong>{e(t.split(' = ')[0])}</strong> {e(t.split(' = ')[1])}</li>" for _, t in etiketler)
-        sema = f'''<div class="numune beyaz turetme">{kelime_svg}<ul class="turetme-etiket">{etiket_html}</ul></div>
-          <p class="aciklama"><span class="renk-ornek" style="background:#2155AD"></span> ana logodan birebir
-          <span class="renk-ornek" style="background:#05A1E6"></span> aynı çizimlerden türetildi</p>'''
 
     palet = "".join(
         f'''<li><span class="renk" style="background:{hx}"></span><span class="renk-ad">{ad}</span>
@@ -401,7 +321,7 @@ def bolum_alternatif(alt: str) -> str:
     return f'''
 <section class="alternatif {sinif}" id="{alt}" aria-labelledby="{alt}-baslik">
   <header class="alt-bas">
-    <p class="alt-harf">Alternatif {harf}</p>
+    <p class="alt-harf">Onaylandı · 13 Kasım 2026</p>
     <h2 id="{alt}-baslik">{b["ad"]}</h2>
     <p class="alt-ozet">{e(b["ozet"])}</p>
   </header>
@@ -419,11 +339,13 @@ def bolum_alternatif(alt: str) -> str:
     <figure><div class="numune gece">{svg_oku(alt, "logo-kompakt-negatif.svg", "logo-k")}</div><figcaption>Kompakt negatif: yönetim paneli</figcaption></figure>
   </div>
   <div class="semboller">
-    <figure><div class="numune beyaz kare-n">{svg_oku(alt, "sembol-renkli.svg", "sembol-b")}</div><figcaption>Sembol</figcaption></figure>
-    <figure><div class="numune lacivert kare-n">{svg_oku(alt, "sembol-negatif.svg", "sembol-b")}</div><figcaption>Sembol, negatif</figcaption></figure>
     <figure><div class="numune sekme"><span class="sekme-kutu">{svg_oku(alt, "favicon.svg", "fav16")}<span>TeknoKariyer · İlanlar</span></span>
-      <span class="fav-boylar">{svg_oku(alt, "favicon.svg", "fav32")}{svg_oku(alt, "favicon.svg", "fav64")}</span></div>
-      <figcaption>Favicon: tarayıcı sekmesinde gerçek boyutta (16 px), 32 ve 64 px</figcaption></figure>
+      <span class="fav-boylar">{svg_oku(alt, "favicon.svg", "fav32")}</span></div>
+      <figcaption>Favicon (16–32 px): ana logodaki “t” ve kümenin yükselen karesi. Sekmede gerçek boyutta.</figcaption></figure>
+    <figure><div class="numune beyaz kare-n">{svg_oku(alt, "uygulama-ikonu.svg", "ikon-b")}</div>
+      <figcaption>Uygulama ikonu ve sosyal medya profil görseli (64 px ve üstü): logonun kendisi.</figcaption></figure>
+    <figure><div class="numune beyaz kare-n yasak-n"><span class="yasak-isaret" aria-hidden="true"></span>{kume_tek()}</div>
+      <figcaption><strong>Kullanılmaz:</strong> küme işareti tek başına. Yalnızca logonun parçası olarak görünür.</figcaption></figure>
   </div>
   <dl class="kurallar">{kullanim}</dl>
   <div class="numune beyaz kucuk-boy"><span>Kompakt logo gerçek boyutta, 120 px:</span>{svg_oku(alt, "logo-kompakt-renkli.svg", "logo-120")}</div>
@@ -491,27 +413,12 @@ def bolum_alternatif(alt: str) -> str:
   </div>
   <figure class="ep-fig">{eposta(alt)}<figcaption>Firma davet e-postası. Metin ağırlıklı; görsel yalnızca logo. Gönderici kurumun alan adı.</figcaption></figure>
 
-  <h3 class="kare-bas">Eleştirel denetim</h3>
+  <h3 class="kare-bas">Bilinen zayıf noktalar</h3>
   <div class="denetim">
     <div><h4>Logo testi</h4><p>{e(DENETIM[alt]["logo_testi"])}</p></div>
     <div><h4>Zayıf noktalar</h4><ul>{"".join(f"<li>{e(r)}</li>" for r in DENETIM[alt]["riskler"])}</ul></div>
   </div>
 </section>'''
-
-
-def karsilastirma() -> str:
-    kart = []
-    for alt in ("a-kume", "b-yuva"):
-        b = ALT_BILGI[alt]
-        renkler = "".join(f'<span style="background:{hx}" title="{ad}"></span>' for ad, hx, _, _ in PALET[alt]
-                          if ad in ("Lacivert", "Camgöbeği", "Kiremit", "Okra", "Zemin"))
-        kart.append(f'''<a class="kars-kart" href="#{alt}">
-      <span class="kars-harf">Alternatif {b["harf"]} · {b["ad"]}</span>
-      <span class="numune beyaz">{svg_oku(alt, "logo-yatay-renkli.svg", "logo-kars", f"Alternatif {b['harf']} yatay logo")}</span>
-      <span class="kars-ozet">{e(b["ozet"])}</span>
-      <span class="kars-alt"><span class="kars-renk">{renkler}</span><span>{e(b["baslik_font"])}{"" if b["govde_font"] == b["baslik_font"] else " + " + e(b["govde_font"])}{" + " + e(b["veri_font"]) if b["veri_font"] not in (b["baslik_font"], b["govde_font"]) else ""}</span></span>
-    </a>''')
-    return f'<div class="kars">{"".join(kart)}</div>'
 
 
 def ortak() -> str:
@@ -522,7 +429,7 @@ def ortak() -> str:
     yk = "".join(f"<tr><td>{e(a)}</td><td>{e(b)}</td></tr>" for a, b in YASAK_KONTROL)
     return f'''
 <section class="ortak" id="ses-tonu" aria-labelledby="ses-baslik">
-  <header class="alt-bas"><p class="alt-harf">İki alternatifte ortak</p><h2 id="ses-baslik">Ses tonu</h2>
+  <header class="alt-bas"><p class="alt-harf">Metin</p><h2 id="ses-baslik">Ses tonu</h2>
   <p class="alt-ozet">Kısa, somut, nazik. Kurumsal ama resmî yazışma dili değil. Her metin ne olduğunu ve ne yapılacağını söyler.</p></header>
   <h3 class="kare-bas">Hitap (K9)</h3>
   <div class="tablo-kap"><table><thead><tr><th>Nerede</th><th>Hitap</th><th>Örnek</th></tr></thead><tbody>{hitap}</tbody></table></div>
@@ -534,38 +441,6 @@ def ortak() -> str:
   </div>
   <h3 class="kare-bas">15. bölüm yasak listesi kontrolü</h3>
   <div class="tablo-kap"><table><thead><tr><th>Yasak</th><th>Durum</th></tr></thead><tbody>{yk}</tbody></table></div>
-</section>'''
-
-
-def karar() -> str:
-    return '''
-<section class="karar" id="karar" aria-labelledby="karar-baslik">
-  <header class="alt-bas"><p class="alt-harf">Önerim ve sizden beklenen</p><h2 id="karar-baslik">Karar</h2></header>
-  <div class="iki-kolon">
-    <div class="metin-kolon">
-      <p><strong>Önerim B · Yuva.</strong> Üç gerekçem var:</p>
-      <ol>
-        <li>Logotype tamamen Teknokent’in kendi çizimlerinden geliyor; hazır bir yazı tipiyle yazılmış bir ad değil.
-        Logo testini en güçlü geçen alternatif bu.</li>
-        <li>Sembol ürünün işini anlatıyor: eşleşme. Aynı okra kare arayüzde eşleşen becerileri işaretleyecek;
-        logo ile ekran aynı dili konuşacak.</li>
-        <li>Okra, kiremidin taşıdığı “krem + toprak rengi” klişe riskini taşımıyor ve hata kırmızısıyla karışmıyor.</li>
-      </ol>
-      <p>A’yı da ciddi bir seçenek olarak hazırladım. Ana markaya en yakın, en az sürpriz içeren yol o.
-      Kurumun alt markalarını ana logoya sıkı bağlı tutmak gibi bir tercihi varsa A daha doğru olur.</p>
-    </div>
-    <div class="metin-kolon">
-      <p><strong>Sizden beklediğim cevaplar:</strong></p>
-      <ol>
-        <li>A mı, B mi? Parçaları birleştirmek de mümkün; örneğin B’nin logotype’ı ile A’nın kiremidi.</li>
-        <li>Seçilen alternatifin ikinci rengi (kiremit veya okra) uygun mu?</li>
-        <li>Yazı tipleri uygun mu?</li>
-        <li>Değişmesini istediğiniz bir şey var mı?</li>
-      </ol>
-      <p>Onaydan sonra seçilen kimlik <code>docs/kimlik/</code> altında kalıcı hâle gelecek, tasarım değişkenleri koda
-      aktarılacak. Ardından referans panosuna ve prototiplere geçeceğim.</p>
-    </div>
-  </div>
 </section>'''
 
 
@@ -668,7 +543,10 @@ figcaption { font-size: 13px; color: var(--metin2); line-height: 1.4; }
 .surumler .numune { height: 150px; }
 .semboller { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; margin-top: 16px; }
 .kare-n { height: 160px; }
-.sembol-b { height: 96px; width: auto; }
+.ikon-b { height: 112px; width: 112px; }
+.kume-tek { height: 96px; width: auto; opacity: .5; }
+.yasak-n { position: relative; }
+.yasak-isaret { position: absolute; inset: 18px; background: linear-gradient(to top right, transparent calc(50% - 1.5px), #BF1F2F calc(50% - 1.5px), #BF1F2F calc(50% + 1.5px), transparent calc(50% + 1.5px)); }
 .numune.sekme { background: #DFE1E5; color: #1F1F1F; flex-direction: column; gap: 14px; height: 160px; border-color: #DFE1E5; }
 .sekme-kutu { display: flex; align-items: center; gap: 8px; background: #FFFFFF; padding: 8px 14px; border-radius: 8px 8px 0 0;
   font: 12px/1 system-ui, sans-serif; }
@@ -784,7 +662,7 @@ th { font: 600 13px/1.3 var(--f-kod); color: var(--metin2); letter-spacing: 0.02
 .lk-bilgi { font-size: 3cqi; opacity: .9; }
 .lk-alt { display: flex; justify-content: space-between; align-items: center; gap: 4cqi; font: 500 2.6cqi/1 var(--k-veri); position: relative; z-index: 1; }
 .lk-logo { height: 4.6cqi; width: auto; }
-.lk-sembol { position: absolute; right: 5%; top: 9%; height: 46%; width: auto; }
+.lk-kare { position: absolute; right: 6%; top: 11%; width: 9%; aspect-ratio: 1; background: #F7A27C; }
 
 /* Sosyal medya */
 .sosyal { position: relative; aspect-ratio: 1; max-width: 420px; background: #FFFFFF; border: 1px solid var(--cizgi); overflow: hidden;
@@ -834,24 +712,20 @@ def sayfa() -> str:
     govde = "".join([
         f'''<div class="sayfa">
 <header class="ust">
-  <p class="ust-meta">TeknoKariyer · alt marka kimliği · Taslak 1 · 13 Kasım 2026</p>
-  <h1>TeknoKariyer için iki kimlik önerisi</h1>
+  <p class="ust-meta">TeknoKariyer · alt marka kimliği · Sürüm 1 · 13 Kasım 2026</p>
+  <h1>TeknoKariyer kimliği</h1>
   <div class="ust-metin">
-    <p>Pamukkale Teknokent’in kariyer portalı için iki alternatif hazırladım. İkisi de ana logonun vektör çizimlerinden
-    türetildi; hazır şablon veya yazı tipiyle yazılmış bir logo yok. Her alternatif aynı başlıklar altında
-    gösteriliyor: fikir, logo sürümleri, renk ve kontrast, tipografi, kare dili, ekranda ve basılı örneklerde görünüş,
-    son olarak kendi zayıf noktaları.</p>
-    <p><strong>Sizden beklenen:</strong> birini seçmeniz veya parçalarını birleştirmemizi istemeniz.
-    Örneklerdeki firmalar Teknokent rehberinden gerçek kayıtlar; ilanlar, kişiler ve sayılar örnektir.</p>
+    <p>Kurum iki alternatiften <strong>A · Küme</strong>’yi seçti. Bu sayfa kimliğin kullanım kılavuzudur: logo
+    sürümleri, kullanım kuralları, renk ve kontrast, tipografi, kare dili, uygulama örnekleri ve ses tonu.</p>
+    <p>Seçimle birlikte gelen kural: piksel kümesi tek başına kullanılmaz. Küçük boylarda favicon, büyük boylarda
+    logonun kendisinden oluşan uygulama ikonu kullanılır. Örneklerdeki firmalar Teknokent rehberinden gerçek kayıtlar;
+    ilanlar, kişiler ve sayılar örnektir.</p>
   </div>
-  <nav class="icindekiler" aria-label="Bölümler"><a href="#a-kume">A · Küme</a><a href="#b-yuva">B · Yuva</a>
-  <a href="#ses-tonu">Ses tonu</a><a href="#karar">Karar</a></nav>
-</header>
-{karsilastirma()}''',
+  <nav class="icindekiler" aria-label="Bölümler"><a href="#a-kume">Logo ve renk</a>
+  <a href="#ses-tonu">Ses tonu</a></nav>
+</header>''',
         bolum_alternatif("a-kume"),
-        bolum_alternatif("b-yuva"),
         ortak(),
-        karar(),
         '</div>',
     ])
     fontlar = ("https://fonts.googleapis.com/css2?family=Lexend:wght@600&family=Source+Sans+3:wght@400;600;700"
@@ -866,22 +740,22 @@ def sayfa() -> str:
 
 
 def tokenlar() -> None:
-    """Her alternatif için tasarım değişkenlerini JSON olarak yazar (onaydan sonra koda aktarılacak)."""
-    for alt in PALET:
-        veri = {
-            "renk": {ad: hx for ad, hx, _, _ in PALET[alt]} | {"İkincil metin": IKINCIL_METIN[alt]}
-                    | {f"Durum: {ad}": hx for ad, hx in DURUM[alt]},
-            "yazi": {k: ALT_BILGI[alt][k] for k in ("baslik_font", "govde_font", "veri_font")},
-            "kose": {"kontrol": 4, "panel": 6, "gorsel": 2},
-            "bosluk": [4, 8, 12, 16, 24, 32, 48],
-        }
-        with open(os.path.join(KIMLIK, alt, "tokenlar.json"), "w", encoding="utf-8") as f:
-            json.dump(veri, f, ensure_ascii=False, indent=2)
+    """Tasarım değişkenlerini JSON olarak yazar: docs/kimlik/tokenlar.json"""
+    alt = "a-kume"
+    veri = {
+        "renk": {ad: hx for ad, hx, _, _ in PALET[alt]} | {"İkincil metin": IKINCIL_METIN[alt]}
+                | {f"Durum: {ad}": hx for ad, hx in DURUM[alt]} | {"Kiremit (koyu zemin)": "#F7A27C"},
+        "yazi": {k: ALT_BILGI[alt][k] for k in ("baslik_font", "govde_font", "veri_font")},
+        "kose": {"kontrol": 4, "panel": 6, "gorsel": 2},
+        "bosluk": [4, 8, 12, 16, 24, 32, 48],
+    }
+    with open(os.path.join(KOK_KIMLIK, "tokenlar.json"), "w", encoding="utf-8") as f:
+        json.dump(veri, f, ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":
     tokenlar()
-    yol = os.path.join(KIMLIK, "sunum.html")
+    yol = os.path.join(KOK_KIMLIK, "sunum.html")
     with open(yol, "w", encoding="utf-8") as f:
         f.write(sayfa())
     print(os.path.relpath(yol, uret.DEPO), f"{os.path.getsize(yol) / 1024:.0f} KB")
