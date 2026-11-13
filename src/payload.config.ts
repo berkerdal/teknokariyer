@@ -75,6 +75,8 @@ function wranglerBaglami(): Promise<CloudflareContext> {
       // Uzak (gerçek Cloudflare) bağlantı yalnızca dağıtım/göç komutlarında açılır: CLOUDFLARE_UZAK=1.
       // Derleme ve yerel geliştirme yerel simülasyonla çalışır; Cloudflare hesabı gerekmez.
       remoteBindings: process.env.CLOUDFLARE_UZAK === '1',
+      // Testler geçici bir klasörde, geliştirme verisinden ayrı bir yerel veritabanı kullanır.
+      ...(process.env.TK_YEREL_VERI ? { persist: { path: process.env.TK_YEREL_VERI } } : {}),
     } satisfies GetPlatformProxyOptions),
   )
 }

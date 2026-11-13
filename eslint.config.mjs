@@ -11,6 +11,11 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
+  {
+    // Testlerde kötüye kullanım denemeleri için tip dışı veri bilerek gönderilir.
+    files: ['tests/**'],
+    rules: { '@typescript-eslint/no-explicit-any': 'off' },
+  },
   globalIgnores([
     '.next/**', '.open-next/**', '.wrangler/**', 'out/**', 'build/**', 'next-env.d.ts',
     // Tasarım prototipi ve kimlik betikleri uygulama kodu değil

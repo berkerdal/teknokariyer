@@ -13,7 +13,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { tr } from '@payloadcms/translations/languages/tr'
 import { en } from '@payloadcms/translations/languages/en'
 
-import { koleksiyonlar } from './koleksiyonlar'
+import { globaller, koleksiyonlar } from './koleksiyonlar'
 import { epostaAdaptoru } from './altyapi/eposta'
 
 const dosyaAdi = fileURLToPath(import.meta.url)
@@ -35,6 +35,7 @@ export function ortakYapilandirma({
       meta: { titleSuffix: ' · TeknoKariyer yönetim' },
     },
     collections: koleksiyonlar,
+    globals: globaller,
     // GraphQL kullanılmıyor; REST ve yerel API yeterli. Kapatmak paketi küçültür.
     graphQL: { disable: true },
     editor: lexicalEditor(),

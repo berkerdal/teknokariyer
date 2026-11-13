@@ -27,5 +27,7 @@ jobs:
         run: pnpm typecheck
       - name: Birim testleri
         run: pnpm test:birim
+      - name: Erişim kuralları (entegrasyon testleri, yerel D1)
+        run: pnpm test:entegrasyon
       - name: Cloudflare derlemesi
         run: pnpm exec opennextjs-cloudflare build

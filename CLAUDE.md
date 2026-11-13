@@ -177,6 +177,14 @@ Claude tarafından yapılacak.
   - Taslak 1'e denetimde eksik kalan 10 ekran eklendi (toplam 29 ekran): giriş/kayıt, profili eksik başvuru, kapanmış ilan,
     hesap ve gizlilik, ilan düzenleme ve sürüm geçmişi, firma ekibi, KVKK talepleri, işlem kayıtları, test posta kutusu.
 - **Adım 4: Teknoloji yığını onaylandı (K26), geliştirme başladı.** Yığın: `docs/teknoloji-onerisi.md`.
+  - **M1 iskelet:** Next.js 16.4.6 + Payload 3.93 + OpenNext. Uygulama depo kökünde (`src/`).
+    `SAGLAYICI=cloudflare` (varsayılan, D1 + R2) veya `SAGLAYICI=node` (PostgreSQL + S3/MinIO).
+    Worker paketi yaklaşık 15 MiB (gzip 3,5 MiB).
+  - **M2 iş kuralları:** `src/alan/` altında saf TypeScript. Birim testleri `tests/birim/`.
+  - **M3 veri modeli:** 12 koleksiyon + ayarlar. Erişim kuralları `src/erisim/` altında.
+    Kötüye kullanım denemeli entegrasyon testleri `tests/entegrasyon/` altında.
+  - **Sırada M4:** Kural uçları (ilanı yayına gönderme, onay, havuz araması ve profil açma, başvuru), ardından arayüz.
+  - **İlk göç (migration) henüz oluşturulmadı:** Şema oturunca ve ilk dağıtımdan önce `pnpm payload migrate:create` ile oluşturulacak.
 
 **Öğrenilenler:**
 
@@ -198,6 +206,20 @@ Claude tarafından yapılacak.
   - Tablolardaki ve kuyruklardaki sayılar elle yazılmamalı, veriden hesaplanmalı; elle yazılan sayılar prototipte hemen tutarsızlaştı.
   - Farklı büyüklükteki iki ölçü aynı çubukta gösterilmez (pano, yetenek ihtiyacı). Gerekirse tablo kullanılır.
   - Firma logosu gelene kadar firmalar blok/oda kodlu karoyla gösterilir (ör. "D208"). Baş harf avatarı kullanılmaz.
+- **Geliştirmeden öğrenilenler:**
+  - **Payload kancaları:** Kısmi güncellemede `data` yalnızca değişen alanları taşıyabilir.
+    Hesaplanan alanlar `{ ...originalDoc, ...data }` üzerinden hesaplanmalı.
+  - **Kullanıcısız yerel API çağrısı** (`req.payloadAPI === 'local'`) sunucunun kendi güvenilir kodudur.
+    Rol zorlama gibi kurallar ona uygulanmaz (`sistemIslemiMi`). Uygulanırsa davet akışı firma hesabı açamaz;
+    entegrasyon testleri bunu yakaladı.
+  - **Derleme ve Cloudflare hesabı:** OpenNext'in `getCloudflareContext` fonksiyonu derleme sırasında "remote" işaretli D1
+    bağlantısı için Cloudflare'e bağlanmaya çalışır. Bu yüzden yalnızca Workers içinde
+    (`navigator.userAgent === 'Cloudflare-Workers'`) kullanılır; derleme yerel Wrangler simülasyonuyla yapılır.
+    Uzak bağlantı yalnızca `CLOUDFLARE_UZAK=1` ile açılır.
+  - **Next.js 16:** Geliştirme Turbopack ile çalışır. `@payload-config` takma adı hem webpack (mutlak yol) hem Turbopack
+    (göreli yol) için tanımlı. `next dev`, depoya `AGENTS.md` yazar; Next 16 belgeleri `node_modules/next/dist/docs/` altında.
+  - **ESLint:** eslint-config-next 16 düz (flat) yapılandırma ister; FlatCompat ile çalışmaz.
+  - **Ağ:** codeload.github.com ve api.github.com kapalı; raw.githubusercontent.com açık. Payload şablon dosyaları oradan alındı.
 - **Kontrast:** Camgöbeği beyaz üzerinde 2,9:1 verir; arayüz çizgisi ve odak halkası için de yetmez (3:1 altı).
   Odak halkası lacivert olacak.
 

@@ -68,6 +68,15 @@ export interface Config {
   blocks: {};
   collections: {
     kullanicilar: Kullanicilar;
+    firmalar: Firmalar;
+    ilanlar: Ilanlar;
+    basvurular: Basvurular;
+    adaylar: Adaylar;
+    taksonomiler: Taksonomiler;
+    davetler: Davetler;
+    rizalar: Rizalar;
+    'havuz-goruntulemeleri': HavuzGoruntulemeleri;
+    'islem-kayitlari': IslemKayitlari;
     dosyalar: Dosyalar;
     'test-postalar': TestPostalar;
     'payload-kv': PayloadKv;
@@ -78,6 +87,15 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     kullanicilar: KullanicilarSelect<false> | KullanicilarSelect<true>;
+    firmalar: FirmalarSelect<false> | FirmalarSelect<true>;
+    ilanlar: IlanlarSelect<false> | IlanlarSelect<true>;
+    basvurular: BasvurularSelect<false> | BasvurularSelect<true>;
+    adaylar: AdaylarSelect<false> | AdaylarSelect<true>;
+    taksonomiler: TaksonomilerSelect<false> | TaksonomilerSelect<true>;
+    davetler: DavetlerSelect<false> | DavetlerSelect<true>;
+    rizalar: RizalarSelect<false> | RizalarSelect<true>;
+    'havuz-goruntulemeleri': HavuzGoruntulemeleriSelect<false> | HavuzGoruntulemeleriSelect<true>;
+    'islem-kayitlari': IslemKayitlariSelect<false> | IslemKayitlariSelect<true>;
     dosyalar: DosyalarSelect<false> | DosyalarSelect<true>;
     'test-postalar': TestPostalarSelect<false> | TestPostalarSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -89,8 +107,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    ayarlar: Ayarlar;
+  };
+  globalsSelect: {
+    ayarlar: AyarlarSelect<false> | AyarlarSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -127,6 +149,10 @@ export interface Kullanicilar {
   id: number;
   ad: string;
   rol: 'yonetici' | 'moderator' | 'raporlayici' | 'firma' | 'aday';
+  firma?: (number | null) | Firmalar;
+  firmaYetkisi?: ('yonetici' | 'ilan-sorumlusu' | 'degerlendirici') | null;
+  ikiAsamaliAcik?: boolean | null;
+  totpGizli?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -149,11 +175,99 @@ export interface Kullanicilar {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "firmalar".
+ */
+export interface Firmalar {
+  id: number;
+  unvan: string;
+  /**
+   * Listelerde görünen ad. Örnek: Kodpit Teknoloji
+   */
+  kisaAd: string;
+  slug: string;
+  /**
+   * Örnek: D Blok 208
+   */
+  konum: string;
+  sektor?: (number | null) | Taksonomiler;
+  web?: string | null;
+  /**
+   * Logo yokken firma blok/oda kodlu karoyla gösterilir.
+   */
+  logo?: (number | null) | Dosyalar;
+  kisaTanitim?: string | null;
+  uzunTanitim?: string | null;
+  teknolojiler?: (number | Taksonomiler)[] | null;
+  calismaModelleri?: ('ofiste' | 'hibrit' | 'uzaktan')[] | null;
+  yanHaklar?:
+    | {
+        ad: string;
+        id?: string | null;
+      }[]
+    | null;
+  kurulusYili?: number | null;
+  calisanAraligi?: ('1–9' | '10–49' | '50–99' | '100–249' | '250+') | null;
+  galeri?: (number | Dosyalar)[] | null;
+  asama: 'iskelet' | 'davet' | 'devralindi' | 'profil-tamam' | 'pasif';
+  /**
+   * İşaretliyse ilanları onaya gitmeden yayınlanır (K4).
+   */
+  guvenilir?: boolean | null;
+  onaylanmisIlanSayisi?: number | null;
+  /**
+   * Kurum içi test için. Herkese açık sayfalarda görünmez (talimatlar 0.5).
+   */
+  testFirmasi?: boolean | null;
+  yetkiliAd?: string | null;
+  yetkiliEposta?: string | null;
+  yetkiliTelefon?: string | null;
+  takipNotlari?:
+    | {
+        not: string;
+        tarih: string;
+        id?: string | null;
+      }[]
+    | null;
+  yayinaHazir?: boolean | null;
+  arama?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "taksonomiler".
+ */
+export interface Taksonomiler {
+  id: number;
+  tur: 'beceri' | 'pozisyon-ailesi' | 'sektor' | 'universite' | 'bolum' | 'dil';
+  ad: string;
+  /**
+   * Aynı şeyi anlatan diğer yazımlar. Örnek: JavaScript için "JS".
+   */
+  esAnlamlilar?:
+    | {
+        ad: string;
+        id?: string | null;
+      }[]
+    | null;
+  aktif?: boolean | null;
+  arama?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "dosyalar".
  */
 export interface Dosyalar {
   id: number;
-  alt: string;
+  tur: 'cv' | 'sartname' | 'logo' | 'kapak' | 'galeri';
+  /**
+   * Görselde ne olduğunu anlatan kısa metin. Görsellerde zorunlu.
+   */
+  alt?: string | null;
+  sahip?: (number | null) | Kullanicilar;
+  taramaDurumu?: ('bekliyor' | 'temiz' | 'zararli') | null;
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -164,6 +278,299 @@ export interface Dosyalar {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ilanlar".
+ */
+export interface Ilanlar {
+  id: number;
+  firma: number | Firmalar;
+  pozisyonAdi: string;
+  tur: 'is' | 'staj';
+  altTur: 'tam-zamanli' | 'yari-zamanli' | 'proje' | 'zorunlu-staj' | 'gonullu-staj' | 'uzun-donem-staj' | 'yaz-staji';
+  aile: number | Taksonomiler;
+  model: 'ofiste' | 'hibrit' | 'uzaktan';
+  konum: string;
+  deneyim: 'ogrenci' | 'yeni-mezun' | '1-3' | '3-5' | '5+';
+  egitim: 'lise' | 'onlisans' | 'lisans' | 'yuksek-lisans' | 'doktora';
+  bolumler?: (number | Taksonomiler)[] | null;
+  zorunluBeceriler: (number | Taksonomiler)[];
+  tercihBeceriler?: (number | Taksonomiler)[] | null;
+  diller?:
+    | {
+        dil: number | Taksonomiler;
+        seviye: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+        id?: string | null;
+      }[]
+    | null;
+  pozisyonSayisi?: number | null;
+  sonBasvuru: string;
+  baslangic?: string | null;
+  ucretEnAz?: number | null;
+  ucretEnCok?: number | null;
+  /**
+   * Gizli kalsa da eşleştirmede adayın beklentisiyle karşılaştırılır.
+   */
+  ucretGorunur?: boolean | null;
+  yanHaklar?:
+    | {
+        ad: string;
+        id?: string | null;
+      }[]
+    | null;
+  isTanimi: string;
+  nitelikler: string;
+  sartname?: (number | null) | Dosyalar;
+  onElemeSorulari?:
+    | {
+        soru: string;
+        tip: 'kisa' | 'evet-hayir' | 'secmeli';
+        secenekler?:
+          | {
+              ad: string;
+              id?: string | null;
+            }[]
+          | null;
+        eleyici?: boolean | null;
+        beklenenCevap?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  linkedinMetni?: string | null;
+  dil: 'tr' | 'en' | 'ikisi';
+  stajDonemi?: string | null;
+  ucretliStaj?: boolean | null;
+  sgk?: ('okul' | 'firma') | null;
+  stajBelgesi?: boolean | null;
+  pauOncelik?: boolean | null;
+  durum: 'taslak' | 'onayda' | 'duzeltme' | 'yayinda' | 'duraklatildi' | 'suresi-doldu' | 'kapandi';
+  duzeltmeGerekcesi?: string | null;
+  kapanisNedeni?: ('doldu' | 'iptal' | 'baska-kanal' | 'sure' | 'moderasyon') | null;
+  yayinTarihi?: string | null;
+  basvuruSayisi?: number | null;
+  goruntulenme?: number | null;
+  arama?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basvurular".
+ */
+export interface Basvurular {
+  id: number;
+  ilan: number | Ilanlar;
+  firma?: (number | null) | Firmalar;
+  adayKullanici?: (number | null) | Kullanicilar;
+  adayKodu?: string | null;
+  profilKopyasi:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  cv?: (number | null) | Dosyalar;
+  onYazi?: string | null;
+  cevaplar?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  eleyiciUyari?: boolean | null;
+  kaynak?: ('portal' | 'linkedin' | 'google' | 'dogrudan') | null;
+  durum: 'alindi' | 'inceleniyor' | 'gorusme' | 'teklif' | 'olumlu' | 'olumsuz' | 'geri-cekti';
+  puan?: number | null;
+  etiketler?:
+    | {
+        ad: string;
+        id?: string | null;
+      }[]
+    | null;
+  ekipNotlari?:
+    | {
+        not: string;
+        yazan?: (number | null) | Kullanicilar;
+        id?: string | null;
+      }[]
+    | null;
+  aydinlatmaSurumu: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "adaylar".
+ */
+export interface Adaylar {
+  id: number;
+  kullanici: number | Kullanicilar;
+  /**
+   * Havuz listesinde adın yerine görünür.
+   */
+  kod?: string | null;
+  telefon?: string | null;
+  /**
+   * İsteğe bağlı. Havuzda görünür ama arama, filtre, sıralama ve eşleştirmede kullanılmaz (K25).
+   */
+  cinsiyet?: ('kadin' | 'erkek' | 'belirtmek-istemiyor') | null;
+  tanitim?: string | null;
+  okul?: (number | null) | Taksonomiler;
+  bolum?: (number | null) | Taksonomiler;
+  sinif?: string | null;
+  mezuniyet?: string | null;
+  gano?: number | null;
+  deneyimSeviyesi?: ('ogrenci' | 'yeni-mezun' | '1-3' | '3-5' | '5+') | null;
+  deneyimler?:
+    | {
+        kurum: string;
+        pozisyon: string;
+        baslangic?: string | null;
+        bitis?: string | null;
+        aciklama?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  beceriler?:
+    | {
+        beceri: number | Taksonomiler;
+        seviye?: ('baslangic' | 'orta' | 'iyi' | 'uzman') | null;
+        id?: string | null;
+      }[]
+    | null;
+  diller?:
+    | {
+        dil: number | Taksonomiler;
+        seviye: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+        id?: string | null;
+      }[]
+    | null;
+  sertifikalar?:
+    | {
+        ad: string;
+        kurum?: string | null;
+        yil?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  baglantilar?:
+    | {
+        ad: string;
+        adres: string;
+        id?: string | null;
+      }[]
+    | null;
+  tercihler?: {
+    turler?: ('is' | 'staj')[] | null;
+    modeller?: ('ofiste' | 'hibrit' | 'uzaktan')[] | null;
+    baslama?: string | null;
+    sehir?: string | null;
+    tasinmayaAcik?: boolean | null;
+    /**
+     * Yalnızca CV havuzunda eşleştirme için; firmaya gösterilmez.
+     */
+    ucretBeklentisi?: number | null;
+  };
+  /**
+   * İsteğe bağlı; yalnızca aday girerse.
+   */
+  askerlik?: string | null;
+  /**
+   * Özel nitelikli kişisel veri. Ayrı açık rıza olmadan kaydedilmez (talimatlar 5).
+   */
+  ozelNitelikli?: string | null;
+  cvler?:
+    | {
+        ad: string;
+        dosya: number | Dosyalar;
+        id?: string | null;
+      }[]
+    | null;
+  havuz?: {
+    gorunurluk?: ('aktif' | 'acik' | 'gizli') | null;
+    rizaTarihi?: string | null;
+    gizlenenFirmalar?: (number | Firmalar)[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "davetler".
+ */
+export interface Davetler {
+  id: number;
+  firma: number | Firmalar;
+  ad: string;
+  eposta: string;
+  firmaYetkisi?: ('yonetici' | 'ilan-sorumlusu' | 'degerlendirici') | null;
+  anahtarOzeti: string;
+  sonGecerlilik: string;
+  kullanildi?: string | null;
+  hatirlatmalar?:
+    | {
+        tarih: string;
+        gun?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rizalar".
+ */
+export interface Rizalar {
+  id: number;
+  kullanici: number | Kullanicilar;
+  tur: 'aday-aydinlatma' | 'basvuru-aydinlatma' | 'havuz' | 'ozel-nitelikli' | 'ticari-ileti';
+  metinSurumu: string;
+  geriAlinma?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "havuz-goruntulemeleri".
+ */
+export interface HavuzGoruntulemeleri {
+  id: number;
+  aday: number | Adaylar;
+  firma: number | Firmalar;
+  kim?: (number | null) | Kullanicilar;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "islem-kayitlari".
+ */
+export interface IslemKayitlari {
+  id: number;
+  islem: string;
+  tur: 'kisisel-veri' | 'ilan' | 'moderasyon' | 'kurulum' | 'ayarlar' | 'hesap' | 'basvuru';
+  kim?: (number | null) | Kullanicilar;
+  kayitTuru?: string | null;
+  kayitId?: string | null;
+  ayrinti?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -206,6 +613,42 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'kullanicilar';
         value: number | Kullanicilar;
+      } | null)
+    | ({
+        relationTo: 'firmalar';
+        value: number | Firmalar;
+      } | null)
+    | ({
+        relationTo: 'ilanlar';
+        value: number | Ilanlar;
+      } | null)
+    | ({
+        relationTo: 'basvurular';
+        value: number | Basvurular;
+      } | null)
+    | ({
+        relationTo: 'adaylar';
+        value: number | Adaylar;
+      } | null)
+    | ({
+        relationTo: 'taksonomiler';
+        value: number | Taksonomiler;
+      } | null)
+    | ({
+        relationTo: 'davetler';
+        value: number | Davetler;
+      } | null)
+    | ({
+        relationTo: 'rizalar';
+        value: number | Rizalar;
+      } | null)
+    | ({
+        relationTo: 'havuz-goruntulemeleri';
+        value: number | HavuzGoruntulemeleri;
+      } | null)
+    | ({
+        relationTo: 'islem-kayitlari';
+        value: number | IslemKayitlari;
       } | null)
     | ({
         relationTo: 'dosyalar';
@@ -264,6 +707,10 @@ export interface PayloadMigration {
 export interface KullanicilarSelect<T extends boolean = true> {
   ad?: T;
   rol?: T;
+  firma?: T;
+  firmaYetkisi?: T;
+  ikiAsamaliAcik?: T;
+  totpGizli?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -284,10 +731,323 @@ export interface KullanicilarSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "firmalar_select".
+ */
+export interface FirmalarSelect<T extends boolean = true> {
+  unvan?: T;
+  kisaAd?: T;
+  slug?: T;
+  konum?: T;
+  sektor?: T;
+  web?: T;
+  logo?: T;
+  kisaTanitim?: T;
+  uzunTanitim?: T;
+  teknolojiler?: T;
+  calismaModelleri?: T;
+  yanHaklar?:
+    | T
+    | {
+        ad?: T;
+        id?: T;
+      };
+  kurulusYili?: T;
+  calisanAraligi?: T;
+  galeri?: T;
+  asama?: T;
+  guvenilir?: T;
+  onaylanmisIlanSayisi?: T;
+  testFirmasi?: T;
+  yetkiliAd?: T;
+  yetkiliEposta?: T;
+  yetkiliTelefon?: T;
+  takipNotlari?:
+    | T
+    | {
+        not?: T;
+        tarih?: T;
+        id?: T;
+      };
+  yayinaHazir?: T;
+  arama?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ilanlar_select".
+ */
+export interface IlanlarSelect<T extends boolean = true> {
+  firma?: T;
+  pozisyonAdi?: T;
+  tur?: T;
+  altTur?: T;
+  aile?: T;
+  model?: T;
+  konum?: T;
+  deneyim?: T;
+  egitim?: T;
+  bolumler?: T;
+  zorunluBeceriler?: T;
+  tercihBeceriler?: T;
+  diller?:
+    | T
+    | {
+        dil?: T;
+        seviye?: T;
+        id?: T;
+      };
+  pozisyonSayisi?: T;
+  sonBasvuru?: T;
+  baslangic?: T;
+  ucretEnAz?: T;
+  ucretEnCok?: T;
+  ucretGorunur?: T;
+  yanHaklar?:
+    | T
+    | {
+        ad?: T;
+        id?: T;
+      };
+  isTanimi?: T;
+  nitelikler?: T;
+  sartname?: T;
+  onElemeSorulari?:
+    | T
+    | {
+        soru?: T;
+        tip?: T;
+        secenekler?:
+          | T
+          | {
+              ad?: T;
+              id?: T;
+            };
+        eleyici?: T;
+        beklenenCevap?: T;
+        id?: T;
+      };
+  linkedinMetni?: T;
+  dil?: T;
+  stajDonemi?: T;
+  ucretliStaj?: T;
+  sgk?: T;
+  stajBelgesi?: T;
+  pauOncelik?: T;
+  durum?: T;
+  duzeltmeGerekcesi?: T;
+  kapanisNedeni?: T;
+  yayinTarihi?: T;
+  basvuruSayisi?: T;
+  goruntulenme?: T;
+  arama?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basvurular_select".
+ */
+export interface BasvurularSelect<T extends boolean = true> {
+  ilan?: T;
+  firma?: T;
+  adayKullanici?: T;
+  adayKodu?: T;
+  profilKopyasi?: T;
+  cv?: T;
+  onYazi?: T;
+  cevaplar?: T;
+  eleyiciUyari?: T;
+  kaynak?: T;
+  durum?: T;
+  puan?: T;
+  etiketler?:
+    | T
+    | {
+        ad?: T;
+        id?: T;
+      };
+  ekipNotlari?:
+    | T
+    | {
+        not?: T;
+        yazan?: T;
+        id?: T;
+      };
+  aydinlatmaSurumu?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "adaylar_select".
+ */
+export interface AdaylarSelect<T extends boolean = true> {
+  kullanici?: T;
+  kod?: T;
+  telefon?: T;
+  cinsiyet?: T;
+  tanitim?: T;
+  okul?: T;
+  bolum?: T;
+  sinif?: T;
+  mezuniyet?: T;
+  gano?: T;
+  deneyimSeviyesi?: T;
+  deneyimler?:
+    | T
+    | {
+        kurum?: T;
+        pozisyon?: T;
+        baslangic?: T;
+        bitis?: T;
+        aciklama?: T;
+        id?: T;
+      };
+  beceriler?:
+    | T
+    | {
+        beceri?: T;
+        seviye?: T;
+        id?: T;
+      };
+  diller?:
+    | T
+    | {
+        dil?: T;
+        seviye?: T;
+        id?: T;
+      };
+  sertifikalar?:
+    | T
+    | {
+        ad?: T;
+        kurum?: T;
+        yil?: T;
+        id?: T;
+      };
+  baglantilar?:
+    | T
+    | {
+        ad?: T;
+        adres?: T;
+        id?: T;
+      };
+  tercihler?:
+    | T
+    | {
+        turler?: T;
+        modeller?: T;
+        baslama?: T;
+        sehir?: T;
+        tasinmayaAcik?: T;
+        ucretBeklentisi?: T;
+      };
+  askerlik?: T;
+  ozelNitelikli?: T;
+  cvler?:
+    | T
+    | {
+        ad?: T;
+        dosya?: T;
+        id?: T;
+      };
+  havuz?:
+    | T
+    | {
+        gorunurluk?: T;
+        rizaTarihi?: T;
+        gizlenenFirmalar?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "taksonomiler_select".
+ */
+export interface TaksonomilerSelect<T extends boolean = true> {
+  tur?: T;
+  ad?: T;
+  esAnlamlilar?:
+    | T
+    | {
+        ad?: T;
+        id?: T;
+      };
+  aktif?: T;
+  arama?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "davetler_select".
+ */
+export interface DavetlerSelect<T extends boolean = true> {
+  firma?: T;
+  ad?: T;
+  eposta?: T;
+  firmaYetkisi?: T;
+  anahtarOzeti?: T;
+  sonGecerlilik?: T;
+  kullanildi?: T;
+  hatirlatmalar?:
+    | T
+    | {
+        tarih?: T;
+        gun?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rizalar_select".
+ */
+export interface RizalarSelect<T extends boolean = true> {
+  kullanici?: T;
+  tur?: T;
+  metinSurumu?: T;
+  geriAlinma?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "havuz-goruntulemeleri_select".
+ */
+export interface HavuzGoruntulemeleriSelect<T extends boolean = true> {
+  aday?: T;
+  firma?: T;
+  kim?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "islem-kayitlari_select".
+ */
+export interface IslemKayitlariSelect<T extends boolean = true> {
+  islem?: T;
+  tur?: T;
+  kim?: T;
+  kayitTuru?: T;
+  kayitId?: T;
+  ayrinti?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "dosyalar_select".
  */
 export interface DosyalarSelect<T extends boolean = true> {
+  tur?: T;
   alt?: T;
+  sahip?: T;
+  taramaDurumu?: T;
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -351,6 +1111,72 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ayarlar".
+ */
+export interface Ayarlar {
+  id: number;
+  onayliIlanSayisi?: number | null;
+  enUzunSureGun?: number | null;
+  onayHedefiIsGunu?: number | null;
+  eslesmeAgirliklari?: {
+    zorunluBeceri?: number | null;
+    tercihBeceri?: number | null;
+    model?: number | null;
+    bolum?: number | null;
+    deneyim?: number | null;
+    dil?: number | null;
+  };
+  saklama?: {
+    basvuruAnonimlestirmeAy?: number | null;
+    havuzRizaAy?: number | null;
+    islemKaydiAy?: number | null;
+  };
+  hatirlatmaGunleri?:
+    | {
+        gun: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ayarlar_select".
+ */
+export interface AyarlarSelect<T extends boolean = true> {
+  onayliIlanSayisi?: T;
+  enUzunSureGun?: T;
+  onayHedefiIsGunu?: T;
+  eslesmeAgirliklari?:
+    | T
+    | {
+        zorunluBeceri?: T;
+        tercihBeceri?: T;
+        model?: T;
+        bolum?: T;
+        deneyim?: T;
+        dil?: T;
+      };
+  saklama?:
+    | T
+    | {
+        basvuruAnonimlestirmeAy?: T;
+        havuzRizaAy?: T;
+        islemKaydiAy?: T;
+      };
+  hatirlatmaGunleri?:
+    | T
+    | {
+        gun?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
