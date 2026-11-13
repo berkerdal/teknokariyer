@@ -1,0 +1,98 @@
+/* Uygulamaya özgü uyarlamalar.
+   Prototipte mobil ve masaüstü ayrı işaretlemeyle çizildi; uygulamada tek işaretleme var ve düzen genişliğe göre değişir.
+   Kırılma noktası prototiple aynı: 900 px (prototipteki kap sorguları burada medya sorgusu). */
+
+html { background: var(--zemin); }
+body.tk { min-height: 100dvh; display: flex; flex-direction: column; }
+body.tk > main { flex: 1 0 auto; }
+.atla { position: absolute; left: 8px; top: -60px; z-index: 60; background: var(--lacivert); color: #FFFFFF !important; padding: 10px 14px; font-weight: 600; }
+.atla:focus { top: 8px; }
+
+/* Firma karosu ve hap içinde gizli onay kutusu (sunucu formu; JS olmadan da çalışır) */
+.hap:has(input:checked) { background: var(--lacivert); border-color: var(--lacivert); color: #FFFFFF; }
+.hap:has(input:focus-visible) { outline: 3px solid var(--lacivert); outline-offset: 2px; }
+.hap:has(input:disabled) { color: var(--metin-3); border-color: var(--cizgi); cursor: not-allowed; }
+
+/* ---------- Üst çubuk: tek işaretleme ---------- */
+.a-ust { padding: 0 16px; }
+.a-ust-ic { min-height: 56px; gap: 16px; }
+.a-menu, .a-firma-giris, .a-ust-ad { display: none; }
+@media (min-width: 900px) {
+  .a-ust { padding: 0 32px; }
+  .a-ust-ic { min-height: 64px; gap: 32px; }
+  .a-menu { display: flex; }
+  .a-firma-giris, .a-ust-ad { display: inline; }
+}
+.a-alt-menu { display: grid; }
+@media (min-width: 900px) { .a-alt-menu { display: none; } }
+
+/* ---------- İlan listesi ---------- */
+.il { display: grid; gap: 10px; padding: 12px 0 0; }
+.il-liste { padding: 0; border-right: 0; }
+.il-liste .arama, .il-liste .secili-filtre, .il-liste .liste-bas { padding: 0 16px; }
+.il-onizleme { display: none; }
+.il-filtre { display: none; }
+.il-filtre[data-acik='true'] { display: grid; grid-template-rows: auto 1fr auto; position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 41;
+  max-height: 88dvh; padding: 0; border: 0; background: var(--yuzey); border-radius: 10px 10px 0 0; box-shadow: var(--golge-katman); animation: alttan var(--sure) var(--egri); }
+.il-filtre-bas { padding: 12px 16px; border-bottom: 1px solid var(--cizgi); margin: 0; }
+.il-filtre-govde { overflow: auto; padding: var(--b4) 16px 0; }
+.il-filtre-ayak { display: flex; gap: 12px; padding: 12px 16px 16px; border-top: 1px solid var(--cizgi); }
+.il-filtre-ayak .dugme--genis { flex: 1; }
+.il-filtre-kapat { display: inline-grid; }
+@media (min-width: 900px) {
+  .il { grid-template-columns: 260px minmax(0, 1fr) minmax(0, 1.15fr); gap: 0; padding: 0; align-items: start; }
+  .il-filtre, .il-filtre[data-acik='true'] { display: block; position: sticky; top: 65px; left: auto; right: auto; bottom: auto; z-index: auto; max-height: calc(100dvh - 65px);
+    overflow: auto; padding: var(--b5) 20px; border-right: 1px solid var(--cizgi); background: transparent; border-radius: 0; box-shadow: none; animation: none; }
+  .il-filtre-bas { padding: 0; border: 0; margin-bottom: var(--b4); }
+  .il-filtre-govde { overflow: visible; padding: 0; }
+  .il-filtre-ayak { padding: 0; border: 0; }
+  .il-filtre-ayak [data-mobil] { display: none; }
+  .il-filtre-kapat { display: none; }
+  .il-liste { padding: var(--b5) 0; border-right: 1px solid var(--cizgi); }
+  .il-liste .arama, .il-liste .secili-filtre, .il-liste .liste-bas { padding: 0 20px; }
+  .il-liste .ilan-listesi { border-left: 0; border-right: 0; border-radius: 0; }
+  .il-onizleme { display: block; }
+  .il .yapiskan-alt { display: none; }
+}
+.il-ortu { display: none; }
+.il-ortu[data-acik='true'] { display: block; }
+@media (min-width: 900px) { .il-ortu[data-acik='true'] { display: none; } }
+
+/* ---------- İlan detayı ---------- */
+.id { padding: 8px 16px var(--b5); display: grid; gap: var(--b4); }
+.id-ana { display: grid; gap: var(--b4); }
+.id-yan { position: static; }
+.id-yan-yapiskan { border: 0; padding: 0; background: transparent; }
+.id-yan .id-yan-eylem, .id-yan .id-yan-kopya { display: none; }
+@media (min-width: 900px) {
+  .id { max-width: 1200px; margin: 0 auto; padding: var(--b5) 32px; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--b7); align-items: start; }
+  .id-ana h1 { font-size: 36px; line-height: 42px; }
+  .id-yan { position: sticky; top: 89px; grid-column: 2; grid-row: 1 / span 2; }
+  .id-yan-yapiskan { background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: var(--kose-panel); padding: var(--b5); }
+  .id-yan .id-yan-eylem, .id-yan .id-yan-kopya { display: flex; }
+  .id-mobil-eylem { display: none; }
+}
+
+/* ---------- Kapanmış ilan ve hata sayfaları ---------- */
+.sayfa-dar { max-width: 720px; width: 100%; margin: 0 auto; padding: var(--b6) 16px; display: grid; gap: var(--b4); align-content: start; }
+@media (min-width: 900px) { .sayfa-dar { padding: var(--b7) 32px; } }
+
+/* ---------- Bildirim ve iletişim kutusu (dialog) ---------- */
+dialog.alt-panel { margin: 0; padding: 0; border: 0; width: 100%; max-width: none; inset: auto 0 0 0; }
+dialog.alt-panel::backdrop { background: rgba(19, 40, 79, .42); }
+@media (min-width: 900px) {
+  dialog.alt-panel { inset: 0; margin: auto; width: min(560px, calc(100% - 32px)); border-radius: var(--kose-panel); max-height: 80dvh; }
+}
+
+/* Mobilde filtre düğmesi listenin altında yapışık durur (ızgarada son sırada). */
+.il .yapiskan-alt { order: 10; }
+/* Seçili filtre etiketi bir bağlantıdır (kaldırır); düğme değil. */
+.hap--secili { background: var(--lacivert); border-color: var(--lacivert); color: #FFFFFF; text-decoration: none; }
+.hap--secili:hover { background: var(--lacivert-koyu); }
+.il-filtre-bas { gap: 8px; }
+.il-filtre-bas h2 { margin-right: auto; }
+.bolum-bas > a { white-space: nowrap; }
+
+/* Test ortamı şeridi (K13, K17): yayın dışındaki her ortamda her sayfanın en üstünde. */
+.ortam-serit { background: var(--uyari); color: #FFFFFF; font-size: 14px; line-height: 1.35; padding: 6px 16px; text-align: center; }
+.ortam-serit strong { letter-spacing: .04em; }

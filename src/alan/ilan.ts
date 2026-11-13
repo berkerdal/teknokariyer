@@ -3,6 +3,8 @@
  * Saf fonksiyonlar: kim ne zaman hangi işlemi yapabilir, sonuç hangi duruma geçer, hangi değişiklik onaydan geçer.
  */
 
+import { trGunBasi, trGunFarki } from './tarih'
+
 export const ILAN_DURUMLARI = ['taslak', 'onayda', 'duzeltme', 'yayinda', 'duraklatildi', 'suresi-doldu', 'kapandi'] as const
 export type IlanDurumu = (typeof ILAN_DURUMLARI)[number]
 
@@ -79,11 +81,9 @@ export type KapatmaNedeni = keyof typeof KAPATMA_NEDENLERI
 /* ---------- Tarihler ---------- */
 
 const GUN_MS = 86_400_000
-/** Takvim günü farkı, saat diliminden bağımsız (yerel tarih bileşenleriyle). */
+/** Takvim günü farkı, Türkiye saatine göre. Sunucu hangi saat diliminde çalışırsa çalışsın sonuç aynıdır. */
 export function gunFarki(baslangic: Date, bitis: Date): number {
-  const a = Date.UTC(baslangic.getFullYear(), baslangic.getMonth(), baslangic.getDate())
-  const b = Date.UTC(bitis.getFullYear(), bitis.getMonth(), bitis.getDate())
-  return Math.round((b - a) / GUN_MS)
+  return trGunFarki(baslangic, bitis)
 }
 
 export type TarihHatasi = 'gecmis' | 'cok-uzak' | null
@@ -100,8 +100,9 @@ export function sonBasvuruTarihiHatasi(
   return null
 }
 
+/** Seçilebilecek en geç son başvuru günü (Türkiye saatiyle o günün başı). */
 export function enGecSonBasvuruTarihi(bugun: Date, enUzunGun = VARSAYILAN_EN_UZUN_SURE_GUN): Date {
-  return new Date(bugun.getFullYear(), bugun.getMonth(), bugun.getDate() + enUzunGun)
+  return new Date(trGunBasi(bugun).getTime() + enUzunGun * GUN_MS)
 }
 
 /** Son başvuru günü geçti mi? Son gün boyunca ilan açıktır. */

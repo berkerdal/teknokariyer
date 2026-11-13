@@ -9,6 +9,8 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      // Logolar SVG; görsel iyileştirme (next/image) gerekmiyor.
+      '@next/next/no-img-element': 'off',
     },
   },
   {

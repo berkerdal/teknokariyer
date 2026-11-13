@@ -1,0 +1,60 @@
+/* TeknoKariyer ön yüz stilleri.
+   Sıra: Tailwind → tokenlar → onaylı bileşenler ve ekran düzenleri (prototipten) → uygulamaya özgü uyarlamalar.
+   Bileşenler renk değerini doğrudan yazmaz; tokenları kullanır. Tailwind sınıfları da aynı adları kullanır (bg-lacivert…). */
+@import 'tailwindcss';
+@import '../../stil/tokenlar.css';
+@import '../../stil/bilesenler.css';
+@import '../../stil/ekranlar.css';
+@import '../../stil/uygulama.css';
+
+@theme inline {
+  --color-zemin: var(--zemin);
+  --color-yuzey: var(--yuzey);
+  --color-yuzey-2: var(--yuzey-2);
+  --color-cizgi: var(--cizgi);
+  --color-cizgi-kontrol: var(--cizgi-kontrol);
+  --color-metin: var(--metin);
+  --color-metin-2: var(--metin-2);
+  --color-metin-3: var(--metin-3);
+  --color-lacivert: var(--lacivert);
+  --color-lacivert-koyu: var(--lacivert-koyu);
+  --color-lacivert-acik: var(--lacivert-acik);
+  --color-baglanti: var(--baglanti);
+  --color-camgobegi: var(--camgobegi);
+  --color-camgobegi-acik: var(--camgobegi-acik);
+  --color-kiremit: var(--kiremit);
+  --color-gece: var(--gece);
+  --color-basari: var(--basari);
+  --color-uyari: var(--uyari);
+  --color-hata: var(--hata);
+  --font-baslik: var(--font-baslik);
+  --font-govde: var(--font-govde);
+  --radius-kontrol: var(--kose-kontrol);
+  --radius-panel: var(--kose-panel);
+}
+
+/* Yazı tipleri: depoda, alt kümeye indirilmiş (Türkçe karakterler ve ₺ dahil). Dış CDN yok. Lisans: OFL (fontlar/). */
+@font-face {
+  font-family: 'Lexend';
+  src: url('../fontlar/LexendRegular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lexend';
+  src: url('../fontlar/LexendSemiBold.woff2') format('woff2');
+  font-weight: 500 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('../fontlar/SourceSans3Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('../fontlar/SourceSans3SemiBold.woff2') format('woff2');
+  font-weight: 500 700;
+  font-display: swap;
+}

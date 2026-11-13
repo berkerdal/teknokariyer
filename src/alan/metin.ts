@@ -64,3 +64,15 @@ export function sayiIyelikEki(sayi: number): string {
   if (n % 1_000_000 !== 0) return '’i' // bin
   return '’u' // milyon
 }
+
+/**
+ * İlgi eki “’ın / ’in / ’un / ’ün” (“Kodpit’in”, “Bulutfon’un”, “Netinternet’in”, “Kodlama’nın”).
+ * Dört yönlü ünlü uyumu; ünlüyle biten adda “n” kaynaştırması. Kısaltma okunuşları kapsam dışı.
+ */
+export function ilgiEki(sozcuk: string): string {
+  const son = sozcuk.trim().split(/\s+/).pop()?.toLocaleLowerCase('tr') ?? ''
+  const unluler = [...son].filter((h) => UNLULER.includes(h))
+  const u = unluler[unluler.length - 1] ?? 'e'
+  const ek = 'aı'.includes(u) ? 'ın' : 'ei'.includes(u) ? 'in' : 'ou'.includes(u) ? 'un' : 'ün'
+  return `’${UNLULER.includes(son.at(-1) ?? '') ? 'n' : ''}${ek}`
+}

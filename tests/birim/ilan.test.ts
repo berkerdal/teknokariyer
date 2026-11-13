@@ -73,3 +73,12 @@ describe('Türkiye saati', () => {
     expect(trGunFarki(new Date(Date.UTC(2026, 10, 13, 20, 0)), an)).toBe(1)
   })
 })
+
+describe('gün sınırı sunucu saat diliminden bağımsız (Workers UTC çalışır)', () => {
+  it('son gün Türkiye saatiyle 23:59’a kadar sürer', () => {
+    const son = new Date('2026-11-15T09:00:00Z') // 15 Kasım, Türkiye 12:00
+    expect(suresiDolduMu(son, new Date('2026-11-15T20:59:00Z'))).toBe(false) // TR 23:59
+    expect(suresiDolduMu(son, new Date('2026-11-15T21:01:00Z'))).toBe(true) // TR 16 Kasım 00:01
+    expect(kalanGun(son, new Date('2026-11-14T22:30:00Z'))).toBe(0) // TR 15 Kasım 01:30: son gün
+  })
+})

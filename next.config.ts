@@ -8,6 +8,9 @@ const goreliYol = saglayici === 'node' ? './src/payload.config.node.ts' : './src
 const payloadYapilandirmasi = path.resolve(goreliYol) // webpack mutlak yol ister
 
 const nextConfig: NextConfig = {
+  // İki kök düzen var (site ve yönetim paneli); eşleşmeyen adresler için tek ve gerçek 404 sayfası.
+  experimental: { globalNotFound: true },
+  poweredByHeader: false,
   images: {
     localPatterns: [
       {

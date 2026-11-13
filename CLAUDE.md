@@ -188,7 +188,15 @@ Claude tarafından yapılacak.
     Uçtan uca senaryolar `tests/entegrasyon/servisler.test.ts` içinde (K4 onay, 60 gün sınırı, kiracı ayrımı, profil kopyası,
     rıza kaydı, cinsiyetle arama reddi, profil açılış kaydı ve K5 sayısı, süresi dolan ilanın kapanması).
   - **Gün sınırları Türkiye saatine göre** hesaplanır (`src/alan/tarih.ts`, UTC+3). Sunucu UTC'de çalışır.
-  - **Sırada M4b:** Arayüz (aday sayfaları, firma paneli, Yönetici A.Ş. paneli) prototip tasarımıyla, sunucu eylemleri üzerinden.
+  - **M4b-1 herkese açık sayfalar:** Ana sayfa, ilan listesi (yüzlü filtre, masaüstünde önizleme, mobilde alt panel),
+    ilan sayfası (JobPosting verisi, kapanmış ilan görünümü), firma sayfası, firmalar, 404.
+    - Stil: prototipin `tokenlar.css`, `bilesenler.css`, `ekranlar.css` dosyaları `src/stil/` altına aynen alındı,
+      Tailwind 4 temasına aynı adlarla bağlandı. Uygulamaya özgü uyarlamalar `src/stil/uygulama.css` içinde.
+    - Filtre mantığı saf fonksiyon: `src/alan/ilanFiltre.ts` (birim testli). Filtreler adreste tutulur.
+    - Örnek veri: `pnpm ornek-veri` (prototip verisinden; firmalar “test firması” işaretli, yayında görünmez).
+      Giriş yapılabilen örnek aday hesabı yalnızca `ORNEK_SIFRE` verilirse açılır.
+    - Yayın dışı ortamlarda her sayfanın üstünde “TEST ORTAMI” şeridi var (K17 örnek işareti).
+  - **Sırada M4b-2:** Giriş/kayıt, başvuru akışı, aday paneli; ardından firma paneli ve Yönetici A.Ş. paneli.
   - **İlk göç (migration) henüz oluşturulmadı:** Şema oturunca ve ilk dağıtımdan önce `pnpm payload migrate:create` ile oluşturulacak.
 
 **Öğrenilenler:**
@@ -225,6 +233,18 @@ Claude tarafından yapılacak.
     (göreli yol) için tanımlı. `next dev`, depoya `AGENTS.md` yazar; Next 16 belgeleri `node_modules/next/dist/docs/` altında.
   - **ESLint:** eslint-config-next 16 düz (flat) yapılandırma ister; FlatCompat ile çalışmaz.
   - **Ağ:** codeload.github.com ve api.github.com kapalı; raw.githubusercontent.com açık. Payload şablon dosyaları oradan alındı.
+- **Arayüz geliştirmesinden öğrenilenler:**
+  - Prototipteki `.tk button { color: inherit }` kuralı `.dugme` metin rengini eziyordu (prototipte de “Ara” düğmesi koyu
+    metinliydi). Temel kurallar artık `:where(.tk)` ile sıfır özgüllükte.
+  - Prototip cihaz çerçevesi için kap sorgusu (`@container ekran`) kullanıyordu. Uygulamada `body` üzerinde kap tanımı
+    sabit konumlu katmanları (alt panel) bozabileceği için hepsi medya sorgusuna çevrildi (900 px).
+  - İki kök düzen (site ve Payload paneli) olduğu için eşleşmeyen adresler `app/global-not-found.tsx` ile gerçek 404 döner
+    (`experimental.globalNotFound`).
+  - App Router'da sayfadan HTTP 410 döndürmenin yolu yok. Kapanmış ilan 200 + `noindex` ile gösteriliyor (prototip 410 diyordu).
+    Gerekirse ileride bir rota işleyicisiyle çözülür.
+  - Workers UTC'de çalışır. Takvim günü hesapları (`gunFarki`, `kalanGun`, `suresiDolduMu`) Türkiye saatine bağlandı;
+    birim testleri `TZ=Europe/Istanbul` ile koşar, ayrıca UTC anlarıyla ayrı test var.
+  - Yazı tipleri depoda, alt kümeye indirilmiş WOFF2 (Türkçe ve ₺ dahil, 4 dosya toplam 55 KB). Dış yazı tipi CDN'i yok.
 - **Kontrast:** Camgöbeği beyaz üzerinde 2,9:1 verir; arayüz çizgisi ve odak halkası için de yetmez (3:1 altı).
   Odak halkası lacivert olacak.
 

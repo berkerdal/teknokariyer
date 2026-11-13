@@ -37,3 +37,12 @@ describe('Türkçe ekler', () => {
     expect(ek(23)).toBe('23’ü')
   })
 })
+
+describe('ilgi eki', () => {
+  it('dört yönlü uyum ve kaynaştırma', async () => {
+    const { ilgiEki } = await import('@/alan/metin')
+    expect(['Kodpit', 'Bulutfon', 'Ratel Bilişim', 'Kodlama', 'Teknokent', 'Türkü', 'Pamukkale', 'Ölçü'].map((s) => s + ilgiEki(s))).toEqual([
+      'Kodpit’in', 'Bulutfon’un', 'Ratel Bilişim’in', 'Kodlama’nın', 'Teknokent’in', 'Türkü’nün', 'Pamukkale’nin', 'Ölçü’nün',
+    ])
+  })
+})

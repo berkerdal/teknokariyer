@@ -1,0 +1,67 @@
+/* TeknoKariyer tasarım değişkenleri (A · Küme, onaylı 13.11.2026). Kaynak: docs/tasarim/prototip/tokenlar.css
+   Kaynak: docs/kimlik/tokenlar.json. Uygulamaya geçişte Tailwind temasına aynı adlarla aktarılır.
+   Kural: bileşenler renk değerini doğrudan yazmaz, buradaki değişkenleri kullanır. */
+:root {
+  /* Zemin ve yüzey: hafif sıcak kırık beyaz, krem değil */
+  --zemin: #F7F6F3;
+  --yuzey: #FFFFFF;
+  --yuzey-2: #F0EFEB;          /* üzerine gelme, ikincil bant */
+  --cizgi: #E4E1DA;            /* ayırıcı çizgi (süs) */
+  --cizgi-kontrol: #8D8B85;    /* form kenarı: beyaz üzerinde 3,4:1 */
+
+  /* Metin: nötr, mavimsi değil */
+  --metin: #1E1E1C;
+  --metin-2: #5B5852;          /* 6,5:1 zemin üzerinde */
+  --metin-3: #6E6B65;          /* yalnızca yardımcı metin, 5,3:1 */
+
+  /* Kimlik */
+  --lacivert: #2155AD;         /* ana eylem, bağlantı, seçili durum, odak halkası */
+  --lacivert-koyu: #183F82;    /* üzerine gelme / basılı */
+  --lacivert-acik: #E8EEF8;    /* seçili satır zemini */
+  --baglanti: #1A3F85;         /* uzun metin içindeki bağlantı ve ilan adı */
+  --camgobegi: #05A1E6;        /* çizgi, grafik; metin değil */
+  --camgobegi-acik: #E6F5FC;   /* bilgi kutusu zemini */
+  --kiremit: #B04E26;          /* alt marka vurgusu: sayfa başına bir öğe; uyarı anlamı yok */
+  --kiremit-koyu-zemin: #F7A27C;
+  --gece: #13284F;             /* yönetim paneli çerçevesi */
+  --gece-2: #1C3666;
+  --gece-metin: #C9D3E6;
+  --gece-metin-2: #9AA9C6;
+
+  /* Durum: yalnızca işlev için, her zaman metin ve kare işaretle */
+  --basari: #25734A;  --basari-zemin: #E7F2EC;
+  --uyari: #9A5B00;   --uyari-zemin: #FBF1DE;
+  --hata: #BF1F2F;    --hata-zemin: #FBE9EA;
+  --notr: #6E6B65;    --notr-zemin: #EFEEEA;
+
+  /* Yazı */
+  --font-baslik: "Lexend", "Segoe UI", system-ui, sans-serif;
+  --font-govde: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --boy-b1: 28px; --sat-b1: 34px;
+  --boy-b2: 22px; --sat-b2: 28px;
+  --boy-b3: 18px; --sat-b3: 24px;
+  --boy-govde: 16px; --sat-govde: 24px;
+  --boy-kucuk: 14px; --sat-kucuk: 20px;
+  --boy-etiket: 13px; --sat-etiket: 16px;
+
+  /* Boşluk: 4 px tabanlı */
+  --b1: 4px; --b2: 8px; --b3: 12px; --b4: 16px; --b5: 24px; --b6: 32px; --b7: 48px;
+
+  /* Köşe: tek sistem */
+  --kose-kontrol: 4px;
+  --kose-panel: 6px;
+  --kose-gorsel: 2px;
+
+  /* Hareket: yalnızca durum değişimi için */
+  --sure: 160ms;
+  --egri: cubic-bezier(.2, 0, 0, 1);
+
+  /* Gölge: yalnızca üstte açılan katmanlar (alt panel, açılır menü) */
+  --golge-katman: 0 -2px 0 rgba(19, 40, 79, .04), 0 12px 32px rgba(19, 40, 79, .18);
+
+  --dokunma: 44px;             /* en küçük dokunma alanı */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --sure: 0ms; }
+}
