@@ -130,6 +130,53 @@ Claude tarafından yapılacak.
 - **K12:** Fotoğraflar sonra gelecek; o zamana kadar stok fotoğraf kullanılmayacak. Tasarım fotoğrafsız da düzgün görünmeli.
 - **K13:** Önce kurum içi test yapılacak (test ortamı, örnek veri, test senaryoları dokümanı). Ardından yayın ve birkaç firmayla pilot.
 
+**Kullanıcının ek cevapları (13.11.2026, kimlik çalışması öncesi):**
+
+- **K14 — Kurumsal kılavuz yok.** Elde yalnızca logo PDF'i var (`docs/logo-teknokent.pdf`, Illustrator çıktısı, tamamen vektör).
+  Yazı tipi adı bilinmiyor. Alt marka kimliği logonun vektör çizimlerinden türetilir.
+- **K15 — Logotype serbest.** "TeknoKariyer" yazımı için kısıt yok; estetik gerekçeyle esnek davranılabilir.
+- **K16 — İkinci rengi Claude seçer.** Alternatiflerde gerekçesiyle önerilir, kurum seçer.
+- **K17 — Prototip içeriği.** Gerçek firma adları, örnek (kurgusal) ilanlar ve uydurma aday adları kullanılabilir.
+  Görece büyük firmalar seçilir; kullanıcının örnekleri: Netinternet, Kodpit, Rattel. Prototiplerde "örnek ilan" işareti bulunur.
+- **K18 — Teknik seçimler Claude'a bırakıldı.** Kullanıcının teknik deneyimi yok.
+  - E-posta servisi: en uygun seçeneği Claude belirler ve kurulumu adım adım anlatır.
+  - Cloudflare: hesap yok. Demo kullanıcının açacağı hesapta çalışır. Hesap açma ve yetki verme adımları Claude tarafından
+    tıklama düzeyinde anlatılmalı.
+  - Payload: işe yaradığı ölçüde kullanılır; gerekirse yönetim tarafı tamamen özel yazılır.
+- **K19 — Mesajlaşma Faz 2'de.** Veri modeli ve bildirim altyapısı, mesajlaşma sonradan eklendiğinde mevcut
+  iletişim talebi / şablonlu e-posta akışlarıyla çakışmayacak şekilde kurulur.
+- **K20 — Yeni sitenin firma rehberi.** Kullanıcı bilmiyor; ARGEPORTAL'a erişim yok (başka bir geliştiricinin sistemi).
+  Firma verisinin tek doğru kaynağı portal olur. Yeni site gerekirse portalın sunacağı salt okunur bir firma beslemesini
+  (JSON) kullanabilir.
+- **K21 — Hedef tarih:** "En kısa zamanda". Sabit tarih yok.
+
+**İlerleme (13.11.2026):**
+
+- **Adım 2, alt marka kimliği:** Taslak 1 hazır ve onay bekliyor.
+  - Sunum: https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR
+  - Ayrıntı: `docs/kimlik/README.md`
+  - Alternatifler: A · Küme (kiremit, Lexend + Source Sans 3) ve B · Yuva (okra, Schibsted Grotesk + IBM Plex Mono).
+    Claude B'yi önerdi.
+  - Onay gelmeden referans panosu ve prototiplere geçilmez.
+
+**Öğrenilenler:**
+
+- **Mevcut sitedeki firma rehberi:** https://www.pauteknokent.com.tr/teknoloji-firmalari
+  - 13 sayfa, sayfa başına 10 firma. Sayfa adresi: `?e-page-a2c4f28=N` (sondaki `/` 301 yönlendirmesi verir).
+  - 121 kayıt doğrulandı. Kayıt alanları: unvan, sektör, e-posta, web, adres, blok/oda.
+- **Rehberdeki e-postalar:** Birçoğu kişisel (gmail, pau.edu.tr). Bu yüzden davet için "yetkili kişisel iş e-postası" adımı (0.3)
+  gerçekten gerekli. E-postalar depoya yazılmaz.
+- **Bazı unvanlar kişi adıdır** (şahıs firmaları). İçe aktarma verisi depoya konmadan önce bu açıdan değerlendirilmeli.
+- **Firma adları:** Kullanıcının "Rattel" dediği firmanın rehberdeki unvanı "Ratel Bilişim Hizmetleri Ltd. Şti." (D Blok 102–103).
+  Netinternet'in iki kaydı var (D Blok B01/1 ve B01/2). Kodpit D Blok 208.
+- **Ana logo:** "tekno" tek kasa çizilmiş ("k" üst uzantısız). Piksel kümesi düzensiz boyutlu dikdörtgenlerden oluşuyor ve
+  "t"nin sol üstünden dağılıyor.
+- **Yazı tipi kontrolleri:**
+  - Lexend'de eşit genişlikli rakam yok; tablolarda kullanılmamalı.
+  - Atkinson Hyperlegible Next ve Hanken Grotesk'te ₺ glifi yok.
+- **Kontrast:** Camgöbeği beyaz üzerinde 2,9:1 verir; arayüz çizgisi ve odak halkası için de yetmez (3:1 altı).
+  Odak halkası lacivert olacak.
+
 ## 7. Teknoloji yığını — değerlendirme (karar değil)
 
 Kullanıcının bir arkadaşının önerdiği yığın:

@@ -1,0 +1,35 @@
+{
+  "renk": {
+    "Zemin": "#F4F4F1",
+    "Yüzey": "#FFFFFF",
+    "Metin": "#1C1D1F",
+    "Lacivert": "#2155AD",
+    "Camgöbeği": "#05A1E6",
+    "Okra": "#F2B230",
+    "Okra açık": "#FCEDC4",
+    "Gece": "#13284F",
+    "İkincil metin": "#585A5E",
+    "Durum: Başarı": "#25734A",
+    "Durum: Uyarı": "#B4540A",
+    "Durum: Hata": "#BF1F2F"
+  },
+  "yazi": {
+    "baslik_font": "Schibsted Grotesk",
+    "govde_font": "Schibsted Grotesk",
+    "veri_font": "IBM Plex Mono"
+  },
+  "kose": {
+    "kontrol": 4,
+    "panel": 6,
+    "gorsel": 2
+  },
+  "bosluk": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ]
+}
