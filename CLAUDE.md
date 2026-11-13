@@ -164,6 +164,9 @@ Claude tarafından yapılacak.
   - Prototip: https://claude.ai/artifact/67TJq45XmkYsvCAfpoitva
   - Ayrıntı ve kurumun kararını bekleyen konular: `docs/tasarim/README.md`
   - Teknoloji yığınına (adım 4) prototip onaylanmadan geçilmez.
+  - Taslak 1'e denetimde eksik kalan 10 ekran eklendi (toplam 29 ekran): giriş/kayıt, profili eksik başvuru, kapanmış ilan,
+    hesap ve gizlilik, ilan düzenleme ve sürüm geçmişi, firma ekibi, KVKK talepleri, işlem kayıtları, test posta kutusu.
+- **Adım 4 hazırlığı:** `docs/teknoloji-onerisi.md` yazıldı. Bu bir öneridir, karar değildir; onay bekliyor. Koda geçilmedi.
 
 **Öğrenilenler:**
 
@@ -225,3 +228,18 @@ Claude'un değerlendirmesi (13.11.2026):
   - Otomatik testler (Vitest ve Playwright)
 - **Animasyon (GSAP + Canvas):** Ölçülü kullanılmalı. Performans hedefleri (Lighthouse mobil ≥ 85) ve `prefers-reduced-motion` desteği şart.
 - **Limitler:** Workers, D1 ve R2 limitleri ve fiyatları değişebilir; karar vermeden önce güncel değerleri resmi sayfalardan doğrula.
+
+**Doğrulanan bilgiler (13.11.2026, ayrıntı `docs/teknoloji-onerisi.md`):**
+
+- **Sürümler (npm):** next 16.4.6, payload 3.93.0, @opennextjs/cloudflare 1.20.17, tailwindcss 4.3.5, react 19.3.1.
+  Payload 4 beta. Next 16.4.6 hem Payload'ın hem OpenNext'in sürüm aralığına uyuyor.
+- **Cloudflare (resmî belge deposu):**
+  - Workers ücretli plan aylık 5 USD; Worker boyutu 64 MiB; CPU 30 sn varsayılan, 5 dk'ya kadar.
+  - D1 veritabanı başına 10 GB; zaman yolculuğu 30 gün.
+  - R2'de 10 GB ücretsiz; veri çıkışı ücretsiz.
+  - D1 ve R2'de "eu" yetki alanı var; Türkiye seçeneği yok.
+- **Erişim notu:** Bu çalışma ortamının ağ politikası developers.cloudflare.com'u engelliyor. Belgeler
+  raw.githubusercontent.com/cloudflare/cloudflare-docs üzerinden okunabiliyor. Dağıtım için Cloudflare API erişimi gerekecek.
+- **Virüs tarama:** ClamAV Worker'da çalışmaz. Cloudflare Containers (genel kullanımda) veya harici bir servis gerekir.
+- **E-posta:** Resend'in belgesine göre AB bölgesi yalnızca gönderimi etkiliyor, hesap verisi ABD'de kalıyor.
+  Servis seçimi KVKK kararından sonra yapılacak.

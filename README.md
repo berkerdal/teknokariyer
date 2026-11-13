@@ -8,3 +8,5 @@ Pamukkale Teknokent kariyer portalı.
 - `docs/talimatlar.md`, `docs/ham-notlar.md`: ürün ve tasarım talimatları, kurumun ham notları
 - `docs/kimlik/`: TeknoKariyer alt marka kimliği (onay bekliyor)
 - `tools/kimlik/`: kimlik dosyalarını üreten betikler
+- `docs/tasarim/`: referans panosu, tasarım sistemi, tıklanabilir prototip (onay bekliyor)
+- `docs/teknoloji-onerisi.md`: teknoloji yığını önerisi (onay bekliyor)
