@@ -1,0 +1,31 @@
+# Her push ve PR'da: lint, tip kontrolü, birim testleri ve Cloudflare derlemesi.
+# Derleme Cloudflare hesabı gerektirmez (yerel simülasyon); dağıtım bu iş akışında yok.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PAYLOAD_SECRET: ci-icin-gecici-anahtar-uretimde-kullanilmaz
+      ORTAM: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.4
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Tip kontrolü
+        run: pnpm typecheck
+      - name: Birim testleri
+        run: pnpm test:birim
+      - name: Cloudflare derlemesi
+        run: pnpm exec opennextjs-cloudflare build
