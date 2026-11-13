@@ -13,6 +13,7 @@ import type { GetPlatformProxyOptions } from 'wrangler'
 
 import { ortakYapilandirma } from './payload.ortak'
 import { DOSYA_KOLEKSIYONLARI } from './koleksiyonlar'
+import { migrations } from './migrations'
 
 const gercekYol = (deger: string) => {
   try {
@@ -56,7 +57,8 @@ void komutSatiri
 
 export default buildConfig(
   ortakYapilandirma({
-    db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),
+    // Göçler Worker ilk açıldığında Cloudflare içinde çalışır (prodMigrations). Uzak bağlantı gerektirmez.
+    db: sqliteD1Adapter({ binding: cloudflare.env.D1, prodMigrations: migrations }),
     logger: uretim ? cloudflareGunlugu : undefined,
     eklentiler: [
       r2Storage({

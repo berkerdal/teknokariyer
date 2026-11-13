@@ -11,6 +11,11 @@
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public
     "global_fetch_strictly_public",
   ],
+  // Test ortamı: ORTAM=test iken hiçbir e-posta dışarı gitmez, test posta kutusuna yazılır.
+  // PAYLOAD_SECRET burada değil, Cloudflare'de şifreli "secret" olarak durur.
+  "vars": {
+    "ORTAM": "test",
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
@@ -18,7 +23,7 @@
   "d1_databases": [
     {
       "binding": "D1",
-      "database_id": "DATABASE_ID",
+      "database_id": "27780501-efa7-474d-b2dc-caed05815f18",
       "database_name": "teknokariyer-test",
       "remote": true,
     },
@@ -50,7 +55,7 @@
   //     "d1_databases": [
   //       {
   //         "binding": "D1",
-  //         "database_id": "DATABASE_ID",
+  //         "database_id": "27780501-efa7-474d-b2dc-caed05815f18",
   //         "database_name": "my-app-staging",
   //         "remote": true
   //       }
