@@ -9,7 +9,7 @@ function firmaDuzen(c, aktif, icerik, { altCubuk = "" } = {}) {
   const ust = `<header class="f-ust"><div class="f-ust-ic">${logoKompakt()}<span class="f-firma">${kareLogo("kodpit", 28)}<span><strong>${kac(f.ad)}</strong>${c === "mobil" ? "" : `<span class="kucuk ikincil">${kac(f.konum)}</span>`}</span></span>
     ${c === "mobil" ? `<button class="ikon-dugme" aria-label="Menü">${ikon("menu")}</button>` : `<span class="f-kisi kucuk">${kac(FIRMA_KULLANICI.ad)} · ${kac(FIRMA_KULLANICI.rol)}</span>`}</div></header>`;
   if (c === "mobil") return `${ust}<main class="f-mobil">${icerik}</main>${altCubuk}<nav class="a-alt-menu f-alt-menu" aria-label="Firma menüsü">${menu.join("")}</nav>`;
-  return `${ust}<div class="f-masa"><nav class="f-menu" aria-label="Firma menüsü">${menu.join("")}<hr>${m("firma-profil", "Firma profili", "ofis")}<a href="#">${ikon("kisi")}<span>Ekip</span></a><a href="#">${ikon("ayar")}<span>Ayarlar</span></a></nav><main class="f-icerik">${icerik}</main></div>${altCubuk}`;
+  return `${ust}<div class="f-masa"><nav class="f-menu" aria-label="Firma menüsü">${menu.join("")}<hr>${m("firma-profil", "Firma profili", "ofis")}${m("firma-ekip", "Ekip", "kisi")}<a href="#">${ikon("ayar")}<span>Ayarlar</span></a></nav><main class="f-icerik">${icerik}</main></div>${altCubuk}`;
 }
 
 /* ---------- ÖZET ---------- */
@@ -117,7 +117,7 @@ ekran("firma-ilanlar", {
         const x = FIRMA_ILANLARI.find((y) => y.id === Number(el.dataset.id));
         const yayinda = x.durum === "yayinda";
         altPanel(poz(x), `<ul class="islem-listesi">
-          <li><a href="#firma-ilan-yeni" data-git="firma-ilan-yeni">${ikon("kalem")}<span>Düzenle<span class="ipucu">Yazım ve tarih düzeltmeleri hemen yayına yansır. Pozisyon adı, ilan türü ve ücret değişiklikleri onaydan geçer.</span></span></a></li>
+          <li><a href="#firma-ilan-duzenle" data-git="firma-ilan-duzenle">${ikon("kalem")}<span>Düzenle<span class="ipucu">Yazım ve tarih düzeltmeleri hemen yayına yansır. Pozisyon adı, ilan türü ve ücret değişiklikleri onaydan geçer.</span></span></a></li>
           ${yayinda ? `<li><button data-eylem="duraklat">${ikon("duraklat")}<span>Başvuru almayı geçici olarak durdur</span></button></li>
           <li><button data-eylem="uzat">${ikon("takvim")}<span>Son başvuru tarihini uzat</span></button></li>
           <li><button data-eylem="paylas">${ikon("paylas")}<span>LinkedIn’de paylaş</span></button></li>

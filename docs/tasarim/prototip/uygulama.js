@@ -235,14 +235,14 @@ const logoKompakt = (negatif = false) => `<img class="ust-logo" src="logo/logo-k
 function adayUst(c, girisli = false, aktif = "") {
   if (c === "mobil") {
     return `<header class="a-ust"><a href="#ana-sayfa" data-git="ana-sayfa" class="a-ust-logo">${logoKompakt()}</a>
-      ${girisli ? `<a class="a-ust-kisi" href="#aday-panel" data-git="aday-panel" aria-label="Hesabım: Elif Karaca">EK</a>` : `<a class="dugme dugme--sade dugme--kucuk" href="#aday-panel" data-git="aday-panel">Giriş</a>`}</header>`;
+      ${girisli ? `<a class="a-ust-kisi" href="#aday-panel" data-git="aday-panel" aria-label="Hesabım: Elif Karaca">EK</a>` : `<a class="dugme dugme--sade dugme--kucuk" href="#giris-yap" data-git="giris-yap">Giriş</a>`}</header>`;
   }
   const m = (id, ad) => `<a href="#${id}" data-git="${id}" ${aktif === id ? 'aria-current="page"' : ""}>${ad}</a>`;
   return `<header class="a-ust"><div class="a-ust-ic">
     <a href="#ana-sayfa" data-git="ana-sayfa" class="a-ust-logo">${logoKompakt()}</a>
     <nav class="a-menu" aria-label="Ana menü">${m("ilanlar", "İlanlar")}${m("firma-vitrin-netinternet", "Firmalar")}${m("ilanlar-staj", "Staj")}${m("aday-havuz", "CV havuzu")}</nav>
-    <div class="a-ust-sag"><a href="#firma-ana" data-git="firma-ana" class="a-firma-giris">Firma girişi</a>
-    ${girisli ? `<a class="a-ust-kisi" href="#aday-panel" data-git="aday-panel" aria-label="Hesabım">EK</a><span class="kucuk">Elif Karaca</span>` : `<a class="dugme dugme--ikincil dugme--kucuk" href="#aday-panel" data-git="aday-panel">Giriş yap</a>`}</div>
+    <div class="a-ust-sag"><a href="#giris-yap-firma" data-git="giris-yap-firma" class="a-firma-giris">Firma girişi</a>
+    ${girisli ? `<a class="a-ust-kisi" href="#aday-panel" data-git="aday-panel" aria-label="Hesabım">EK</a><span class="kucuk">Elif Karaca</span>` : `<a class="dugme dugme--ikincil dugme--kucuk" href="#giris-yap" data-git="giris-yap">Giriş yap</a>`}</div>
   </div></header>`;
 }
 function adayAltMenu(aktif) {

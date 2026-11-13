@@ -93,7 +93,7 @@ ekran("ana-sayfa", {
               <li><span class="tarih-karo"><b>4</b>Ara</span><span><strong>Teknokent Kariyer Günü</strong><span class="kucuk ikincil">Firmalarla yüz yüze görüşme · Teknokent konferans salonu</span></span></li>
               <li><span class="tarih-karo"><b>15</b>Oca</span><span><strong>Bahar dönemi uzun dönem staj ilanları için son hafta</strong><span class="kucuk ikincil">Şubat’ta başlayacak stajlar</span></span></li>
             </ul></section>
-          <p class="firma-satir">Teknokent firmasıysanız ilan vermek için <a href="#firma-ana" data-git="firma-ana">firma girişi</a> yapın. Hesabınız yoksa Yönetici A.Ş. sizi davet eder.</p>
+          <p class="firma-satir">Teknokent firmasıysanız ilan vermek için <a href="#giris-yap-firma" data-git="giris-yap-firma">firma girişi</a> yapın. Hesabınız yoksa Yönetici A.Ş. sizi davet eder.</p>
         </aside>
       </div>
     </main>${adayAlt()}`;
@@ -382,7 +382,7 @@ ekran("basvuru", {
 function adayPanelDuzen(c, aktif, icerik) {
   if (c === "mobil") return `${adayUst(c, true)}<main class="ap-mobil">${icerik}</main>${adayAltMenu(aktif)}`;
   const m = (id, ad) => `<a href="#${id}" data-git="${id}" ${aktif === id ? 'aria-current="page"' : ""}>${ad}</a>`;
-  return `${adayUst(c, true)}<main class="ap-masa"><nav class="ap-menu" aria-label="Hesabım">${m("aday-panel", "Başvurularım")}${m("aday-kaydedilen", "Kaydedilen ilanlar")}${m("aday-profil", "Profil ve CV’ler")}${m("aday-havuz", "CV havuzu")}<a href="#">Kayıtlı aramalar</a><a href="#">Hesap ve gizlilik</a></nav><div class="ap-icerik">${icerik}</div></main>`;
+  return `${adayUst(c, true)}<main class="ap-masa"><nav class="ap-menu" aria-label="Hesabım">${m("aday-panel", "Başvurularım")}${m("aday-kaydedilen", "Kaydedilen ilanlar")}${m("aday-profil", "Profil ve CV’ler")}${m("aday-havuz", "CV havuzu")}<a href="#">Kayıtlı aramalar</a>${m("aday-hesap", "Hesap ve gizlilik")}</nav><div class="ap-icerik">${icerik}</div></main>`;
 }
 ekran("aday-panel", {
   ad: "Aday paneli: Başvurularım", alan: "aday",

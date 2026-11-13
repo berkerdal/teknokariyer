@@ -10,25 +10,25 @@ const DENETIM_SATIRLARI = [
     "Listede eşleşme özeti gösterilmedi; yoğunluk için yalnızca ayrıntıda ve kaydedilenlerde var. Sıralama seçenekleri yalnızca görünüm olarak duruyor."],
   ["İlan detayı", "“Pamukkale Teknokent, B Blok G12” konumu; staj bilgilerinde SGK ve zorunlu staj belgesi.",
     "Eşleşme gerekçeli bir liste, yüzde değil. Sayaçta baskı dili yok.",
-    "Sayaç biçimi kurumun kararını bekliyor (K7). Kapanmış ilan sayfası (HTTP 410) prototipte çizilmedi."],
+    "Sayaç biçimi kurumun kararını bekliyor (K7). İngilizce arayüz prototipte yok."],
   ["Başvuru akışı", "Aydınlatma metni sürümüyle birlikte gösteriliyor; havuz rızası ayrı kutu.",
     "Hata özeti ve alan altı Türkçe hata mesajları var; sessiz hata yok. “İsteğe bağlı” alanlar kaydı engellemiyor.",
-    "Profili eksik adayın akışı (yalnızca bu ilanın gerektirdiği eksiklerin sorulması) çizilmedi. Hesap açma ve giriş ekranları da prototipte yok."],
+    "Şifre sıfırlama ve e-posta doğrulama ekranları çizilmedi; giriş, kayıt ve profili eksik başvuru ekranları eklendi."],
   ["Aday paneli", "Görüşme yeri “Teknokent D Blok 208”; CV havuzunda mevcut işverenden gizlenme seçeneği Teknokent çalışanları için düşünüldü.",
     "Puan veya rozet yok; profil tamamlanma göstergesi bir eksikler listesi.",
-    "Kayıtlı aramalar ile “Hesap ve gizlilik” (verilerimi indir, hesabımı sil) menüde yer tutucu olarak duruyor, ekranları çizilmedi."],
+    "Kayıtlı aramalar ekranı çizilmedi (menüde yer tutucu). Hesap ve gizlilik ekranı eklendi."],
   ["Firma sayfası", "Teknokent’teki yeri sayfanın en görünür bilgisi; fotoğraf yerine firma karosu ve büyük tipografi.",
     "Stok fotoğraf yok. Fotoğrafsız da tamamlanmış görünüyor.",
     "Firmalar fotoğraf yükledikten sonra galeri düzeni yeniden denetlenmeli. Firmalar dizini sayfası çizilmedi."],
   ["Firma paneli", "Onay kuralı (ilk 3 ilan) ve “güvenilir firma” yolu Teknokent’in kendi süreci; konum varsayılanı “Pamukkale Teknokent, D Blok 208”.",
     "Pano kartı yok, yapılacaklar var. Düğmeler ne yapacağını söylüyor.",
-    "İlan formu tek uzun sayfa. 5 dakika hedefi kurum içi kullanılabilirlik testinde ölçülmeli. Yayındaki ilanı düzenlerken çıkan “esaslı değişiklik onaydan geçer” uyarısı ayrı bir ekran olarak çizilmedi."],
+    "İlan formu tek uzun sayfa. 5 dakika hedefi kurum içi kullanılabilirlik testinde ölçülmeli. Yayındaki ilanı düzenleme (esaslı değişiklik ve sürüm geçmişi) ile ekip yetkileri eklendi."],
   ["Başvurular ve CV havuzu", "İndirilen CV’de firma adı ve tarih filigranı (K6); havuzda aday kodları.",
     "Kara kutu uyum yüzdesi yok. Olumsuz bildirim kapatılamıyor.",
     "Toplu durum değiştirme ve ZIP indirme yalnızca düğme olarak var. Havuzda adın gizlenmesi kurum kararı bekliyor."],
   ["Yönetici A.Ş. paneli", "121 firmalık kare ızgara: her kare bir Teknokent firması. Kurulum aşamaları (iskelet, davet, devralma) kurumun kendi iş akışı (K3).",
     "“4 KPI kartı + alan grafiği” yok; pano yönetimin beş sorusuna göre kuruldu. Talep ve arz farklı ölçekli çubukla değil, tabloyla gösteriliyor.",
-    "KVKK talepleri, taksonomi, e-posta şablonları ve işlem kayıtları menüde yer tutucu; ekranları geliştirmede çizilecek. Menüdeki sayı rozetleri işlevsel (bekleyen iş sayısı); süs değil, ama sayılar sıfırken gizlenmeli."],
+    "Taksonomi, e-posta şablonları, duyurular ve ayarlar menüde yer tutucu; KVKK talepleri, işlem kayıtları ve test posta kutusu eklendi. Menüdeki sayı rozetleri işlevsel (bekleyen iş sayısı); süs değil, ama sayılar sıfırken gizlenmeli."],
 ];
 
 ekran("denetim", {
@@ -59,7 +59,7 @@ ekran("denetim", {
 });
 
 grup("Başlangıç", ["giris"]);
-grup("Aday tarafı", ["ana-sayfa", "ilanlar", "ilan", "basvuru", "aday-panel", "aday-kaydedilen", "aday-profil", "aday-havuz", "firma-vitrin"]);
-grup("Firma paneli", ["firma-ana", "firma-ilanlar", "firma-ilan-yeni", "firma-basvurular", "firma-havuz", "firma-profil"]);
-grup("Yönetici A.Ş. paneli", ["yonetim-is", "yonetim-onay", "yonetim-kurulum", "yonetim-pano"]);
+grup("Aday tarafı", ["ana-sayfa", "ilanlar", "ilan", "ilan-kapandi", "giris-yap", "kayit", "basvuru-eksik", "basvuru", "aday-panel", "aday-kaydedilen", "aday-profil", "aday-havuz", "aday-hesap", "firma-vitrin"]);
+grup("Firma paneli", ["firma-ana", "firma-ilanlar", "firma-ilan-yeni", "firma-ilan-duzenle", "firma-basvurular", "firma-havuz", "firma-ekip", "firma-profil"]);
+grup("Yönetici A.Ş. paneli", ["yonetim-is", "yonetim-onay", "yonetim-kurulum", "yonetim-pano", "yonetim-kvkk", "yonetim-kayit", "yonetim-posta"]);
 grup("Tasarım belgeleri", ["referanslar", "tasarim-sistemi", "denetim"]);

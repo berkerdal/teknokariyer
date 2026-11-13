@@ -3,7 +3,7 @@
 **Durum:** Taslak 1 · kurum onayı bekliyor (13 Kasım 2026)
 
 - **Prototip:** https://claude.ai/artifact/67TJq45XmkYsvCAfpoitva
-- **İçerik:** Referans panosu, tasarım sistemi, denetim ve 19 ekran. Ekranlar mobil (390 px) ve masaüstü (1280 px) için ayrı düzenlendi.
+- **İçerik:** Referans panosu, tasarım sistemi, denetim ve 29 ekran. Ekranlar mobil (390 px) ve masaüstü (1280 px) için ayrı düzenlendi.
 
 ## Klasör
 
@@ -22,6 +22,7 @@
 | `ekran-firma.js` | Firma ekranları |
 | `ekran-yonetim.js` | Yönetim ekranları |
 | `ekran-belge.js` | Belge sayfaları (prototip hakkında, referanslar, tasarım sistemi) |
+| `ekran-ek.js` | Giriş, kayıt, kapanmış ilan, hesap ve gizlilik, ilan düzenleme, ekip, KVKK, işlem kayıtları, test posta kutusu |
 | `ekran-denetim.js` | Denetim sayfası ve menü grupları |
 | `logo` | `../../kimlik/logo` klasörüne bağlantı |
 

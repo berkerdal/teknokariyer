@@ -6,13 +6,13 @@ const IS_SAYISI = () => ONAY_KUYRUGU.length + 1 + 1 + 1 + BASVURUSUZ().length + 
 function yonetimDuzen(c, aktif, icerik) {
   const m = (id, ad, sayi) => `<a href="#${id}" data-git="${id}" ${aktif === id ? 'aria-current="page"' : ""}><span>${ad}</span>${sayi ? `<span class="y-sayi">${sayi}</span>` : ""}</a>`;
   const menu = [m("yonetim-is", "Bugün", IS_SAYISI()), m("yonetim-onay", "İlan onayı", ONAY_KUYRUGU.length), m("yonetim-kurulum", "Firma kurulumu", KURULUM.takip.length), m("yonetim-pano", "Pano")];
-  const diger = ["Firmalar", "Adaylar", "KVKK talepleri", "Taksonomi", "E-posta şablonları", "Duyurular", "Site metinleri", "İşlem kayıtları", "Ayarlar"];
+  const diger = [["Firmalar"], ["Adaylar"], ["KVKK talepleri", "yonetim-kvkk"], ["Taksonomi"], ["E-posta şablonları"], ["Test posta kutusu", "yonetim-posta"], ["Duyurular"], ["Site metinleri"], ["İşlem kayıtları", "yonetim-kayit"], ["Ayarlar"]];
   if (c === "mobil") {
     return `<header class="y-ust"><img class="ust-logo" src="logo/logo-kompakt-negatif.svg" alt="TeknoKariyer" width="140" height="24"><span class="y-rol">Yönetim</span><button class="ikon-dugme y-ikon" aria-label="Menü">${ikon("menu")}</button></header>
       <nav class="y-sekmeler" aria-label="Yönetim menüsü">${menu.join("")}</nav><main class="y-mobil">${icerik}</main>`;
   }
   return `<div class="y-masa"><nav class="y-yan" aria-label="Yönetim menüsü"><div class="y-logo"><img class="ust-logo" src="logo/logo-kompakt-negatif.svg" alt="TeknoKariyer" width="150" height="26"><span class="y-rol">Yönetici A.Ş.</span></div>
-    <div class="y-menu">${menu.join("")}</div><p class="y-menu-bas">Yönetim</p><div class="y-menu y-menu--ikincil">${diger.map((d) => `<a href="#"><span>${d}</span></a>`).join("")}</div>
+    <div class="y-menu">${menu.join("")}</div><p class="y-menu-bas">Yönetim</p><div class="y-menu y-menu--ikincil">${diger.map(([d, id]) => id ? m(id, d) : `<a href="#"><span>${d}</span></a>`).join("")}</div>
     <p class="y-kisi">Kurumsal İletişim · Yönetici</p></nav><main class="y-icerik">${icerik}</main></div>`;
 }
 
