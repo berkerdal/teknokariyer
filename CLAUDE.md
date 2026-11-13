@@ -183,7 +183,12 @@ Claude tarafından yapılacak.
   - **M2 iş kuralları:** `src/alan/` altında saf TypeScript. Birim testleri `tests/birim/`.
   - **M3 veri modeli:** 12 koleksiyon + ayarlar. Erişim kuralları `src/erisim/` altında.
     Kötüye kullanım denemeli entegrasyon testleri `tests/entegrasyon/` altında.
-  - **Sırada M4:** Kural uçları (ilanı yayına gönderme, onay, havuz araması ve profil açma, başvuru), ardından arayüz.
+  - **M4a kural servisleri:** `src/servisler/` (ilan işlemleri ve moderasyon, başvuru, CV havuzu). Arayüz yalnızca bu
+    servisleri çağırır; kural mantığı arayüzde tekrarlanmaz. Hatalar `IslemHatasi` ile Türkçe ve durum koduyla döner.
+    Uçtan uca senaryolar `tests/entegrasyon/servisler.test.ts` içinde (K4 onay, 60 gün sınırı, kiracı ayrımı, profil kopyası,
+    rıza kaydı, cinsiyetle arama reddi, profil açılış kaydı ve K5 sayısı, süresi dolan ilanın kapanması).
+  - **Gün sınırları Türkiye saatine göre** hesaplanır (`src/alan/tarih.ts`, UTC+3). Sunucu UTC'de çalışır.
+  - **Sırada M4b:** Arayüz (aday sayfaları, firma paneli, Yönetici A.Ş. paneli) prototip tasarımıyla, sunucu eylemleri üzerinden.
   - **İlk göç (migration) henüz oluşturulmadı:** Şema oturunca ve ilk dağıtımdan önce `pnpm payload migrate:create` ile oluşturulacak.
 
 **Öğrenilenler:**

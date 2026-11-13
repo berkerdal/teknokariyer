@@ -64,3 +64,12 @@ describe('kopyalama', () => {
     expect(k).toEqual({ durum: 'taslak', pozisyonAdi: 'iOS Geliştirici', zorunluBeceriler: ['Swift'] })
   })
 })
+
+import { trGunBasi, trGunFarki } from '@/alan/tarih'
+describe('Türkiye saati', () => {
+  it('UTC 22:30 Türkiye’de ertesi gündür', () => {
+    const an = new Date(Date.UTC(2026, 10, 13, 22, 30)) // TR: 14 Kasım 01:30
+    expect(trGunBasi(an).toISOString()).toBe('2026-11-13T21:00:00.000Z') // TR 14 Kasım 00:00
+    expect(trGunFarki(new Date(Date.UTC(2026, 10, 13, 20, 0)), an)).toBe(1)
+  })
+})
