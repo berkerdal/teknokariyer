@@ -35,6 +35,10 @@ olursa bu bölüm geçerlidir.
 | K11 | Yönetici A.Ş. kullanıcıları | Genel Müdür, Genel Müdür Yardımcısı, kurumsal iletişim ve teknokent süreç yöneticileri kullanacak. **Başlangıçta Yönetici A.Ş. kullanıcılarının hepsi tam yetkili "Yönetici" olur.** Sistem rol tabanlı kurulur; moderatör ve raporlayıcı rolleri hazır tutulur ama varsayılan olarak kullanılmaz. Kullanıcı tipleri ve yetkiler, paneller somutlaşınca kurumla birlikte netleştirilecek. |
 | K12 | Fotoğraflar | Teknokent fotoğrafları daha sonra verilecek; firma fotoğrafları yayına hazırlık aşamasında toplanacak. Tasarım ve geliştirme sırasında stok fotoğraf **kullanılmaz**. Fotoğraf alanları, fotoğraf olmadan da düzgün görünecek şekilde tasarlanır: firma logosu, tipografi, kare motifi. |
 | K13 | Yayın ve pilot | Önce kurum içi test yapılacak: personel test firmaları kurup test kullanıcılarıyla süreçleri deneyecek. Onaylanırsa uygun sunucu ve alan adında yayına alınacak, birkaç firma pilot olarak dahil edilecek (bkz. 0.5). |
+| K23 | Sayaç biçimi (K7'nin kesinleşmesi) | İlan sayfasında başvuru sayısı aralıkla gösterilir: “10’dan az başvuru”, “10–50 başvuru”, “50’den fazla başvuru”. Görüntülenme sayısı herkese açık sayfada gösterilmez. |
+| K24 | CV havuzunda görünürlük | Aday havuza katılırken açık rıza verir. Rıza metni, Teknokent firmalarının adını, iletişim bilgisini ve CV’sini ayrıca izin istemeden görebileceğini açıkça yazar. Arama sonuç listesinde ad ve iletişim bilgisi gizlidir (anonim özet). Firma bir profili açtığında ad, iletişim bilgisi ve CV görünür; adaya ayrıca sorulmaz. Her açılış kayda geçer; aday yalnızca sayıyı görür (K5). 7. bölümdeki “iletişim talebi” akışı bu kararla kaldırılır. |
+| K25 | Cinsiyet | Aday profilinde isteğe bağlı alan; “belirtmek istemiyorum” seçeneği vardır. Havuzdaki anonim özette ve profilde görünür. Cinsiyete göre arama, filtreleme ve sıralama yapılamaz; eşleştirmede kullanılmaz (İş Kanunu md. 5, eşit davranma ilkesi). |
+| K26 | Prototip ve teknoloji önerisi | Prototip (29 ekran), favicon ve `docs/teknoloji-onerisi.md` onaylandı (13 Kasım 2026). Geliştirmeye geçildi. |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 
@@ -486,6 +490,8 @@ Firma profili eksikse yayına girmez. En az şunlar gerekir: logo, kısa tanıt�
 **[?] Platform içi mesajlaşma Faz 2'de mi?**
 
 ## 7. CV havuzu
+
+> **Güncelleme (K24, K25):** İletişim talebi akışı kaldırıldı. Firma, rıza veren adayın profilini açtığında ad, iletişim bilgisi ve CV’yi görür; arama listesinde ad ve iletişim gizlidir. Cinsiyet isteğe bağlıdır, görünür ama filtrelenemez. Aşağıdaki maddelerden bunlarla çelişenler geçersizdir.
 
 **[K]**
 

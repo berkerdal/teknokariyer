@@ -1,6 +1,6 @@
 # TeknoKariyer — Teknoloji önerisi
 
-**Durum:** Öneri · kurum onayı bekliyor (13 Kasım 2026). Prototip onaylanmadan koda geçilmez.
+**Durum:** Onaylandı (K26, 13 Kasım 2026).
 
 Bu belge talimatların 17. bölümündeki öneriyi güncel sürümler ve limitlerle doğrular. Her sayının kaynağı belgenin sonunda.
 

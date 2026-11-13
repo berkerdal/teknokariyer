@@ -107,7 +107,8 @@ Claude tarafından yapılacak.
 - Tasarım: jenerik/"AI kokan" tasarım kesinlikle istenmiyor (talimatlar 15. bölüm). Mobil sıfırdan düşünülmeli.
 - Paneller: Aday, firma ve Yönetici A.Ş. panelleri ayrı amaçlara hizmet etmeli ve ayrı tasarlanmalı.
 - Filtre ve eşleştirme: ürünün kalbi. Taksonomiye dayalı olmalı ve sonucun nedenini açıklamalı.
-- KVKK: CV havuzu ayrı açık rızayla çalışır; firma, adayın iletişim bilgisini adayın onayıyla görür.
+- KVKK: CV havuzu ayrı açık rızayla çalışır. Rıza havuza katılırken alınır; firma profili açınca ad, iletişim ve CV görünür,
+  adaya ayrıca sorulmaz (K24). Arama listesinde ad ve iletişim gizlidir.
 
 **Alınan kararlar (13.11.2026):** Ayrıntısı `docs/talimatlar.md` 0. bölümde (K1–K13).
 
@@ -154,19 +155,28 @@ Claude tarafından yapılacak.
   - Favicon: ana logodaki "t" harfi ve kiremit kare. Uygulama ikonu: "tekno / KARİYER" yığını.
   - Ayrıntı: `docs/kimlik/README.md`.
 
+**Prototip sonrası kararlar (13.11.2026; `docs/talimatlar.md` 0. bölümde K23–K26):**
+
+- **K23 — Sayaç:** İlan sayfasında başvuru sayısı aralıkla gösterilir ("10–50 başvuru"); görüntülenme herkese açık sayfada yok.
+- **K24 — CV havuzu:** Aday havuza katılırken açık rıza verir; rıza metni, firmaların ad, iletişim ve CV'yi ayrıca izin
+  istemeden görebileceğini açıkça yazar. Arama listesi anonimdir (ad ve iletişim gizli). Firma profili açınca her şey görünür.
+  Her açılış kayda geçer; aday yalnızca sayıyı görür (K5). İletişim talebi akışı kaldırıldı.
+- **K25 — Cinsiyet:** İsteğe bağlı profil alanı ("belirtmek istemiyorum" seçeneğiyle). Havuzda görünür ama arama, filtre,
+  sıralama ve eşleştirmede kullanılmaz.
+- **K26 — Onay:** Prototip (29 ekran), favicon ve teknoloji önerisi onaylandı. Geliştirmeye geçildi.
+
 **İlerleme (13.11.2026):**
 
 - **Adım 2, alt marka kimliği: tamamlandı.** A · Küme onaylandı (K22).
   - Kılavuz: https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR
   - Ayrıntı: `docs/kimlik/README.md`
   - Claude B'yi önermişti; kurum A'yı seçti.
-- **Adım 3: Referans panosu, tasarım sistemi ve prototip.** Taslak 1 hazır ve onay bekliyor.
+- **Adım 3: Referans panosu, tasarım sistemi ve prototip: onaylandı (K26).**
   - Prototip: https://claude.ai/artifact/67TJq45XmkYsvCAfpoitva
   - Ayrıntı ve kurumun kararını bekleyen konular: `docs/tasarim/README.md`
-  - Teknoloji yığınına (adım 4) prototip onaylanmadan geçilmez.
   - Taslak 1'e denetimde eksik kalan 10 ekran eklendi (toplam 29 ekran): giriş/kayıt, profili eksik başvuru, kapanmış ilan,
     hesap ve gizlilik, ilan düzenleme ve sürüm geçmişi, firma ekibi, KVKK talepleri, işlem kayıtları, test posta kutusu.
-- **Adım 4 hazırlığı:** `docs/teknoloji-onerisi.md` yazıldı. Bu bir öneridir, karar değildir; onay bekliyor. Koda geçilmedi.
+- **Adım 4: Teknoloji yığını onaylandı (K26), geliştirme başladı.** Yığın: `docs/teknoloji-onerisi.md`.
 
 **Öğrenilenler:**
 
@@ -191,7 +201,11 @@ Claude tarafından yapılacak.
 - **Kontrast:** Camgöbeği beyaz üzerinde 2,9:1 verir; arayüz çizgisi ve odak halkası için de yetmez (3:1 altı).
   Odak halkası lacivert olacak.
 
-## 7. Teknoloji yığını — değerlendirme (karar değil)
+## 7. Teknoloji yığını
+
+**Karar (K26):** `docs/teknoloji-onerisi.md` onaylandı. Aşağıdaki ilk değerlendirme kayıt için duruyor.
+
+### İlk değerlendirme
 
 Kullanıcının bir arkadaşının önerdiği yığın:
 

@@ -1,6 +1,6 @@
 # TeknoKariyer tasarım
 
-**Durum:** Taslak 1 · kurum onayı bekliyor (13 Kasım 2026)
+**Durum:** Onaylandı (K26, 13 Kasım 2026). Sayaç (K23), CV havuzu (K24) ve cinsiyet (K25) kararları işlendi.
 
 - **Prototip:** https://claude.ai/artifact/67TJq45XmkYsvCAfpoitva
 - **İçerik:** Referans panosu, tasarım sistemi, denetim ve 29 ekran. Ekranlar mobil (390 px) ve masaüstü (1280 px) için ayrı düzenlendi.

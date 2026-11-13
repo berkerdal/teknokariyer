@@ -21,12 +21,11 @@ ekran("giris", {
           <li><strong>Örnek:</strong> ilanlar, kişiler, firma tanıtım metinleri ve tüm sayılar. Canlı sistemde sayılar veritabanından gelecek.</li>
           <li>Firma logoları henüz yok. Logo gelene kadar firmalar blok/oda kodlu bir karoyla görünüyor.</li></ul></section>
       </div>
-      <section class="karar-kutusu"><h2 class="b2">Sizden beklenen kararlar</h2><ol class="karar-liste">
-        <li><strong>Sayaç biçimi (K7).</strong> İlan sayfasında dört biçim var: aralık (“10–50 başvuru”), kesin sayı, görüntülenme + başvuru, hiç gösterme. <a href="#ilan-1">İlan detayında deneyin.</a> Önerim: aralık. Adayı yanıltmadan bilgi veriyor ve az başvurulu ilanı “kimse başvurmamış” diye damgalamıyor.</li>
-        <li><strong>CV havuzunda adın gizlenmesi.</strong> Talimatlarda firma önce “iletişim bilgisi ve CV olmadan” bir özet görüyor. Ben adın da aday onay verene kadar gizli kalmasını öneriyorum (“A-1042”). Bu, ayrımcılık riskini azaltır. <a href="#firma-havuz">Ekranı görün.</a></li>
-        <li><strong>İletişim talebinin süresi.</strong> Firmanın talebine aday 14 gün içinde cevap vermezse talep kapansın mı?</li>
-        <li><strong>Favicon.</strong> Ana logodaki “t” ve kiremit kare. Tarayıcı sekmesinde görmek için <a href="https://claude.ai/artifact/Nqt3PPkQZxjTZemDeYtjxR">kimlik kılavuzuna</a> bakabilirsiniz.</li>
-        <li><strong>Genel onay.</strong> Ekranlardaki yapı, akışlar ve görsel dil uygunsa teknoloji yığınını kesinleştirip geliştirmeye geçeceğim.</li></ol></section>
+      <section class="karar-kutusu"><h2 class="b2">Kurum kararları (13 Kasım 2026)</h2><ol class="karar-liste">
+        <li><strong>Sayaç (K23):</strong> başvuru sayısı aralıkla gösterilir (“10–50 başvuru”).</li>
+        <li><strong>CV havuzu (K24):</strong> rıza havuza katılırken alınır. Listede ad ve iletişim gizli; firma profili açınca ad, iletişim ve CV görünür, adaya ayrıca sorulmaz. İletişim talebi akışı kaldırıldı.</li>
+        <li><strong>Cinsiyet (K25):</strong> isteğe bağlı profil alanı; görünür, ama arama, filtre ve eşleştirmede kullanılmaz.</li>
+        <li><strong>Favicon ve genel onay (K26):</strong> onaylandı; geliştirmeye geçildi.</li></ol></section>
       <p class="kucuk ikincil">Kaynak: <code>docs/tasarim/prototip/</code>. Tasarım değişkenleri <code>tokenlar.css</code> dosyasında; uygulamaya aynı adlarla aktarılacak.</p>
     </div>` };
   },

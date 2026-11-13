@@ -114,7 +114,7 @@ const ILANLAR = [
 
 /* Giriş yapmış örnek aday (kurgusal kişi) */
 const ADAY = {
-  ad: "Elif Karaca", eposta: "elif.karaca@ornek.com",
+  ad: "Elif Karaca", eposta: "elif.karaca@ornek.com", cinsiyet: "Kadın",
   okul: "Pamukkale Üniversitesi", bolum: "Bilgisayar Mühendisliği", sinif: "4. sınıf", mezuniyet: "Haziran 2027",
   deneyim: "Öğrenci", tanitim: "Gömülü sistemlere ve Linux'a ilgi duyan, Denizli'de staj ve ilk iş arayan bir öğrenciyim.",
   beceriler: { "C": "Orta", "Python": "Orta", "Git": "İyi", "Linux": "Orta", "STM32": "Başlangıç", "RTOS": "Başlangıç", "React": "Başlangıç", "SQL": "Başlangıç" },
@@ -173,12 +173,12 @@ const BASVURANLAR = [
     cevaplar: [["Flutter ile yayında olan bir uygulamanızın bağlantısını paylaşır mısınız?", "Yok"], ["Haftada 2 gün ofiste çalışabilir misiniz?", "Evet"]], puan: 2 },
 ];
 
-/* CV havuzu (firma görür): ad ve iletişim aday onay verene kadar gizli */
+/* CV havuzu (K24): listede ad ve iletişim gizli; firma profili açınca görünür. Cinsiyet isteğe bağlı, filtrelenemez (K25). */
 const HAVUZ = [
-  { kod: "A-1042", ozet: "Bilgisayar Mühendisliği · Pamukkale Üniversitesi · 2025 mezunu", deneyim: "1 yıl", beceri: ["Flutter", "Dart", "Firebase", "Git"], tercih: "Hibrit · Denizli", baslama: "Hemen", gorunurluk: "Aktif iş arıyor", dil: "İngilizce B2" },
-  { kod: "A-0988", ozet: "Yazılım Mühendisliği · Ege Üniversitesi · 2023 mezunu", deneyim: "3 yıl", beceri: ["Flutter", "Kotlin", "REST API", "CI/CD"], tercih: "Uzaktan · İzmir, taşınmaya açık", baslama: "1 ay içinde", gorunurluk: "Fırsatlara açık", dil: "İngilizce C1" },
-  { kod: "A-1107", ozet: "Bilgisayar Programcılığı · PAÜ Denizli Teknik Bilimler MYO · 2024 mezunu", deneyim: "2 yıl", beceri: ["Flutter", "Dart", "SQLite"], tercih: "Ofiste · Denizli", baslama: "Hemen", gorunurluk: "Aktif iş arıyor", dil: "İngilizce A2" },
-  { kod: "A-0731", ozet: "Bilgisayar Mühendisliği · ODTÜ · 2021 mezunu", deneyim: "5 yıl", beceri: ["Flutter", "Swift", "Dart", "GraphQL"], tercih: "Hibrit · Denizli'ye dönmek istiyor", baslama: "2 ay içinde", gorunurluk: "Fırsatlara açık", dil: "İngilizce C1" },
+  { kod: "A-1042", ad: "Oğuzhan Polat", cinsiyet: "Erkek", eposta: "oguzhan.polat@ornek.com", ozet: "Bilgisayar Mühendisliği · Pamukkale Üniversitesi · 2025 mezunu", deneyim: "1 yıl", beceri: ["Flutter", "Dart", "Firebase", "Git"], tercih: "Hibrit · Denizli", baslama: "Hemen", gorunurluk: "Aktif iş arıyor", dil: "İngilizce B2" },
+  { kod: "A-0988", ad: "Selin Arıkan", cinsiyet: "Kadın", eposta: "selin.arikan@ornek.com", ozet: "Yazılım Mühendisliği · Ege Üniversitesi · 2023 mezunu", deneyim: "3 yıl", beceri: ["Flutter", "Kotlin", "REST API", "CI/CD"], tercih: "Uzaktan · İzmir, taşınmaya açık", baslama: "1 ay içinde", gorunurluk: "Fırsatlara açık", dil: "İngilizce C1" },
+  { kod: "A-1107", ad: "Emre Tunç", cinsiyet: "Belirtmek istemiyor", eposta: "emre.tunc@ornek.com", ozet: "Bilgisayar Programcılığı · PAÜ Denizli Teknik Bilimler MYO · 2024 mezunu", deneyim: "2 yıl", beceri: ["Flutter", "Dart", "SQLite"], tercih: "Ofiste · Denizli", baslama: "Hemen", gorunurluk: "Aktif iş arıyor", dil: "İngilizce A2" },
+  { kod: "A-0731", ad: "Deniz Akgül", cinsiyet: "Kadın", eposta: "deniz.akgul@ornek.com", ozet: "Bilgisayar Mühendisliği · ODTÜ · 2021 mezunu", deneyim: "5 yıl", beceri: ["Flutter", "Swift", "Dart", "GraphQL"], tercih: "Hibrit · Denizli'ye dönmek istiyor", baslama: "2 ay içinde", gorunurluk: "Fırsatlara açık", dil: "İngilizce C1" },
 ];
 
 /* Yönetim paneli */

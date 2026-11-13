@@ -210,9 +210,9 @@ function beceriListesi(i, notr = false) {
 /* ---------- İLAN DETAYI ---------- */
 ekran("ilan", {
   ad: "İlan detayı", alan: "aday",
-  aciklama: "Önce özet ve eşleşme, sonra açılır bölümler. “Başvur” her zaman görünür. Sayaç biçimi (K7) bu ekranda seçilecek.",
+  aciklama: "Önce özet ve eşleşme, sonra açılır bölümler. “Başvur” her zaman görünür. Başvuru sayısı aralıkla gösterilir (K23).",
   not: `<ul><li>Eşleşme bir yüzde değil, gerekçeli bir liste: “Zorunlu 4 becerinin 3’ü var · eksik: RTOS”. Liste ilan ve profilden hesaplanır.</li>
-    <li>Sayaç (K7) için dört biçim hazırladık. Kurumun seçimine göre biri kalacak. Hiçbiri “şu an 12 kişi bakıyor” gibi baskı kurmuyor; sayılar gerçek veriden gelir.</li>
+    <li>Başvuru sayısı aralıkla gösterilir: “10’dan az”, “10–50”, “50’den fazla” (K23). Az başvurulu ilan “kimse başvurmamış” diye damgalanmaz; baskı dili yok. Görüntülenme sayısı yalnızca firma panelinde.</li>
     <li>Kapanmış ilanın adresi 404 vermez: “Bu ilan kapandı” ve firmanın açık ilanları gösterilir (HTTP 410).</li>
     <li>Şikâyet bağlantısı sayfanın sonunda, sakin bir dille.</li></ul>`,
   ciz(param, c) {
@@ -224,15 +224,14 @@ ekran("ilan", {
       const aralik = b < 10 ? "10’dan az başvuru" : b <= 50 ? "10–50 başvuru" : "50’den fazla başvuru";
       return ({ aralik: aralik, kesin: `${b} başvuru`, ikisi: `${g} görüntülenme · ${b} başvuru`, yok: "" })[DURUM.sayacBicimi];
     };
-    const sayacSec = `<div class="prototip-secim" role="group" aria-label="Sayaç biçimi seçenekleri (kurum seçecek)"><p class="ust-etiket">Prototip seçeneği · Sayaç biçimi (K7)</p><div class="f-haplar">
-      ${[["aralik", "Aralık"], ["kesin", "Kesin sayı"], ["ikisi", "Görüntülenme + başvuru"], ["yok", "Gösterme"]].map(([k, a]) => `<button class="hap" data-eylem="sayac" data-k="${k}" aria-pressed="${DURUM.sayacBicimi === k}">${a}</button>`).join("")}</div></div>`;
+    const sayacSec = "";
     const ozet = `<dl class="ozet-dl">
       <div><dt>Son başvuru</dt><dd>${tarihYaz(i.son, true)} <span class="ikincil">(${kalanGun(i.son)} gün kaldı)</span></dd></div>
       <div><dt>Yayın tarihi</dt><dd>${tarihYaz(i.yayin, true)}</dd></div>
       <div><dt>Konum</dt><dd>Pamukkale Teknokent, ${kac(f.konum)}</dd></div>
       <div><dt>Pozisyon sayısı</dt><dd>${i.pozSayi}</dd></div>
       ${i.ucret ? `<div><dt>Ücret</dt><dd>${kac(i.ucret)}</dd></div>` : ""}
-      <div data-sayac-alan ${DURUM.sayacBicimi === "yok" ? "hidden" : ""}><dt>İlgi</dt><dd data-sayac>${sayac()}</dd></div></dl>`;
+      <div><dt>Başvuru</dt><dd>${sayac()}</dd></div></dl>`;
     const esl = `<div class="eslesme-kutu"><p class="ust-etiket">Senin profilinle</p>${eslesmeListe(e)}
       ${e.eksikZ.length ? `<p class="kucuk">Bu beceriler profilinde varsa ekle: <a href="#aday-profil" data-git="aday-profil">profili düzenle</a></p>` : ""}</div>`;
     const bolumler = `
@@ -263,8 +262,6 @@ ekran("ilan", {
     }
     return { html, eylemler: {
       kaydet: (el) => { kaydetEylemi(el); if (c !== "mobil") el.innerHTML = `${ikon("yer-imi")} ${DURUM.kaydedilen.has(i.id) ? "Kaydedildi" : "Kaydet"}`; },
-      sayac: (el) => { DURUM.sayacBicimi = el.dataset.k; document.querySelectorAll('[data-eylem="sayac"]').forEach((b) => b.setAttribute("aria-pressed", String(b === el)));
-        document.querySelector("[data-sayac]").textContent = sayac(); document.querySelector("[data-sayac-alan]").hidden = DURUM.sayacBicimi === "yok"; },
       kopyala: () => bildirim("Bağlantı kopyalandı"),
       sikayet: () => altPanel("İlanı bildir", `<div class="form-yigin"><p>Bildirimin Yönetici A.Ş.’ye gider; firmaya adın iletilmez.</p>
         <fieldset class="alan"><legend>Sorun ne?</legend>${["Sahte veya firmaya ait olmayan ilan", "Ayrımcı ifade (yaş, cinsiyet, medeni hâl…)", "Ücret veya ücretsiz deneme çalışması istiyor", "Başka bir sorun"].map((s, n) => `<label class="secenek"><input type="radio" name="sik" ${n === 0 ? "" : ""}> <span>${s}</span></label>`).join("")}</fieldset>
@@ -334,7 +331,7 @@ ekran("basvuru", {
           ${h.some(([x]) => x === "aydinlatma") ? `<p class="hata-metni">Başvurmak için aydınlatma metnini okuduğunu onayla.</p>` : ""}
           <label class="secenek"><input type="checkbox" data-degis="aydinlatma" ${b.aydinlatma ? "checked" : ""}> <span><a href="#">Başvuru aydınlatma metnini</a> okudum. Profilimin ve CV’min ${kac(FIRMALAR[i.firma].ad)} ile paylaşılacağını biliyorum.<span class="ipucu">Metin sürümü 1.0 · 1 Kasım 2026</span></span></label></div>
         <div class="havuz-kutu"><label class="secenek"><input type="checkbox" data-degis="havuz" ${b.havuz ? "checked" : ""}> <span><strong>Bilgilerimi CV havuzuna ekle</strong> <span class="istege-bagli">(isteğe bağlı)</span>
-          <span class="ipucu">Teknokent firmaları, ilan açmadan da profilinin iletişim bilgisi olmayan bir özetini görebilir. Sana ulaşmak isteyen firma önce izin ister. İznin 12 ay geçerli; istediğin zaman geri alabilirsin. <a href="#">Açık rıza metni</a></span></span></label></div>`;
+          <span class="ipucu">Teknokent firmaları ilan açmadan da seni bulabilir. Arama listesinde adın ve iletişim bilgin görünmez; bir firma profilini açtığında adın, iletişim bilgin ve CV’n ona görünür, sana ayrıca sorulmaz. Kaç firmanın açtığını görürsün. Rızan 12 ay geçerli; istediğin zaman geri alabilirsin. <a href="#">Açık rıza metni</a></span></span></label></div>`;
       ayak = `<button class="dugme dugme--ikincil" data-eylem="geri" data-a="2">Geri</button><button class="dugme dugme--genis" data-eylem="gonder">Başvurunu gönder</button>`;
     }
     if (param === "tamam") {
@@ -436,7 +433,7 @@ ekran("aday-profil", {
     const icerik = `<h1 class="b1">Profil ve CV’ler</h1>
       <section class="panel panel-ic eksik-panel"><h2 class="b3">Profilinde eksik olanlar</h2><ul class="eksikler">${ADAY.eksik.map(([a, h]) => `<li><span>${kac(a)}</span><a class="dugme dugme--sade dugme--kucuk" href="#${h}" data-git="${h}">Ekle</a></li>`).join("")}</ul></section>
       <section class="profil-bolum"><div class="bolum-bas"><h2 class="b3 kare-bas">Kimlik ve eğitim</h2><button class="dugme dugme--sade dugme--kucuk">Düzenle</button></div>
-        <dl class="ozet-dl"><div><dt>Ad soyad</dt><dd>${kac(ADAY.ad)}</dd></div><div><dt>Okul</dt><dd>${kac(ADAY.okul)}</dd></div><div><dt>Bölüm</dt><dd>${kac(ADAY.bolum)} · ${kac(ADAY.sinif)}</dd></div><div><dt>Mezuniyet</dt><dd>${kac(ADAY.mezuniyet)} (beklenen)</dd></div></dl></section>
+        <dl class="ozet-dl"><div><dt>Ad soyad</dt><dd>${kac(ADAY.ad)}</dd></div><div><dt>Okul</dt><dd>${kac(ADAY.okul)}</dd></div><div><dt>Bölüm</dt><dd>${kac(ADAY.bolum)} · ${kac(ADAY.sinif)}</dd></div><div><dt>Mezuniyet</dt><dd>${kac(ADAY.mezuniyet)} (beklenen)</dd></div><div><dt>Cinsiyet</dt><dd>${kac(ADAY.cinsiyet)} <span class="kucuk ikincil">· isteğe bağlı; aramada ve eşleştirmede kullanılmaz</span></dd></div></dl></section>
       <section class="profil-bolum"><div class="bolum-bas"><h2 class="b3 kare-bas">Beceriler</h2><button class="dugme dugme--sade dugme--kucuk">Düzenle</button></div>
         <ul class="beceri-seviye">${Object.entries(ADAY.beceriler).map(([b, s]) => `<li><span>${kac(b)}</span><span class="ikincil">${kac(s)}</span></li>`).join("")}</ul></section>
       <section class="profil-bolum"><div class="bolum-bas"><h2 class="b3 kare-bas">Diller</h2></div><p>İngilizce · B2 (CEFR)</p></section>
@@ -450,15 +447,15 @@ ekran("aday-profil", {
 
 ekran("aday-havuz", {
   ad: "Aday paneli: CV havuzu ayarları", alan: "aday",
-  aciklama: "Havuza katılım ayrı açık rızayla olur ve 12 ayda bir yenilenir. Aday görünürlüğünü ve kimden gizleneceğini seçer.",
+  aciklama: "Havuza katılım ayrı açık rızayla olur ve 12 ayda bir yenilenir. Rıza verilince firmalar profili ayrıca sormadan açabilir (K24).",
   not: `<ul><li>Görünürlük üç seçenekli: aktif iş arıyorum, fırsatlara açığım, gizle.</li>
     <li>“Mevcut işverenimden gizle”: Teknokent’te çalışan bir aday, kendi firmasının onu havuzda görmesini engeller.</li>
     <li>Rızanın bitiş tarihi açıkça yazar; yenilenmezse aday havuzdan otomatik çıkar.</li>
-    <li>Firma önce iletişim bilgisi ve CV olmadan bir özet görür; iletişim adayın onayıyla başlar.</li></ul>`,
+    <li>Firma arama listesinde ad ve iletişim bilgisi olmayan bir özet görür. Profili açınca ad, iletişim ve CV görünür; adaya ayrıca sorulmaz (K24). Bu yüzden rıza metni bunu açıkça söyler.</li></ul>`,
   ciz(_, c) {
     const icerik = `<h1 class="b1">CV havuzu</h1>
       <div class="ap-ust-bilgi"><div class="goruntulenme"><p class="ust-etiket">Son 30 gün</p><p><strong class="buyuk-sayi">4</strong> firma profilini görüntüledi.</p><p class="kucuk ikincil">Firma adlarını göstermiyoruz.</p></div>
-        <div class="gorev"><p class="ust-etiket">İletişim talepleri</p><p><strong>1</strong> firma seninle iletişime geçmek istiyor.</p><button class="dugme dugme--kucuk" data-eylem="talep">Talebi gör</button></div></div>
+        <div class="gorev"><p class="ust-etiket">Havuzda neler görünür?</p><p class="kucuk">Arama listesinde: bölüm, okul, deneyim, beceriler, tercihler${ADAY.cinsiyet ? ", cinsiyet" : ""}. Bir firma profilini açtığında: adın, iletişim bilgin ve CV’n.</p></div></div>
       <fieldset class="alan"><legend class="b3">Görünürlüğün</legend>
         ${[["Aktif iş arıyorum", "Profilin arama sonuçlarında öne çıkar."], ["Fırsatlara açığım", "Profilin görünür ama öne çıkmaz."], ["Gizle", "Hiçbir firma profilini havuzda görmez. Başvuruların etkilenmez."]].map(([a, i]) =>
           `<label class="secenek secenek-kutu"><input type="radio" name="g" ${a === ADAY.havuz.durum ? "checked" : ""}> <span><strong>${a}</strong><span class="ipucu">${i}</span></span></label>`).join("")}</fieldset>
@@ -468,12 +465,6 @@ ekran("aday-havuz", {
         <p>Havuz rızan <strong>${ADAY.havuz.rizaBitis}</strong> tarihine kadar geçerli. Süre dolmadan bir ay önce hatırlatacağız; yenilemezsen havuzdan otomatik çıkarsın.</p>
         <div class="dugme-grubu"><button class="dugme dugme--ikincil dugme--kucuk">Rızamı şimdi yenile</button><button class="dugme dugme--tehlike dugme--kucuk">Havuzdan çık</button></div></section>`;
     return { html: adayPanelDuzen(c, "aday-havuz", icerik), eylemler: {
-      talep: () => altPanel("İletişim talebi", `<div class="form-yigin"><p><strong>Bulutfon</strong> · D Blok 212</p><p class="ikincil kucuk">İlgili ilan: Backend Geliştirici (Go)</p>
-        <blockquote class="alinti">Merhaba, profilinizdeki Linux ve C deneyimi ilgimizi çekti. Yaz döneminde başlayacak bir staj için görüşmek isteriz.</blockquote>
-        <p class="kucuk">Kabul edersen adın, e-posta adresin ve seçtiğin CV yalnızca Bulutfon’a açılır.</p>
-        <fieldset class="alan"><legend>Hangi CV paylaşılsın?</legend>${ADAY.cvler.map((cv, n) => `<label class="secenek"><input type="radio" name="tcv" ${n === 0 ? "checked" : ""}> <span>${kac(cv.ad)}</span></label>`).join("")}</fieldset></div>`,
-        `<button class="dugme dugme--ikincil" data-eylem-genel="kapat">Reddet</button><button class="dugme dugme--genis" data-eylem="talep-kabul">Kabul et ve paylaş</button>`),
-      "talep-kabul": () => { katmanKapat(); bildirim("Bilgilerin Bulutfon ile paylaşıldı."); },
     } };
   },
 });

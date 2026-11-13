@@ -314,27 +314,27 @@ ekran("firma-basvurular", {
 /* ---------- CV HAVUZU ARAMASI ---------- */
 ekran("firma-havuz", {
   ad: "Firma paneli: CV havuzu", alan: "firma",
-  aciklama: "İlan açmadan aday arama. Firma önce ad ve iletişim bilgisi olmayan bir özet görür; iletişim adayın onayıyla başlar.",
+  aciklama: "İlan açmadan aday arama. Listede ad ve iletişim gizli; profili açınca ad, iletişim ve CV görünür. Aday rızasını havuza katılırken verdi (K24).",
   not: `<ul><li>Önerimiz: adın da aday onay verene kadar gizli kalması (“A-1042”). Talimatlarda yalnızca iletişim bilgisi ve CV gizli; adı da gizlemek ayrımcılık riskini azaltır. Kurumun onayına sunuyoruz.</li>
     <li>“Zorunlu becerilerin hepsi / herhangi biri” seçimi aramanın sertliğini belirler.</li>
     <li>Her profil görüntülemesi kayda geçer; aday yalnızca sayıyı görür (K5).</li>
     <li>Kayıtlı arama: yeni uyan adaylar için haftalık e-posta.</li></ul>`,
   ciz(_, c) {
     const kart = (a) => `<li class="havuz-kart panel"><div class="havuz-kart-bas"><p class="ust-etiket">${kac(a.kod)} · ${kac(a.gorunurluk)}</p><p><strong>${kac(a.ozet)}</strong></p></div>
-      <dl class="ozet-dl kucuk"><div><dt>Deneyim</dt><dd>${kac(a.deneyim)}</dd></div><div><dt>Beceriler</dt><dd>${a.beceri.map(kac).join(", ")}</dd></div><div><dt>Tercih</dt><dd>${kac(a.tercih)}</dd></div><div><dt>Başlama</dt><dd>${kac(a.baslama)}</dd></div><div><dt>Dil</dt><dd>${kac(a.dil)}</dd></div></dl>
-      <button class="dugme dugme--kucuk" data-eylem="talep" data-kod="${a.kod}">İletişim talebi gönder</button></li>`;
+      <dl class="ozet-dl kucuk"><div><dt>Deneyim</dt><dd>${kac(a.deneyim)}</dd></div><div><dt>Beceriler</dt><dd>${a.beceri.map(kac).join(", ")}</dd></div><div><dt>Tercih</dt><dd>${kac(a.tercih)}</dd></div><div><dt>Başlama</dt><dd>${kac(a.baslama)}</dd></div><div><dt>Dil</dt><dd>${kac(a.dil)}</dd></div><div><dt>Cinsiyet</dt><dd>${kac(a.cinsiyet)}</dd></div></dl>
+      <button class="dugme dugme--kucuk" data-eylem="ac" data-kod="${a.kod}">Profili aç</button></li>`;
     const filtre = `<div class="havuz-filtre"><div class="alan"><span class="alan-ad">Beceri</span><div class="beceri-giris"><span class="beceri-cip">Flutter<button aria-label="Flutter becerisini kaldır">${ikon("kapat", "ikon--k")}</button></span><span class="beceri-cip">Dart<button aria-label="Dart becerisini kaldır">${ikon("kapat", "ikon--k")}</button></span><input class="beceri-girdi" placeholder="Beceri ekle" aria-label="Beceri ekle"></div>
       <div class="yan-yana kucuk"><label class="secenek"><input type="radio" name="bh" checked> <span>Hepsi olsun</span></label><label class="secenek"><input type="radio" name="bh"> <span>Herhangi biri</span></label></div></div>
       <div class="iki-alan"><div class="alan"><label for="hv-d">Deneyim</label><select id="hv-d" class="secim"><option>Fark etmez</option><option>En az 1 yıl</option><option>En az 3 yıl</option></select></div><div class="alan"><label for="hv-s">Şehir</label><select id="hv-s" class="secim"><option>Denizli veya taşınmaya açık</option><option>Fark etmez</option></select></div></div></div>`;
     const icerik = `<div class="f-bas"><div><h1 class="b1">CV havuzu</h1><p class="ikincil">Havuzda açık rıza veren <strong>412 aday</strong> var. ${ornek()}</p></div><button class="dugme dugme--ikincil dugme--kucuk" data-eylem="kaydet">${ikon("zil", "ikon--k")} Aramayı kaydet</button></div>
-      ${filtre}<p class="kucuk"><strong>${HAVUZ.length} aday</strong> · ad ve iletişim bilgileri aday onay verince açılır</p><ul class="havuz-liste">${HAVUZ.map(kart).join("")}</ul>`;
+      ${filtre}<p class="kucuk"><strong>${HAVUZ.length} aday</strong> · ad ve iletişim bilgisi profil açılınca görünür; her açılış kayda geçer</p><ul class="havuz-liste">${HAVUZ.map(kart).join("")}</ul>`;
     return { html: firmaDuzen(c, "firma-havuz", icerik), eylemler: {
       kaydet: () => bildirim("Arama kaydedildi. Yeni uyan adayları her pazartesi e-postayla bildireceğiz."),
-      talep: (el) => altPanel(`İletişim talebi · ${el.dataset.kod}`, `<div class="form-yigin"><div class="alan"><label for="tl-ilan">İlgili ilan <span class="istege-bagli">(isteğe bağlı)</span></label><select id="tl-ilan" class="secim"><option>Flutter Geliştirici</option><option>İlan yok, genel tanışma</option></select></div>
-        <div class="alan"><label for="tl-m">Adaya mesajınız</label><span class="ipucu">Kısa ve somut yazın: neden bu aday, ne öneriyorsunuz.</span><textarea id="tl-m" class="metin-alani">Merhaba, Flutter deneyiminiz ilgimizi çekti. Hibrit çalışan mobil ekibimiz için tanışmak isteriz.</textarea></div>
-        <p class="bilgi kucuk">Aday kabul ederse adı, iletişim bilgileri ve seçtiği CV size açılır. 14 gün içinde cevap gelmezse talep kapanır.</p></div>`,
-        `<button class="dugme dugme--genis" data-eylem="talep-gitti">Talebi gönder</button>`),
-      "talep-gitti": () => { katmanKapat(); bildirim("Talep gönderildi. Aday kabul ettiğinde e-posta alacaksınız."); },
+      ac: (el) => { const a = HAVUZ.find((x) => x.kod === el.dataset.kod);
+        altPanel(`${a.ad} · ${a.kod}`, `<div class="form-yigin"><p class="bilgi kucuk">Bu görüntüleme kayda geçti. Aday kimin baktığını değil, yalnızca kaç firmanın baktığını görür.</p>
+          <dl class="ozet-dl"><div><dt>Ad soyad</dt><dd>${kac(a.ad)}</dd></div><div><dt>E-posta</dt><dd>${kac(a.eposta)}</dd></div><div><dt>Eğitim</dt><dd>${kac(a.ozet)}</dd></div><div><dt>Deneyim</dt><dd>${kac(a.deneyim)}</dd></div><div><dt>Beceriler</dt><dd>${a.beceri.map(kac).join(", ")}</dd></div><div><dt>Tercih</dt><dd>${kac(a.tercih)}</dd></div></dl>
+          <div class="dosya-satiri">${ikon("dosya")}<span class="ad">CV – Türkçe<span class="kucuk ikincil" style="display:block">İndirilen CV’ye firma adı ve tarih filigranı eklenir</span></span><button class="dugme dugme--sade dugme--kucuk">İndir</button></div></div>`,
+          `<button class="dugme dugme--ikincil" data-eylem-genel="kapat">Kapat</button><button class="dugme dugme--genis" data-eylem-genel="kapat">${ikon("mesaj", "ikon--k")} E-posta gönder</button>`); },
     } };
   },
 });
