@@ -40,6 +40,9 @@ olursa bu bölüm geçerlidir.
 | K25 | Cinsiyet | Aday profilinde isteğe bağlı alan; “belirtmek istemiyorum” seçeneği vardır. Havuzdaki anonim özette ve profilde görünür. Cinsiyete göre arama, filtreleme ve sıralama yapılamaz; eşleştirmede kullanılmaz (İş Kanunu md. 5, eşit davranma ilkesi). |
 | K26 | Prototip ve teknoloji önerisi | Prototip (29 ekran), favicon ve `docs/teknoloji-onerisi.md` onaylandı (13 Kasım 2026). Geliştirmeye geçildi. |
 | K27 | Hesap silme | Aday hesabını silince başvuruları firmada “aday hesabını sildi” olarak kalır; ad, iletişim bilgisi ve CV hemen silinir (14 Kasım 2026). |
+| K28 | Profil sayfası | LinkedIn/ResearchGate usulü: bilgiler okunur özet olarak görünür; her bölümün “Düzenle” düğmesi açılır pencerede düzenleme açar (mobilde düzgün). Kaydedince pencere kapanır, özet güncel bilgiyle dolu görünür. Yeni adaya LinkedIn'deki gibi yol gösteren bir profil sihirbazı sunulur (14 Kasım 2026). |
+| K29 | Metin dili | Her alan ve mesaj profesyonel Türkçeyle yazılır: tam cümle, yüklemli, devriksiz. Örnek: “15 ilan, 13 firmadan.” değil “Şu anda 13 firmanın 15 ilanı yayında.” (14 Kasım 2026). |
+| K30 | Panellerde açıklama | Yönetici A.Ş. ve firma panellerinde her modülün ve alanın ne olduğu bir bilgi kutusuyla anlatılır; paneller kendini açıklar (14 Kasım 2026). |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 

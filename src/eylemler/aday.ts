@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation'
 import type { FormDurumu } from '@/arayuz/form'
 import { CEFR, DENEYIM_SIRASI } from '@/alan/eslesme'
 import { SINIFLAR } from '@/alan/basvuru'
+import { profilFormunuOku } from '@/alan/profilFormu'
 import { adayMi } from '@/erisim'
 import { basvur, geriCek } from '@/servisler/basvuru'
 import { FormHatasi } from '@/servisler/hesap'
@@ -136,7 +137,7 @@ export async function cvYukleEylemi(_: FormDurumu, f: FormData): Promise<FormDur
     if (!(dosya instanceof File) || !dosya.size) throw new FormHatasi({ cvDosya: 'Bir PDF dosyası seç.' })
     await cvYukle(await payloadAl(), k, { ad: metin(f, 'cvAd'), dosya: { veri: new Uint8Array(await dosya.arrayBuffer()), boyut: dosya.size } })
     revalidatePath('/hesabim/profil')
-    return { tamam: 'CV yüklendi.' }
+    return { tamam: 'CV’n yüklendi.', surum: Date.now() }
   } catch (e) {
     return hataDurumu(e)
   }
@@ -148,65 +149,18 @@ export async function cvSilEylemi(f: FormData) {
   revalidatePath('/hesabim/profil')
 }
 
-/** Profil formu: bölüm bölüm kaydedilir (formdaki `bolumAdi` hangi alanların gönderildiğini söyler). */
+/**
+ * Profil formu (K28): formdaki `profilBolumu` alanları hangi bölümlerin kaydedileceğini söyler; diğer bölümlere dokunulmaz.
+ * Kurallar `src/alan/profilFormu.ts` içinde (birim testli). Başarılı kayıtta `surum` döner: pencere kendini kapatır.
+ */
 export async function profilKaydetEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
   try {
     const k = await aday()
-    const payload = await payloadAl()
-    const bolum = metin(f, 'bolumAdi')
-    const g: ProfilGuncellemesi = {}
-    const hatalar: Record<string, string> = {}
-    if (bolum === 'kimlik') {
-      const tel = metin(f, 'telefon')
-      if (tel && !/^[+\d][\d\s()-]{6,19}$/.test(tel)) hatalar.telefon = 'Telefonu 0 5xx xxx xx xx biçiminde yaz.'
-      g.telefon = tel || null
-      const c = metin(f, 'cinsiyet')
-      g.cinsiyet = (['kadin', 'erkek', 'belirtmek-istemiyor'].includes(c) ? c : null) as never
-      const t = metin(f, 'tanitim')
-      if (t.length > 500) hatalar.tanitim = 'Kısa tanıtım en fazla 500 karakter olabilir.'
-      g.tanitim = t || null
-    }
-    if (bolum === 'egitim') {
-      g.okul = Number(metin(f, 'okul')) || null
-      g.bolum = Number(metin(f, 'bolum')) || null
-      const s = metin(f, 'sinif')
-      g.sinif = (SINIFLAR as readonly string[]).includes(s) ? s : null
-      const ay = Number(metin(f, 'mezuniyetAy')), yil = Number(metin(f, 'mezuniyetYil'))
-      g.mezuniyet = ay && yil ? new Date(Date.UTC(yil, ay - 1, 15, 9)).toISOString() : null
-      const gano = metin(f, 'gano').replace(',', '.')
-      if (gano && !(Number(gano) >= 0 && Number(gano) <= 4)) hatalar.gano = 'GANO 0 ile 4 arasında olmalı (ör. 3,12).'
-      g.gano = gano ? Number(gano) : null
-      const d = metin(f, 'deneyim')
-      g.deneyimSeviyesi = ((DENEYIM_SIRASI as readonly string[]).includes(d) ? d : null) as never
-    }
-    if (bolum === 'beceriler') {
-      g.beceriler = f
-        .getAll('beceri')
-        .map((x) => String(x).split(':'))
-        .filter(([id, sev]) => Number(id) && ['baslangic', 'orta', 'iyi', 'uzman'].includes(sev!))
-        .slice(0, 30)
-        .map(([id, sev]) => ({ beceri: Number(id), seviye: sev as never }))
-      g.diller = f
-        .getAll('dil')
-        .map((x) => String(x).split(':'))
-        .filter(([id, sev]) => Number(id) && (CEFR as readonly string[]).includes(sev!))
-        .slice(0, 10)
-        .map(([id, sev]) => ({ dil: Number(id), seviye: sev as never }))
-    }
-    if (bolum === 'tercihler') {
-      g.tercihler = {
-        turler: f.getAll('tur').map(String).filter((x) => ['is', 'staj'].includes(x)) as never,
-        modeller: f.getAll('model').map(String).filter((x) => ['ofiste', 'hibrit', 'uzaktan'].includes(x)) as never,
-        sehir: metin(f, 'sehir').slice(0, 60) || null,
-        tasinmayaAcik: Boolean(f.get('tasinmayaAcik')),
-        baslama: metin(f, 'baslama').slice(0, 60) || null,
-        ucretBeklentisi: Number(metin(f, 'ucretBeklentisi').replace(/\D/g, '')) || null,
-      }
-    }
+    const { guncelleme, hatalar } = profilFormunuOku(f)
     if (Object.keys(hatalar).length) throw new FormHatasi(hatalar)
-    await profilGuncelle(payload, k, g)
-    revalidatePath('/hesabim/profil')
-    return { tamam: 'Kaydedildi.' }
+    await profilGuncelle(await payloadAl(), k, guncelleme as ProfilGuncellemesi)
+    revalidatePath('/hesabim', 'layout')
+    return { tamam: metin(f, 'tamamMetni') || 'Bilgilerin kaydedildi.', surum: Date.now() }
   } catch (e) {
     return hataDurumu(e)
   }

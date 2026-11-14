@@ -79,7 +79,7 @@ export async function cvSil(payload: Payload, kullanici: Kullanici, dosyaId: num
 }
 
 /** Profil alanlarını günceller. Yalnızca izin verilen alanlar yazılır; kimlik ve havuz alanları buradan değişmez. */
-export const PROFIL_ALANLARI = ['telefon', 'cinsiyet', 'tanitim', 'okul', 'bolum', 'sinif', 'mezuniyet', 'gano', 'deneyimSeviyesi', 'beceriler', 'diller', 'tercihler', 'baglantilar', 'askerlik'] as const
+export const PROFIL_ALANLARI = ['telefon', 'cinsiyet', 'tanitim', 'okul', 'bolum', 'sinif', 'mezuniyet', 'gano', 'deneyimSeviyesi', 'deneyimler', 'beceriler', 'diller', 'tercihler', 'sertifikalar', 'baglantilar', 'askerlik'] as const
 export type ProfilGuncellemesi = Partial<Pick<Adaylar, (typeof PROFIL_ALANLARI)[number]>>
 
 export async function profilGuncelle(payload: Payload, kullanici: Kullanici, veri: ProfilGuncellemesi): Promise<Adaylar> {

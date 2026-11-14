@@ -167,6 +167,15 @@ Claude tarafından yapılacak.
 - **K27 — Hesap silme (14.11.2026):** Aday hesabını silince başvuruları firmada “aday hesabını sildi” olarak kalır;
   ad, iletişim bilgisi ve CV hemen silinir. Hukuk birimine de danışılması önerildi.
 
+**Kullanıcının ilk test geri bildirimi (14.11.2026; talimatlar K28–K30):**
+
+- **K28 — Profil:** Okunur özet + bölüm bazında “Düzenle” → açılır pencere (mobilde tam boy alt panel). Kaydedince kapanır,
+  özet güncel bilgiyle görünür. Yeni aday için LinkedIn usulü profil sihirbazı.
+  Bildirilen hata: kaydettikten sonra alanlar varsayılana veya başka değere dönüyordu (React form sıfırlaması).
+- **K29 — Metin dili:** Tam cümle, yüklemli, devriksiz profesyonel Türkçe. Kılavuz: `docs/tasarim/metin-kilavuzu.md`.
+- **K30 — Panellerde açıklama:** Yönetici A.Ş. ve firma panellerinde her modül ve alan için bilgi kutusu. Kullanıcının
+  ifadesi: “Kullanım kabus olursa kendilerini kaybederler, kullanmak istemezler.”
+
 **İlerleme (13.11.2026):**
 
 - **Adım 2, alt marka kimliği: tamamlandı.** A · Küme onaylandı (K22).

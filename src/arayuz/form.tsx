@@ -11,6 +11,8 @@ export interface FormDurumu {
   hatalar?: Record<string, string>
   genel?: string
   tamam?: string
+  /** Her başarılı kayıtta değişir; pencereler kaydın bittiğini buradan anlar. */
+  surum?: number
   /** Hata sonrası formu yeniden doldurmak için (şifreler hiçbir zaman geri gönderilmez). */
   degerler?: Record<string, string>
 }

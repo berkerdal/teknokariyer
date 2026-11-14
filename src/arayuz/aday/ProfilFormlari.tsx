@@ -9,51 +9,13 @@ import { CEFR } from '@/alan/eslesme'
 import { Ikon } from '../Ikon'
 import { DosyaSecici, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 
-export function ProfilBolumu(props: { ad: string; baslik: string; children: React.ReactNode }) {
-  const [durum, eylem] = useActionState<FormDurumu, FormData>(profilKaydetEylemi, {})
-  const [kirli, setKirli] = useState(false)
-  useEffect(() => {
-    if (!kirli) return
-    const uyar = (e: BeforeUnloadEvent) => e.preventDefault()
-    window.addEventListener('beforeunload', uyar)
-    return () => window.removeEventListener('beforeunload', uyar)
-  }, [kirli])
-  return (
-    <section className="profil-bolum" aria-labelledby={`b-${props.ad}`} id={props.ad}>
-      <h2 className="b3 kare-bas" id={`b-${props.ad}`}>
-        {props.baslik}
-      </h2>
-      <form
-        action={async (f) => {
-          await eylem(f)
-          setKirli(false)
-        }}
-        onChange={() => setKirli(true)}
-        className="form-yigin panel panel-ic"
-        noValidate
-      >
-        <input type="hidden" name="bolumAdi" value={props.ad} />
-        <HataOzeti durum={durum} />
-        {props.children}
-        <div className="dugme-grubu">
-          <GonderDugmesi className="dugme" bekleme="Kaydediliyor…">
-            Kaydet
-          </GonderDugmesi>
-          <span role="status" className="kucuk">
-            {kirli ? <span className="ikincil">Kaydedilmemiş değişiklik var</span> : durum.tamam && !durum.hatalar && !durum.genel ? 'Kaydedildi.' : ''}
-          </span>
-        </div>
-      </form>
-    </section>
-  )
-}
-
 type Satir = { ad: string; seviye: string }
 
 /** Beceri veya dil listesi: taksonomiden seçilir (ilan ile aynı liste, eşleşme doğru çalışsın diye). */
 export function ListeDuzenleyici(props: {
   ad: 'beceri' | 'dil'
   etiket: string
+  ipucu?: string
   secenekler: Array<{ id: number; ad: string }>
   seviyeler: Array<[string, string]>
   baslangic: Satir[]
@@ -66,8 +28,8 @@ export function ListeDuzenleyici(props: {
   const listeId = `${props.ad}-liste`
   const ekle = () => {
     const s = idBul(yeni)
-    if (!s) return setHata(`“${yeni}” listede yok. Listeden bir seçenek seç; listede olmayanı Yönetici A.Ş. ekler.`)
-    if (satirlar.some((x) => x.ad === s.ad)) return setHata(`${s.ad} zaten listende.`)
+    if (!s) return setHata(`“${yeni}” listede yok. Lütfen listeden bir seçenek seç; listede olmayan seçenekleri Yönetici A.Ş. ekler.`)
+    if (satirlar.some((x) => x.ad === s.ad)) return setHata(`${s.ad} zaten listende bulunuyor.`)
     setSatirlar([...satirlar, { ad: s.ad, seviye: props.seviyeler[1]?.[0] ?? props.seviyeler[0]![0] }])
     setYeni('')
     setHata('')
@@ -75,6 +37,8 @@ export function ListeDuzenleyici(props: {
   return (
     <fieldset className="alan">
       <legend>{props.etiket}</legend>
+      {props.ipucu && <span className="ipucu">{props.ipucu}</span>}
+      {satirlar.length === 0 && <p className="ikincil">{props.ad === 'beceri' ? 'Henüz beceri eklemedin.' : 'Henüz dil eklemedin.'}</p>}
       <ul className="beceri-duzen">
         {satirlar.map((s, n) => {
           const id = idBul(s.ad)?.id

@@ -1,160 +1,245 @@
 import type { Metadata } from 'next'
-import { DENEYIM_ADI, DENEYIM_SIRASI } from '@/alan/eslesme'
-import { SINIFLAR } from '@/alan/basvuru'
-import { CINSIYET_ADI } from '@/alan/havuz'
+import Link from 'next/link'
+import type { Adaylar } from '@/payload-types'
+import { DENEYIM_ADI, MODEL_ADI, type CalismaModeli, type Deneyim } from '@/alan/eslesme'
+import { CINSIYET_ADI, type Cinsiyet } from '@/alan/havuz'
 import { Ikon } from '@/arayuz/Ikon'
-import { CEFR_SEVIYELERI, CvSilDugmesi, CvYukleFormu, ListeDuzenleyici, ProfilBolumu } from '@/arayuz/aday/ProfilFormlari'
+import { DuzenlemePenceresi } from '@/arayuz/aday/DuzenlemePenceresi'
+import {
+  AYLAR,
+  BaglantiAlanlari,
+  BeceriAlanlari,
+  DeneyimAlanlari,
+  DilAlanlari,
+  EgitimAlanlari,
+  HakkindaAlanlari,
+  KimlikAlanlari,
+  SEVIYE_ADI,
+  SertifikaAlanlari,
+  TercihAlanlari,
+} from '@/arayuz/aday/ProfilAlanlari'
+import { CvSilDugmesi, CvYukleFormu } from '@/arayuz/aday/ProfilFormlari'
 import { tarihYaz } from '@/arayuz/bicim'
 import { EN_FAZLA_CV, kendiAdayKaydi } from '@/servisler/profil'
 import { cvOzetleri, taksonomiSecenekleri } from '@/veri/basvuru'
-import { payloadAl } from '@/veri/payload'
 import { adayOturumu } from '@/veri/aday'
+import { payloadAl } from '@/veri/payload'
+import { profilEksikleri } from '@/veri/profil'
 
 export const metadata: Metadata = { title: 'Profil ve CV’ler', robots: { index: false } }
 
-const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
-const SEVIYE: Array<[string, string]> = [['baslangic', 'Başlangıç'], ['orta', 'Orta'], ['iyi', 'İyi'], ['uzman', 'Uzman']]
 const ad = (x: unknown) => (x && typeof x === 'object' ? ((x as { ad?: string }).ad ?? '') : '')
-const id = (x: unknown) => (x && typeof x === 'object' ? (x as { id: number }).id : (x as number | null))
+const ayYilYaz = (iso?: string | null) => (iso ? `${AYLAR[new Date(iso).getUTCMonth()]} ${new Date(iso).getUTCFullYear()}` : '')
 
-/** Profil bir kez doldurulur, her başvuruda kullanılır. Tamamlanma göstergesi puan değil, eksikler listesi. */
+/** Bölüm kartı: başlık, sağda düzenleme düğmesi, altında okunur özet. */
+function Kart(props: { id: string; baslik: string; eylem: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="profil-kart" id={props.id} aria-labelledby={`${props.id}-b`}>
+      <div className="profil-kart-bas">
+        <h2 className="b3" id={`${props.id}-b`}>
+          {props.baslik}
+        </h2>
+        {props.eylem}
+      </div>
+      <div className="profil-kart-govde">{props.children}</div>
+    </section>
+  )
+}
+const Bos = ({ children }: { children: React.ReactNode }) => <p className="ikincil">{children}</p>
+
+/**
+ * Profil (K28): LinkedIn usulü okunur özet. Her bölüm “Düzenle” ile açılır pencerede düzenlenir;
+ * kaydedince pencere kapanır ve özet yeni bilgilerle görünür. Eksikler sihirbaza yönlendirir.
+ */
 export default async function ProfilSayfasi() {
-  const k = await adayOturumu()
-  const a = await kendiAdayKaydi(await payloadAl(), k)
+  const k = await adayOturumu('/hesabim/profil')
+  const a: Adaylar = await kendiAdayKaydi(await payloadAl(), k)
   const [okullar, bolumler, beceriler, diller] = await Promise.all(['universite', 'bolum', 'beceri', 'dil'].map((t) => taksonomiSecenekleri(t as never)))
   const cvler = cvOzetleri(a)
-  const mez = a.mezuniyet ? new Date(a.mezuniyet) : null
-
-  const eksikler: Array<[string, string]> = [
-    ...(!a.okul || !a.bolum ? [['Okul ve bölüm', '#egitim'] as [string, string]] : []),
-    ...(!a.deneyimSeviyesi ? [['Deneyim düzeyi', '#egitim'] as [string, string]] : []),
-    ...(!(a.beceriler ?? []).length ? [['Beceriler', '#beceriler'] as [string, string]] : []),
-    ...(!(a.diller ?? []).length ? [['Diller', '#beceriler'] as [string, string]] : []),
-    ...(!cvler.length ? [['CV', '#cvler'] as [string, string]] : []),
-    ...(!(a.tercihler?.modeller ?? []).length ? [['Çalışma tercihleri', '#tercihler'] as [string, string]] : []),
-  ]
+  const eksikler = profilEksikleri(a, cvler.length)
+  const t = a.tercihler
+  const egitimSatiri = [ad(a.bolum), a.sinif].filter(Boolean).join(' · ')
 
   return (
     <>
-      <h1 className="b1">Profil ve CV’ler</h1>
+      <header className="profil-ust">
+        <p className="ust-etiket">Profilin</p>
+        <h1 className="b1">{k.ad}</h1>
+        <p className="profil-ust-alt">
+          {egitimSatiri || ad(a.okul) ? (
+            <>
+              {egitimSatiri}
+              {egitimSatiri && ad(a.okul) ? ', ' : ''}
+              {ad(a.okul)}
+            </>
+          ) : (
+            <span className="ikincil">Okul ve bölüm bilgisi henüz eklenmedi.</span>
+          )}
+        </p>
+        <p className="kucuk ikincil">
+          {[a.deneyimSeviyesi ? DENEYIM_ADI[a.deneyimSeviyesi as Deneyim] : null, t?.sehir].filter(Boolean).join(' · ')}
+        </p>
+        <p className="kucuk ikincil">Firmalar başvurularında bu profilin başvuru anındaki kopyasını görür.</p>
+      </header>
+
       {eksikler.length > 0 ? (
-        <section className="panel panel-ic eksik-panel">
-          <h2 className="b3">Profilinde eksik olanlar</h2>
+        <section className="panel panel-ic eksik-panel" aria-labelledby="eksik-b">
+          <h2 className="b3" id="eksik-b">
+            Profilini tamamla
+          </h2>
+          <p className="ikincil">Profilin ne kadar eksiksiz olursa ilanlarla eşleşmen o kadar doğru hesaplanır. Aşağıdaki bilgiler henüz eklenmedi.</p>
           <ul className="eksikler">
-            {eksikler.map(([e, h]) => (
-              <li key={e}>
-                <span>{e}</span>
-                <a className="dugme dugme--sade dugme--kucuk" href={h}>
+            {eksikler.map((e) => (
+              <li key={e.ad}>
+                <span>{e.ad}</span>
+                <Link className="dugme dugme--sade dugme--kucuk" href={`/hesabim/profil/sihirbaz?adim=${e.adim}`}>
                   Ekle
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
+          <p>
+            <Link className="dugme" href={`/hesabim/profil/sihirbaz?adim=${eksikler[0]!.adim}`}>
+              Adım adım tamamla
+            </Link>
+          </p>
         </section>
       ) : (
-        <p className="basari-kutu">Profilin tamam. Başvurularında otomatik kullanılır.</p>
+        <p className="basari-kutu">Profilin eksiksiz. Başvurularında otomatik olarak kullanılır.</p>
       )}
 
-      <ProfilBolumu ad="kimlik" baslik="Kimlik ve iletişim">
-        <dl className="ozet-dl">
-          <div>
-            <dt>Ad soyad</dt>
-            <dd>{k.ad}</dd>
+      <Kart
+        id="hakkinda"
+        baslik="Hakkında"
+        eylem={
+          <DuzenlemePenceresi baslik="Hakkında" bolumler={['hakkinda']} dugme={a.tanitim ? 'Düzenle' : 'Ekle'} tamamMetni="Tanıtım yazın kaydedildi.">
+            <HakkindaAlanlari aday={a} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {a.tanitim ? <p className="profil-metin">{a.tanitim}</p> : <Bos>Henüz kendini tanıtan bir yazı eklemedin.</Bos>}
+      </Kart>
+
+      <Kart
+        id="egitim"
+        baslik="Eğitim"
+        eylem={
+          <DuzenlemePenceresi
+            baslik="Eğitim bilgileri"
+            bolumler={['egitim']}
+            dugme={a.okul ? 'Düzenle' : 'Ekle'}
+            tamamMetni="Eğitim bilgilerin kaydedildi."
+            alanlar={{ mezuniyetAy: 'mezuniyetAy' }}
+          >
+            <EgitimAlanlari aday={a} okullar={okullar} bolumler={bolumler} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {a.okul || a.bolum ? (
+          <div className="profil-oge">
+            <p className="profil-oge-bas">{ad(a.okul) || 'Okul seçilmedi'}</p>
+            <p>{[ad(a.bolum), a.sinif].filter(Boolean).join(' · ')}</p>
+            <p className="kucuk ikincil">
+              {[a.mezuniyet ? `Mezuniyet: ${ayYilYaz(a.mezuniyet)}` : null, a.gano != null ? `GANO: ${String(a.gano).replace('.', ',')}` : null].filter(Boolean).join(' · ')}
+            </p>
           </div>
-          <div>
-            <dt>E-posta</dt>
-            <dd>{k.email}</dd>
-          </div>
-        </dl>
-        <div className="alan">
-          <label htmlFor="telefon">
-            Telefon <span className="istege-bagli">(isteğe bağlı)</span>
-          </label>
-          <input id="telefon" name="telefon" className="girdi" type="tel" inputMode="tel" autoComplete="tel" defaultValue={a.telefon ?? ''} />
-        </div>
-        <fieldset className="alan">
-          <legend>
-            Cinsiyet <span className="istege-bagli">(isteğe bağlı)</span>
-          </legend>
-          <span className="ipucu">CV havuzunda görünür; arama, filtre, sıralama ve eşleştirmede kullanılmaz.</span>
-          <div className="yan-yana">
-            {Object.entries(CINSIYET_ADI).map(([d, e]) => (
-              <label key={d} className="secenek secenek-kutu">
-                <input type="radio" name="cinsiyet" value={d} defaultChecked={a.cinsiyet === d} /> <span>{e}</span>
-              </label>
+        ) : (
+          <Bos>Henüz eğitim bilgisi eklemedin.</Bos>
+        )}
+      </Kart>
+
+      <Kart
+        id="deneyim"
+        baslik="Deneyim"
+        eylem={
+          <DuzenlemePenceresi
+            baslik="Deneyim"
+            aciklama="Deneyim düzeyini seç ve varsa iş ya da staj deneyimlerini ekle."
+            bolumler={['deneyim', 'deneyimler']}
+            dugme={a.deneyimSeviyesi || a.deneyimler?.length ? 'Düzenle' : 'Ekle'}
+            tamamMetni="Deneyim bilgilerin kaydedildi."
+          >
+            <DeneyimAlanlari aday={a} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {a.deneyimSeviyesi && <p>Deneyim düzeyi: {DENEYIM_ADI[a.deneyimSeviyesi as Deneyim]}</p>}
+        {(a.deneyimler ?? []).length ? (
+          <ul className="profil-liste">
+            {(a.deneyimler ?? []).map((d, n) => (
+              <li key={n} className="profil-oge">
+                <p className="profil-oge-bas">{d.pozisyon}</p>
+                <p>{d.kurum}</p>
+                {d.baslangic && (
+                  <p className="kucuk ikincil">
+                    {ayYilYaz(d.baslangic)} – {d.bitis ? ayYilYaz(d.bitis) : 'Devam ediyor'}
+                  </p>
+                )}
+                {d.aciklama && <p className="profil-metin kucuk">{d.aciklama}</p>}
+              </li>
             ))}
-          </div>
-        </fieldset>
-        <div className="alan">
-          <label htmlFor="tanitim">
-            Kısa tanıtım <span className="istege-bagli">(isteğe bağlı)</span>
-          </label>
-          <span className="ipucu">En fazla 500 karakter. Ne aradığını ve neyle ilgilendiğini birkaç cümleyle yaz.</span>
-          <textarea id="tanitim" name="tanitim" className="metin-alani" maxLength={500} defaultValue={a.tanitim ?? ''} />
-        </div>
-      </ProfilBolumu>
+          </ul>
+        ) : (
+          <Bos>Henüz iş veya staj deneyimi eklemedin.</Bos>
+        )}
+      </Kart>
 
-      <ProfilBolumu ad="egitim" baslik="Eğitim ve deneyim">
-        <div className="iki-alan">
-          <Secim id="okul" etiket="Okul" secenekler={okullar} deger={id(a.okul)} />
-          <Secim id="bolum" etiket="Bölüm" secenekler={bolumler} deger={id(a.bolum)} />
-        </div>
-        <div className="iki-alan">
-          <Secim id="sinif" etiket="Sınıf" secenekler={SINIFLAR.map((s) => ({ id: s, ad: s }))} deger={a.sinif} />
-          <div className="alan">
-            <label htmlFor="gano">
-              GANO <span className="istege-bagli">(isteğe bağlı)</span>
-            </label>
-            <input id="gano" name="gano" className="girdi" inputMode="decimal" defaultValue={a.gano != null ? String(a.gano).replace('.', ',') : ''} placeholder="Ör. 3,12" />
-          </div>
-        </div>
-        <fieldset className="alan">
-          <legend>Mezuniyet tarihi (beklenen de olur)</legend>
-          <div className="iki-alan">
-            <Secim id="mezuniyetAy" etiket="Ay" secenekler={AYLAR.map((x, n) => ({ id: n + 1, ad: x }))} deger={mez ? mez.getUTCMonth() + 1 : null} />
-            <Secim id="mezuniyetYil" etiket="Yıl" secenekler={Array.from({ length: 30 }, (_, n) => 2031 - n).map((y) => ({ id: y, ad: String(y) }))} deger={mez?.getUTCFullYear() ?? null} />
-          </div>
-        </fieldset>
-        <fieldset className="alan">
-          <legend>Deneyim düzeyi</legend>
-          <div className="yan-yana">
-            {DENEYIM_SIRASI.map((d) => (
-              <label key={d} className="secenek secenek-kutu">
-                <input type="radio" name="deneyim" value={d} defaultChecked={a.deneyimSeviyesi === d} /> <span>{DENEYIM_ADI[d]}</span>
-              </label>
+      <Kart
+        id="beceriler"
+        baslik="Beceriler"
+        eylem={
+          <DuzenlemePenceresi baslik="Beceriler" bolumler={['beceriler']} dugme={a.beceriler?.length ? 'Düzenle' : 'Ekle'} tamamMetni="Becerilerin kaydedildi.">
+            <BeceriAlanlari aday={a} beceriler={beceriler} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {(a.beceriler ?? []).length ? (
+          <ul className="beceri-seviye">
+            {(a.beceriler ?? []).map((b) => (
+              <li key={ad(b.beceri)}>
+                <span>{ad(b.beceri)}</span>
+                <span className="ikincil">{SEVIYE_ADI[b.seviye] ?? b.seviye}</span>
+              </li>
             ))}
-          </div>
-        </fieldset>
-      </ProfilBolumu>
+          </ul>
+        ) : (
+          <Bos>Henüz beceri eklemedin. Beceri eklersen ilanlarla eşleşmen daha doğru hesaplanır.</Bos>
+        )}
+      </Kart>
 
-      <ProfilBolumu ad="beceriler" baslik="Beceriler ve diller">
-        <ListeDuzenleyici
-          ad="beceri"
-          etiket="Beceriler"
-          secenekler={beceriler}
-          seviyeler={SEVIYE}
-          baslangic={(a.beceriler ?? []).map((b) => ({ ad: ad(b.beceri), seviye: b.seviye }))}
-          enFazla={30}
-        />
-        <ListeDuzenleyici
-          ad="dil"
-          etiket="Diller (CEFR)"
-          secenekler={diller}
-          seviyeler={CEFR_SEVIYELERI}
-          baslangic={(a.diller ?? []).map((d) => ({ ad: ad(d.dil), seviye: d.seviye }))}
-          enFazla={10}
-        />
-      </ProfilBolumu>
+      <Kart
+        id="diller"
+        baslik="Diller"
+        eylem={
+          <DuzenlemePenceresi baslik="Yabancı diller" bolumler={['diller']} dugme={a.diller?.length ? 'Düzenle' : 'Ekle'} tamamMetni="Dil bilgilerin kaydedildi.">
+            <DilAlanlari aday={a} diller={diller} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {(a.diller ?? []).length ? (
+          <ul className="beceri-seviye">
+            {(a.diller ?? []).map((d) => (
+              <li key={ad(d.dil)}>
+                <span>{ad(d.dil)}</span>
+                <span className="ikincil">{d.seviye}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Bos>Henüz yabancı dil eklemedin.</Bos>
+        )}
+      </Kart>
 
-      <section className="profil-bolum" id="cvler" aria-labelledby="b-cvler">
-        <div className="bolum-bas">
-          <h2 className="b3 kare-bas" id="b-cvler">
-            CV’ler
-          </h2>
+      <Kart
+        id="cvler"
+        baslik="CV’ler"
+        eylem={
           <span className="kucuk ikincil">
             {cvler.length} / {EN_FAZLA_CV}
           </span>
-        </div>
+        }
+      >
+        {cvler.length === 0 && <Bos>Henüz CV yüklemedin. Başvuru yapabilmek için en az bir CV gerekir.</Bos>}
         {cvler.map((cv) => (
           <div key={cv.id} className="dosya-satiri">
             <Ikon ad="dosya" />
@@ -162,83 +247,143 @@ export default async function ProfilSayfasi() {
               {cv.ad}
               {cv.tarih && (
                 <span className="kucuk ikincil" style={{ display: 'block' }}>
-                  {tarihYaz(cv.tarih, true)} yüklendi
+                  {tarihYaz(cv.tarih, true)} tarihinde yüklendi
                 </span>
               )}
             </span>
             <CvSilDugmesi dosyaId={cv.id} ad={cv.ad} />
           </div>
         ))}
-        <CvYukleFormu kalan={EN_FAZLA_CV - cvler.length} />
-      </section>
+        {cvler.length < EN_FAZLA_CV && (
+          <details className="cv-ekle">
+            <summary className="dugme dugme--ikincil dugme--kucuk">
+              <Ikon ad="arti" kucuk /> CV ekle
+            </summary>
+            <CvYukleFormu kalan={EN_FAZLA_CV - cvler.length} />
+          </details>
+        )}
+      </Kart>
 
-      <ProfilBolumu ad="tercihler" baslik="Tercihler">
-        <fieldset className="alan">
-          <legend>İlan türü</legend>
-          <div className="yan-yana">
-            {[
-              ['staj', 'Staj'],
-              ['is', 'İş'],
-            ].map(([d, e]) => (
-              <label key={d} className="secenek secenek-kutu">
-                <input type="checkbox" name="tur" value={d} defaultChecked={(a.tercihler?.turler ?? []).includes(d as never)} /> <span>{e}</span>
-              </label>
+      <Kart
+        id="sertifikalar"
+        baslik="Sertifikalar"
+        eylem={
+          <DuzenlemePenceresi baslik="Sertifikalar" bolumler={['sertifikalar']} dugme={a.sertifikalar?.length ? 'Düzenle' : 'Ekle'} tamamMetni="Sertifikaların kaydedildi.">
+            <SertifikaAlanlari aday={a} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {(a.sertifikalar ?? []).length ? (
+          <ul className="profil-liste">
+            {(a.sertifikalar ?? []).map((s, n) => (
+              <li key={n} className="profil-oge">
+                <p className="profil-oge-bas">{s.ad}</p>
+                <p className="kucuk ikincil">{[s.kurum, s.yil].filter(Boolean).join(' · ')}</p>
+              </li>
             ))}
-          </div>
-        </fieldset>
-        <fieldset className="alan">
-          <legend>Çalışma modeli</legend>
-          <div className="yan-yana">
-            {[
-              ['ofiste', 'Ofiste'],
-              ['hibrit', 'Hibrit'],
-              ['uzaktan', 'Uzaktan'],
-            ].map(([d, e]) => (
-              <label key={d} className="secenek secenek-kutu">
-                <input type="checkbox" name="model" value={d} defaultChecked={(a.tercihler?.modeller ?? []).includes(d as never)} /> <span>{e}</span>
-              </label>
+          </ul>
+        ) : (
+          <Bos>Henüz sertifika eklemedin.</Bos>
+        )}
+      </Kart>
+
+      <Kart
+        id="baglantilar"
+        baslik="Projeler ve bağlantılar"
+        eylem={
+          <DuzenlemePenceresi baslik="Projeler ve bağlantılar" bolumler={['baglantilar']} dugme={a.baglantilar?.length ? 'Düzenle' : 'Ekle'} tamamMetni="Bağlantıların kaydedildi.">
+            <BaglantiAlanlari aday={a} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {(a.baglantilar ?? []).length ? (
+          <ul className="profil-liste">
+            {(a.baglantilar ?? []).map((b, n) => (
+              <li key={n}>
+                <a href={b.adres} rel="noopener nofollow" target="_blank">
+                  {b.ad}
+                </a>{' '}
+                <span className="kucuk ikincil">{b.adres.replace(/^https?:\/\//, '')}</span>
+              </li>
             ))}
+          </ul>
+        ) : (
+          <Bos>Henüz bağlantı eklemedin.</Bos>
+        )}
+      </Kart>
+
+      <Kart
+        id="tercihler"
+        baslik="İş arama tercihleri"
+        eylem={
+          <DuzenlemePenceresi baslik="İş arama tercihleri" bolumler={['tercihler']} dugme={t?.modeller?.length ? 'Düzenle' : 'Ekle'} tamamMetni="Tercihlerin kaydedildi.">
+            <TercihAlanlari aday={a} />
+          </DuzenlemePenceresi>
+        }
+      >
+        {t?.modeller?.length || t?.turler?.length || t?.sehir ? (
+          <dl className="ozet-dl">
+            {(t?.turler ?? []).length > 0 && (
+              <div>
+                <dt>İlan türü</dt>
+                <dd>{(t?.turler ?? []).map((x) => (x === 'is' ? 'İş' : 'Staj')).join(', ')}</dd>
+              </div>
+            )}
+            {(t?.modeller ?? []).length > 0 && (
+              <div>
+                <dt>Çalışma modeli</dt>
+                <dd>{(t?.modeller ?? []).map((m) => MODEL_ADI[m as CalismaModeli]).join(', ')}</dd>
+              </div>
+            )}
+            {t?.sehir && (
+              <div>
+                <dt>Şehir</dt>
+                <dd>
+                  {t.sehir}
+                  {t.tasinmayaAcik ? ' (taşınmaya açık)' : ''}
+                </dd>
+              </div>
+            )}
+            {t?.baslama && (
+              <div>
+                <dt>Başlayabileceği tarih</dt>
+                <dd>{t.baslama}</dd>
+              </div>
+            )}
+            <div>
+              <dt>Ücret beklentisi</dt>
+              <dd>{t?.ucretBeklentisi ? `${t.ucretBeklentisi.toLocaleString('tr-TR')} ₺ (yalnızca sen görürsün)` : 'Belirtilmedi'}</dd>
+            </div>
+          </dl>
+        ) : (
+          <Bos>Henüz iş arama tercihlerini belirtmedin.</Bos>
+        )}
+      </Kart>
+
+      <Kart
+        id="iletisim"
+        baslik="İletişim ve kişisel bilgiler"
+        eylem={
+          <DuzenlemePenceresi baslik="İletişim ve kişisel bilgiler" bolumler={['kimlik']} dugme="Düzenle" tamamMetni="Bilgilerin kaydedildi.">
+            <KimlikAlanlari aday={a} />
+          </DuzenlemePenceresi>
+        }
+      >
+        <dl className="ozet-dl">
+          <div>
+            <dt>E-posta</dt>
+            <dd>{k.email}</dd>
           </div>
-        </fieldset>
-        <div className="iki-alan">
-          <div className="alan">
-            <label htmlFor="sehir">Şehir</label>
-            <input id="sehir" name="sehir" className="girdi" autoComplete="address-level2" defaultValue={a.tercihler?.sehir ?? ''} />
+          <div>
+            <dt>Telefon</dt>
+            <dd>{a.telefon || <span className="ikincil">Eklenmedi</span>}</dd>
           </div>
-          <div className="alan">
-            <label htmlFor="baslama">
-              Ne zaman başlayabilirsin? <span className="istege-bagli">(isteğe bağlı)</span>
-            </label>
-            <input id="baslama" name="baslama" className="girdi" placeholder="Ör. Şubat 2027" defaultValue={a.tercihler?.baslama ?? ''} />
+          <div>
+            <dt>Cinsiyet</dt>
+            <dd>{a.cinsiyet ? CINSIYET_ADI[a.cinsiyet as Cinsiyet] : <span className="ikincil">Belirtilmedi</span>}</dd>
           </div>
-        </div>
-        <label className="secenek">
-          <input type="checkbox" name="tasinmayaAcik" value="1" defaultChecked={Boolean(a.tercihler?.tasinmayaAcik)} /> <span>Başka şehre taşınmaya açığım</span>
-        </label>
-        <div className="alan">
-          <label htmlFor="ucretBeklentisi">
-            Ücret beklentisi, net/ay (₺) <span className="istege-bagli">(isteğe bağlı)</span>
-          </label>
-          <span className="ipucu">Yalnızca CV havuzunda eşleştirme için kullanılır; firmalara ve başvurularına gösterilmez.</span>
-          <input id="ucretBeklentisi" name="ucretBeklentisi" className="girdi" inputMode="numeric" defaultValue={a.tercihler?.ucretBeklentisi ?? ''} />
-        </div>
-      </ProfilBolumu>
+        </dl>
+      </Kart>
     </>
-  )
-}
-
-function Secim(props: { id: string; etiket: string; secenekler: Array<{ id: number | string; ad: string }>; deger?: number | string | null }) {
-  return (
-    <div className="alan">
-      <label htmlFor={props.id}>{props.etiket}</label>
-      <select id={props.id} name={props.id} className="secim" defaultValue={props.deger != null ? String(props.deger) : ''}>
-        <option value="">Seç</option>
-        {props.secenekler.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.ad}
-          </option>
-        ))}
-      </select>
-    </div>
   )
 }
