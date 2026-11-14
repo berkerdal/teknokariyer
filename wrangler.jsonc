@@ -21,6 +21,9 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
+    // Rota grubu adları parantezli; tarayıcı bu dosyaları %28/%29 ile ister ve statik katman 307 döngüsüne girer.
+    // Bu yoldaki istekler önce Worker'a gelir; worker.ts adresi çözüp dosyayı doğrudan verir.
+    "run_worker_first": ["/_next/static/chunks/app/*"],
   },
   "d1_databases": [
     {

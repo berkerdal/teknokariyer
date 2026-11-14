@@ -17,8 +17,9 @@ interface Ortam {
 export default {
   async fetch(istek: Request, env: Ortam, ctx: unknown): Promise<Response> {
     const url = new URL(istek.url)
-    if (url.pathname.startsWith('/_next/static/') && /%2[89]/i.test(url.pathname)) {
-      url.pathname = decodeURIComponent(url.pathname)
+    // wrangler.jsonc'deki run_worker_first ile bu yol önce buraya gelir: kodlanmış da kodlanmamış da depodan verilir.
+    if (url.pathname.startsWith('/_next/static/')) {
+      if (/%2[89]/i.test(url.pathname)) url.pathname = decodeURIComponent(url.pathname)
       const yanit = await env.ASSETS.fetch(new Request(url.toString(), istek))
       if (yanit.ok) return yanit
     }
