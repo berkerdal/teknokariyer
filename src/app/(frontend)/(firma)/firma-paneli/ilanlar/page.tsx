@@ -43,7 +43,7 @@ function ayrinti(i: FirmaIlani, simdi: Date): string {
   }
 }
 
-export default async function FirmaIlanlari({ searchParams }: { searchParams: Promise<{ durum?: string }> }) {
+export default async function FirmaIlanlari({ searchParams }: { searchParams: Promise<{ durum?: string; gonderildi?: string; sonuc?: string }> }) {
   const k = await firmaOturumu('/firma-paneli/ilanlar')
   const [ilanlar, sinir, p] = await Promise.all([firmaIlanlari(), tarihSiniri(), searchParams])
   const yonetir = ilanYonetebilirMi(k)
@@ -84,6 +84,14 @@ export default async function FirmaIlanlari({ searchParams }: { searchParams: Pr
           </Link>
         )}
       </div>
+
+      {p.gonderildi && (
+        <p className="basari-kutu" role="status">
+          {p.sonuc === 'yayinda'
+            ? `“${ilanlar.find((i) => i.id === Number(p.gonderildi))?.pozisyonAdi ?? 'İlan'}” yayına girdi. Adaylar artık başvurabilir.`
+            : `“${ilanlar.find((i) => i.id === Number(p.gonderildi))?.pozisyonAdi ?? 'İlan'}” Yönetici A.Ş. onayına gönderildi. Hedef onay süresi 1 iş günüdür; onaylanınca ilan kendiliğinden yayına girer.`}
+        </p>
+      )}
 
       <ModulBilgisi kimlik="firma-ilanlar" baslik="İlanlarınızı buradan yönetirsiniz">
         <p>Firmanızın bütün ilanları, durumlarına göre sekmelerde listelenir. Her ilanın yanındaki düğme, o ilanda yapabileceğiniz işlemleri açar.</p>

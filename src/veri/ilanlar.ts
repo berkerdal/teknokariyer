@@ -28,7 +28,7 @@ function firmaGorunurMu(f: Pick<Firmalar, 'asama' | 'testFirmasi'>): boolean {
   return !f.testFirmasi || ortam() !== 'yayin'
 }
 
-const firmaOzeti = (f: Firmalar): FirmaOzeti => ({
+export const firmaOzeti = (f: Firmalar): FirmaOzeti => ({
   id: f.id,
   ad: f.kisaAd,
   unvan: f.unvan,
@@ -115,16 +115,8 @@ export interface IlanAyrintisi extends IlanOzeti {
   basvuruSayisi: number
 }
 
-/** İlanın ayrıntısı. İlan yoksa, herkese açık değilse veya firması görünmüyorsa null. */
-export const ilanAyrintisi = cache(async (ilanId: number): Promise<IlanAyrintisi | null> => {
-  if (!Number.isInteger(ilanId) || ilanId <= 0) return null
-  const payload = await payloadAl()
-  const i = await payload
-    .findByID({ collection: 'ilanlar', id: ilanId, depth: 1, overrideAccess: false, populate: { firmalar: { kisaAd: true }, taksonomiler: { ad: true } } })
-    .catch((): null => null)
-  if (!i) return null
-  const f = (await firmalariAl([id(i.firma)])).get(id(i.firma))
-  if (!f) return null
+/** Payload kaydını (taksonomiler ad alanıyla doldurulmuş) ayrıntı görünümüne çevirir. Önizleme de bunu kullanır. */
+export function ilanAyrintisinaCevir(i: Ilanlar, f: FirmaOzeti): IlanAyrintisi {
   const adlar = (x: unknown[] | null | undefined) => (x ?? []).map(ad).filter((y): y is string => Boolean(y))
   return {
     ...ozet(i, f),
@@ -155,6 +147,19 @@ export const ilanAyrintisi = cache(async (ilanId: number): Promise<IlanAyrintisi
         : undefined,
     basvuruSayisi: i.basvuruSayisi ?? 0,
   }
+}
+
+/** İlanın ayrıntısı. İlan yoksa, herkese açık değilse veya firması görünmüyorsa null. */
+export const ilanAyrintisi = cache(async (ilanId: number): Promise<IlanAyrintisi | null> => {
+  if (!Number.isInteger(ilanId) || ilanId <= 0) return null
+  const payload = await payloadAl()
+  const i = await payload
+    .findByID({ collection: 'ilanlar', id: ilanId, depth: 1, overrideAccess: false, populate: { firmalar: { kisaAd: true }, taksonomiler: { ad: true } } })
+    .catch((): null => null)
+  if (!i) return null
+  const f = (await firmalariAl([id(i.firma)])).get(id(i.firma))
+  if (!f) return null
+  return ilanAyrintisinaCevir(i, f)
 })
 
 /** Firmanın herkese açık sayfası için firma (adres adıyla). */

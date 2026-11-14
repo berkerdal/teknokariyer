@@ -17,6 +17,7 @@ export function ModulBilgisi({ kimlik, baslik, children }: { kimlik: string; bas
   const id = useId()
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- tarayıcı deposu yalnızca istemcide okunur (sunucu çizimiyle uyum)
       if (localStorage.getItem(anahtar(kimlik)) === '1') setAcik(false)
     } catch {}
   }, [kimlik])

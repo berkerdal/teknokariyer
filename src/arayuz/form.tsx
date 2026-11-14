@@ -17,7 +17,7 @@ export interface FormDurumu {
   degerler?: Record<string, string>
 }
 
-export function HataOzeti({ durum, alanlar }: { durum: FormDurumu; alanlar?: Record<string, string> }) {
+export function HataOzeti({ durum, alanlar, siz = false }: { durum: FormDurumu; alanlar?: Record<string, string>; siz?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   const hatalar = Object.entries(durum.hatalar ?? {})
   const var_ = hatalar.length > 0 || Boolean(durum.genel)
@@ -27,7 +27,7 @@ export function HataOzeti({ durum, alanlar }: { durum: FormDurumu; alanlar?: Rec
   if (!var_) return null
   return (
     <div className="hata-ozeti" tabIndex={-1} ref={ref} role="alert">
-      <h2>{hatalar.length ? 'Devam etmeden önce düzelt' : 'İşlem tamamlanamadı'}</h2>
+      <h2>{hatalar.length ? (siz ? 'Devam etmeden önce şu alanları düzeltin' : 'Devam etmeden önce düzelt') : 'İşlem tamamlanamadı'}</h2>
       {durum.genel && <p>{durum.genel}</p>}
       {hatalar.length > 0 && (
         <ul>

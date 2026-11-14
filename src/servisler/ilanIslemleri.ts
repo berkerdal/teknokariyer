@@ -14,11 +14,12 @@ import {
   VARSAYILAN_EN_UZUN_SURE_GUN,
   VARSAYILAN_ONAYLI_ILAN_SAYISI,
   ilanKopyasi,
+  ilanEksikleri,
 } from '@/alan/ilan'
 import { firmaKimligi, firmaYetkisiVarMi, moderasyonYapabilirMi } from '@/erisim'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { trGunBasi } from '@/alan/tarih'
-import { IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
+import { FormHatasi, IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
 
 const ISLEM_ADI: Record<FirmaIslemi, string> = {
   'yayina-gonder': 'yayına gönderilemez',
@@ -33,7 +34,7 @@ const ISLEM_ADI: Record<FirmaIslemi, string> = {
 }
 
 /** İlanı okur ve kullanıcının bu ilan üzerinde firma işlemi yapma yetkisini denetler. */
-async function yetkiliIlan(payload: Payload, kullanici: Kullanici, ilanId: number | string, islem: FirmaIslemi): Promise<Ilanlar> {
+export async function yetkiliIlan(payload: Payload, kullanici: Kullanici, ilanId: number | string, islem: FirmaIslemi): Promise<Ilanlar> {
   const ilan = await payload.findByID({ collection: 'ilanlar', id: ilanId, depth: 0, overrideAccess: true }).catch((): null => null)
   if (!ilan) throw new IslemHatasi('İlan bulunamadı.', 404)
   const kurum = moderasyonYapabilirMi(kullanici)
@@ -52,6 +53,8 @@ async function durumYaz(payload: Payload, kullanici: Kullanici, ilanId: number |
 /** Taslak veya düzeltilmiş ilanı yayına gönderir. Sonuç: doğrudan yayın veya onay kuyruğu (K4). */
 export async function yayinaGonder(payload: Payload, kullanici: Kullanici, ilanId: number | string) {
   const ilan = await yetkiliIlan(payload, kullanici, ilanId, 'yayina-gonder')
+  const eksik = ilanEksikleri(ilan as unknown as Record<string, unknown>)
+  if (Object.keys(eksik).length) throw new FormHatasi(eksik)
   const a = await ayarlar(payload)
   const hata = sonBasvuruTarihiHatasi(new Date(ilan.sonBasvuru), new Date(), a.enUzunSureGun ?? VARSAYILAN_EN_UZUN_SURE_GUN)
   if (hata === 'gecmis') throw new IslemHatasi('Son başvuru tarihi geçmiş. Yeni bir tarih seçip tekrar gönderin.')
@@ -103,11 +106,10 @@ export async function kopyala(payload: Payload, kullanici: Kullanici, ilanId: nu
   const req = await istekOlustur(payload, kullanici)
   const kopya = ilanKopyasi(ilan as unknown as Record<string, unknown>)
   delete kopya.arama
-  // Son başvuru tarihi zorunlu; kopyada geçici olarak yarına ayarlanır, firma yayına göndermeden önce seçer.
-  const yarin = new Date(Date.now() + 86_400_000).toISOString()
+  // Son başvuru tarihi kopyada boş gelir; taslak eksik kaydedilebilir, firma yayına göndermeden önce seçer.
   return payload.create({
     collection: 'ilanlar',
-    data: { ...(kopya as Partial<Ilanlar>), sonBasvuru: yarin, durum: 'taslak' } as Ilanlar,
+    data: { ...(kopya as Partial<Ilanlar>), sonBasvuru: null, bekleyenDegisiklik: null, duzeltmeGerekcesi: null, durum: 'taslak' } as Ilanlar,
     overrideAccess: true,
     req,
     depth: 0,

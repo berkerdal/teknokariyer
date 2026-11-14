@@ -19,6 +19,14 @@ export class IslemHatasi extends Error {
   }
 }
 
+/** Alan hataları: anahtar alan adı, değer kullanıcıya gösterilecek Türkçe mesaj. */
+export class FormHatasi extends IslemHatasi {
+  constructor(public alanlar: Record<string, string>) {
+    super(Object.values(alanlar)[0] ?? 'Formda hata var.', 400)
+    this.name = 'FormHatasi'
+  }
+}
+
 export type Kullanici = Kullanicilar & OturumKullanicisi
 
 export const kimlik = (x: unknown): number =>

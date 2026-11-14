@@ -10,18 +10,12 @@
 import type { Payload } from 'payload'
 import { hesapZatenVarEpostasi } from '@/altyapi/epostaSablonlari'
 import { surum } from '@/metinler'
-import { IslemHatasi } from './ortak'
+import { FormHatasi, IslemHatasi } from './ortak'
 import { epostaGecerliMi, epostaNormallestir, sifreHatasi } from './hesapKurallari'
 
 export { SIFRE_EN_AZ, SIFRE_EN_COK, SIFRE_KURALLARI, sifreHatasi, epostaGecerliMi, epostaNormallestir } from './hesapKurallari'
 
-/** Alan hataları: anahtar alan adı, değer kullanıcıya gösterilecek Türkçe mesaj. */
-export class FormHatasi extends IslemHatasi {
-  constructor(public alanlar: Record<string, string>) {
-    super(Object.values(alanlar)[0] ?? 'Formda hata var.', 400)
-    this.name = 'FormHatasi'
-  }
-}
+export { FormHatasi } from './ortak'
 
 export interface KayitGirdisi {
   ad: string

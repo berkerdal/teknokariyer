@@ -230,6 +230,17 @@ Claude tarafından yapılacak.
       kurumsal alt bilgi; hitaba göre (sen/siz) alt bilgi metni ve bağlantılar; gizli ön izleme metni.
       E-posta istemcileri SVG göstermediği için logolar PNG (`public/eposta/`, `tools/kimlik/eposta_png.cjs`).
     - TTO'nun web adresi bilinmediği için TTO logosu bağlantısız. Adres öğrenilince eklenecek.
+  - **Firma paneli F1–F2 (14.11.2026):** `/firma-paneli` (yan menü masaüstünde, alt menü mobilde, kurumsal alt bilgi).
+    - Özet, ilan listesi (durum sekmeleri, mobilde kart/masaüstünde tablo), işlem penceresi (yalnızca o durumda yapılabilen
+      işlemler: yayına gönder, duraklat, yeniden başlat, süre uzat, kapat, kopyala/yeniden yayınla, taslağı sil).
+    - İlan formu (`src/arayuz/firma/IlanFormu.tsx`, ayrıştırıcı `src/alan/ilanFormu.ts`, servis `src/servisler/ilanFormu.ts`):
+      taslak yalnızca pozisyon adıyla kaydedilir; tamlık yayına gönderirken `ilanEksikleri` ile alan alan denetlenir.
+      Önizleme sayfası eksikleri listeler, tamamsa yayına/onaya gönderir. Sürüm geçmişi sayfası değişen alanları gösterir.
+    - Yayındaki ilanda esaslı alanlar (ad, tür, çalışma şekli, ücret) güvenilir olmayan firmada `bekleyenDegisiklik`
+      alanında onay bekler; `bekleyenDegisikligiSonuclandir` (Yönetici A.Ş.) onaylar veya gerekçeyle reddeder.
+      Onay arayüzü Yönetici A.Ş. panelinde yazılacak.
+    - K30 bilgi kutuları: `ModulBilgisi` (sayfa başı, gizlenebilir) ve `AlanBilgisi` (“?” düğmesi). Türkçe takvim: `TarihSecici`.
+    - Örnek veri `ORNEK_SIFRE` ile kurgusal firma kullanıcısı açar (`kodpit@kariyer.test`, Kodpit firma yöneticisi).
   - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
@@ -306,6 +317,22 @@ Claude tarafından yapılacak.
     `NEXT_PHASE === 'phase-production-build'` iken bağlantılar boş bırakılır.
   - **Derleme:** Ön yüz `force-dynamic`; derleme veritabanına bağlanmaz ve `.env` olmadan çalışır. Oturum okuyan kod önce
     `headers()` çağırır. Aksi hâlde derleme, sayfaları önceden üretirken Payload'un göç sorusunda takılıyordu.
+- **D1 göçlerinden öğrenilenler (14.11.2026, yerelde denenerek):**
+  - D1'de yabancı anahtar denetimi kapatılamaz. `PRAGMA foreign_keys=OFF` etkisizdir. `defer_foreign_keys` zincirleme
+    silmeyi durdurmaz. `legacy_alter_table` ne tek tek ne toplu işlemde uygulanır.
+  - Bu yüzden Drizzle'ın tablo yeniden kurma göçü (`DROP TABLE` + `RENAME`) bağlı satırları siler; bağlantı NOT NULL ise
+    silmeyi tamamen reddeder (başvurunun ilanı). Çözüm: `src/altyapi/gocYardimcisi.ts` → `bagliSatirlariKoru` (yedekle,
+    NOT NULL bağlı satırları geçici kaldır, kur, geri yükle, sayıları karşılaştır; tutmazsa yedekleri silmeden dur).
+  - Drizzle'ın kopyalama komutu (`INSERT … SELECT`) yeni sütunu eski tablodan çift tırnakla seçebilir. SQLite bulamadığı
+    tırnaklı adı metin sabiti sayar ve her satıra sütun adını yazar. Üretilen her göçte yeni sütunlar için `NULL` seçildiği
+    denetlenmeli. (Bu hata canlıda olmuştu, temizlendi.)
+  - Göçler `scripts/goc-uygula.ts` ile D1 API üzerinden sırayla uygulanır (önce kuru çalıştırma, sonra `--uygula`); eski
+    kodla uyumlu göç önce, kod sonra gönderilir. Node `fetch` vekil için `NODE_USE_ENV_PROXY=1` ve
+    `NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt` ister. Uygulamadan önce Time Travel yer imi alınır.
+  - Yerel veritabanı “dev” (push) modunda kurulduysa `payload migrate` onay sorusunda bekler; `payload_migrations`
+    kaydı düzeltilip `< /dev/null` ile çalıştırılır.
+- **Dialog içinde tablo:** Tablo hücresindeki `<dialog>` tablonun hizalama ve hücre stillerini devralır (sağa hizalı metin,
+  takvim hücre kenarlıkları). `.islem-pencere` içinde sıfırlandı. Kapalı `dialog.alt-panel` için `display: none` gerekli.
 - **Arayüz geliştirmesinden öğrenilenler:**
   - Prototipteki `.tk button { color: inherit }` kuralı `.dugme` metin rengini eziyordu (prototipte de “Ara” düğmesi koyu
     metinliydi). Temel kurallar artık `:where(.tk)` ile sıfır özgüllükte.

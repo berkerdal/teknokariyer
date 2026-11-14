@@ -7,6 +7,8 @@ import type { Firmalar, Ilanlar } from '@/payload-types'
 import { firmaKimligi, firmaKullanicisiMi, type FirmaYetkisi } from '@/erisim'
 import { VARSAYILAN_EN_UZUN_SURE_GUN, VARSAYILAN_ONAYLI_ILAN_SAYISI, type IlanDurumu } from '@/alan/ilan'
 import type { Kullanici } from '@/servisler/ortak'
+import type { IlanFormBaslangici, Secenek } from '@/arayuz/firma/IlanFormu'
+import { trGunMetni } from '@/alan/tarih'
 import { oturum, payloadAl } from './payload'
 
 /**
@@ -116,4 +118,123 @@ export async function tarihSiniri(simdi = new Date()) {
   const { enUzunSureGun } = await firmaKurallari()
   const g = (n: number) => trGunMetni(new Date(simdi.getTime() + n * 86_400_000))
   return { bugun: g(0), enErken: g(1), enGec: g(enUzunSureGun), gun: enUzunSureGun }
+}
+
+/* ---------- İlan formu ---------- */
+
+
+/** Formdaki seçim listeleri: yalnızca seçilebilir (aktif) taksonomi kayıtları, Türkçe sıralı. */
+export const ilanFormuSecenekleri = cache(async () => {
+  const payload = await payloadAl()
+  const { docs } = await payload.find({
+    collection: 'taksonomiler',
+    where: { and: [{ tur: { in: ['pozisyon-ailesi', 'beceri', 'bolum', 'dil'] } }, { aktif: { not_equals: false } }] },
+    select: { tur: true, ad: true },
+    depth: 0,
+    limit: 5000,
+    pagination: false,
+    overrideAccess: true,
+  })
+  const liste = (tur: string): Secenek[] =>
+    docs
+      .filter((d) => d.tur === tur)
+      .map((d) => ({ id: d.id, ad: d.ad }))
+      .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
+  return { aileler: liste('pozisyon-ailesi'), beceriler: liste('beceri'), bolumler: liste('bolum'), diller: liste('dil') }
+})
+
+const secenek = (x: unknown): Secenek | null =>
+  x && typeof x === 'object' && 'ad' in x ? { id: (x as unknown as { id: number }).id, ad: String((x as unknown as { ad: string }).ad) } : null
+const tutarMetni = (n?: number | null) => (n ? new Intl.NumberFormat('tr-TR').format(n) : '')
+
+/** Yeni ilan: firma profilinden konum ve yan haklar dolu gelir. */
+export function bosIlanFormu(firma: Firmalar): IlanFormBaslangici {
+  return {
+    pozisyonAdi: '',
+    tur: '',
+    altTur: '',
+    aile: null,
+    model: '',
+    konum: `Pamukkale Teknokent, ${firma.konum}`,
+    deneyim: '',
+    egitim: '',
+    pozisyonSayisi: 1,
+    bolumler: [],
+    zorunluBeceriler: [],
+    tercihBeceriler: [],
+    diller: [],
+    sonBasvuru: '',
+    baslangic: '',
+    ucretEnAz: '',
+    ucretEnCok: '',
+    ucretGorunur: false,
+    yanHaklar: (firma.yanHaklar ?? []).map((y) => y.ad),
+    isTanimi: '',
+    nitelikler: '',
+    sorular: [],
+    linkedinMetni: '',
+    dil: 'tr',
+    stajDonemi: '',
+    ucretliStaj: false,
+    sgk: '',
+    stajBelgesi: true,
+    pauOncelik: false,
+  }
+}
+
+/** Firmanın kendi ilanı (erişim kuralıyla okunur; başka firmanın ilanı bulunamaz). */
+export async function firmaIlani(ilanId: number): Promise<Ilanlar | null> {
+  const k = await oturum()
+  if (!k || !firmaKullanicisiMi(k) || !Number.isInteger(ilanId) || ilanId <= 0) return null
+  const payload = await payloadAl()
+  const i = await payload
+    .findByID({ collection: 'ilanlar', id: ilanId, depth: 1, overrideAccess: false, user: k, populate: { taksonomiler: { ad: true } } })
+    .catch((): null => null)
+  if (!i) return null
+  const firma = typeof i.firma === 'object' ? i.firma?.id : i.firma
+  return Number(firma) === Number(firmaKimligi(k)) ? i : null
+}
+
+export function ilanFormuBaslangici(i: Ilanlar): IlanFormBaslangici {
+  const liste = (x: unknown[] | null | undefined) => (x ?? []).map(secenek).filter((y): y is Secenek => Boolean(y))
+  return {
+    pozisyonAdi: i.pozisyonAdi,
+    tur: (i.tur as 'is' | 'staj') ?? '',
+    altTur: i.altTur ?? '',
+    aile: i.aile ? Number(typeof i.aile === 'object' ? i.aile.id : i.aile) : null,
+    model: i.model ?? '',
+    konum: i.konum,
+    deneyim: i.deneyim ?? '',
+    egitim: i.egitim ?? '',
+    pozisyonSayisi: i.pozisyonSayisi ?? 1,
+    bolumler: liste(i.bolumler),
+    zorunluBeceriler: liste(i.zorunluBeceriler),
+    tercihBeceriler: liste(i.tercihBeceriler),
+    diller: (i.diller ?? []).flatMap((d) => {
+      const s = secenek(d.dil)
+      return s ? [{ ...s, seviye: d.seviye }] : []
+    }),
+    sonBasvuru: i.sonBasvuru ? trGunMetni(new Date(i.sonBasvuru)) : '',
+    baslangic: i.baslangic ? trGunMetni(new Date(i.baslangic)) : '',
+    ucretEnAz: tutarMetni(i.ucretEnAz),
+    ucretEnCok: tutarMetni(i.ucretEnCok),
+    ucretGorunur: Boolean(i.ucretGorunur),
+    yanHaklar: (i.yanHaklar ?? []).map((y) => y.ad),
+    isTanimi: i.isTanimi ?? '',
+    nitelikler: i.nitelikler ?? '',
+    sorular: (i.onElemeSorulari ?? []).map((s) => ({
+      soru: s.soru,
+      tip: s.tip,
+      eleyici: Boolean(s.eleyici),
+      beklenenCevap: s.beklenenCevap ?? '',
+      secenekler: (s.secenekler ?? []).map((x) => x.ad).join('\n'),
+    })),
+    linkedinMetni: i.linkedinMetni ?? '',
+    dil: i.dil ?? 'tr',
+    stajDonemi: i.stajDonemi ?? '',
+    ucretliStaj: Boolean(i.ucretliStaj),
+    sgk: i.sgk ?? '',
+    stajBelgesi: i.stajBelgesi !== false,
+    pauOncelik: Boolean(i.pauOncelik),
+  }
 }
