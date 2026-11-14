@@ -289,15 +289,17 @@ export interface Ilanlar {
   id: number;
   firma: number | Firmalar;
   pozisyonAdi: string;
-  tur: 'is' | 'staj';
-  altTur: 'tam-zamanli' | 'yari-zamanli' | 'proje' | 'zorunlu-staj' | 'gonullu-staj' | 'uzun-donem-staj' | 'yaz-staji';
-  aile: number | Taksonomiler;
-  model: 'ofiste' | 'hibrit' | 'uzaktan';
+  tur?: ('is' | 'staj') | null;
+  altTur?:
+    | ('tam-zamanli' | 'yari-zamanli' | 'proje' | 'zorunlu-staj' | 'gonullu-staj' | 'uzun-donem-staj' | 'yaz-staji')
+    | null;
+  aile?: (number | null) | Taksonomiler;
+  model?: ('ofiste' | 'hibrit' | 'uzaktan') | null;
   konum: string;
-  deneyim: 'ogrenci' | 'yeni-mezun' | '1-3' | '3-5' | '5+';
-  egitim: 'lise' | 'onlisans' | 'lisans' | 'yuksek-lisans' | 'doktora';
+  deneyim?: ('ogrenci' | 'yeni-mezun' | '1-3' | '3-5' | '5+') | null;
+  egitim?: ('lise' | 'onlisans' | 'lisans' | 'yuksek-lisans' | 'doktora') | null;
   bolumler?: (number | Taksonomiler)[] | null;
-  zorunluBeceriler: (number | Taksonomiler)[];
+  zorunluBeceriler?: (number | Taksonomiler)[] | null;
   tercihBeceriler?: (number | Taksonomiler)[] | null;
   diller?:
     | {
@@ -307,7 +309,7 @@ export interface Ilanlar {
       }[]
     | null;
   pozisyonSayisi?: number | null;
-  sonBasvuru: string;
+  sonBasvuru?: string | null;
   baslangic?: string | null;
   ucretEnAz?: number | null;
   ucretEnCok?: number | null;
@@ -321,8 +323,8 @@ export interface Ilanlar {
         id?: string | null;
       }[]
     | null;
-  isTanimi: string;
-  nitelikler: string;
+  isTanimi?: string | null;
+  nitelikler?: string | null;
   sartname?: (number | null) | Dosyalar;
   onElemeSorulari?:
     | {
@@ -349,6 +351,18 @@ export interface Ilanlar {
   durum: 'taslak' | 'onayda' | 'duzeltme' | 'yayinda' | 'duraklatildi' | 'suresi-doldu' | 'kapandi';
   duzeltmeGerekcesi?: string | null;
   kapanisNedeni?: ('doldu' | 'iptal' | 'baska-kanal' | 'sure' | 'moderasyon') | null;
+  /**
+   * Yayındaki ilanda pozisyon adı, ilan türü, çalışma şekli veya ücret değişince yeni değerler onaylanana kadar burada bekler.
+   */
+  bekleyenDegisiklik?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   yayinTarihi?: string | null;
   basvuruSayisi?: number | null;
   goruntulenme?: number | null;
@@ -841,6 +855,7 @@ export interface IlanlarSelect<T extends boolean = true> {
   durum?: T;
   duzeltmeGerekcesi?: T;
   kapanisNedeni?: T;
+  bekleyenDegisiklik?: T;
   yayinTarihi?: T;
   basvuruSayisi?: T;
   goruntulenme?: T;

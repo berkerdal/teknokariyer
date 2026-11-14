@@ -153,9 +153,64 @@ export function duzenlemeSonucu(eski: Kayit, yeni: Kayit, guvenilir: boolean): D
 /** Kopyada sıfırlanan alanlar: tarih, durum, sayaçlar ve kimlik. Diğer her şey dolu gelir. */
 export const KOPYADA_SIFIRLANAN = ['id', 'durum', 'sonBasvuru', 'yayinTarihi', 'kapanisNedeni', 'goruntulenme', 'basvuruSayisi', 'createdAt', 'updatedAt'] as const
 
+/**
+ * Dizi satırlarının (dil, yan hak, soru…) kimlikleri kopyada atılır; aynı kimlikle ikinci satır kaydedilemez.
+ * İlan derinlik 0 ile okunmuş olmalıdır: ilişkiler o zaman nesne değil kimlik sayısıdır ve korunur.
+ */
+function satirKimlikleriniAt(deger: unknown): unknown {
+  if (Array.isArray(deger))
+    return deger.map((x) => {
+      if (!x || typeof x !== 'object') return x
+      const { id: _id, ...geri } = x as Kayit
+      return Object.fromEntries(Object.entries(geri).map(([k, v]) => [k, satirKimlikleriniAt(v)]))
+    })
+  return deger
+}
+
 export function ilanKopyasi<T extends Kayit>(ilan: T): Partial<T> {
-  const kopya: Kayit = { ...ilan }
+  const kopya: Kayit = Object.fromEntries(Object.entries(ilan).map(([k, v]) => [k, satirKimlikleriniAt(v)]))
   for (const alan of KOPYADA_SIFIRLANAN) delete kopya[alan]
   kopya.durum = 'taslak'
   return kopya as Partial<T>
+}
+
+/* ---------- Yayına hazır olma ---------- */
+
+/** Taslak eksik kaydedilebilir; yayına gönderilen (taslak olmayan) ilanda bu alanlar dolu olmalıdır. */
+export const ILAN_ZORUNLU_ALANLAR = [
+  'pozisyonAdi', 'tur', 'altTur', 'aile', 'model', 'konum', 'deneyim', 'egitim', 'zorunluBeceriler', 'sonBasvuru', 'isTanimi', 'nitelikler',
+] as const
+
+const EKSIK_MESAJI: Record<(typeof ILAN_ZORUNLU_ALANLAR)[number], string> = {
+  pozisyonAdi: 'Pozisyon adını yazın.',
+  tur: 'İlanın iş ilanı mı staj ilanı mı olduğunu seçin.',
+  altTur: 'Çalışma şeklini veya staj türünü seçin.',
+  aile: 'Pozisyon ailesini seçin.',
+  model: 'Çalışma modelini seçin: ofiste, hibrit veya uzaktan.',
+  konum: 'Konumu yazın. Örnek: Pamukkale Teknokent, D Blok 208.',
+  deneyim: 'Aranan deneyimi seçin.',
+  egitim: 'Aranan eğitim düzeyini seçin.',
+  zorunluBeceriler: 'En az bir zorunlu beceri ekleyin.',
+  sonBasvuru: 'Son başvuru tarihini seçin.',
+  isTanimi: 'İş tanımını yazın: Bu pozisyondaki kişi ne yapacak?',
+  nitelikler: 'Aranan nitelikleri yazın.',
+}
+
+export const IS_ALT_TURLERI = ['tam-zamanli', 'yari-zamanli', 'proje'] as const
+export const STAJ_ALT_TURLERI = ['zorunlu-staj', 'gonullu-staj', 'uzun-donem-staj', 'yaz-staji'] as const
+
+const bos = (x: unknown) => x === undefined || x === null || (typeof x === 'string' && !x.trim()) || (Array.isArray(x) && x.length === 0)
+
+/** Yayına göndermeden önce tamamlanması gereken alanlar ve Türkçe mesajları (alan adı → mesaj). */
+export function ilanEksikleri(v: Record<string, unknown>): Record<string, string> {
+  const eksik: Record<string, string> = {}
+  for (const a of ILAN_ZORUNLU_ALANLAR) if (bos(v[a])) eksik[a] = EKSIK_MESAJI[a]
+  if (!eksik.tur && !eksik.altTur) {
+    const uygun = v.tur === 'staj' ? STAJ_ALT_TURLERI : IS_ALT_TURLERI
+    if (!(uygun as readonly string[]).includes(String(v.altTur)))
+      eksik.altTur = v.tur === 'staj' ? 'Staj ilanı için bir staj türü seçin.' : 'İş ilanı için bir çalışma şekli seçin.'
+  }
+  if (typeof v.ucretEnAz === 'number' && typeof v.ucretEnCok === 'number' && v.ucretEnAz > v.ucretEnCok)
+    eksik.ucretEnAz = 'Ücretin en az değeri en çok değerinden büyük olamaz.'
+  return eksik
 }

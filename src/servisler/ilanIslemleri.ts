@@ -114,6 +114,14 @@ export async function kopyala(payload: Payload, kullanici: Kullanici, ilanId: nu
   })
 }
 
+/** Hiç yayınlanmamış taslağı siler. Yayınlanmış ilanlar kayıt için kalır; onlar kapatılır. */
+export async function taslakSil(payload: Payload, kullanici: Kullanici, ilanId: number | string) {
+  await yetkiliIlan(payload, kullanici, ilanId, 'sil')
+  const req = await istekOlustur(payload, kullanici)
+  await islemKaydet(req, { islem: 'Taslak ilan silindi', tur: 'ilan', kayitTuru: 'ilanlar', kayitId: ilanId })
+  await payload.delete({ collection: 'ilanlar', id: ilanId, overrideAccess: true, req })
+}
+
 /* ---------- Moderasyon (Yönetici A.Ş.) ---------- */
 
 function moderasyonYetkisi(kullanici: Kullanici) {

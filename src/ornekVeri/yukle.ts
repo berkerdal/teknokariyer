@@ -6,6 +6,7 @@
  * - Yayın ortamında çalışmaz.
  * - Giriş yapılabilen örnek hesaplar yalnızca ORNEK_SIFRE verilirse açılır (parola depoda tutulmaz).
  */
+import { ilanKopyasi } from '@/alan/ilan'
 import type { Payload } from 'payload'
 import { DENEYIM_ADI, MODEL_ADI } from '@/alan/eslesme'
 import { ALT_TUR_ADI } from '@/alan/ilanFiltre'
@@ -173,6 +174,38 @@ export async function ornekVeriYukle(payload: Payload, simdi = new Date()): Prom
     sonuc.ilan++
   }
 
+  /*
+   * Firma panelinin her durumu denenebilsin diye Kodpit'e farklı durumlarda kurgusal ilanlar (K17). Flutter ilanının
+   * kopyası olarak açılır; yalnızca pozisyon adı, durum ve tarih değişir.
+   */
+  const kodpit = firmaId.get('kodpit')
+  const temel = kodpit
+    ? (await payload.find({ collection: 'ilanlar', where: { and: [{ firma: { equals: kodpit } }, { pozisyonAdi: { equals: 'Flutter Geliştirici' } }] }, limit: 1, depth: 0, overrideAccess: true })).docs[0]
+    : undefined
+  if (temel) {
+    const tarih = (gun: number) => new Date(simdi.getTime() + gun * GUN).toISOString()
+    const ekler: Array<Record<string, unknown>> = [
+      { pozisyonAdi: 'Kıdemli Flutter Geliştirici', durum: 'taslak', sonBasvuru: tarih(30) },
+      { pozisyonAdi: 'Backend Geliştirici (Node.js)', durum: 'onayda', sonBasvuru: tarih(35) },
+      {
+        pozisyonAdi: 'Arayüz Tasarımcısı',
+        durum: 'duzeltme',
+        sonBasvuru: tarih(28),
+        duzeltmeGerekcesi: 'Ücret aralığının en az değeri en çok değerinden büyük görünüyor. Aralığı düzeltip yeniden gönderin.',
+      },
+      { pozisyonAdi: 'Front-end Geliştirici', durum: 'duraklatildi', sonBasvuru: tarih(12), yayinTarihi: tarih(-10) },
+      { pozisyonAdi: 'Test Uzmanı', durum: 'kapandi', kapanisNedeni: 'doldu', sonBasvuru: tarih(5), yayinTarihi: tarih(-40) },
+    ]
+    for (const e of ekler) {
+      const var_ = await payload.count({ collection: 'ilanlar', where: { and: [{ firma: { equals: kodpit } }, { pozisyonAdi: { equals: e.pozisyonAdi } }] }, overrideAccess: true })
+      if (var_.totalDocs) continue
+      const kopya = ilanKopyasi(temel as unknown as Record<string, unknown>)
+      delete kopya.arama
+      await payload.create({ collection: 'ilanlar', overrideAccess: true, data: { ...kopya, basvuruSayisi: 0, ...e } as never })
+      sonuc.ilan++
+    }
+  }
+
   /* Örnek aday (kurgusal kişi). Yalnızca ORNEK_SIFRE verilirse giriş yapılabilir hesap açılır. */
   const sifre = process.env.ORNEK_SIFRE
   if (sifre) {
@@ -200,6 +233,18 @@ export async function ornekVeriYukle(payload: Payload, simdi = new Date()): Prom
           tercihler: { turler: ['staj', 'is'], modeller: (a.modeller as string[]).map((m) => MODEL[m]), sehir: 'Denizli' },
           havuz: { gorunurluk: 'gizli' },
         } as never,
+      })
+      sonuc.kullanici++
+    }
+    /* Örnek firma kullanıcısı (kurgusal kişi, Kodpit'in firma yöneticisi). `.test` alan adı gerçek bir kişiye ait olamaz. */
+    const fk = { eposta: 'kodpit@kariyer.test', ad: 'Selin Aydemir' }
+    const varMi = await payload.count({ collection: 'kullanicilar', where: { email: { equals: fk.eposta } }, overrideAccess: true })
+    if (kodpit && !varMi.totalDocs) {
+      await payload.create({
+        collection: 'kullanicilar',
+        overrideAccess: true,
+        disableVerificationEmail: true,
+        data: { email: fk.eposta, password: sifre, ad: fk.ad, rol: 'firma', firma: kodpit, firmaYetkisi: 'yonetici', _verified: true } as never,
       })
       sonuc.kullanici++
     }

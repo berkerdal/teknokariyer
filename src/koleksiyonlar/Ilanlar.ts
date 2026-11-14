@@ -11,7 +11,7 @@ import {
   sistemIslemiMi,
 } from '../erisim'
 import { aramaMetni } from '../alan/metin'
-import { DURUM_ADI, ILAN_DURUMLARI, sonBasvuruTarihiHatasi, VARSAYILAN_EN_UZUN_SURE_GUN } from '../alan/ilan'
+import { DURUM_ADI, ILAN_DURUMLARI, ilanEksikleri, sonBasvuruTarihiHatasi, VARSAYILAN_EN_UZUN_SURE_GUN } from '../alan/ilan'
 import { CEFR, DENEYIM_ADI, DENEYIM_SIRASI } from '../alan/eslesme'
 import { islemKaydet } from '../altyapi/islemKaydi'
 
@@ -21,6 +21,7 @@ import { islemKaydet } from '../altyapi/islemKaydi'
  * - Durum alanını firma doğrudan değiştiremez. Yayına gönderme, duraklatma, kapatma gibi işlemler alan/ilan.ts
  *   kurallarına göre çalışan ayrı uçlardan yapılır (M4). Burada yalnızca moderasyon durum değiştirebilir.
  * - Her kayıt bir sürüm oluşturur (sürüm geçmişi, CLAUDE.md 5).
+ * - Taslak eksik kaydedilebilir (yalnızca pozisyon adı zorunlu); taslak dışındaki durumlarda `ilanEksikleri` boş olmalıdır.
  * - Herkese açık okuma yalnızca yayındaki, duraklatılmış ve kapanmış ilanlar içindir; kapanmış ilan 410 sayfasında
  *   kullanılır. Taslak ve onaydaki ilanları yalnızca firması ve kurum görür.
  */
@@ -100,6 +101,11 @@ export const Ilanlar: CollectionConfig = {
         }
         if (v.ucretEnAz && v.ucretEnCok && v.ucretEnAz > v.ucretEnCok)
           throw new APIError('Ücretin en az değeri en çok değerinden büyük olamaz.', 400, undefined, true)
+        // Taslak eksik kaydedilebilir; taslak dışındaki her durumda ilan tam olmalıdır (servisler alan alan mesaj verir).
+        if (v.durum && v.durum !== 'taslak') {
+          const eksik = ilanEksikleri(v)
+          if (Object.keys(eksik).length) throw new APIError(`İlan yayına hazır değil: ${Object.values(eksik).join(' ')}`, 400, undefined, true)
+        }
         data.arama = await ilanAramaMetni(req, v)
         return data
       },
@@ -124,7 +130,7 @@ export const Ilanlar: CollectionConfig = {
       name: 'tur',
       label: 'İlan türü',
       type: 'select',
-      required: true,
+      required: false,
       options: [
         { label: 'İş', value: 'is' },
         { label: 'Staj', value: 'staj' },
@@ -134,7 +140,7 @@ export const Ilanlar: CollectionConfig = {
       name: 'altTur',
       label: 'Çalışma şekli / staj türü',
       type: 'select',
-      required: true,
+      required: false,
       options: [
         { label: 'Tam zamanlı', value: 'tam-zamanli' },
         { label: 'Yarı zamanlı', value: 'yari-zamanli' },
@@ -150,14 +156,14 @@ export const Ilanlar: CollectionConfig = {
       label: 'Pozisyon ailesi',
       type: 'relationship',
       relationTo: 'taksonomiler',
-      required: true,
+      required: false,
       filterOptions: { tur: { equals: 'pozisyon-ailesi' } },
     },
     {
       name: 'model',
       label: 'Çalışma modeli',
       type: 'select',
-      required: true,
+      required: false,
       options: [
         { label: 'Ofiste', value: 'ofiste' },
         { label: 'Hibrit', value: 'hibrit' },
@@ -169,14 +175,14 @@ export const Ilanlar: CollectionConfig = {
       name: 'deneyim',
       label: 'Deneyim',
       type: 'select',
-      required: true,
+      required: false,
       options: DENEYIM_SIRASI.map((d) => ({ label: DENEYIM_ADI[d], value: d })),
     },
     {
       name: 'egitim',
       label: 'Eğitim düzeyi',
       type: 'select',
-      required: true,
+      required: false,
       options: [
         { label: 'Lise', value: 'lise' },
         { label: 'Önlisans', value: 'onlisans' },
@@ -199,8 +205,6 @@ export const Ilanlar: CollectionConfig = {
       type: 'relationship',
       relationTo: 'taksonomiler',
       hasMany: true,
-      required: true,
-      minRows: 1,
       filterOptions: { tur: { equals: 'beceri' } },
     },
     {
@@ -221,7 +225,7 @@ export const Ilanlar: CollectionConfig = {
       ],
     },
     { name: 'pozisyonSayisi', label: 'Pozisyon sayısı', type: 'number', min: 1, defaultValue: 1 },
-    { name: 'sonBasvuru', label: 'Son başvuru tarihi', type: 'date', required: true, index: true },
+    { name: 'sonBasvuru', label: 'Son başvuru tarihi', type: 'date', required: false, index: true },
     { name: 'baslangic', label: 'Başlangıç tarihi', type: 'date' },
     { name: 'ucretEnAz', label: 'Ücret, en az (₺, net/ay)', type: 'number', min: 0 },
     { name: 'ucretEnCok', label: 'Ücret, en çok (₺, net/ay)', type: 'number', min: 0 },
@@ -233,8 +237,8 @@ export const Ilanlar: CollectionConfig = {
       admin: { description: 'Gizli kalsa da eşleştirmede adayın beklentisiyle karşılaştırılır.' },
     },
     { name: 'yanHaklar', label: 'Yan haklar', type: 'array', fields: [{ name: 'ad', type: 'text', required: true }] },
-    { name: 'isTanimi', label: 'İş tanımı', type: 'textarea', required: true, maxLength: 5000 },
-    { name: 'nitelikler', label: 'Aranan nitelikler', type: 'textarea', required: true, maxLength: 5000 },
+    { name: 'isTanimi', label: 'İş tanımı', type: 'textarea', required: false, maxLength: 5000 },
+    { name: 'nitelikler', label: 'Aranan nitelikler', type: 'textarea', required: false, maxLength: 5000 },
     { name: 'sartname', label: 'Şartname veya ek belge (PDF)', type: 'upload', relationTo: 'dosyalar' },
     {
       name: 'onElemeSorulari',
@@ -318,6 +322,17 @@ export const Ilanlar: CollectionConfig = {
         { label: 'Yönetici A.Ş. yayından kaldırdı', value: 'moderasyon' },
       ],
       admin: { position: 'sidebar' },
+    },
+    {
+      name: 'bekleyenDegisiklik',
+      label: 'Onay bekleyen değişiklik',
+      type: 'json',
+      access: { update: alanModerasyon },
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Yayındaki ilanda pozisyon adı, ilan türü, çalışma şekli veya ücret değişince yeni değerler onaylanana kadar burada bekler.',
+      },
     },
     { name: 'yayinTarihi', label: 'Yayın tarihi', type: 'date', admin: { position: 'sidebar', readOnly: true } },
     { name: 'basvuruSayisi', type: 'number', defaultValue: 0, admin: { hidden: true }, access: { update: () => false } },

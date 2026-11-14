@@ -82,3 +82,31 @@ describe('gün sınırı sunucu saat diliminden bağımsız (Workers UTC çalı�
     expect(kalanGun(son, new Date('2026-11-14T22:30:00Z'))).toBe(0) // TR 15 Kasım 01:30: son gün
   })
 })
+
+describe('tarih seçici günleri (Türkiye saati)', async () => {
+  const { trGunMetni, trGunu } = await import('@/alan/tarih')
+  it('UTC gece yarısından önceki an Türkiye’de ertesi gündür', () => {
+    expect(trGunMetni(new Date('2026-11-14T22:30:00Z'))).toBe('2026-11-15')
+  })
+  it('metin günü Türkiye saatiyle gün başına çevrilir; geçersiz gün reddedilir', () => {
+    expect(trGunu('2026-11-15')?.toISOString()).toBe('2026-11-14T21:00:00.000Z')
+    expect(trGunu('2026-02-31')).toBeNull()
+    expect(trGunu('15.11.2026')).toBeNull()
+  })
+})
+
+describe('ilan kopyası: dizi satırları', () => {
+  it('dil, yan hak ve soru satırlarının kimliklerini atar; ilişki kimliklerini korur', () => {
+    const k = ilanKopyasi({
+      id: 3,
+      zorunluBeceriler: [5, 6],
+      diller: [{ id: 'a1', dil: 17, seviye: 'B1' }],
+      yanHaklar: [{ id: 'b1', ad: 'Yemek kartı' }],
+      onElemeSorulari: [{ id: 'c1', soru: 'Ne zaman?', secenekler: [{ id: 'd1', ad: 'Hemen' }] }],
+    }) as Record<string, unknown>
+    expect(k.zorunluBeceriler).toEqual([5, 6])
+    expect(k.diller).toEqual([{ dil: 17, seviye: 'B1' }])
+    expect(k.yanHaklar).toEqual([{ ad: 'Yemek kartı' }])
+    expect(k.onElemeSorulari).toEqual([{ soru: 'Ne zaman?', secenekler: [{ ad: 'Hemen' }] }])
+  })
+})

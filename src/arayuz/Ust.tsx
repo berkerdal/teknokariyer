@@ -20,7 +20,7 @@ export async function Ust({ aktif = '' }: { aktif?: UstMenu }) {
     : adayMi(k)
       ? { href: '/hesabim', ad: k.ad ?? 'Hesabım' }
       : firmaKullanicisiMi(k)
-        ? { href: '/firma', ad: k.ad ?? 'Firma paneli' }
+        ? { href: '/firma-paneli', ad: k.ad ?? 'Firma paneli' }
         : kurumKullanicisiMi(k)
           ? { href: '/admin', ad: k.ad ?? 'Yönetim' }
           : null
