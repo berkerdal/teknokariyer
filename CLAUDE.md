@@ -264,8 +264,10 @@ Claude tarafından yapılacak.
     Tarayıcı parantezi `%28` olarak ister, Cloudflare statik sunucusu bulamaz, Next aynı adrese 307 verir: sonsuz döngü,
     sayfa etkileşimsiz. Kökteki `worker.ts` sarmalayıcısı kodlanmış adresi çözüp dosyayı doğrudan `ASSETS`'ten verir.
     curl ile denenince görünmez (curl kodlamaz, önbellek kullanmaz); tarayıcıyla denenmeli.
-    Gerekenler: `run_worker_first: ["/_next/static/chunks/app/*"]`, `html_handling`/`not_found_handling: "none"`
-    (OpenNext şartı) ve depodan gelen 304'ün de iletilmesi (yalnızca 404 Next'e devredilir).
+    Köşeli parantezli dinamik rota adları (`[adres]`) sarmalayıcıyla da çözülemedi. **Kalıcı çözüm:** `next.config.ts`
+    webpack ayarı, adı `( ) [ ]` içeren istemci parçalarına yalnızca içerik özetinden ad verir (`static/chunks/r/…`).
+    Sarmalayıcı ve `run_worker_first` zararsız yedek olarak duruyor (`html_handling`/`not_found_handling: "none"` OpenNext
+    şartı; depodan gelen 304 de iletilir).
   - **Derlemede veritabanı yok:** `next build` sayfa bilgisini 3 işlemle paralel toplar; her biri yerel D1 simülasyonunu
     açınca "database is locked" ile derleme rastgele düşüyordu (Cloudflare'deki aralıklı "Failed" derlemelerin sebebi).
     `NEXT_PHASE === 'phase-production-build'` iken bağlantılar boş bırakılır.

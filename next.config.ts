@@ -40,7 +40,18 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['jose', 'pg-cloudflare'],
 
   // Your Next.js config here
-  webpack: (webpackConfig) => {
+  webpack: (webpackConfig, { isServer, dev }) => {
+    // Tarayıcıya giden JS dosyalarının adında rota adları geçmesin: `(frontend)`, `[adres]` gibi karakterler bazı
+    // sunucularda (Cloudflare statik katmanı) kodlama farkı yüzünden yönlendirme döngüsüne yol açıyor.
+    // Bu parçalar yalnızca içerik özetinden oluşan bir ad alır; dosya listesi Next'in derleme kaydından okunduğu için
+    // başka bir şey değişmez.
+    if (!isServer && !dev) {
+      const asil = webpackConfig.output.filename
+      webpackConfig.output.filename = (veri: { chunk?: { name?: string | null } }, bilgi: unknown) => {
+        if (/[()[\]]/.test(veri.chunk?.name ?? '')) return 'static/chunks/r/[contenthash].js'
+        return typeof asil === 'function' ? asil(veri, bilgi) : asil
+      }
+    }
     webpackConfig.resolve.alias = { ...webpackConfig.resolve.alias, '@payload-config': payloadYapilandirmasi }
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
