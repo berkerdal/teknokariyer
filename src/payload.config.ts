@@ -14,6 +14,7 @@ import type { GetPlatformProxyOptions } from 'wrangler'
 import { ortakYapilandirma } from './payload.ortak'
 import { DOSYA_KOLEKSIYONLARI } from './koleksiyonlar'
 import { migrations } from './migrations'
+import { dosyaOkuyucusuAyarla } from './altyapi/depolama'
 
 const gercekYol = (deger: string) => {
   try {
@@ -62,6 +63,13 @@ const cloudflare: Pick<CloudflareContext, 'env'> = workersIcinde
     ? { env: {} as CloudflareContext['env'] }
     : await wranglerBaglami()
 void komutSatiri
+
+// Ham dosya okuma (CV filigranı): R2'de nesne anahtarı dosya adıdır (r2Storage, önek yok).
+if (cloudflare.env.R2)
+  dosyaOkuyucusuAyarla(async (anahtar) => {
+    const nesne = await cloudflare.env.R2.get(anahtar)
+    return nesne ? new Uint8Array(await nesne.arrayBuffer()) : null
+  })
 
 export default buildConfig(
   ortakYapilandirma({

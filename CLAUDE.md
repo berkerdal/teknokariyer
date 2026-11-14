@@ -253,6 +253,17 @@ Claude tarafından yapılacak.
     - Kullanıcıya “Görevi” (`unvan`) alanı; firma panelinde adın altında görünür. Örnek firma kullanıcısı İK uzmanı.
     - Şema push kapalı (`push: false`): geliştirmede de şema yalnızca göçle değişir. Entegrasyon testleri geçici veritabanını
       göçlerle kurar (`tests/entegrasyon/hazirlik.ts`); her çalıştırmada göçler baştan denenir.
+  - **Firma paneli F3 (14.11.2026):** Başvurular (`/firma-paneli/basvurular`: ilan, durum ve “zorunluların hepsi” süzgeci;
+    ayrıntıda eşleşme, ön eleme cevapları, başvuru anındaki profil, durum, puan, ekip notu) ve CV havuzu
+    (`/firma-paneli/havuz`: anonim liste, beceri araması, profil açma kaydı). Servisler `src/servisler/degerlendirme.ts`
+    ve `havuz.ts`. Başvuru ilk açılınca “İnceleniyor” olur; görüşme/teklif/olumlu/olumsuz adaya e-posta gönderir.
+    - **CV filigranı (K6):** `src/altyapi/filigran.ts` (pdf-lib + fontkit, Source Sans 3 alt kümesi gömülü:
+      `tools/yazi/filigran_yazitipi.py`). Her sayfanın altına firma adı ve tarih; her indirme işlem kaydına geçer.
+      Dosya içeriği sağlayıcıdan bağımsız okunur: `src/altyapi/depolama.ts` (R2 veya S3 okuyucusu yapılandırmada kaydedilir).
+    - Örnek veriye kurgusal adaylar (`src/ornekVeri/adaylar.ts`): profil, PDF CV, Kodpit ilanlarına başvuru, havuz.
+      Gerçek servislerle yüklenir; yarıda kalırsa kaldığı yerden tamamlanır. Hesaplar giriş yapılamaz.
+    - Örnek veri ucu test ortamında `x-ornek-anahtar` başlığıyla da çağrılabilir (Worker gizli değişkeni `ORNEK_ANAHTAR`;
+      değeri hiçbir yerde yok, işten sonra silinir).
   - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

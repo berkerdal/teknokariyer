@@ -164,3 +164,31 @@ export function basvuruAlindiEpostasi(k: Hitap, ilan: { pozisyonAdi: string; fir
     ['Bu e-posta başvurunla ilgili olduğu için bildirim ayarlarından kapatılamaz.'],
   )
 }
+
+/**
+ * Başvurunun durumu değişince adaya bildirim (görüşme, teklif, olumlu, olumsuz). Firma bu bildirimi kapatamaz
+ * (prototip “Başvurular”). Olumsuz bildirimde firmanın isteğe bağlı kişisel notu eklenir.
+ */
+export function basvuruDurumuEpostasi(
+  k: Hitap,
+  b: { durum: 'gorusme' | 'teklif' | 'olumlu' | 'olumsuz'; pozisyonAdi: string; firma: string; not?: string },
+): Eposta {
+  const selam = `Merhaba ${k.ad ?? ''},`.trim()
+  const ilan = `“${b.pozisyonAdi}”`
+  const not = b.not?.trim() ? [`${b.firma} firmasının notu: “${b.not.trim()}”`] : []
+  const basvurularim = { metin: 'Başvurularımı gör', adres: `${siteAdresi()}/hesabim` }
+  switch (b.durum) {
+    case 'gorusme':
+      return eposta(`Görüşme aşaması: ${b.pozisyonAdi}`, [selam, `${b.firma}, ${ilan} ilanına yaptığın başvuruyu görüşme aşamasına aldı.`, 'Firma görüşmenin zamanı ve yeri için seninle iletişime geçecek.', ...not], basvurularim)
+    case 'teklif':
+      return eposta(`Teklif aşaması: ${b.pozisyonAdi}`, [selam, `${b.firma}, ${ilan} ilanına yaptığın başvuruda teklif aşamasına geçti.`, 'Firma teklifin ayrıntıları için seninle iletişime geçecek.', ...not], basvurularim)
+    case 'olumlu':
+      return eposta(`Başvurun olumlu sonuçlandı: ${b.pozisyonAdi}`, [selam, `Tebrikler! ${b.firma}, ${ilan} ilanına yaptığın başvuruyu olumlu sonuçlandırdı.`, 'Firma sonraki adımlar için seninle iletişime geçecek.', ...not], basvurularim)
+    case 'olumsuz':
+      return eposta(
+        `Başvurunun sonucu: ${b.pozisyonAdi}`,
+        [selam, `${b.firma}, ${ilan} ilanı için başka bir adayla ilerlemeye karar verdi.`, 'Başvurun ve gösterdiğin ilgi için teşekkür ederiz. Bu karar, başka ilanlara yapacağın başvuruları etkilemez.', ...not],
+        { metin: 'Diğer ilanlara göz at', adres: `${siteAdresi()}/ilanlar` },
+      )
+  }
+}

@@ -15,6 +15,8 @@ import {
 } from '@/alan/havuz'
 import { firmaKimligi, firmaYetkisiVarMi, kurumKullanicisiMi, adayMi } from '@/erisim'
 import { islemKaydet } from '@/altyapi/islemKaydi'
+import { dosyaIcerigi } from '@/altyapi/depolama'
+import { filigranMetni, pdfFiligranla } from '@/altyapi/filigran'
 import { IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
 
 const HAVUZ_YETKISI = ['yonetici', 'ilan-sorumlusu'] as const
@@ -128,4 +130,33 @@ export async function goruntuleyenFirmaSayisi(payload: Payload, kullanici: Kulla
     docs.map((d) => ({ firmaId: String(kimlik(d.firma)), tarih: new Date(d.createdAt) })),
     new Date(),
   )
+}
+
+/** Havuzdaki adayın CV'si, firma adı ve tarih filigranıyla (K6). Aday görünür değilse veya dosya onun değilse 404. */
+export async function havuzCvsi(payload: Payload, kullanici: Kullanici, adayId: number, dosyaId: number): Promise<{ icerik: Uint8Array; dosyaAdi: string }> {
+  havuzYetkisi(kullanici)
+  const aday = await payload.findByID({ collection: 'adaylar', id: adayId, depth: 0, overrideAccess: true }).catch((): null => null)
+  if (!aday) throw new IslemHatasi('Aday bulunamadı.', 404)
+  const h = havuzAdayi(aday)
+  if (!firmaGorebilirMi(h, String(firmaKimligi(kullanici)), new Date())) throw new IslemHatasi('Bu aday artık havuzda değil.', 404)
+  const cv = (aday.cvler ?? []).find((c) => kimlik(c.dosya) === dosyaId)
+  if (!cv) throw new IslemHatasi('CV bulunamadı.', 404)
+  const dosya = await payload.findByID({ collection: 'dosyalar', id: dosyaId, depth: 0, overrideAccess: true }).catch((): null => null)
+  const ham = dosya?.filename ? await dosyaIcerigi(dosya.filename) : null
+  if (!ham) throw new IslemHatasi('CV dosyası bulunamadı.', 404)
+  const firma = await payload.findByID({ collection: 'firmalar', id: Number(firmaKimligi(kullanici)), depth: 0, overrideAccess: true })
+  let icerik: Uint8Array
+  try {
+    icerik = await pdfFiligranla(ham, filigranMetni(firma.kisaAd, new Date()))
+  } catch {
+    throw new IslemHatasi('CV’ye filigran eklenemediği için dosya indirilemiyor. Bu durumu Yönetici A.Ş.’ye bildirin.', 409)
+  }
+  const req = await istekOlustur(payload, kullanici)
+  await islemKaydet(req, { islem: 'Havuzdaki CV indirildi', tur: 'kisisel-veri', kayitTuru: 'adaylar', kayitId: adayId, ayrinti: { firma: firma.kisaAd } })
+  return { icerik, dosyaAdi: `CV - ${aday.kod ?? 'aday'} - ${cv.ad ?? 'CV'}.pdf` }
+}
+
+/** Havuzdaki (görünür ve rızası geçerli) aday sayısı: firma sayfasının üstünde gösterilir. */
+export async function havuzAdaySayisi(payload: Payload, kullanici: Kullanici): Promise<number> {
+  return (await havuzAra(payload, kullanici, {})).length
 }

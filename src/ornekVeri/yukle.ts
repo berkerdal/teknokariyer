@@ -12,6 +12,7 @@ import { DENEYIM_ADI, MODEL_ADI } from '@/alan/eslesme'
 import { ALT_TUR_ADI } from '@/alan/ilanFiltre'
 import { ortam } from '@/altyapi/eposta'
 import veri from './veri.json'
+import { ornekAdaylariYukle } from './adaylar'
 
 type Tur = 'beceri' | 'pozisyon-ailesi' | 'sektor' | 'universite' | 'bolum' | 'dil'
 const tersi = <T extends string>(k: Record<T, string>) => Object.fromEntries(Object.entries(k).map(([a, b]) => [b, a])) as Record<string, T>
@@ -205,6 +206,9 @@ export async function ornekVeriYukle(payload: Payload, simdi = new Date()): Prom
       sonuc.ilan++
     }
   }
+
+  /* Firma panelini dolduran kurgusal adaylar: başvurular ve CV havuzu (giriş yapılamaz). */
+  sonuc.kullanici += await ornekAdaylariYukle(payload, taksonomi as never, kodpit)
 
   /* Örnek aday (kurgusal kişi). Yalnızca ORNEK_SIFRE verilirse giriş yapılabilir hesap açılır. */
   const sifre = process.env.ORNEK_SIFRE

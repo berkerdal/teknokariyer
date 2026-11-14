@@ -15,6 +15,29 @@ import { s3Storage } from '@payloadcms/storage-s3'
 
 import { ortakYapilandirma } from './payload.ortak'
 import { DOSYA_KOLEKSIYONLARI } from './koleksiyonlar'
+import { dosyaOkuyucusuAyarla } from './altyapi/depolama'
+
+const s3Ayari = {
+  endpoint: process.env.S3_ENDPOINT,
+  region: process.env.S3_REGION || 'us-east-1',
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+  },
+}
+
+// Ham dosya okuma (CV filigranı): nesne anahtarı dosya adıdır (s3Storage, önek yok).
+dosyaOkuyucusuAyarla(async (anahtar) => {
+  const { S3Client, GetObjectCommand } = await import('@aws-sdk/client-s3')
+  try {
+    const y = await new S3Client(s3Ayari).send(new GetObjectCommand({ Bucket: process.env.S3_BUCKET || '', Key: anahtar }))
+    return y.Body ? new Uint8Array(await y.Body.transformToByteArray()) : null
+  } catch (e) {
+    if ((e as { name?: string }).name === 'NoSuchKey') return null
+    throw e
+  }
+})
 
 export default buildConfig(
   ortakYapilandirma({
@@ -23,15 +46,7 @@ export default buildConfig(
       s3Storage({
         collections: Object.fromEntries(DOSYA_KOLEKSIYONLARI.map((k) => [k, true])),
         bucket: process.env.S3_BUCKET || '',
-        config: {
-          endpoint: process.env.S3_ENDPOINT,
-          region: process.env.S3_REGION || 'us-east-1',
-          forcePathStyle: true,
-          credentials: {
-            accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
-          },
-        },
+        config: s3Ayari,
       }),
     ],
   }),

@@ -13,6 +13,7 @@ import { duraklat, kapat, kopyala, sureUzat, taslakSil, yayinaGonder, yenidenBas
 import { ESASLI_ALAN_ADI } from '@/alan/ilan'
 import { ilanFormunuOku } from '@/alan/ilanFormu'
 import { ilanKaydet } from '@/servisler/ilanFormu'
+import { basvuruDurumuDegistir, ekipNotuEkle, puanVer } from '@/servisler/degerlendirme'
 import { FormHatasi, IslemHatasi } from '@/servisler/ortak'
 import { firmaOturumu } from '@/veri/firma'
 import { payloadAl } from '@/veri/payload'
@@ -133,4 +134,52 @@ export async function yayinaGonderEylemi(_: FormDurumu, f: FormData): Promise<Fo
   }
   revalidatePath('/firma-paneli', 'layout')
   redirect(`/firma-paneli/ilanlar?gonderildi=${ilanId}&sonuc=${durum}`)
+}
+
+/* ---------- Başvuru değerlendirme ---------- */
+
+const DURUM_TAMAM: Record<string, string> = {
+  alindi: 'Başvuru “Alındı” durumuna geri alındı.',
+  inceleniyor: 'Başvuru “İnceleniyor” olarak işaretlendi.',
+  gorusme: 'Başvuru görüşme aşamasına alındı. Adaya bildirim gönderildi.',
+  teklif: 'Başvuru teklif aşamasına alındı. Adaya bildirim gönderildi.',
+  olumlu: 'Başvuru olumlu sonuçlandı. Adaya bildirim gönderildi.',
+  olumsuz: 'Başvuru olumsuz sonuçlandı. Adaya nazik bir bildirim gönderildi.',
+}
+
+export async function basvuruDurumuEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  const id = Number(metin(f, 'basvuru'))
+  const durum = metin(f, 'durum')
+  try {
+    const s = await basvuruDurumuDegistir(await payloadAl(), k, id, durum, metin(f, 'not'))
+    revalidatePath('/firma-paneli', 'layout')
+    return { tamam: s.bildirim ? DURUM_TAMAM[durum] : (DURUM_TAMAM[durum] ?? 'Durum güncellendi.').replace(' Adaya bildirim gönderildi.', '').replace(' Adaya nazik bir bildirim gönderildi.', ''), surum: Date.now() }
+  } catch (e) {
+    return hata(e)
+  }
+}
+
+export async function ekipNotuEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  try {
+    await ekipNotuEkle(await payloadAl(), k, Number(metin(f, 'basvuru')), metin(f, 'not'))
+  } catch (e) {
+    const h = hata(e)
+    return h.genel ? { hatalar: { not: h.genel } } : h
+  }
+  revalidatePath(`/firma-paneli/basvurular/${metin(f, 'basvuru')}`)
+  return { tamam: 'Not eklendi. Notu yalnızca firma ekibiniz görür.', surum: Date.now() }
+}
+
+export async function puanEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  const ham = metin(f, 'puan')
+  try {
+    await puanVer(await payloadAl(), k, Number(metin(f, 'basvuru')), ham ? Number(ham) : null)
+  } catch (e) {
+    return hata(e)
+  }
+  revalidatePath('/firma-paneli/basvurular', 'layout')
+  return { tamam: ham ? `Puan ${ham} olarak kaydedildi.` : 'Puan kaldırıldı.', surum: Date.now() }
 }
