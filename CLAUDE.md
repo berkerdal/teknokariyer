@@ -206,7 +206,13 @@ Claude tarafından yapılacak.
     - Kaydedilen ilanlar ve kayıtlı aramalar henüz yok (veri modelinde koleksiyon yok).
   - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
-  - **İlk göç (migration) henüz oluşturulmadı:** Şema oturunca ve ilk dağıtımdan önce `pnpm payload migrate:create` ile oluşturulacak.
+  - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
+    Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
+  - **Test ortamı dağıtımı (14.11.2026):** Workers ücretli plan aktif. Bu oturumdan `wrangler deploy` statik dosya
+    yüklemesinde 401 alıyor (aşağıda). Dağıtım Cloudflare **Workers Builds** ile GitHub'dan yapılacak; kullanıcı bağlantıyı
+    kuruyor. Adres: https://teknokariyer-test.teknokariyer.workers.dev (bu oturumun ağ izinlerine eklendi).
+    Kurulumdan sonra: `PAYLOAD_SECRET` Worker gizli değişkeni API ile yazılır, ilk yönetici oluşturulur,
+    örnek veri `POST /yonetim-islem/ornek-veri` ile (yalnızca yönetici, yayında kapalı) yüklenir.
 
 **Öğrenilenler:**
 
@@ -242,6 +248,12 @@ Claude tarafından yapılacak.
     (göreli yol) için tanımlı. `next dev`, depoya `AGENTS.md` yazar; Next 16 belgeleri `node_modules/next/dist/docs/` altında.
   - **ESLint:** eslint-config-next 16 düz (flat) yapılandırma ister; FlatCompat ile çalışmaz.
   - **Ağ:** codeload.github.com ve api.github.com kapalı; raw.githubusercontent.com açık. Payload şablon dosyaları oradan alındı.
+  - **Vekil sunucu ve Cloudflare:** Ortamın vekil sunucusu `api.cloudflare.com` isteklerindeki `Authorization` başlığını
+    her zaman kayıtlı API anahtarıyla değiştiriyor (yanlış anahtarla deneyip doğrulandı). Statik dosya yüklemesi ise
+    yüklemeye özel kısa ömürlü bir anahtar istediği için 401 alıyor. API çağrıları (D1, R2, gizli değişken, ayar) çalışır;
+    tam dağıtım Workers Builds ile yapılır.
+  - **Derleme:** Ön yüz `force-dynamic`; derleme veritabanına bağlanmaz ve `.env` olmadan çalışır. Oturum okuyan kod önce
+    `headers()` çağırır. Aksi hâlde derleme, sayfaları önceden üretirken Payload'un göç sorusunda takılıyordu.
 - **Arayüz geliştirmesinden öğrenilenler:**
   - Prototipteki `.tk button { color: inherit }` kuralı `.dugme` metin rengini eziyordu (prototipte de “Ara” düğmesi koyu
     metinliydi). Temel kurallar artık `:where(.tk)` ile sıfır özgüllükte.
