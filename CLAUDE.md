@@ -264,7 +264,19 @@ Claude tarafından yapılacak.
       Gerçek servislerle yüklenir; yarıda kalırsa kaldığı yerden tamamlanır. Hesaplar giriş yapılamaz.
     - Örnek veriyi yönetici oturumuyla yüklemek için test sayfası: `/yonetim-islem-ornek` (yalnızca yayın dışı ortam).
       Canlıya gizli anahtar yazarak yükleme denemesi izin sisteminde reddedildi; yükleme kullanıcının oturumuyla yapılır.
-  - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
+  - **Firma paneli F4 (14.11.2026):** Firma profili (`/firma-paneli/profil`: tanıtım, sektör, teknolojiler, çalışma modeli,
+    yan haklar, logo; yayına hazır olma durumu) ve ekip (`/firma-paneli/ekip`: üyeler, yetki değişikliği, ekipten çıkarma,
+    davet, kişinin kendi adı ve görevi). Servisler `src/servisler/ekip.ts`, `firmaProfili.ts`.
+    - Davet: tek kullanımlık, 14 gün; anahtarın yalnızca SHA-256 özeti saklanır. Kabul sayfası `/davet?anahtar=`.
+      İlk davet firmanın kurulum aşamasını “davet”, kabul “devralındı” yapar (K3 hunisi). Yönetici A.Ş. de aynı servisle davet eder.
+    - Ekipten çıkarma silme değil, `pasif` işaretidir: giriş açıklamalı mesajla reddedilir, açık oturum `/cikis?pasif=1`
+      ile kapatılır. Firmanın son tam yetkilisi çıkarılamaz veya yetkisi düşürülemez.
+    - Logo yalnızca PNG/JPEG/WebP (ilk baytlardan denetlenir); SVG betik taşıyabileceği için reddedilir.
+    - Öğrenilen: `'use client'` dosyasından dışa aktarılan sabitler sunucu bileşeninde veri olarak kullanılamaz (istemci
+      referansına dönüşür). Ortak sabitler saf modülde durur (`src/alan/ekip.ts`).
+    - Öğrenilen: işlem sonrası satırı başka listeye taşınan bileşenin bildirimi kaybolur; sonuç sayfa düzeyinde
+      (`?sonuc=`) gösterilir.
+  - **Sırada:** Yönetici A.Ş. paneli (ilan onayı, bekleyen değişiklik onayı, talepler, firma kurulumu ve davet, kullanıcılar).
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

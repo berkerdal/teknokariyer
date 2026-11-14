@@ -192,3 +192,19 @@ export function basvuruDurumuEpostasi(
       )
   }
 }
+
+/** Firma ekibine (veya Yönetici A.Ş.'nin firma yetkilisine) davet. Bağlantı tek kullanımlık ve 14 gün geçerlidir. */
+export function davetEpostasi(d: { ad: string; firma: string; davetEden: string; anahtar: string; gun: number }): Eposta {
+  return eposta(
+    `TeknoKariyer’de ${d.firma} ekibine davet edildiniz`,
+    [
+      `Merhaba ${d.ad},`,
+      `${d.davetEden}, sizi Pamukkale Teknokent’in kariyer portalı TeknoKariyer’de ${d.firma} firmasının ekibine davet etti.`,
+      'Firma panelinde ilanları yönetebilir, başvuruları değerlendirebilir ve yetkinize göre CV havuzunda arama yapabilirsiniz.',
+      'Daveti kabul etmek için aşağıdaki bağlantıyı açın ve kendinize bir şifre belirleyin.',
+    ],
+    { metin: 'Daveti kabul et', adres: `${siteAdresi()}/davet?anahtar=${encodeURIComponent(d.anahtar)}` },
+    [`Bu bağlantı ${d.gun} gün geçerlidir ve yalnızca bir kez kullanılabilir.`, 'Bu daveti beklemiyorsanız e-postayı yok sayabilirsiniz; hesap açılmaz.'],
+    'siz',
+  )
+}

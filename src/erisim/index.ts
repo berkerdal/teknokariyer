@@ -17,6 +17,7 @@ export interface OturumKullanicisi {
   rol: Rol
   firma?: string | number | { id: string | number } | null
   firmaYetkisi?: FirmaYetkisi | null
+  pasif?: boolean | null
   collection?: string
 }
 
@@ -41,7 +42,8 @@ export const moderasyonYapabilirMi = (k: OturumKullanicisi | null) => k?.rol ===
 /** Yönetici A.Ş. tarafındaki herhangi bir rol (raporlayıcı yalnızca okur) */
 export const kurumKullanicisiMi = (k: OturumKullanicisi | null) =>
   k?.rol === 'yonetici' || k?.rol === 'moderator' || k?.rol === 'raporlayici'
-export const firmaKullanicisiMi = (k: OturumKullanicisi | null) => k?.rol === 'firma' && firmaKimligi(k) !== null
+/** Etkin firma kullanıcısı: ekipten çıkarılan (pasif) kullanıcı oturumu sürse bile firma verisine erişemez. */
+export const firmaKullanicisiMi = (k: OturumKullanicisi | null) => k?.rol === 'firma' && firmaKimligi(k) !== null && !k.pasif
 export const adayMi = (k: OturumKullanicisi | null) => k?.rol === 'aday'
 
 /** Firma içindeki yetki (talimatlar 2: ekip üyesi verilen yetki kadar işlem yapar). */

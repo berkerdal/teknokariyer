@@ -8,6 +8,7 @@ import { FormHatasi, adayKaydi, girisYap, sifreSifirlamaIste, sifreYenile } from
 import { IslemHatasi } from '@/servisler/ortak'
 import { guvenliDonus, oturumAc, oturumKapat, rolAnaSayfasi } from '@/veri/cerez'
 import { payloadAl } from '@/veri/payload'
+import { davetiKabulEt } from '@/servisler/ekip'
 
 const metin = (f: FormData, k: string) => String(f.get(k) ?? '')
 
@@ -72,4 +73,21 @@ export async function sifreYenileEylemi(_: FormDurumu, f: FormData): Promise<For
 export async function cikisEylemi() {
   await oturumKapat()
   redirect('/')
+}
+
+/** Ekip davetini kabul eder, oturum açar ve firma paneline götürür. */
+export async function davetKabulEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const degerler = { ad: metin(f, 'ad'), unvan: metin(f, 'unvan') }
+  try {
+    const payload = await payloadAl()
+    const u = await davetiKabulEt(payload, metin(f, 'anahtar'), { ...degerler, sifre: metin(f, 'sifre') })
+    const s = await girisYap(payload, u.email, metin(f, 'sifre'))
+    await oturumAc(s.token, s.bitis)
+  } catch (e) {
+    if (e instanceof FormHatasi) return { hatalar: e.alanlar, degerler }
+    if (e instanceof IslemHatasi) return { genel: e.message, degerler }
+    console.error(e)
+    return { genel: 'Beklenmeyen bir sorun oluştu. Biraz sonra yeniden deneyin.', degerler }
+  }
+  redirect('/firma-paneli?hosgeldiniz=1')
 }

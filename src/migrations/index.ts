@@ -1,6 +1,7 @@
 import * as migration_20261114_022255_ilk_sema from './20261114_022255_ilk_sema';
 import * as migration_20261114_085901_taslak_eksik_alanlar from './20261114_085901_taslak_eksik_alanlar';
 import * as migration_20261114_102239_talepler_ve_unvan from './20261114_102239_talepler_ve_unvan';
+import * as migration_20261114_130910_kullanici_pasif from './20261114_130910_kullanici_pasif';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20261114_102239_talepler_ve_unvan.up,
     down: migration_20261114_102239_talepler_ve_unvan.down,
-    name: '20261114_102239_talepler_ve_unvan'
+    name: '20261114_102239_talepler_ve_unvan',
+  },
+  {
+    up: migration_20261114_130910_kullanici_pasif.up,
+    down: migration_20261114_130910_kullanici_pasif.down,
+    name: '20261114_130910_kullanici_pasif'
   },
 ];

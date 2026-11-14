@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
-import { sifreSifirlamaEylemi, sifreYenileEylemi } from '@/eylemler/hesap'
+import { sifreSifirlamaEylemi, sifreYenileEylemi, davetKabulEylemi } from '@/eylemler/hesap'
 import { SIFRE_KURALLARI } from '@/servisler/hesapKurallari'
 import { Alan, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 
@@ -51,6 +51,34 @@ export function SifreYenileFormu({ anahtar }: { anahtar: string }) {
         </ul>
       </Alan>
       <GonderDugmesi>Şifreyi kaydet ve giriş yap</GonderDugmesi>
+    </form>
+  )
+}
+
+/** Firma ekibi davetini kabul: ad, görev ve şifre. Firma kullanıcısına “siz” denir (K9). */
+export function DavetKabulFormu({ anahtar, ad }: { anahtar: string; ad: string }) {
+  const [durum, eylem] = useActionState<FormDurumu, FormData>(davetKabulEylemi, {})
+  const [sifre, setSifre] = useState('')
+  return (
+    <form action={eylem} className="form-yigin" noValidate>
+      <HataOzeti durum={durum} siz />
+      <input type="hidden" name="anahtar" value={anahtar} />
+      <Alan id="ad" etiket="Ad soyad" autoComplete="name" required hata={durum.hatalar?.ad} defaultValue={durum.degerler?.ad ?? ad} />
+      <Alan id="unvan" etiket="Göreviniz" istegeBagli autoComplete="organization-title" defaultValue={durum.degerler?.unvan ?? ''} placeholder="Örnek: İnsan Kaynakları Uzmanı" />
+      <Alan id="sifre" etiket="Şifre" type="password" autoComplete="new-password" required hata={durum.hatalar?.sifre} value={sifre} onChange={(e) => setSifre(e.target.value)}>
+        <ul className="sifre-kurallari kucuk" aria-label="Şifre kuralları">
+          {SIFRE_KURALLARI.map((k) => (
+            <li key={k.metin} className={k.uyuyor(sifre) ? 'tamam' : undefined}>
+              {k.metin}
+            </li>
+          ))}
+        </ul>
+      </Alan>
+      <p className="kucuk">
+        Hesabınızla ilgili kişisel verilerin nasıl işlendiği <Link href="/metin/firma-kullanici-aydinlatma">firma kullanıcıları için aydınlatma metninde</Link>{' '}
+        anlatılır.
+      </p>
+      <GonderDugmesi>Daveti kabul et ve giriş yap</GonderDugmesi>
     </form>
   )
 }

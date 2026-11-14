@@ -159,6 +159,10 @@ export interface Kullanicilar {
   firmaYetkisi?: ('yonetici' | 'ilan-sorumlusu' | 'degerlendirici') | null;
   ikiAsamaliAcik?: boolean | null;
   totpGizli?: string | null;
+  /**
+   * Pasif kullanıcı giriş yapamaz. Notları ve işlem kayıtları silinmez.
+   */
+  pasif?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -773,6 +777,7 @@ export interface KullanicilarSelect<T extends boolean = true> {
   firmaYetkisi?: T;
   ikiAsamaliAcik?: T;
   totpGizli?: T;
+  pasif?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

@@ -9,7 +9,7 @@
 
 import { KURUM } from '@/altyapi/kurum'
 
-export type MetinKimligi = 'aday-aydinlatma' | 'basvuru-aydinlatma' | 'havuz' | 'ticari-ileti'
+export type MetinKimligi = 'aday-aydinlatma' | 'basvuru-aydinlatma' | 'havuz' | 'ticari-ileti' | 'firma-kullanici-aydinlatma'
 
 export interface Metin {
   baslik: string
@@ -86,6 +86,21 @@ Veri sorumlusu: ${SORUMLU}. ${HAKLAR}`,
     govde: `Bu onayı verirsen Pamukkale Teknokent’in kariyer etkinlikleri, staj dönemleri ve duyurularıyla ilgili e-posta alırsın. Onay isteğe bağlıdır. İstediğin zaman “Hesap ve gizlilik” sayfasından veya her e-postadaki bağlantıdan geri alabilirsin.
 
 Başvurunla ilgili zorunlu bildirimler (başvuru alındı, durum değişti, şifre sıfırlama) bu onaydan bağımsızdır.`,
+  },
+  'firma-kullanici-aydinlatma': {
+    baslik: 'Firma kullanıcıları için aydınlatma metni',
+    surum: '1.0',
+    tarih: '2026-11-14',
+    onayli: false,
+    govde: `Veri sorumlusu: ${SORUMLU}.
+
+TeknoKariyer’de firmanız adına hesap açtığınızda adınız, iş e-posta adresiniz, göreviniz ve firmanızdaki yetkiniz işlenir. Bu bilgiler firma hesabının yönetilmesi, ilanların ve başvuruların değerlendirilmesi ve sizinle iletişim kurulması amacıyla, sözleşmenin kurulması ve ifası ile veri sorumlusunun meşru menfaati hukuki sebeplerine dayanılarak işlenir.
+
+Yaptığınız işlemler (ilan değişiklikleri, başvuru durum değişiklikleri, CV indirmeleri ve CV havuzunda profil açılışları) güvenlik ve hesap verebilirlik amacıyla kayıt altına alınır. Aday verilerine yalnızca işe alım değerlendirmesi için erişebilirsiniz.
+
+Hesabınız firmanızın ekibinden çıkarıldığında giriş yapamazsınız; işlem kayıtları yasal saklama süresi boyunca tutulur.
+
+Kişisel verilerinizle ilgili haklarınızı (KVKK madde 11) ${KURUM.kvkkEposta} adresine yazarak kullanabilirsiniz.`,
   },
 }
 

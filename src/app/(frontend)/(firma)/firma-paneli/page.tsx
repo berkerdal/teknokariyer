@@ -13,7 +13,8 @@ const GUN = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', ye
 const herkeseAcik = (d: string) => ['yayinda', 'duraklatildi', 'kapandi', 'suresi-doldu'].includes(d)
 
 /** Açılış ekranı görev odaklı: yeni başvurular, dikkat isteyen ilanlar, yayındakiler ve onay kuralı (K4). */
-export default async function FirmaOzeti() {
+export default async function FirmaOzeti({ searchParams }: { searchParams: Promise<{ hosgeldiniz?: string }> }) {
+  const { hosgeldiniz } = await searchParams
   const k = await firmaOturumu()
   const [firma, ilanlar, kurallar, sinir] = await Promise.all([oturumdakiFirma(), firmaIlanlari(), firmaKurallari(), tarihSiniri()])
   if (!firma) return null
@@ -59,6 +60,11 @@ export default async function FirmaOzeti() {
         )}
       </div>
 
+      {hosgeldiniz && (
+        <p className="basari-kutu" role="status">
+          {firma.kisaAd} ekibine hoş geldiniz. Neler yapabileceğinizi aşağıdaki açıklamada ve her sayfanın üstündeki kutularda bulabilirsiniz.
+        </p>
+      )}
       <ModulBilgisi kimlik="firma-ozet" baslik="Bu sayfa ne işe yarar?">
         <p>Özet, bugün ilgilenmeniz gereken işleri bir arada gösterir. Her kutudaki bağlantı sizi ilgili işleme götürür.</p>
         <ul>

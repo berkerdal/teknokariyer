@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { APIError } from 'payload'
 import { alanSadeceYonetici, kullanici, kurumKullanicisiMi, sistemIslemiMi, yoneticiMi } from '../erisim'
 import { dogrulamaEpostasi, sifreSifirlamaEpostasi } from '../altyapi/epostaSablonlari'
 
@@ -46,6 +47,14 @@ export const Kullanicilar: CollectionConfig = {
     admin: ({ req }) => kurumKullanicisiMi(kullanici(req)),
   },
   hooks: {
+    // Ekipten çıkarılan (pasif) kullanıcı giriş yapamaz.
+    beforeLogin: [
+      ({ user }) => {
+        if ((user as { pasif?: boolean }).pasif)
+          throw new APIError('Bu hesap firmanın ekibinden çıkarıldı. Yeniden erişim için firmanızın yöneticisine başvurun.', 403, undefined, true)
+        return user
+      },
+    ],
     beforeChange: [
       ({ data, operation, req }) => {
         // Kendi kendine kayıt olan herkes aday olarak açılır; rolü yalnızca yönetici belirler.
@@ -110,5 +119,13 @@ export const Kullanicilar: CollectionConfig = {
       access: { update: () => false }, // yalnızca doğrulama akışı değiştirir
     },
     { name: 'totpGizli', type: 'text', hidden: true, access: { read: () => false, update: () => false } },
+    {
+      name: 'pasif',
+      label: 'Pasif (ekipten çıkarıldı)',
+      type: 'checkbox',
+      defaultValue: false,
+      access: { create: alanSadeceYonetici, update: alanSadeceYonetici },
+      admin: { description: 'Pasif kullanıcı giriş yapamaz. Notları ve işlem kayıtları silinmez.' },
+    },
   ],
 }

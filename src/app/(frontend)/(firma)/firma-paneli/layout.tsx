@@ -16,6 +16,7 @@ const dosyaAdresi = (x: unknown) => (x && typeof x === 'object' ? ((x as { url?:
 export default async function FirmaPaneliDuzeni({ children }: { children: React.ReactNode }) {
   const k = await oturum()
   if (!k) redirect('/giris?firma=1&donus=%2Ffirma-paneli')
+  if (k.rol === 'firma' && k.pasif) redirect('/cikis?pasif=1')
   if (!firmaKullanicisiMi(k)) redirect(rolAnaSayfasi(String(k.rol)))
   const [firma, ilanlar] = await Promise.all([oturumdakiFirma(), firmaIlanlari()])
   if (!firma) redirect('/')

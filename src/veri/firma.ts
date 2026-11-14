@@ -21,6 +21,7 @@ export async function firmaOturumu(donus = '/firma-paneli'): Promise<Kullanici> 
   const { rolAnaSayfasi } = await import('./cerez')
   const k = await oturum()
   if (!k) redirect(`/giris?firma=1&donus=${encodeURIComponent(donus)}`)
+  if (k.rol === 'firma' && k.pasif) redirect('/cikis?pasif=1') // ekipten çıkarılan kişinin açık kalmış oturumu
   if (!firmaKullanicisiMi(k)) redirect(rolAnaSayfasi(String(k.rol)))
   return k
 }

@@ -74,6 +74,9 @@ export async function girisYap(payload: Payload, epostaHam: string, sifre: strin
     return { token: s.token, bitis: new Date((s.exp ?? Math.floor(Date.now() / 1000) + 8 * 3600) * 1000), rol: String(s.user?.rol ?? 'aday') }
   } catch (e) {
     if (e instanceof IslemHatasi) throw e
+    // Giriş kancasının açıklamalı reddi (ör. ekipten çıkarılan hesap). Şifre doğrulandıktan sonra çalışır.
+    const h = e as { isPublic?: boolean; status?: number; message?: string }
+    if (h.isPublic && h.status === 403 && h.message) throw new IslemHatasi(h.message, 403)
     const ad = (e as Error)?.name ?? ''
     if (ad === 'LockedAuth') throw new IslemHatasi('Çok sayıda hatalı deneme yapıldı. Hesap 15 dakika kilitlendi; sonra yeniden dene veya şifreni yenile.', 403)
     if (ad === 'UnverifiedEmail') throw new IslemHatasi('E-posta adresin henüz doğrulanmadı. Hesap açarken gönderdiğimiz e-postadaki bağlantıya tıkla.', 403)

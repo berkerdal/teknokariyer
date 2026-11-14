@@ -336,3 +336,19 @@ dialog.alt-panel:not([open]) { display: none; }
 .not-listesi p { margin: 0; }
 .dosya-listesi { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; } .dosya-satiri > a { margin-left: auto; }
 .dugme[disabled] { opacity: .55; cursor: not-allowed; }
+
+/* ---------- Firma profili ---------- */
+.firma-kimlik { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--b4); align-items: start; }
+.logo-formu { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: var(--b4); align-items: start; }
+.logo-onizleme { width: 120px; height: 120px; border: 1px solid var(--cizgi); border-radius: var(--kose-panel); display: grid; place-items: center; background: #FFFFFF; overflow: hidden; }
+.logo-onizleme img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.firma-profili-formu { max-width: 820px; }
+@media (max-width: 599px) { .logo-formu { grid-template-columns: 1fr; } }
+/* ---------- Ekip ---------- */
+.ekip-listesi { list-style: none; margin: 0; padding: 0; }
+.ekip-listesi > li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--cizgi); }
+.ekip-listesi > li:last-child { border-bottom: 0; }
+.ekip-listesi p { margin: 0; }
+.ekip-listesi .etiket { margin-left: 8px; }
+.ekip-islemleri, .yetki-formu { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tehlike-metin { color: var(--hata); }

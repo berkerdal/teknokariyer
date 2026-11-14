@@ -31,6 +31,11 @@ export default async function GirisSayfasi({ searchParams }: Props) {
             </Link>
           </div>
           <h1 className="b2">{firma ? 'Firma girişi' : 'Giriş yap'}</h1>
+          {p.pasif === '1' && (
+            <div className="uyari-kutu" role="status">
+              Hesabınız firmanızın ekibinden çıkarıldığı için oturumunuz kapatıldı. Yeniden erişim için firmanızın yöneticisine başvurun.
+            </div>
+          )}
           {p.dogrulandi === '1' && (
             <div className="basari-kutu" role="status">
               E-posta adresin doğrulandı. Şimdi giriş yapabilirsin.

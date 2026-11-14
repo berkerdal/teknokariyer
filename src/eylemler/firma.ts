@@ -14,6 +14,8 @@ import { ESASLI_ALAN_ADI } from '@/alan/ilan'
 import { ilanFormunuOku } from '@/alan/ilanFormu'
 import { ilanKaydet } from '@/servisler/ilanFormu'
 import { basvuruDurumuDegistir, ekipNotuEkle, puanVer } from '@/servisler/degerlendirme'
+import { davetGonder, davetiIptalEt, davetiYenidenGonder, ekibeGeriAl, ekiptenCikar, kendiBilgileriniGuncelle, yetkiDegistir } from '@/servisler/ekip'
+import { firmaLogosuYukle, firmaProfiliGuncelle } from '@/servisler/firmaProfili'
 import { FormHatasi, IslemHatasi } from '@/servisler/ortak'
 import { firmaOturumu } from '@/veri/firma'
 import { payloadAl } from '@/veri/payload'
@@ -182,4 +184,87 @@ export async function puanEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu
   }
   revalidatePath('/firma-paneli/basvurular', 'layout')
   return { tamam: ham ? `Puan ${ham} olarak kaydedildi.` : 'Puan kaldırıldı.', surum: Date.now() }
+}
+
+/* ---------- Firma profili ve ekip ---------- */
+
+export async function firmaProfiliEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  const sayi = (a: string) => (metin(f, a).trim() ? Number(metin(f, a)) : null)
+  try {
+    await firmaProfiliGuncelle(await payloadAl(), k, {
+      kisaTanitim: metin(f, 'kisaTanitim'),
+      uzunTanitim: metin(f, 'uzunTanitim'),
+      web: metin(f, 'web'),
+      sektor: sayi('sektor'),
+      teknolojiler: f.getAll('teknoloji').map(Number).filter((n) => n > 0),
+      calismaModelleri: f.getAll('calismaModeli').map(String),
+      yanHaklar: f.getAll('yanHak').map(String),
+      kurulusYili: sayi('kurulusYili'),
+      calisanAraligi: metin(f, 'calisanAraligi') || null,
+    })
+  } catch (e) {
+    return hata(e)
+  }
+  revalidatePath('/firma-paneli', 'layout')
+  return { tamam: 'Firma profili kaydedildi.', surum: Date.now() }
+}
+
+export async function logoEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  const dosya = f.get('logo')
+  if (!(dosya instanceof File) || !dosya.size) return { hatalar: { logo: 'Bir logo dosyası seçin.' } }
+  try {
+    await firmaLogosuYukle(await payloadAl(), k, { veri: new Uint8Array(await dosya.arrayBuffer()), boyut: dosya.size })
+  } catch (e) {
+    return hata(e)
+  }
+  revalidatePath('/firma-paneli', 'layout')
+  return { tamam: 'Logo yüklendi.', surum: Date.now() }
+}
+
+export async function davetEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  const degerler = { ad: metin(f, 'ad'), eposta: metin(f, 'eposta'), firmaYetkisi: metin(f, 'firmaYetkisi') }
+  try {
+    await davetGonder(await payloadAl(), k, degerler)
+  } catch (e) {
+    return { ...hata(e), degerler }
+  }
+  revalidatePath('/firma-paneli/ekip')
+  return { tamam: `${degerler.ad.trim()} için davet e-postası gönderildi. Bağlantı 14 gün geçerlidir.`, surum: Date.now() }
+}
+
+/**
+ * Ekip işlemleri. İşlem sonrası satır başka listeye geçebildiği (ör. ekipten çıkarılanlar) için sonuç, satırın
+ * içinde değil sayfanın üstünde gösterilir: sayfa `?sonuc=` koduyla yeniden açılır.
+ */
+export async function ekipIslemiEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  const payload = await payloadAl()
+  const id = Number(metin(f, 'id'))
+  const islem = metin(f, 'islem')
+  try {
+    if (islem === 'yetki') await yetkiDegistir(payload, k, id, metin(f, 'yetki'))
+    else if (islem === 'cikar') await ekiptenCikar(payload, k, id)
+    else if (islem === 'geri-al') await ekibeGeriAl(payload, k, id)
+    else if (islem === 'davet-yeniden') await davetiYenidenGonder(payload, k, id)
+    else if (islem === 'davet-iptal') await davetiIptalEt(payload, k, id)
+    else return { genel: 'İşlem anlaşılamadı. Sayfayı yenileyip yeniden deneyin.' }
+  } catch (e) {
+    return hata(e)
+  }
+  revalidatePath('/firma-paneli/ekip')
+  redirect(`/firma-paneli/ekip?sonuc=${islem}`)
+}
+
+export async function kendiBilgilerimEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await firmaOturumu()
+  try {
+    await kendiBilgileriniGuncelle(await payloadAl(), k, { ad: metin(f, 'ad'), unvan: metin(f, 'unvan') })
+  } catch (e) {
+    return hata(e)
+  }
+  revalidatePath('/firma-paneli', 'layout')
+  return { tamam: 'Bilgileriniz kaydedildi.', surum: Date.now() }
 }
