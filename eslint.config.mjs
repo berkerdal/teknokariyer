@@ -23,6 +23,6 @@ export default defineConfig([
     // Tasarım prototipi ve kimlik betikleri uygulama kodu değil
     'docs/**', 'tools/**',
     // Üretilen dosyalar
-    'src/payload-types.ts', 'src/app/(payload)/admin/importMap.js', 'cloudflare-env.d.ts', 'src/migrations/**',
+    'src/payload-types.ts', 'src/app/(payload)/admin/importMap.js', 'cloudflare-env.d.ts', 'src/migrations/**', 'worker.ts',
   ]),
 ])
