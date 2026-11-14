@@ -21,7 +21,9 @@ export default {
     if (url.pathname.startsWith('/_next/static/')) {
       if (/%2[89]/i.test(url.pathname)) url.pathname = decodeURIComponent(url.pathname)
       const yanit = await env.ASSETS.fetch(new Request(url.toString(), istek))
-      if (yanit.ok) return yanit
+      // 304 (tarayıcı önbelleği doğrulaması) de geçerli yanıttır; yalnızca dosya yoksa Next'e devredilir.
+      // (İlk sürümde yalnızca 200 kabul ediliyordu: ikinci istekte 304 Next'e düşüp 307 döngüsü başlatıyordu.)
+      if (yanit.status !== 404) return yanit
     }
     return isleyici.fetch(istek, env, ctx)
   },
