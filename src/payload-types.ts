@@ -81,6 +81,7 @@ export interface Config {
     'test-postalar': TestPostalar;
     talepler: Talepler;
     'gunluk-ozetler': GunlukOzetler;
+    'kvkk-talepleri': KvkkTalepleri;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,6 +103,7 @@ export interface Config {
     'test-postalar': TestPostalarSelect<false> | TestPostalarSelect<true>;
     talepler: TaleplerSelect<false> | TaleplerSelect<true>;
     'gunluk-ozetler': GunlukOzetlerSelect<false> | GunlukOzetlerSelect<true>;
+    'kvkk-talepleri': KvkkTalepleriSelect<false> | KvkkTalepleriSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -690,6 +692,36 @@ export interface GunlukOzetler {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kvkk-talepleri".
+ */
+export interface KvkkTalepleri {
+  id: number;
+  tur: 'bilgi' | 'amac' | 'aktarim' | 'duzeltme' | 'silme' | 'bildirim' | 'itiraz' | 'zarar' | 'diger';
+  aciklama?: string | null;
+  kanal: 'portal' | 'eposta' | 'yazili' | 'kep';
+  kullanici?: (number | null) | Kullanicilar;
+  basvuranAd: string;
+  basvuranEposta: string;
+  basvuruTarihi: string;
+  kimlik: 'hesap' | 'kayitli-eposta' | 'imzali' | 'kep' | 'dogrulanmadi';
+  durum: 'alindi' | 'inceleniyor' | 'sonuclandi';
+  sonuc?: ('kabul' | 'kismen' | 'ret') | null;
+  cevap?: string | null;
+  cevapTarihi?: string | null;
+  cevapGonderildi?: boolean | null;
+  notlar?:
+    | {
+        metin: string;
+        yazan?: (number | null) | Kullanicilar;
+        tarih: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -767,6 +799,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'gunluk-ozetler';
         value: number | GunlukOzetler;
+      } | null)
+    | ({
+        relationTo: 'kvkk-talepleri';
+        value: number | KvkkTalepleri;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1231,6 +1267,35 @@ export interface GunlukOzetlerSelect<T extends boolean = true> {
   havuzdakiAday?: T;
   ilanVerenFirma?: T;
   ilanlar?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kvkk-talepleri_select".
+ */
+export interface KvkkTalepleriSelect<T extends boolean = true> {
+  tur?: T;
+  aciklama?: T;
+  kanal?: T;
+  kullanici?: T;
+  basvuranAd?: T;
+  basvuranEposta?: T;
+  basvuruTarihi?: T;
+  kimlik?: T;
+  durum?: T;
+  sonuc?: T;
+  cevap?: T;
+  cevapTarihi?: T;
+  cevapGonderildi?: T;
+  notlar?:
+    | T
+    | {
+        metin?: T;
+        yazan?: T;
+        tarih?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

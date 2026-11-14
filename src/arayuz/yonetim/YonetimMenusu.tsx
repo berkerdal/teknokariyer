@@ -10,7 +10,18 @@ const etkinMi = (yol: string, href: string) => (href === '/yonetim' ? yol === hr
  * Yönetici A.Ş. menüsü: masaüstünde koyu yan menü, mobilde yatay kaydırılan sekmeler (prototip “Yönetim”).
  * Sayılar bekleyen işlerdir; sayfa sunucuda her istekte hesaplar.
  */
-export function YonetimMenusu({ yer, sayilar, teknik }: { yer: 'yan' | 'sekme'; sayilar: { toplam: number; onay: number; degisiklik: number; talep: number; takip: number }; teknik: boolean }) {
+export function YonetimMenusu({
+  yer,
+  sayilar,
+  teknik,
+  yonetici,
+}: {
+  yer: 'yan' | 'sekme'
+  sayilar: { toplam: number; onay: number; degisiklik: number; talep: number; takip: number; kvkk: number }
+  teknik: boolean
+  /** KVKK başvuruları ve işlem kayıtları kişisel veri içerir; yalnızca tam yetkiliye görünür. */
+  yonetici: boolean
+}) {
   const yol = usePathname()
   const ana: Oge[] = [
     { href: '/yonetim', ad: 'Bugün', sayi: sayilar.toplam },
@@ -20,11 +31,13 @@ export function YonetimMenusu({ yer, sayilar, teknik }: { yer: 'yan' | 'sekme'; 
     { href: '/yonetim/degisiklikler', ad: 'İlan değişiklikleri', sayi: sayilar.degisiklik },
     { href: '/yonetim/talepler', ad: 'Liste talepleri', sayi: sayilar.talep },
     { href: '/yonetim/firmalar', ad: 'Firmalar ve kurulum', sayi: sayilar.takip },
+    ...(yonetici ? [{ href: '/yonetim/kvkk', ad: 'KVKK başvuruları', sayi: sayilar.kvkk }] : []),
   ]
   const yonetim: Oge[] = [
     { href: '/yonetim/listeler', ad: 'Listeler' },
     { href: '/yonetim/kullanicilar', ad: 'Kullanıcılar' },
     { href: '/yonetim/ayarlar', ad: 'Ayarlar' },
+    ...(yonetici ? [{ href: '/yonetim/kayitlar', ad: 'İşlem kayıtları' }] : []),
   ]
   const baglanti = (o: Oge) => (
     <Link key={o.href} href={o.href} aria-current={etkinMi(yol, o.href) ? 'page' : undefined}>

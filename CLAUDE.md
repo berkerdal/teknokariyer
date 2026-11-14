@@ -216,7 +216,7 @@ Claude tarafından yapılacak.
     eksikler sorulur, CV zorunlu ve yalnızca geçerli PDF), başarı sayfası ve “başvurun alındı” e-postası, aday paneli
     (başvurularım, profil ve CV’ler, CV havuzu ayarları, hesap ve gizlilik, veri indirme). Tarayıcıda uçtan uca denendi.
     - KVKK metinleri `src/metinler/` altında, sürümlü ve **taslak** (`onayli: false`); hukuk birimi onayı bekliyor.
-    - Hesap silme şimdilik kvkk@ adresine e-postayla; K27'ye göre panelden silme yazılacak.
+    - Hesap silme panelden yapılır (K27; aşağıda “KVKK başvuruları, işlem kayıtları ve hesap silme”).
     - Kaydedilen ilanlar ve kayıtlı aramalar henüz yok (veri modelinde koleksiyon yok).
   - **Geri bildirim turu 1 (14.11.2026, K28–K29):** Profil okunur özet + düzenleme penceresi (`DuzenlemePenceresi`),
     profil sihirbazı (`/hesabim/profil/sihirbaz`), yeni bölümler (iş deneyimi, sertifikalar, bağlantılar), metin kılavuzu
@@ -376,8 +376,35 @@ Claude tarafından yapılacak.
     - **Firma raporu:** `/firma-paneli/rapor` (+ `/excel`), `src/veri/firmaRaporu.ts`; yalnızca kendi firmasının ilanları,
       başka firmayla karşılaştırma yok. Firma başvuruları zaten tek tek gördüğü için kanal sayıları gizlenmez.
     - KVKK raporundaki ilgili kişi talepleri, talepler ekranı yazılınca dolacak.
-  - **Sırada:** (1) KVKK talepleri ve işlem kayıtları ekranı, (2) aday hesap silme (K27).
-    Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
+  - **KVKK başvuruları, işlem kayıtları ve hesap silme (14.11.2026, K27):** Göç `20261114_194152_kvkk_talepleri`
+    (yalnızca CREATE/ADD). Kurallar `src/alan/kvkk.ts` (9 tür m. 11, kanal, kimlik yöntemi, 30 gün TR saatiyle, cevap
+    taslakları ve `[… yazın]` yer tutucu denetimi), servis `src/servisler/kvkk.ts`, veri `src/veri/kvkk.ts`.
+    - Aday `/hesabim/hesap#kvkk` formundan başvurur (kimlik doğrulanmış sayılır, en fazla 3 açık başvuru). E-postayla ve
+      yazılı gelenleri tam yetkili `/yonetim/kvkk` sayfasında kaydeder; adres kayıtlı aday hesabıysa bağlanır, “kayıtlı
+      e-posta” yöntemi yalnızca o durumda seçilebilir. Akış: alındı → kimlik doğrulanıp incelemeye alındı → (silmede hesabı
+      sil) → cevap e-postası. Kimlik doğrulanmadan cevap verilemez; cevap gerekçeli, boş veya yer tutuculu olamaz.
+    - Herkese açık bilgi sayfası `/kvkk-basvurusu` (alt bilgideki bağlantı). Veri dökümü ortak: `src/veri/adayDokumu.ts`
+      (aday `/hesabim/verilerim`, Yönetici A.Ş. `/yonetim/kvkk/[id]/dokum`; firma iç notları, puan ve etiketler yok).
+    - **Hesap silme** `src/servisler/hesapSilme.ts` (`adayHesabiniSil`): aday şifresiyle kendisi veya tam yetkili KVKK silme
+      başvurusu üzerine. Başvurular firmada kalır; profil kopyasından ad, e-posta, telefon, bağlantılar, ayrıca ön yazı ve
+      CV silinir (`hesapSilindi: true`). Profil, bütün dosyalar, havuz görüntülenmeleri, rızalar ve hesap silinir.
+      Firma sayfası “Aday hesabını sildi” gösterir, profil ve eşleşme yalnızca anonimleştirmede gizlenir.
+      Silme sonrası `/hesap-silindi`. Aday aydınlatma metni 1.1 (silme cümlesi K27’ye göre).
+    - **İşlem kayıtları** `/yonetim/kayitlar`: arama (işlem, kişi adı/e-postası, kayıt no), tür, Türkçe takvimle tarih
+      aralığı, 50’lik sayfa, Excel çıktısı (kayda geçer). Veri `src/veri/islemKayitlari.ts`.
+    - KVKK başvuruları ve işlem kayıtları **yalnızca rol `yonetici`** (kişisel veri); moderatör ve raporlayıcı menüde
+      görmez, adresle gelirse açıklama görür (`YetkiYok`). “Bugün”de KVKK kuyruğu ve menü sayacı yalnızca tam yetkiliye.
+    - KVKK raporu artık başvuruları (konu, sonuç, ortalama cevap süresi, süre aşımı) ve silinen hesapları sayar; KVKK
+      başvurusu iş adımları “kişisel veri erişimi” sayılmaz.
+    - Hukuk birimine sorulacaklar talimatlar 19. bölümün sonunda (saklama süreleri, silmede kalan alanlar, rıza kayıtları,
+      KVKK başvuru kayıtlarının saklanması, taslak metinler, kimlik doğrulama yolları).
+    - Öğrenilen: React eylem sonrası formu sıfırlarken **state ile kontrol edilen radyo düğmesinin DOM seçimi de silinir**;
+      React bunu fark etmez ve ikinci gönderimde değer boş gider. Hata sonucunda `surum` döndürülür ve form `key={surum}`
+      ile yeniden kurulur. Next’in sayfa duyurucusu da `role=alert` taşır; testlerde hata kutusu kapsamla seçilmeli.
+    - Öğrenilen: Hesap silmede veri değişiklikleri sistem isteğiyle yapılır (aday rolüne özgü kanca kuralları uygulanmasın);
+      kişi kendini sildiyse işlem kaydının `kim` alanı silinen hesaba bağlanamaz (yabancı anahtar), sistem adına yazılır.
+  - **Sırada:** iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması,
+    YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang, `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayından önce YÖK üniversite ve

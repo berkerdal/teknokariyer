@@ -544,3 +544,27 @@ p.y-oge-satir { padding: 10px 14px; }
   body { background: #FFFFFF !important; }
   a { color: inherit; text-decoration: none; }
 }
+
+/* KVKK başvuruları ve işlem kayıtları */
+.y-tablo tr.risk td:first-child { box-shadow: inset 4px 0 0 var(--hata); }
+.y-iki-alan { display: grid; gap: 0 16px; }
+@media (min-width: 900px) { .y-iki-alan { grid-template-columns: 1fr 1fr; } }
+.kvkk-adim { list-style: none; margin: 0 0 16px; padding: 0; }
+.kvkk-cevap { white-space: pre-wrap; background: var(--zemin); border-left: 3px solid var(--cizgi-kontrol); padding: 10px 12px; margin: 6px 0 12px; }
+.kvkk-liste { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 12px; }
+.kvkk-liste li { border-bottom: 1px solid var(--cizgi); padding-bottom: 10px; }
+.kvkk-liste p { margin: 0; }
+.kvkk-yeni { margin: 8px 0 12px; }
+.kvkk-yeni > summary { list-style: none; display: inline-flex; cursor: pointer; }
+.kvkk-yeni > summary::-webkit-details-marker { display: none; }
+.kvkk-yeni[open] > summary { margin-bottom: 16px; }
+.hesap-sil ul { margin: 0 0 12px; padding-left: 20px; list-style: disc; }
+.kayit-suzgec { display: grid; gap: 0 16px; align-items: end; }
+@media (min-width: 900px) { .kayit-suzgec { grid-template-columns: 2fr 1fr; } .kayit-suzgec .kayit-tarih, .kayit-suzgec .dugme-grubu { grid-column: 1 / -1; } }
+.kayit-tarih { margin: 4px 0 12px; }
+.kayit-tarih > summary { cursor: pointer; font-weight: 600; min-height: var(--dokunma); display: flex; align-items: center; }
+.kayit-ayrinti { overflow-wrap: anywhere; margin: 4px 0 0; color: var(--metin-2); }
+.kayit-tablo td { vertical-align: top; }
+.sayfalama { display: flex; gap: 16px; align-items: center; justify-content: space-between; border-top: 1px solid var(--cizgi); }
+.kvkk-dokum { display: grid; gap: 6px; justify-items: start; margin-top: 8px; }
+.kayit-tarih > summary { color: var(--lacivert); }

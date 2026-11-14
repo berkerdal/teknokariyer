@@ -166,7 +166,7 @@ describe('başvuru ve havuz (K24, K25, K5)', () => {
     expect(p.eposta).toBe(adayK.email)
     await havuzProfiliAc(payload, firmaKullanici, aday.id) // aynı firma ikinci kez
     expect(await goruntuleyenFirmaSayisi(payload, adayK)).toBe(1)
-    const kayit = await payload.find({ collection: 'islem-kayitlari', where: { and: [{ tur: { equals: 'kisisel-veri' } }, { kayitId: { equals: String(aday.id) } }] }, overrideAccess: true })
+    const kayit = await payload.find({ collection: 'islem-kayitlari', where: { and: [{ tur: { equals: 'kisisel-veri' } }, { kayitTuru: { equals: 'adaylar' } }, { kayitId: { equals: String(aday.id) } }] }, overrideAccess: true })
     expect(kayit.totalDocs).toBe(2)
     await expect(havuzProfiliAc(payload, digerKullanici, aday.id)).rejects.toThrow(/havuzda değil/)
   })

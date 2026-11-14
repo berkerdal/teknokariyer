@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { kurumKullanicisiMi, teknikSorumluMu } from '@/erisim'
+import { kurumKullanicisiMi, teknikSorumluMu, yoneticiMi } from '@/erisim'
 import { Alt } from '@/arayuz/Alt'
 import { YonetimMenusu } from '@/arayuz/yonetim/YonetimMenusu'
 import { cikisEylemi } from '@/eylemler/hesap'
 import { rolAnaSayfasi } from '@/veri/cerez'
 import { oturum } from '@/veri/payload'
-import { yonetimSayilari } from '@/veri/yonetim'
+import { kullaniciSayilari } from '@/veri/yonetim'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { robots: { index: false } }
@@ -22,7 +22,8 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
   if (!k) redirect('/giris?donus=%2Fyonetim')
   if (k.pasif) redirect('/cikis?pasif=kurum')
   if (!kurumKullanicisiMi(k)) redirect(rolAnaSayfasi(String(k.rol)))
-  const sayilar = await yonetimSayilari()
+  const yonetici = yoneticiMi(k)
+  const sayilar = await kullaniciSayilari(yonetici)
   const kisi = `${k.ad ?? k.email} · ${ROL_ADI[String(k.rol)] ?? k.rol}`
   return (
     <>
@@ -37,7 +38,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
           </button>
         </form>
       </header>
-      <YonetimMenusu yer="sekme" sayilar={sayilar} teknik={teknikSorumluMu(k)} />
+      <YonetimMenusu yer="sekme" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} />
       <div className="y-masa">
         <nav className="y-yan" aria-label="Yönetim menüsü">
           <div className="y-logo">
@@ -46,7 +47,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
             </Link>
             <span className="y-rol">Yönetici A.Ş.</span>
           </div>
-          <YonetimMenusu yer="yan" sayilar={sayilar} teknik={teknikSorumluMu(k)} />
+          <YonetimMenusu yer="yan" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} />
           <div className="y-kisi">
             <p>{kisi}</p>
             <form action={cikisEylemi}>

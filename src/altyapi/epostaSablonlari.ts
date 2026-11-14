@@ -328,3 +328,45 @@ export function kurumHesabiEpostasi(d: { ad: string; rolAdi: string; acan: strin
     'siz',
   )
 }
+
+const GUN_AY = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul' })
+
+/** KVKK başvurusu alındı (başvurana). Hesabı olan aday için “sen”, diğerleri için “siz”. */
+export function kvkkAlindiEpostasi(d: { ad: string; turAdi: string; sonGun: Date; hitap: EpostaHitabi }): Eposta {
+  const sen = d.hitap === 'sen'
+  return eposta(
+    sen ? 'KVKK başvurun alındı' : 'KVKK başvurunuz alındı',
+    [
+      `Merhaba ${d.ad},`,
+      sen
+        ? `Kişisel verilerinle ilgili “${d.turAdi}” başvurunu aldık. Başvurunu en geç ${GUN_AY.format(d.sonGun)} tarihine kadar ücretsiz olarak sonuçlandırıp sana bu adresten yazacağız.`
+        : `Kişisel verilerinizle ilgili “${d.turAdi}” başvurunuzu aldık. Başvurunuzu en geç ${GUN_AY.format(d.sonGun)} tarihine kadar ücretsiz olarak sonuçlandırıp size bu adresten yazacağız.`,
+    ],
+    sen ? { metin: 'Başvurumu gör', adres: `${siteAdresi()}/hesabim/hesap#kvkk` } : undefined,
+    [sen ? `Ek bilgi vermek istersen ${KURUM.kvkkEposta} adresine yazabilirsin.` : `Ek bilgi vermek isterseniz ${KURUM.kvkkEposta} adresine yazabilirsiniz.`],
+    d.hitap,
+  )
+}
+
+/** Portaldan yeni KVKK başvurusu geldi (Yönetici A.Ş.’nin KVKK adresine). Kişinin adı yazılmaz; ayrıntı panelde. */
+export function kvkkYeniBasvuruEpostasi(d: { id: number; turAdi: string; sonGun: Date }): Eposta {
+  return eposta(
+    `Yeni KVKK başvurusu: ${d.turAdi}`,
+    [`Portal üzerinden yeni bir ilgili kişi başvurusu geldi. Yasal süre ${GUN_AY.format(d.sonGun)} tarihinde doluyor.`, 'Başvurunun ayrıntısını ve kişinin bilgilerini Yönetici A.Ş. panelinde görebilirsiniz.'],
+    { metin: 'Başvuruyu aç', adres: `${siteAdresi()}/yonetim/kvkk/${d.id}` },
+    [],
+    'siz',
+  )
+}
+
+/** KVKK başvurusunun cevabı. Cevap metnini Yönetici A.Ş. yazar. */
+export function kvkkCevapEpostasi(d: { ad: string; turAdi: string; sonucAdi: string; cevap: string; hitap: EpostaHitabi }): Eposta {
+  const sen = d.hitap === 'sen'
+  return eposta(
+    sen ? 'KVKK başvurun sonuçlandı' : 'KVKK başvurunuz sonuçlandı',
+    [`Merhaba ${d.ad},`, sen ? `“${d.turAdi}” başvurun sonuçlandı: ${d.sonucAdi}.` : `“${d.turAdi}” başvurunuz sonuçlandı: ${d.sonucAdi}.`, ...d.cevap.trim().split(/\n{2,}/)],
+    undefined,
+    [`${KURUM.unvan} · ${KURUM.kvkkEposta}`],
+    d.hitap,
+  )
+}

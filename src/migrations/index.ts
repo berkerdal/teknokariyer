@@ -4,6 +4,7 @@ import * as migration_20261114_102239_talepler_ve_unvan from './20261114_102239_
 import * as migration_20261114_130910_kullanici_pasif from './20261114_130910_kullanici_pasif';
 import * as migration_20261114_174215_teknik_sorumlu from './20261114_174215_teknik_sorumlu';
 import * as migration_20261114_181314_gunluk_ozet_saklama from './20261114_181314_gunluk_ozet_saklama';
+import * as migration_20261114_194152_kvkk_talepleri from './20261114_194152_kvkk_talepleri';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261114_181314_gunluk_ozet_saklama.up,
     down: migration_20261114_181314_gunluk_ozet_saklama.down,
-    name: '20261114_181314_gunluk_ozet_saklama'
+    name: '20261114_181314_gunluk_ozet_saklama',
+  },
+  {
+    up: migration_20261114_194152_kvkk_talepleri.up,
+    down: migration_20261114_194152_kvkk_talepleri.down,
+    name: '20261114_194152_kvkk_talepleri'
   },
 ];

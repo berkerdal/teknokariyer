@@ -909,3 +909,14 @@ Kurumun ilettiği listeye eleştirel yaklaşıldı. Liste çoğunlukla doğru te
 11. Yönetici A.Ş. tarafında paneli kimler kullanacak, hangi rollerde?
 12. Gerçek fotoğraf: Teknokent binaları ve kampüs için fotoğraf çekimi yapılabilir mi? Firmalardan ekip ve ofis fotoğrafı istenecek mi?
 13. Yayın hedef tarihi ve pilot firmalar.
+
+### Hukuk birimine sorulacaklar (KVKK araçları, 14.11.2026)
+
+Bu konularda geçici bir uygulama seçildi; hukuk biriminin görüşüyle kesinleşecek. Seçilenler koda işlendi ve kolayca değişir.
+
+1. **[?] Saklama süreleri:** Başvurulardaki kişisel veri ilan kapandıktan 12 ay sonra, işlem kayıtları 24 ay sonra siliniyor (Ayarlar’dan değişir).
+2. **[?] Hesap silmede başvuru kaydı:** K27’ye göre ad, iletişim ve CV hemen silinir. Ayrıca ön yazı ve profil bağlantıları (LinkedIn vb.) da siliniyor; eğitim, beceri ve ön eleme cevapları firmanın değerlendirme kaydında saklama süresi dolana kadar kalıyor.
+3. **[?] Hesap silmede onay (rıza) kayıtları:** Hesapla birlikte siliniyor. Rızanın alındığını ispat için silinen hesabın onay kayıtları bir süre saklanmalı mı?
+4. **[?] KVKK başvuru kayıtlarının saklama süresi:** Başvuran adı, e-postası ve cevap şimdilik süresiz saklanıyor (ispat için). Ne kadar saklanmalı?
+5. **[?] Cevap taslakları ve “KVKK başvurusu” sayfası:** Metinler taslak; hukuk onayı gerekiyor.
+6. **[?] Kimlik doğrulama:** Hesabından başvuran aday doğrulanmış sayılıyor; e-postayla gelen başvuruda kayıtlı adres, ıslak imza veya KEP kabul ediliyor. Kurumun kabul ettiği yollar bunlar mı?

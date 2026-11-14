@@ -293,7 +293,11 @@ export const yonetimSayilari = cache(async () => {
   const basvurusuz = tumBasvurusuz.filter((i) => !i.hatirlatildi)
   const { kurulumOzeti } = await import('./firmaYonetimi')
   const takip = (await kurulumOzeti()).takip.length
+  const { acikKvkk } = await import('./kvkk')
+  const kvkk = (await acikKvkk()).length
   return {
+    /** Açık KVKK başvuruları; yalnızca tam yetkiliye gösterilir, bu yüzden toplamda değil (yonetimToplami). */
+    kvkk,
     onay: onay.length,
     degisiklik: degisiklik.length,
     talep: talep.length,
@@ -302,6 +306,12 @@ export const yonetimSayilari = cache(async () => {
     toplam: onay.length + degisiklik.length + talep.length + basvurusuz.length + takip,
   }
 })
+
+/** Kullanıcının göreceği bekleyen iş sayıları: tam yetkili için açık KVKK başvuruları da toplama girer. */
+export async function kullaniciSayilari(yonetici: boolean) {
+  const s = await yonetimSayilari()
+  return yonetici ? { ...s, toplam: s.toplam + s.kvkk } : { ...s, kvkk: 0 }
+}
 
 /** Zamanlanmış işlerin son çalışması (panelde güven için gösterilir). */
 export const sonZamanliCalisma = cache(async () => {

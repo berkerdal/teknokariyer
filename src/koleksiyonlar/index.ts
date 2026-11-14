@@ -17,6 +17,7 @@ import { Dosyalar } from './Dosyalar'
 import { TestPostalar } from './TestPostalar'
 import { Talepler } from './Talepler'
 import { GunlukOzetler } from './GunlukOzetler'
+import { KvkkTalepleri } from './KvkkTalepleri'
 import { Ayarlar } from '../globaller/Ayarlar'
 
 export const koleksiyonlar: CollectionConfig[] = [
@@ -34,6 +35,7 @@ export const koleksiyonlar: CollectionConfig[] = [
   TestPostalar,
   Talepler,
   GunlukOzetler,
+  KvkkTalepleri,
 ]
 
 export const globaller: GlobalConfig[] = [Ayarlar]

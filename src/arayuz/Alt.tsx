@@ -43,7 +43,7 @@ const SUTUNLAR: Array<{ baslik: string; baglantilar: Baglanti[] }> = [
       { ad: 'Aday aydınlatma metni', href: '/metin/aday-aydinlatma' },
       { ad: 'Başvuru aydınlatma metni', href: '/metin/basvuru-aydinlatma' },
       { ad: 'CV havuzu açık rıza metni', href: '/metin/havuz' },
-      { ad: 'KVKK başvurusu', href: `mailto:${KURUM.kvkkEposta}` },
+      { ad: 'KVKK başvurusu', href: '/kvkk-basvurusu' },
     ],
   },
 ]

@@ -82,7 +82,7 @@ export const firmaBasvurulari = cache(async (): Promise<{ satirlar: BasvuruSatir
     if (!ilan) return []
     const p = (b.profilKopyasi ?? {}) as ProfilKopyasi
     const hesapSilindi = !b.adayKullanici
-    const eslesme = hesapSilindi ? null : eslesmeHesapla(ilanKosullari(ilan), kopyaProfili(p), 'firma')
+    const eslesme = b.anonimlestirildi ? null : eslesmeHesapla(ilanKosullari(ilan), kopyaProfili(p), 'firma')
     return [
       {
         id: b.id,

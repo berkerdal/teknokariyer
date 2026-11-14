@@ -35,7 +35,7 @@ describe('aday kaydı', () => {
     const { docs } = await payload.find({ collection: 'kullanicilar', where: { email: { equals: eposta } }, overrideAccess: true })
     expect(docs[0]).toMatchObject({ ad: 'Elif Karaca', rol: 'aday' })
     const rizalar = await payload.find({ collection: 'rizalar', where: { kullanici: { equals: docs[0]!.id } }, overrideAccess: true })
-    expect(rizalar.docs.map((r) => [r.tur, r.metinSurumu])).toEqual([['aday-aydinlatma', '1.0']])
+    expect(rizalar.docs.map((r) => [r.tur, r.metinSurumu])).toEqual([['aday-aydinlatma', '1.1']])
     const aday = await payload.find({ collection: 'adaylar', where: { kullanici: { equals: docs[0]!.id } }, overrideAccess: true })
     expect(aday.docs[0]?.havuz?.gorunurluk).toBe('gizli')
     const posta = await kutu(eposta)

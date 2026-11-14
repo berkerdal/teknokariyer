@@ -26,8 +26,8 @@ const HAKLAR = `KVKK’nın 11. maddesindeki haklarını (verinin işlenip işle
 export const METINLER: Record<MetinKimligi, Metin> = {
   'aday-aydinlatma': {
     baslik: 'Aday aydınlatma metni',
-    surum: '1.0',
-    tarih: '2026-11-13',
+    surum: '1.1',
+    tarih: '2026-11-14',
     onayli: false,
     govde: `Veri sorumlusu: ${SORUMLU}.
 
@@ -40,7 +40,7 @@ Bu bilgileri hesabını yönetmek, ilanlara başvurmanı sağlamak ve hizmetin g
 
 Bilgilerin, sen bir ilana başvurmadıkça veya CV havuzuna katılmadıkça hiçbir firmayla paylaşılmaz. Hizmetin barındırıldığı altyapı sağlayıcısı verileri yalnızca bizim adımıza saklar.
 
-Hesabını sildiğinde profilin, CV’lerin ve havuz kaydın silinir. Başvuruların, ilan kapandıktan 12 ay sonra anonimleştirilir.
+Hesabını sildiğinde profilin, CV’lerin, havuz kaydın ve onay kayıtların hemen silinir. Başvurduğun firmalardaki başvuru kayıtlarından adın, iletişim bilgilerin, ön yazın ve CV’n de hemen silinir; firma başvuruyu “aday hesabını sildi” olarak görür. Başvurudaki diğer bilgiler, ilan kapandıktan 12 ay sonra anonimleştirilir.
 
 ${HAKLAR}`,
   },

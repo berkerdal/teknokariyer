@@ -11,6 +11,7 @@ import { ASAMA_ADI, type KurulumAsamasi } from '@/alan/kurulum'
 import { normallestir } from '@/alan/metin'
 import { aralikta, gruplariGizle, huni, GIZLEME_ESIGI, type Grup } from '@/alan/ozet'
 import { donemAylari, type RaporDonemi } from '@/alan/raporDonemi'
+import { KVKK_SONUC_ADI, KVKK_TALEP_TURLERI, cevapSuresi, kalanGun, type KvkkSonuc, type KvkkTalepTuru } from '@/alan/kvkk'
 import type { Sayfa } from '@/altyapi/excel'
 import { isSaati } from './yonetim'
 import { payloadAl } from './payload'
@@ -79,7 +80,7 @@ async function veriYukle(d: RaporDonemi) {
   const bul = <T,>(collection: string, where: object, select: object, limit = 100000) =>
     payload.find({ collection: collection as never, where: where as never, select: select as never, limit, pagination: false, depth: 0, overrideAccess: true }).then((r) => tum(r) as T[])
   const icinde = (alan: string) => ({ and: [{ [alan]: { greater_than_equal: d.bas.toISOString() } }, { [alan]: { less_than: d.bit.toISOString() } }] })
-  const [firmalar, ilanlar, basvurular, sektorler, havuz, adaylar, kayitlar, talepler, davetler, rizalar, ozetler] = await Promise.all([
+  const [firmalar, ilanlar, basvurular, sektorler, havuz, adaylar, kayitlar, talepler, davetler, rizalar, ozetler, kvkk] = await Promise.all([
     bul<Firmalar>('firmalar', {}, { kisaAd: true, asama: true, testFirmasi: true, sektor: true }),
     bul<Ilanlar>('ilanlar', { durum: { not_equals: 'taslak' } }, { pozisyonAdi: true, firma: true, durum: true, tur: true, altTur: true, yayinTarihi: true, kapanisTarihi: true, goruntulenme: true, zorunluBeceriler: true, tercihBeceriler: true }),
     bul<{ id: number; ilan: unknown; firma: unknown; durum: string; kaynak?: string | null; profilKopyasi?: unknown; createdAt: string; adayKullanici?: unknown; anonimlestirildi?: string | null }>(
@@ -101,6 +102,12 @@ async function veriYukle(d: RaporDonemi) {
     bul<{ createdAt: string; kullanildi?: string | null }>('davetler', icinde('createdAt'), { createdAt: true, kullanildi: true }),
     bul<{ tur: string; createdAt: string; geriAlinma?: string | null }>('rizalar', { or: [icinde('createdAt'), icinde('geriAlinma')] }, { tur: true, createdAt: true, geriAlinma: true }),
     bul<{ tarih: string; goruntulenme?: number | null }>('gunluk-ozetler', {}, { tarih: true, goruntulenme: true }),
+    // Dönemde gelen veya dönemde sonuçlanan KVKK başvuruları (kişi bilgisi seçilmez)
+    bul<{ tur: KvkkTalepTuru; kanal: string; basvuruTarihi: string; durum: string; sonuc?: KvkkSonuc | null; cevapTarihi?: string | null }>(
+      'kvkk-talepleri',
+      { or: [icinde('basvuruTarihi'), icinde('cevapTarihi'), { durum: { not_equals: 'sonuclandi' } }] },
+      { tur: true, kanal: true, basvuruTarihi: true, durum: true, sonuc: true, cevapTarihi: true },
+    ),
   ])
   const testFirma = new Set(firmalar.filter((f) => f.testFirmasi).map((f) => f.id))
   const sayilir = (firmaId: number) => !yayin || !testFirma.has(firmaId)
@@ -120,6 +127,7 @@ async function veriYukle(d: RaporDonemi) {
     talepler,
     davetler,
     rizalar,
+    kvkk,
     goruntulenme: ozetler.filter((o) => {
       const t = new Date(`${o.tarih}T12:00:00+03:00`)
       return t >= d.bas && t < d.bit
@@ -441,22 +449,55 @@ function kvkkRaporu(v: Veri, d: RaporDonemi): Pick<Rapor, 'ozet' | 'tablolar' | 
     if (aralikta(r.geriAlinma, d.bas, d.bit)) geri.set(r.tur, (geri.get(r.tur) ?? 0) + 1)
   }
   const erisim = new Map<string, number>()
-  for (const k of v.kayitlar.filter((x) => x.tur === 'kisisel-veri')) erisim.set(k.islem, (erisim.get(k.islem) ?? 0) + 1)
+  // KVKK başvurusunun iş adımları erişim sayılmaz; yalnızca kişinin verisine bakılan işlemler (döküm, CV, profil) sayılır.
+  const erisimMi = (x: { tur: string; islem: string; kayitTuru?: string | null }) =>
+    x.tur === 'kisisel-veri' && (x.kayitTuru !== 'kvkk-talepleri' || x.islem.includes('veri dökümü')) && !x.islem.startsWith('Saklama süresi')
+  for (const k of v.kayitlar.filter(erisimMi)) erisim.set(k.islem, (erisim.get(k.islem) ?? 0) + 1)
   const anonim = v.basvurular.filter((b) => aralikta(b.anonimlestirildi, d.bas, d.bit)).length
   const silinenKayit = v.kayitlar.filter((k) => k.islem === 'Saklama süresi dolan işlem kayıtları silindi').reduce((t, k) => t + Number((k.ayrinti as { adet?: number } | null)?.adet ?? 0), 0)
+  const silinenHesap = v.kayitlar.filter((k) => k.islem === 'Aday hesabı silindi')
+  const kendisiSildi = silinenHesap.filter((k) => (k.ayrinti as { baslatan?: string } | null)?.baslatan === 'aday').length
+  // İlgili kişi başvuruları: dönemde gelenler, dönemde sonuçlananlar ve cevap süreleri
+  const gelen = v.kvkk.filter((t) => aralikta(t.basvuruTarihi, d.bas, d.bit))
+  const sonuclanan = v.kvkk.filter((t) => t.cevapTarihi && aralikta(t.cevapTarihi, d.bas, d.bit))
+  const sureler = sonuclanan.map((t) => cevapSuresi(new Date(t.basvuruTarihi), new Date(t.cevapTarihi!)))
+  const asan = sureler.filter((g) => g > 30).length
+  const simdi = new Date()
+  const acikGeciken = v.kvkk.filter((t) => t.durum !== 'sonuclandi' && kalanGun(new Date(t.basvuruTarihi), simdi) < 0).length
   return {
     ozet: [
       { ad: 'Verilen rıza ve onay', deger: [...verilen.values()].reduce((a, b) => a + b, 0), tanim: 'Dönemde metin sürümüyle kaydedilen onaylar' },
       { ad: 'Geri alınan rıza', deger: [...geri.values()].reduce((a, b) => a + b, 0), tanim: 'Dönemde geri alınan rızalar' },
+      { ad: 'KVKK başvurusu', deger: gelen.length, tanim: 'Dönemde gelen ilgili kişi başvuruları' },
+      { ad: 'Ortalama cevap süresi', deger: ortalama(sureler) === null ? '—' : `${ortalama(sureler)!.toLocaleString('tr-TR')} gün`, tanim: `Dönemde sonuçlanan başvurular; yasal sınır 30 gün${asan ? `, ${asan} başvuruda aşıldı` : ''}` },
+      { ad: 'Silinen aday hesabı', deger: silinenHesap.length, tanim: `${kendisiSildi} hesabı aday kendisi, ${silinenHesap.length - kendisiSildi} hesabı Yönetici A.Ş. başvuru üzerine sildi` },
       { ad: 'Kişisel veri erişimi', deger: [...erisim.values()].reduce((a, b) => a + b, 0), tanim: 'CV indirme, havuz profili açma gibi kayda geçen erişimler' },
       { ad: 'Anonimleştirilen başvuru', deger: anonim, tanim: 'Saklama süresi dolduğu için kişisel verisi silinen başvurular' },
     ],
     tablolar: [
+      {
+        baslik: 'İlgili kişi başvuruları',
+        aciklama: 'Konuya göre dönemde gelen ve sonuçlanan başvurular',
+        sutunlar: [{ ad: 'Konu' }, { ad: 'Gelen', sayi: true }, { ad: 'Kabul', sayi: true }, { ad: 'Kısmen kabul', sayi: true }, { ad: 'Ret', sayi: true }],
+        satirlar: KVKK_TALEP_TURLERI.map(([t, a]) => [
+          a,
+          gelen.filter((x) => x.tur === t).length,
+          ...(['kabul', 'kismen', 'ret'] as KvkkSonuc[]).map((s) => sonuclanan.filter((x) => x.tur === t && x.sonuc === s).length),
+        ]).filter((r) => (r.slice(1) as number[]).some((n) => n > 0)),
+        bos: 'Dönemde KVKK başvurusu yok.',
+      },
       { baslik: 'Rıza ve onaylar', sutunlar: [{ ad: 'Metin' }, { ad: 'Verilen', sayi: true }, { ad: 'Geri alınan', sayi: true }], satirlar: Object.entries(RIZA).map(([k, a]) => [a, verilen.get(k) ?? 0, geri.get(k) ?? 0]) },
       { baslik: 'Kişisel veri erişimleri', sutunlar: [{ ad: 'İşlem' }, { ad: 'Adet', sayi: true }], satirlar: [...erisim.entries()].sort((a, b) => b[1] - a[1]).map(([a, n]) => [a, n]), bos: 'Dönemde kayda geçen erişim yok.' },
-      { baslik: 'Saklama süresi işlemleri', sutunlar: [{ ad: 'İşlem' }, { ad: 'Adet', sayi: true }], satirlar: [['Anonimleştirilen başvuru', anonim], ['Silinen işlem kaydı', silinenKayit]] },
+      {
+        baslik: 'Silme ve saklama süresi işlemleri',
+        sutunlar: [{ ad: 'İşlem' }, { ad: 'Adet', sayi: true }],
+        satirlar: [['Silinen aday hesabı', silinenHesap.length], ['Anonimleştirilen başvuru', anonim], ['Silinen işlem kaydı', silinenKayit]],
+      },
     ],
-    notlar: ['İlgili kişi başvuruları (KVKK talepleri) ekranı henüz yok; talepler şimdilik kvkk@pauteknokent.com.tr adresine e-postayla geliyor.'],
+    notlar: [
+      `Sonuç sütunları (${Object.values(KVKK_SONUC_ADI).join(', ').toLocaleLowerCase('tr')}) dönemde sonuçlanan başvuruları sayar; başvuru daha önceki bir dönemde gelmiş olabilir.`,
+      ...(acikGeciken ? [`Bugün itibarıyla ${acikGeciken} açık başvurunun yasal süresi geçti.`] : []),
+    ],
   }
 }
 

@@ -2,9 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { HatirlatDugmesi } from '@/arayuz/yonetim/Kararlar'
-import { moderasyonYapabilirMi } from '@/erisim'
+import { moderasyonYapabilirMi, yoneticiMi } from '@/erisim'
+import { tarihYaz } from '@/arayuz/bicim'
+import { acikKvkk } from '@/veri/kvkk'
 import { kurulumOzeti } from '@/veri/firmaYonetimi'
-import { sonZamanliCalisma, basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, onayKuyrugu, yonetimOturumu, yonetimSayilari } from '@/veri/yonetim'
+import { sonZamanliCalisma, basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, kullaniciSayilari, onayKuyrugu, yonetimOturumu } from '@/veri/yonetim'
 
 export const metadata: Metadata = { title: 'Bugün · Yönetim' }
 
@@ -37,7 +39,17 @@ export default async function Bugun({ searchParams }: Props) {
   const sp = await searchParams
   const k = await yonetimOturumu()
   const karar = moderasyonYapabilirMi(k)
-  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum, zamanli] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), yonetimSayilari(), kurulumOzeti(), sonZamanliCalisma()])
+  const yonetici = yoneticiMi(k)
+  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum, zamanli, kvkk] = await Promise.all([
+    onayKuyrugu(),
+    bekleyenDegisiklikler(),
+    bekleyenTalepler(),
+    basvurusuzBitenler(),
+    kullaniciSayilari(yonetici),
+    kurulumOzeti(),
+    sonZamanliCalisma(),
+    yonetici ? acikKvkk() : Promise.resolve([]),
+  ])
   const enEski = onay[0]
   return (
     <>
@@ -78,6 +90,12 @@ export default async function Bugun({ searchParams }: Props) {
             <strong>Kurulumda kişisel takip:</strong> Davet gönderildikten veya hesap devralındıktan sonra {kurulum.esik.gun} gün ilerlemeyen firmalar. Firmayı arayıp
             sonucu not olarak yazın.
           </li>
+          {yonetici && (
+            <li>
+              <strong>KVKK başvuruları:</strong> Kişilerin kişisel verileriyle ilgili başvuruları. Kanuna göre en geç 30 gün içinde cevaplanmaları gerekir; süresi
+              7 günden az kalan başvuru kırmızı çizgiyle öne çıkar.
+            </li>
+          )}
           <li>
             <strong>Başvurusuz bitmek üzere:</strong> Son başvuruya 7 günden az kalmış ve hiç başvuru almamış ilanlar. Firmaya tek düğmeyle hatırlatma
             gönderebilirsiniz.
@@ -153,6 +171,24 @@ export default async function Bugun({ searchParams }: Props) {
             </li>
           ))}
         </Kuyruk>
+
+        {yonetici && (
+          <Kuyruk baslik="KVKK başvuruları" sayi={kvkk.length} bilgi="Yasal süre: 30 gün" hedef="/yonetim/kvkk" bos="Açık KVKK başvurusu yok.">
+            {kvkk.slice(0, 6).map((t) => (
+              <li key={t.id} className={t.yaklasan || t.gecikti ? 'risk' : undefined}>
+                <Link href={`/yonetim/kvkk/${t.id}`}>
+                  <span>
+                    <strong>{t.turAdi}</strong>
+                    <span className="kucuk">
+                      {t.basvuranAd} · {t.durumAdi} · son gün {tarihYaz(t.sonGun)}
+                    </span>
+                  </span>
+                  <span className="y-sure">{t.gecikti ? `${-t.kalan} gün gecikti` : t.kalan === 0 ? 'bugün son gün' : `${t.kalan} gün kaldı`}</span>
+                </Link>
+              </li>
+            ))}
+          </Kuyruk>
+        )}
 
         <Kuyruk
           baslik="Başvurusuz bitmek üzere"

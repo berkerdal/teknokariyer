@@ -42,7 +42,7 @@ export default async function BasvuruAyrintisi({ params }: Props) {
   if (!ilan) notFound()
   const p = (b.profilKopyasi ?? {}) as ProfilKopyasi
   const silindi = !b.adayKullanici
-  const eslesme = silindi ? null : eslesmeHesapla(ilanKosullari(ilan), kopyaProfili(p), 'firma')
+  const eslesme = b.anonimlestirildi ? null : eslesmeHesapla(ilanKosullari(ilan), kopyaProfili(p), 'firma')
   const durumYetkisi = firmaYetkisiVarMi(k, ['yonetici', 'ilan-sorumlusu'])
   const sorular = new Map((ilan.onElemeSorulari ?? []).map((s) => [s.id ?? '', s]))
   const cevaplar = Object.entries((b.cevaplar ?? {}) as Record<string, string>)
@@ -84,7 +84,7 @@ export default async function BasvuruAyrintisi({ params }: Props) {
             <p className="uyari-kutu">
               {b.anonimlestirildi
                 ? 'İlanın kapanmasından sonraki saklama süresi dolduğu için bu başvurudaki kişisel veriler (ad, iletişim, CV, cevaplar ve ekip notları) KVKK gereği silindi. Başvuru kaydı istatistik için kalır.'
-                : 'Aday hesabını sildiği için adı, iletişim bilgisi ve CV’si silindi (K27). Başvuru kaydı istatistik için kalır.'}
+                : 'Aday hesabını sildiği için adı, iletişim bilgileri, ön yazısı ve CV’si silindi. Eğitim, beceri ve ön eleme cevapları değerlendirmeniz için kalır; ilan kapandıktan sonra saklama süresi dolunca bunlar da silinir.'}
             </p>
           )}
           {b.durum === 'geri-cekti' && <p className="uyari-kutu">Aday bu başvuruyu geri çekti. Durumu değiştirilemez.</p>}
@@ -160,7 +160,7 @@ export default async function BasvuruAyrintisi({ params }: Props) {
             </section>
           )}
 
-          {!silindi && (
+          {!b.anonimlestirildi && (
             <section>
               <h2 className="b3 kare-bas">Profil</h2>
               <p className="kucuk ikincil">Başvuru anındaki profil. Aday profilini sonradan değiştirse de burada bu hâli görünür.</p>
