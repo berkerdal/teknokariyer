@@ -173,6 +173,13 @@ export const Basvurular: CollectionConfig = {
         { name: 'yazan', type: 'relationship', relationTo: 'kullanicilar' },
       ],
     },
+    {
+      name: 'anonimlestirildi',
+      label: 'Anonimleştirildi',
+      type: 'date',
+      admin: { readOnly: true, description: 'KVKK saklama süresi dolunca kişisel veriler silindi; sayılar raporlar için kaldı.' },
+      access: { update: alanKimseYazamaz },
+    },
     { name: 'aydinlatmaSurumu', label: 'Onaylanan aydınlatma metni sürümü', type: 'text', required: true, access: { update: alanKimseYazamaz } },
   ],
 }

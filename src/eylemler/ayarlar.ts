@@ -10,7 +10,7 @@ const sayi = (f: FormData, k: string) => (String(f.get(k) ?? '').trim() === '' ?
 
 export async function ayarlarEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
   const k = await yonetimOturumu()
-  const degerler = Object.fromEntries(['onayliIlanSayisi', 'enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy'].map((a) => [a, String(f.get(a) ?? '')]))
+  const degerler = Object.fromEntries(['onayliIlanSayisi', 'enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy', 'basvuruAnonimlestirmeAy', 'islemKaydiAy'].map((a) => [a, String(f.get(a) ?? '')]))
   try {
     await ayarlariGuncelle(await payloadAl(), k, {
       onayliIlanSayisi: sayi(f, 'onayliIlanSayisi'),
@@ -20,6 +20,8 @@ export async function ayarlarEylemi(_: FormDurumu, f: FormData): Promise<FormDur
         .filter(Boolean)
         .map(Number),
       havuzRizaAy: sayi(f, 'havuzRizaAy'),
+      basvuruAnonimlestirmeAy: sayi(f, 'basvuruAnonimlestirmeAy'),
+      islemKaydiAy: sayi(f, 'islemKaydiAy'),
     })
   } catch (e) {
     if (e instanceof FormHatasi) return { hatalar: e.alanlar, degerler }

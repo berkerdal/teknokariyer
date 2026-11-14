@@ -106,6 +106,10 @@ export const Ilanlar: CollectionConfig = {
           const eksik = ilanEksikleri(v)
           if (Object.keys(eksik).length) throw new APIError(`İlan yayına hazır değil: ${Object.values(eksik).join(' ')}`, 400, undefined, true)
         }
+        // Kapanış tarihi: KVKK saklama süresi bu tarihten başlar (başvurular N ay sonra anonimleştirilir).
+        const kapali = ['kapandi', 'suresi-doldu'].includes(String(v.durum))
+        if (kapali && !(originalDoc && ['kapandi', 'suresi-doldu'].includes(String(originalDoc.durum)))) data.kapanisTarihi = new Date().toISOString()
+        if (!kapali && data.durum) data.kapanisTarihi = null
         data.arama = await ilanAramaMetni(req, v)
         return data
       },
@@ -335,6 +339,7 @@ export const Ilanlar: CollectionConfig = {
       },
     },
     { name: 'yayinTarihi', label: 'Yayın tarihi', type: 'date', admin: { position: 'sidebar', readOnly: true } },
+    { name: 'kapanisTarihi', label: 'Kapanış tarihi', type: 'date', admin: { position: 'sidebar', readOnly: true }, access: { update: () => false } },
     { name: 'basvuruSayisi', type: 'number', defaultValue: 0, admin: { hidden: true }, access: { update: () => false } },
     { name: 'goruntulenme', type: 'number', defaultValue: 0, admin: { hidden: true }, access: { update: () => false } },
     { name: 'arama', type: 'text', index: true, admin: { hidden: true } },

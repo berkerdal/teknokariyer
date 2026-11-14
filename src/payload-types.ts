@@ -80,6 +80,7 @@ export interface Config {
     dosyalar: Dosyalar;
     'test-postalar': TestPostalar;
     talepler: Talepler;
+    'gunluk-ozetler': GunlukOzetler;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +101,7 @@ export interface Config {
     dosyalar: DosyalarSelect<false> | DosyalarSelect<true>;
     'test-postalar': TestPostalarSelect<false> | TestPostalarSelect<true>;
     talepler: TaleplerSelect<false> | TaleplerSelect<true>;
+    'gunluk-ozetler': GunlukOzetlerSelect<false> | GunlukOzetlerSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -378,6 +380,7 @@ export interface Ilanlar {
     | boolean
     | null;
   yayinTarihi?: string | null;
+  kapanisTarihi?: string | null;
   basvuruSayisi?: number | null;
   goruntulenme?: number | null;
   arama?: string | null;
@@ -431,6 +434,10 @@ export interface Basvurular {
         id?: string | null;
       }[]
     | null;
+  /**
+   * KVKK saklama süresi dolunca kişisel veriler silindi; sayılar raporlar için kaldı.
+   */
+  anonimlestirildi?: string | null;
   aydinlatmaSurumu: string;
   updatedAt: string;
   createdAt: string;
@@ -653,6 +660,36 @@ export interface Talepler {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gunluk-ozetler".
+ */
+export interface GunlukOzetler {
+  id: number;
+  tarih: string;
+  yayindakiIlan?: number | null;
+  yeniIlan?: number | null;
+  basvuru?: number | null;
+  goruntulenme?: number | null;
+  toplamAday?: number | null;
+  yeniAday?: number | null;
+  havuzdakiAday?: number | null;
+  ilanVerenFirma?: number | null;
+  /**
+   * [{ id, goruntulenme, basvuru }]: ertesi günle farkı o günün değeridir.
+   */
+  ilanlar?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -726,6 +763,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'talepler';
         value: number | Talepler;
+      } | null)
+    | ({
+        relationTo: 'gunluk-ozetler';
+        value: number | GunlukOzetler;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -913,6 +954,7 @@ export interface IlanlarSelect<T extends boolean = true> {
   kapanisNedeni?: T;
   bekleyenDegisiklik?: T;
   yayinTarihi?: T;
+  kapanisTarihi?: T;
   basvuruSayisi?: T;
   goruntulenme?: T;
   arama?: T;
@@ -949,6 +991,7 @@ export interface BasvurularSelect<T extends boolean = true> {
         yazan?: T;
         id?: T;
       };
+  anonimlestirildi?: T;
   aydinlatmaSurumu?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1170,6 +1213,24 @@ export interface TaleplerSelect<T extends boolean = true> {
   eklenenler?: T;
   sonuclandiran?: T;
   sonucTarihi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gunluk-ozetler_select".
+ */
+export interface GunlukOzetlerSelect<T extends boolean = true> {
+  tarih?: T;
+  yayindakiIlan?: T;
+  yeniIlan?: T;
+  basvuru?: T;
+  goruntulenme?: T;
+  toplamAday?: T;
+  yeniAday?: T;
+  havuzdakiAday?: T;
+  ilanVerenFirma?: T;
+  ilanlar?: T;
   updatedAt?: T;
   createdAt?: T;
 }

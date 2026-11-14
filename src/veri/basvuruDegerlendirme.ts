@@ -88,7 +88,7 @@ export const firmaBasvurulari = cache(async (): Promise<{ satirlar: BasvuruSatir
         id: b.id,
         ilanId: ilan.id,
         pozisyonAdi: ilan.pozisyonAdi,
-        ad: hesapSilindi ? 'Aday hesabını sildi' : (p.ad ?? 'Aday'),
+        ad: b.anonimlestirildi ? 'Kişisel veriler silindi' : hesapSilindi ? 'Aday hesabını sildi' : (p.ad ?? 'Aday'),
         hesapSilindi,
         egitim: [p.bolum, p.okul].filter(Boolean).join(', '),
         durum: b.durum,

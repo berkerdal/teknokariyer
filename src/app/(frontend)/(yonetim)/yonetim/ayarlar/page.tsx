@@ -30,6 +30,8 @@ export default async function Ayarlar() {
           enUzunSureGun: a.enUzunSureGun ?? VARSAYILAN_EN_UZUN_SURE_GUN,
           hatirlatmaGunleri: hatirlatmaGunleri(a.hatirlatmaGunleri),
           havuzRizaAy: a.saklama?.havuzRizaAy ?? 12,
+          basvuruAnonimlestirmeAy: a.saklama?.basvuruAnonimlestirmeAy ?? 12,
+          islemKaydiAy: a.saklama?.islemKaydiAy ?? 24,
         }}
       />
     </>

@@ -13,11 +13,16 @@ import { profilHatirlatmaEpostasi } from '@/altyapi/epostaSablonlari'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { davetHatirlat } from './ekip'
 import { suresiDolanlariKapat } from './ilanIslemleri'
+import { gunlukOzetYaz } from './gunlukOzet'
+import { basvurulariAnonimlestir, eskiIslemKayitlariniSil } from './saklama'
 import { ayarlar, istekOlustur, kimlik } from './ortak'
 
 export const PROFIL_HATIRLATMA_ISLEMI = 'Profil tamamlama hatırlatması gönderildi'
 
 export interface ZamanliSonuc {
+  gunlukOzet: string | null
+  anonimlestirilenBasvuru: number
+  silinenIslemKaydi: number
   kapananIlan: number
   davetHatirlatma: number
   profilHatirlatma: number
@@ -95,11 +100,17 @@ export async function zamanliIsleriCalistir(payload: Payload, simdi = new Date()
       return 0
     }
   }
-  const gunler = hatirlatmaGunleri((await ayarlar(payload).catch((): null => null))?.hatirlatmaGunleri)
+  const a = await ayarlar(payload).catch((): null => null)
+  const gunler = hatirlatmaGunleri(a?.hatirlatmaGunleri)
   const kapananIlan = await guvenli('Süre dolumu', () => suresiDolanlariKapat(payload, simdi))
+  // Günlük özet süre dolumundan sonra: biten günün kapanışları sayılara yansısın
+  let gunlukOzet: string | null = null
+  await guvenli('Günlük özet', async () => ((gunlukOzet = await gunlukOzetYaz(payload, simdi)), 0))
+  const anonimlestirilenBasvuru = await guvenli('Başvuru saklama süresi', async () => (await basvurulariAnonimlestir(payload, simdi, Math.max(1, a?.saklama?.basvuruAnonimlestirmeAy ?? 12))).basvuru)
+  const silinenIslemKaydi = await guvenli('İşlem kaydı saklama süresi', () => eskiIslemKayitlariniSil(payload, simdi, Math.max(12, a?.saklama?.islemKaydiAy ?? 24)))
   const davetHatirlatma = hatirlatmalar ? await guvenli('Davet hatırlatmaları', () => davetHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const profilHatirlatma = hatirlatmalar ? await guvenli('Profil hatırlatmaları', () => profilHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
-  const sonuc = { kapananIlan, davetHatirlatma, profilHatirlatma, hatalar }
+  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, kapananIlan, davetHatirlatma, profilHatirlatma, hatalar }
   await islemKaydet(await istekOlustur(payload, null), { islem: 'Zamanlanmış işler çalıştı', tur: 'ayarlar', ayrinti: sonuc }).catch((): undefined => undefined)
   return sonuc
 }

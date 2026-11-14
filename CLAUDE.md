@@ -345,9 +345,17 @@ Claude tarafından yapılacak.
     - **Payload ekranı:** `access.admin` artık yalnızca `teknikSorumlu` işaretli etkin kurum kullanıcısı. İşareti yalnızca
       teknik sorumlu verir. Göç `20261114_174215_teknik_sorumlu` o anki tam yetkilileri teknik sorumlu yaptı (test ortamında
       yalnızca test yöneticisi). Menüdeki bağlantı yalnızca teknik sorumluya görünür.
-  - **Sırada:** (1) günlük özet tablosu ve gece işi (trend geçmişi birikmeye başlasın), (2) KVKK saklama süreleri işi,
-    (3) Yönetici özeti (canlı pano, K31), (4) rapor merkezi (Excel + PDF), (5) firma raporu, (6) KVKK talepleri ve işlem
-    kayıtları ekranı, (7) aday hesap silme (K27).
+  - **Günlük özet ve KVKK saklama (14.11.2026):** Göç `20261114_181314_gunluk_ozet_saklama` (tablo `gunluk_ozetler`,
+    `ilanlar.kapanis_tarihi`, `basvurular.anonimlestirildi`; yalnızca CREATE/ADD, canlıda uygulandı).
+    - `src/servisler/gunlukOzet.ts`: gece işi biten günün satırını bir kez yazar (yayındaki ilan, yeni ilan, başvuru,
+      görüntülenme farkı, aday, havuz, ilan veren firma, ilan başına birikimli sayaçlar). Kişisel veri yok.
+    - `src/servisler/saklama.ts`: ilan kapanışından N ay sonra (varsayılan 12) başvurulardaki kişisel veri silinir
+      (`profilKopyasi` zorunlu alan olduğu için `{ anonim: true }` olur), başka yerde kullanılmayan CV dosyası silinir;
+      işlem kayıtları N ay sonra (varsayılan 24, en az 12) silinir. Bir çalışmada en fazla 500 başvuru.
+    - Kapanış tarihi Ilanlar kancasında yazılır; göçten önce kapanmışlarda `updated_at` kullanıldı.
+    - İki süre de Ayarlar ekranında (hukuk onayı notuyla). Firma panelinde anonimleştirilen başvuru açıklamayla görünür.
+  - **Sırada:** (1) Yönetici özeti (canlı pano, K31), (2) rapor merkezi (Excel + PDF), (3) firma raporu, (4) KVKK talepleri
+    ve işlem kayıtları ekranı, (5) aday hesap silme (K27).
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

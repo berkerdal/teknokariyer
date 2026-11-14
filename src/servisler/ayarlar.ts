@@ -11,6 +11,8 @@ export interface AyarGirdisi {
   enUzunSureGun: number
   hatirlatmaGunleri: number[]
   havuzRizaAy: number
+  basvuruAnonimlestirmeAy: number
+  islemKaydiAy: number
 }
 
 const tamSayi = (n: number, en: number, cok: number) => Number.isInteger(n) && n >= en && n <= cok
@@ -24,6 +26,8 @@ export async function ayarlariGuncelle(payload: Payload, k: Kullanici, g: AyarGi
   if (!gunler.length || gunler.length > 5 || gunler.some((x) => !tamSayi(x, 1, 60)))
     h.hatirlatmaGunleri = 'En az bir, en fazla beş gün yazın; her biri 1 ile 60 arasında olsun. Örnek: 3, 7, 14'
   if (!tamSayi(g.havuzRizaAy, 1, 36)) h.havuzRizaAy = '1 ile 36 ay arasında bir sayı yazın.'
+  if (!tamSayi(g.basvuruAnonimlestirmeAy, 1, 60)) h.basvuruAnonimlestirmeAy = '1 ile 60 ay arasında bir sayı yazın.'
+  if (!tamSayi(g.islemKaydiAy, 12, 120)) h.islemKaydiAy = '12 ile 120 ay arasında bir sayı yazın. İşlem kayıtları en az 12 ay saklanır.'
   if (Object.keys(h).length) throw new FormHatasi(h)
   const req = await istekOlustur(payload, k)
   const once = await payload.findGlobal({ slug: 'ayarlar', overrideAccess: true })
@@ -33,7 +37,7 @@ export async function ayarlariGuncelle(payload: Payload, k: Kullanici, g: AyarGi
       onayliIlanSayisi: g.onayliIlanSayisi,
       enUzunSureGun: g.enUzunSureGun,
       hatirlatmaGunleri: gunler.map((gun) => ({ gun })),
-      saklama: { ...(once.saklama ?? {}), havuzRizaAy: g.havuzRizaAy },
+      saklama: { ...(once.saklama ?? {}), havuzRizaAy: g.havuzRizaAy, basvuruAnonimlestirmeAy: g.basvuruAnonimlestirmeAy, islemKaydiAy: g.islemKaydiAy },
     },
     overrideAccess: true,
     req,

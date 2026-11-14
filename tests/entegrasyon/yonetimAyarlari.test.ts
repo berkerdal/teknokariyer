@@ -89,11 +89,11 @@ describe('Yönetici A.Ş. kullanıcıları', () => {
 
 describe('ayarlar', () => {
   it('geçersiz değerler alan hatasıyla reddedilir; geçerli değerler kaydedilir', async () => {
-    await expect(ayarlariGuncelle(payload, moderator, { onayliIlanSayisi: 3, enUzunSureGun: 60, hatirlatmaGunleri: [3, 7, 14], havuzRizaAy: 12 })).rejects.toMatchObject({ durumKodu: 403 })
-    const h = await ayarlariGuncelle(payload, yonetici, { onayliIlanSayisi: 11, enUzunSureGun: 2, hatirlatmaGunleri: [], havuzRizaAy: 0 }).catch((e) => e)
-    expect(Object.keys((h as FormHatasi).alanlar).sort()).toEqual(['enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy', 'onayliIlanSayisi'])
+    await expect(ayarlariGuncelle(payload, moderator, { onayliIlanSayisi: 3, enUzunSureGun: 60, hatirlatmaGunleri: [3, 7, 14], havuzRizaAy: 12, basvuruAnonimlestirmeAy: 12, islemKaydiAy: 24 })).rejects.toMatchObject({ durumKodu: 403 })
+    const h = await ayarlariGuncelle(payload, yonetici, { onayliIlanSayisi: 11, enUzunSureGun: 2, hatirlatmaGunleri: [], havuzRizaAy: 0, basvuruAnonimlestirmeAy: 0, islemKaydiAy: 6 }).catch((e) => e)
+    expect(Object.keys((h as FormHatasi).alanlar).sort()).toEqual(['basvuruAnonimlestirmeAy', 'enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy', 'islemKaydiAy', 'onayliIlanSayisi'])
     const once = await payload.findGlobal({ slug: 'ayarlar', overrideAccess: true })
-    await ayarlariGuncelle(payload, yonetici, { onayliIlanSayisi: 2, enUzunSureGun: 45, hatirlatmaGunleri: [7, 2, 7], havuzRizaAy: 18 })
+    await ayarlariGuncelle(payload, yonetici, { onayliIlanSayisi: 2, enUzunSureGun: 45, hatirlatmaGunleri: [7, 2, 7], havuzRizaAy: 18, basvuruAnonimlestirmeAy: 12, islemKaydiAy: 24 })
     const a = await payload.findGlobal({ slug: 'ayarlar', overrideAccess: true })
     expect(a.hatirlatmaGunleri?.map((x) => x.gun)).toEqual([2, 7])
     expect(a.saklama?.havuzRizaAy).toBe(18)

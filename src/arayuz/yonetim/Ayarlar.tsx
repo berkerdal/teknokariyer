@@ -4,7 +4,7 @@ import { ayarlarEylemi } from '@/eylemler/ayarlar'
 import { AlanBilgisi } from '../BilgiKutusu'
 import { GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 
-type Deger = { onayliIlanSayisi: number; enUzunSureGun: number; hatirlatmaGunleri: number[]; havuzRizaAy: number }
+type Deger = { onayliIlanSayisi: number; enUzunSureGun: number; hatirlatmaGunleri: number[]; havuzRizaAy: number; basvuruAnonimlestirmeAy: number; islemKaydiAy: number }
 
 function SayiAlani(p: { ad: string; etiket: string; bilgi: React.ReactNode; ipucu: string; durum: FormDurumu; deger: string; birim?: string; disabled: boolean }) {
   const hata = p.durum.hatalar?.[p.ad]
@@ -35,7 +35,7 @@ export function AyarlarFormu({ deger, yonetici }: { deger: Deger; yonetici: bool
   }, [kirli])
   return (
     <form action={eylem} noValidate className="form-yigin" onChange={() => setKirli(true)} onSubmit={() => setKirli(false)}>
-      <HataOzeti durum={durum} siz alanlar={Object.fromEntries(['onayliIlanSayisi', 'enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy'].map((a) => [a, `a-${a}`]))} />
+      <HataOzeti durum={durum} siz alanlar={Object.fromEntries(['onayliIlanSayisi', 'enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy', 'basvuruAnonimlestirmeAy', 'islemKaydiAy'].map((a) => [a, `a-${a}`]))} />
       {durum.tamam && (
         <p className="basari-kutu" role="status">
           {durum.tamam}
@@ -88,6 +88,27 @@ export function AyarlarFormu({ deger, yonetici }: { deger: Deger; yonetici: bool
           birim="ay"
           disabled={!yonetici}
         />
+        <SayiAlani
+          ad="basvuruAnonimlestirmeAy"
+          etiket="Başvuruların saklama süresi"
+          ipucu="İlan kapandıktan kaç ay sonra başvurulardaki kişisel veriler silinsin?"
+          bilgi="Süre dolunca başvurudaki ad, iletişim, CV, cevaplar ve ekip notları silinir; başka yerde kullanılmayan CV dosyası da silinir. Durum ve tarih istatistik için kalır. İşlem her gece otomatik yapılır ve geri alınamaz."
+          durum={durum}
+          deger={String(deger.basvuruAnonimlestirmeAy)}
+          birim="ay"
+          disabled={!yonetici}
+        />
+        <SayiAlani
+          ad="islemKaydiAy"
+          etiket="İşlem kayıtlarının saklama süresi"
+          ipucu="Kim neyi ne zaman yaptı kayıtları kaç ay saklansın? En az 12 ay."
+          bilgi="Süresi dolan işlem kayıtları her gece silinir. Silme işleminin kendisi yeni bir kayıt olarak yazılır."
+          durum={durum}
+          deger={String(deger.islemKaydiAy)}
+          birim="ay"
+          disabled={!yonetici}
+        />
+        <p className="kucuk ikincil">Bu süreler önerilen varsayılanlardır (12 ve 24 ay). Hukuk biriminin onayıyla kesinleşmelidir.</p>
       </section>
       {yonetici ? (
         <div className="dugme-grubu">

@@ -58,7 +58,7 @@ export default async function BasvuruAyrintisi({ params }: Props) {
           <Link className="geri kucuk" href={`/firma-paneli/basvurular?ilan=${ilan.id}`}>
             <Ikon ad="geri" kucuk /> {ilan.pozisyonAdi} başvuruları
           </Link>
-          <h1 className="b1">{silindi ? 'Aday hesabını sildi' : p.ad}</h1>
+          <h1 className="b1">{b.anonimlestirildi ? 'Kişisel veriler silindi' : silindi ? 'Aday hesabını sildi' : p.ad}</h1>
           <p className="ikincil">{[p.bolum, p.okul, p.sinif].filter(Boolean).join(', ')}</p>
           <p className="kucuk ikincil">
             “{ilan.pozisyonAdi}” ilanına {tarihYaz(b.createdAt, true)} tarihinde başvurdu · Kaynak: {KAYNAK_ADI[b.kaynak ?? 'portal']}
@@ -82,7 +82,9 @@ export default async function BasvuruAyrintisi({ params }: Props) {
         <div className="bsv-ayrinti">
           {silindi && (
             <p className="uyari-kutu">
-              Aday hesabını sildiği için adı, iletişim bilgisi ve CV’si silindi (K27). Başvuru kaydı istatistik için kalır.
+              {b.anonimlestirildi
+                ? 'İlanın kapanmasından sonraki saklama süresi dolduğu için bu başvurudaki kişisel veriler (ad, iletişim, CV, cevaplar ve ekip notları) KVKK gereği silindi. Başvuru kaydı istatistik için kalır.'
+                : 'Aday hesabını sildiği için adı, iletişim bilgisi ve CV’si silindi (K27). Başvuru kaydı istatistik için kalır.'}
             </p>
           )}
           {b.durum === 'geri-cekti' && <p className="uyari-kutu">Aday bu başvuruyu geri çekti. Durumu değiştirilemez.</p>}
