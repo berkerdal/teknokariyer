@@ -38,6 +38,8 @@ export function ortakYapilandirma({
     globals: globaller,
     // GraphQL kullanılmıyor; REST ve yerel API yeterli. Kapatmak paketi küçültür.
     graphQL: { disable: true },
+    // Sitenin kendi adresi: CSRF denetimi ve yönetim panelindeki bağlantılar için (yerelde boş kalır).
+    ...(process.env.SITE_ADRESI ? { serverURL: process.env.SITE_ADRESI.replace(/\/$/, '') } : {}),
     // Cloudflare Workers PBKDF2'de en fazla 100.000 tekrara izin verir; varsayılan 600.000 ile giriş çalışmaz.
     // Özetler önekli saklanır: Türkiye'deki sunucuya geçişte 600.000'e çıkarılabilir, eski şifreler yine doğrulanır.
     auth: { passwordHashIterations: 100000 },
