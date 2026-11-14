@@ -89,20 +89,25 @@ export function eslesmeHesapla(
   const sen = bakis === 'aday'
 
   const satirlar: EslesmeSatiri[] = []
-  const zorunluMetni = `Zorunlu ${ilan.zorunluBeceriler.length} becerinin ${varZorunlu.length}${sayiIyelikEki(varZorunlu.length)} var`
+  // Metinler tam cümledir (K29). Adaya “sen”, firmaya üçüncü kişi (“adayın”) bakışıyla yazılır.
+  const profilinde = sen ? 'profilinde' : 'adayın profilinde'
+  const zorunluMetni = `İlanın istediği ${ilan.zorunluBeceriler.length} zorunlu beceriden ${varZorunlu.length}${sayiIyelikEki(varZorunlu.length)} ${profilinde} var.`
   if (ilan.zorunluBeceriler.length) satirlar.push({ durum: eksikZorunlu.length ? 'eksik' : 'var', metin: zorunluMetni })
-  if (varTercih.length) satirlar.push({ durum: 'var', metin: `Tercih sebebi: ${varTercih.join(', ')}` })
+  if (varTercih.length) satirlar.push({ durum: 'var', metin: `Tercih sebebi olan becerilerden ${varTercih.join(', ')} ${profilinde} var.` })
 
   const modelUyar = profil.modeller.includes(ilan.model)
+  const ilanModeli = MODEL_ADI[ilan.model].toLocaleLowerCase('tr')
   satirlar.push(
     modelUyar
-      ? { durum: 'var', metin: `${MODEL_ADI[ilan.model]} çalışma ${sen ? 'tercihine' : 'tercihiyle'} uyuyor` }
-      : {
-          durum: 'eksik',
-          metin: `İlan ${MODEL_ADI[ilan.model].toLocaleLowerCase('tr')}; ${sen ? 'sen' : 'aday'} ${profil.modeller
-            .map((m) => MODEL_ADI[m].toLocaleLowerCase('tr'))
-            .join(' / ')} tercih ${sen ? 'ediyorsun' : 'ediyor'}`,
-        },
+      ? { durum: 'var', metin: `İlanın çalışma modeli (${ilanModeli}) ${sen ? 'tercihinle' : 'adayın tercihiyle'} uyuşuyor.` }
+      : profil.modeller.length
+        ? {
+            durum: 'eksik',
+            metin: `İlan ${ilanModeli} çalışmayı öngörüyor; ${sen ? 'sen' : 'aday'} ${profil.modeller
+              .map((m) => MODEL_ADI[m].toLocaleLowerCase('tr'))
+              .join(' veya ')} çalışmayı tercih ${sen ? 'ediyorsun' : 'ediyor'}.`,
+          }
+        : { durum: 'notr', metin: `İlan ${ilanModeli} çalışmayı öngörüyor; ${sen ? 'çalışma modeli tercihini henüz belirtmedin' : 'aday çalışma modeli tercihini belirtmemiş'}.` },
   )
 
   let bolumUyar = true
@@ -110,27 +115,36 @@ export function eslesmeHesapla(
     bolumUyar = Boolean(profil.bolum && ilan.bolumler.includes(profil.bolum))
     satirlar.push(
       bolumUyar
-        ? { durum: 'var', metin: 'Bölüm uyuyor' }
-        : { durum: 'notr', metin: profil.bolum ? `Bölüm tercih listesinde değil (${profil.bolum})` : 'Bölüm bilgisi yok' },
+        ? { durum: 'var', metin: `${sen ? 'Bölümün' : 'Adayın bölümü'} ilanın tercih ettiği bölümler arasında.` }
+        : {
+            durum: 'notr',
+            metin: profil.bolum
+              ? `${sen ? 'Bölümün' : 'Adayın bölümü'} (${profil.bolum}) ilanın tercih ettiği bölümler arasında değil.`
+              : `${sen ? 'Bölüm bilgin henüz eklenmedi.' : 'Adayın bölüm bilgisi eklenmemiş.'}`,
+          },
     )
   }
 
   let deneyimUyar = true
   if (profil.deneyim) {
     deneyimUyar = DENEYIM_SIRASI.indexOf(profil.deneyim) >= DENEYIM_SIRASI.indexOf(ilan.deneyim)
-    if (!deneyimUyar) satirlar.push({ durum: 'eksik', metin: `Deneyim: ilan ${DENEYIM_ADI[ilan.deneyim]} istiyor` })
+    if (!deneyimUyar)
+      satirlar.push({
+        durum: 'eksik',
+        metin: `Bu ilan “${DENEYIM_ADI[ilan.deneyim]}” deneyim düzeyini arıyor; ${sen ? 'senin deneyim düzeyin' : 'adayın deneyim düzeyi'} “${DENEYIM_ADI[profil.deneyim]}”.`,
+      })
   }
 
   let dilPuani = 1
   for (const istenen of ilan.diller) {
     const var_ = profil.diller.find((d) => d.dil === istenen.dil)
     if (!var_) {
-      satirlar.push({ durum: 'eksik', metin: `${istenen.dil} ${istenen.seviye} isteniyor` })
+      satirlar.push({ durum: 'eksik', metin: `İlan ${istenen.dil} için en az ${istenen.seviye} seviyesi istiyor; ${profilinde} ${istenen.dil} bulunmuyor.` })
       dilPuani = 0
     } else if (CEFR.indexOf(var_.seviye) >= CEFR.indexOf(istenen.seviye)) {
-      satirlar.push({ durum: 'var', metin: `${istenen.dil} ${var_.seviye} (istenen ${istenen.seviye})` })
+      satirlar.push({ durum: 'var', metin: `${sen ? `${istenen.dil} seviyen` : `Adayın ${istenen.dil} seviyesi`} (${var_.seviye}) ilanın istediği ${istenen.seviye} seviyesini karşılıyor.` })
     } else {
-      satirlar.push({ durum: 'eksik', metin: `${istenen.dil}: ${istenen.seviye} isteniyor, ${var_.seviye} var` })
+      satirlar.push({ durum: 'eksik', metin: `İlan ${istenen.dil} için ${istenen.seviye} seviyesi istiyor; ${sen ? 'senin seviyen' : 'adayın seviyesi'} ${var_.seviye}.` })
       dilPuani = Math.min(dilPuani, 0.5)
     }
   }
@@ -146,8 +160,10 @@ export function eslesmeHesapla(
       agirlik.dil * dilPuani) /
     toplamAgirlik
 
+  // Listelerde tek satırlık özet (veri satırı).
   const kisa = ilan.zorunluBeceriler.length
-    ? zorunluMetni + (eksikZorunlu.length ? ` · eksik: ${eksikZorunlu.join(', ')}` : '')
+    ? `${ilan.zorunluBeceriler.length} zorunlu beceriden ${varZorunlu.length}${sayiIyelikEki(varZorunlu.length)} var` +
+      (eksikZorunlu.length ? ` (eksik: ${eksikZorunlu.join(', ')})` : '')
     : satirlar[0]?.metin ?? ''
 
   return { satirlar, kisa, eksikZorunlu, siralamaPuani: Math.round(puan * 100) }

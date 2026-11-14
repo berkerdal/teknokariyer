@@ -20,19 +20,20 @@ const elif: EslesmeProfili = {
 describe('açıklanabilir eşleşme', () => {
   it('gerekçeli kısa özet üretir, yüzde değil', () => {
     const s = eslesmeHesapla(gomulu, elif, 'aday')
-    expect(s.kisa).toBe('Zorunlu 4 becerinin 3’ü var · eksik: RTOS')
+    expect(s.kisa).toBe('4 zorunlu beceriden 3’ü var (eksik: RTOS)')
+    expect(s.satirlar[0]!.metin).toBe('İlanın istediği 4 zorunlu beceriden 3’ü profilinde var.')
     expect(s.kisa).not.toMatch(/%/)
     expect(s.eksikZorunlu).toEqual(['RTOS'])
   })
   it('aday bakışında "sen", firma bakışında "aday" der (K9)', () => {
     const mod = { ...gomulu, model: 'uzaktan' as const }
-    expect(eslesmeHesapla(mod, elif, 'aday').satirlar.some((s) => s.metin.includes('sen ofiste / hibrit tercih ediyorsun'))).toBe(true)
-    expect(eslesmeHesapla(mod, elif, 'firma').satirlar.some((s) => s.metin.includes('aday ofiste / hibrit tercih ediyor'))).toBe(true)
+    expect(eslesmeHesapla(mod, elif, 'aday').satirlar.some((s) => s.metin === 'İlan uzaktan çalışmayı öngörüyor; sen ofiste veya hibrit çalışmayı tercih ediyorsun.')).toBe(true)
+    expect(eslesmeHesapla(mod, elif, 'firma').satirlar.some((s) => s.metin === 'İlan uzaktan çalışmayı öngörüyor; aday ofiste veya hibrit çalışmayı tercih ediyor.')).toBe(true)
   })
   it('deneyim ve dil eksiklerini söyler', () => {
     const s = eslesmeHesapla({ ...gomulu, diller: [{ dil: 'İngilizce', seviye: 'C1' }] }, elif, 'aday')
-    expect(s.satirlar.map((x) => x.metin)).toContain('Deneyim: ilan 1–3 yıl istiyor')
-    expect(s.satirlar.map((x) => x.metin)).toContain('İngilizce: C1 isteniyor, B2 var')
+    expect(s.satirlar.map((x) => x.metin)).toContain('Bu ilan “1–3 yıl” deneyim düzeyini arıyor; senin deneyim düzeyin “Öğrenci”.')
+    expect(s.satirlar.map((x) => x.metin)).toContain('İlan İngilizce için C1 seviyesi istiyor; senin seviyen B2.')
   })
   it('beceri adları büyük/küçük harfe duyarsız eşleşir', () => {
     const s = eslesmeHesapla({ ...gomulu, zorunluBeceriler: ['git', 'c'] }, elif, 'firma')

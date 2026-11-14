@@ -62,9 +62,9 @@ export default async function GirisSayfasi({ searchParams }: Props) {
             </ul>
           ) : (
             <ul className="madde">
-              <li>Profilini bir kez doldurursun, her başvuruda kullanılır.</li>
+              <li>Profilini bir kez doldurursun; profilin her başvuruda otomatik olarak kullanılır.</li>
               <li>Başvurularının durumunu tek yerden izlersin.</li>
-              <li>İstersen CV havuzuna katılırsın; Teknokent firmaları seni bulabilir.</li>
+              <li>İstersen CV havuzuna katılabilirsin; böylece Teknokent firmaları seni bulabilir.</li>
             </ul>
           )}
         </aside>

@@ -113,7 +113,7 @@ export default async function FirmaSayfasi({ params }: Props) {
                 ))}
               </div>
             ) : (
-              <p className="ikincil">Şu an açık ilan yok.</p>
+              <p className="ikincil">Bu firmanın şu anda açık ilanı bulunmuyor.</p>
             )}
           </section>
         </div>

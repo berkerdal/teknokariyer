@@ -75,12 +75,12 @@ export function EslesmeKutusu({ ilan, profil, girisli }: { ilan: IlanAyrintisi; 
         <p className="kucuk">
           {girisli ? (
             <>
-              Bu ilanın becerilerini profilinle karşılaştırmak için <Link href="/hesabim/profil">profilini doldur</Link>.
+              Bu ilanın becerilerini profilinle karşılaştırabilmemiz için önce <Link href="/hesabim/profil">profilini doldur</Link>.
             </>
           ) : (
             <>
-              <Link href={`/giris?donus=${encodeURIComponent(`/ilan/${ilan.id}`)}`}>Giriş yaparsan</Link> bu ilanın becerilerini profilinle
-              karşılaştırırız: hangisi var, hangisi eksik.
+              <Link href={`/giris?donus=${encodeURIComponent(`/ilan/${ilan.id}`)}`}>Giriş yaparsan</Link> bu ilanın aradığı becerileri profilinle
+              karşılaştırır, hangilerinin profilinde bulunduğunu gösteririz.
             </>
           )}
         </p>
@@ -104,7 +104,7 @@ export function EslesmeKutusu({ ilan, profil, girisli }: { ilan: IlanAyrintisi; 
       </ul>
       {e.eksikZorunlu.length > 0 && (
         <p className="kucuk">
-          Bu beceriler profilinde varsa ekle: <Link href="/hesabim/profil">profili düzenle</Link>
+          Bu beceriler sende varsa <Link href="/hesabim/profil#beceriler">profiline ekleyebilirsin</Link>.
         </p>
       )}
     </div>

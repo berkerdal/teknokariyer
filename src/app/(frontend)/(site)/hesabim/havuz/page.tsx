@@ -20,7 +20,7 @@ export default async function HavuzSayfasi() {
   const gecerli = rizaGecerliMi(riza, new Date())
   const { docs: firmalar } = await payload.find({ collection: 'firmalar', where: { asama: { not_equals: 'pasif' } }, limit: 500, depth: 0, sort: 'kisaAd', overrideAccess: true, select: { kisaAd: true } })
   const sayi = gecerli ? await goruntuleyenFirmaSayisi(payload, k) : 0
-  const gorunenler = [`bölüm, okul, deneyim, beceriler, diller, tercihler${a.cinsiyet ? ', cinsiyet' : ''}`]
+  const gorunenler = `bölümünü, okulunu, deneyimini, becerilerini, dillerini${a.cinsiyet ? ', tercihlerini ve cinsiyetini' : ' ve tercihlerini'}`
   return (
     <>
       <h1 className="b1">CV havuzu</h1>
@@ -31,14 +31,14 @@ export default async function HavuzSayfasi() {
             <p>
               <strong className="buyuk-sayi">{sayi}</strong> firma profilini görüntüledi.
             </p>
-            <p className="kucuk ikincil">Firma adlarını göstermiyoruz.</p>
+            <p className="kucuk ikincil">Firmaların adları gösterilmez.</p>
           </div>
         )}
         <div className="gorev">
           <p className="ust-etiket">Havuzda neler görünür?</p>
           <p className="kucuk">
-            Arama listesinde: {gorunenler.join('')}. Adın ve iletişim bilgin görünmez. Bir firma profilini açtığında: adın, iletişim bilgin ve CV’n; sana ayrıca
-            sorulmaz.
+            Firmalar arama listesinde {gorunenler} görür; adın ve iletişim bilgilerin bu listede görünmez. Bir firma profilini açtığında adın, iletişim
+            bilgilerin ve CV’n o firmaya görünür; bunun için sana ayrıca sorulmaz.
           </p>
         </div>
       </div>

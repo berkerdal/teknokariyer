@@ -213,6 +213,12 @@ Claude tarafından yapılacak.
     - KVKK metinleri `src/metinler/` altında, sürümlü ve **taslak** (`onayli: false`); hukuk birimi onayı bekliyor.
     - Hesap silme şimdilik kvkk@ adresine e-postayla; K27'ye göre panelden silme yazılacak.
     - Kaydedilen ilanlar ve kayıtlı aramalar henüz yok (veri modelinde koleksiyon yok).
+  - **Geri bildirim turu 1 (14.11.2026, K28–K29):** Profil okunur özet + düzenleme penceresi (`DuzenlemePenceresi`),
+    profil sihirbazı (`/hesabim/profil/sihirbaz`), yeni bölümler (iş deneyimi, sertifikalar, bağlantılar), metin kılavuzu
+    ve aday tarafı metinlerinin gözden geçirilmesi (eşleşme gerekçeleri dahil tam cümle).
+    - Profil form kuralları `src/alan/profilFormu.ts`: yalnızca formdaki bölümler (`profilBolumu` gizli alanları) güncellenir.
+    - Öğrenilen: gizli alan adı `bolum`, okulun “bölüm” seçimiyle çakışıp bölümü kaydettirmiyordu. Form alan adları çakışmamalı.
+    - Öğrenilen: React form eylemi sonrası formu sıfırlar; açılır pencerede form kayıttan sonra `key` ile yeniden kurulur.
   - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

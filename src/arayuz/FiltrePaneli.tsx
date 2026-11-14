@@ -74,7 +74,7 @@ export function FiltrePaneli(props: { formId: string; aktifSayi: number; sonucSa
             </button>
           </noscript>
           <button type="button" className="dugme dugme--genis" data-mobil onClick={kapat} disabled={props.sonucSayisi === 0}>
-            {props.sonucSayisi ? `${props.sonucSayisi} ilanı göster` : 'Sonuç yok'}
+            {props.sonucSayisi ? `${props.sonucSayisi} ilanı göster` : 'Uyan ilan bulunmuyor'}
           </button>
         </div>
       </aside>

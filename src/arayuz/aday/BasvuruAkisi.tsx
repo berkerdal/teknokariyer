@@ -138,7 +138,7 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
             {p.eksikler.length > 0 && (
               <section hidden={adim !== 'eksik'} className="form-yigin">
                 <h1 className="b2">Bu ilan için {p.eksikler.length} bilgi eksik</h1>
-                <p className="ikincil">Cevapların profiline de kaydedilir, sonraki başvurularda tekrar sormayız.</p>
+                <p className="ikincil">Cevapların profiline de kaydedilir; sonraki başvurularında bu bilgileri yeniden sormayız.</p>
                 {p.eksikler.includes('okul') && (
                   <Secim id="okul" etiket="Okul" hata={hatalar.okul} secenekler={p.okullar} ipucu="Listede yoksa en yakın seçeneği seç; Yönetici A.Ş. listeyi günceller." />
                 )}
@@ -221,7 +221,7 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
                     <input type="radio" name="cv" value="" checked={cvSecim === 'yeni'} onChange={() => setCvSecim('yeni')} />
                     <span>
                       <Ikon ad="arti" kucuk /> <strong>Yeni CV yükle</strong>
-                      <span className="ipucu">Yalnızca PDF, en fazla 5 MB. Profiline de eklenir.</span>
+                      <span className="ipucu">Yalnızca PDF dosyası yükleyebilirsin; dosya en fazla 5 MB olabilir. Yüklediğin CV profiline de eklenir.</span>
                     </span>
                   </label>
                 )}

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'İlan veren firmalar',
-  description: 'Pamukkale Teknokent’te şu an iş veya staj ilanı olan firmalar.',
+  description: 'Pamukkale Teknokent’te şu anda iş veya staj ilanı bulunan firmalar.',
   alternates: { canonical: '/firmalar' },
 }
 
@@ -24,7 +24,7 @@ export default async function FirmalarSayfasi() {
       <Ust aktif="firmalar" />
       <main id="icerik" className="sayfa-dar">
         <h1 className="b1">İlan veren firmalar</h1>
-        <p className="ikincil">Pamukkale Teknokent’te şu an açık ilanı olan {firmalar.length} firma.</p>
+        <p className="ikincil">Pamukkale Teknokent’te şu anda açık ilanı bulunan {firmalar.length} firma aşağıda listeleniyor.</p>
         {firmalar.length ? (
           <ul className="firma-liste">
             {firmalar.map((f) => (
@@ -40,7 +40,7 @@ export default async function FirmalarSayfasi() {
             ))}
           </ul>
         ) : (
-          <p>Şu an ilanı olan firma yok.</p>
+          <p>Şu anda açık ilanı bulunan firma yok.</p>
         )}
       </main>
     </>

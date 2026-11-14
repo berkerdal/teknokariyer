@@ -8,7 +8,7 @@ import { METINLER } from '@/metinler'
 import { rolAnaSayfasi } from '@/veri/cerez'
 import { oturum } from '@/veri/payload'
 
-export const metadata: Metadata = { title: 'Hesap aç', description: 'TeknoKariyer aday hesabı aç: ad, e-posta ve şifre yeter.' }
+export const metadata: Metadata = { title: 'Hesap aç', description: 'Adını, e-posta adresini ve bir şifre belirleyerek TeknoKariyer aday hesabını açabilirsin.' }
 
 /** Yalnızca gerekli üç bilgi. Profil bilgileri kayıtta sorulmaz. */
 export default async function KayitSayfasi() {
@@ -28,9 +28,9 @@ export default async function KayitSayfasi() {
         <aside className="giris-yan giris-yan--masa">
           <p className="ust-etiket">Sonra ne olacak?</p>
           <ul className="madde">
-            <li>E-postandaki bağlantıyla adresini doğrularsın.</li>
+            <li>E-postana gönderdiğimiz bağlantıyla adresini doğrularsın.</li>
             <li>İlk başvurunda yalnızca o ilanın gerektirdiği bilgileri sorarız.</li>
-            <li>CV havuzuna katılmak isteğe bağlıdır; ayrıca sorulur.</li>
+            <li>CV havuzuna katılmak isteğe bağlıdır ve sana ayrıca sorulur.</li>
           </ul>
         </aside>
       </main>

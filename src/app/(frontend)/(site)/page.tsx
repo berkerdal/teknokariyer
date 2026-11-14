@@ -34,12 +34,12 @@ export default async function AnaSayfa() {
             <p className="as-alt">
               {ilanlar.length ? (
                 <>
-                  Şu an yayında <strong>{ilanlar.length} ilan</strong>, {firmaSayisi} firmadan.{' '}
+                  Şu anda {firmaSayisi} firmanın <strong>{ilanlar.length} ilanı</strong> yayında.{' '}
                 </>
               ) : (
-                <>Şu an yayında ilan yok. </>
+                <>Şu anda yayında ilan bulunmuyor. </>
               )}
-              İlanları yalnızca Teknokent’teki firmalar verir; başvuru herkese açık.
+              İlanları yalnızca Pamukkale Teknokent’teki firmalar verir ve herkes başvurabilir.
             </p>
             <form className="arama" role="search" action="/ilanlar">
               <label className="gizli" htmlFor="as-ara">
@@ -72,7 +72,7 @@ export default async function AnaSayfa() {
               </h2>
               {ilanlar.length > 0 && (
                 <Link href="/ilanlar" className="kucuk">
-                  {ilanlar.length} ilanın tümü
+                  Tüm ilanları gör ({ilanlar.length})
                 </Link>
               )}
             </div>
@@ -84,13 +84,13 @@ export default async function AnaSayfa() {
                   ))}
                 </div>
                 <Link className="dugme dugme--ikincil dugme--genis tumu" href="/ilanlar">
-                  {ilanlar.length} ilanın tümünü göster
+                  Tüm ilanları göster ({ilanlar.length})
                 </Link>
               </>
             ) : (
               <div className="bos panel">
-                <p className="b3">Yayında ilan yok.</p>
-                <p className="ikincil">Firmalar ilan yayınladığında burada görünür.</p>
+                <p className="b3">Şu anda yayında ilan bulunmuyor.</p>
+                <p className="ikincil">Firmalar ilan yayınladığında ilanlar burada listelenir.</p>
               </div>
             )}
           </section>

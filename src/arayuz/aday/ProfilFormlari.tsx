@@ -107,12 +107,12 @@ export const CEFR_SEVIYELERI: Array<[string, string]> = CEFR.map((c) => [c, c])
 
 export function CvYukleFormu({ kalan }: { kalan: number }) {
   const [durum, eylem] = useActionState<FormDurumu, FormData>(cvYukleEylemi, {})
-  if (kalan <= 0) return <p className="kucuk ikincil">En fazla 3 CV saklayabilirsin. Yenisini yüklemek için birini sil.</p>
+  if (kalan <= 0) return <p className="kucuk ikincil">En fazla 3 CV saklayabilirsin. Yeni bir CV yüklemek için önce birini sil.</p>
   return (
     <form action={eylem} className="dosya" noValidate>
       <HataOzeti durum={durum} alanlar={{ cvDosya: 'cv-dosya' }} />
       <p>
-        <strong>Yalnızca PDF, en fazla 5 MB.</strong> {kalan} CV daha ekleyebilirsin.
+        <strong>Yalnızca PDF dosyası yükleyebilirsin; dosya en fazla 5 MB olabilir.</strong> {kalan} CV daha ekleyebilirsin.
       </p>
       <div className={durum.hatalar?.cvDosya ? 'alan alan--hata' : 'alan'}>
         {durum.hatalar?.cvDosya && <p className="hata-metni">{durum.hatalar.cvDosya}</p>}

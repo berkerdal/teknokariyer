@@ -232,7 +232,7 @@ async function KapanmisIlan({ ilan }: { ilan: IlanAyrintisi }) {
   const t = tarihYaz(ilan.sonBasvuru, true)
   const ust =
     ilan.durum === 'suresi-doldu' || ilan.durum === 'yayinda'
-      ? `Son başvuru tarihi ${t} idi`
+      ? `Bu ilanın son başvuru tarihi geçti (${t}).`
       : ilan.durum === 'duraklatildi'
         ? 'Bu ilan şu an başvuru almıyor'
         : 'Bu ilan kapandı'
@@ -257,7 +257,7 @@ async function KapanmisIlan({ ilan }: { ilan: IlanAyrintisi }) {
           {ilan.durum === 'duraklatildi'
             ? 'Firma bu ilanı geçici olarak durdurdu. Yeniden başvuruya açılırsa bu adresten başvurabilirsin.'
             : 'Bu ilana artık başvurulamıyor.'}{' '}
-          {firmanin.length || benzer.length ? 'Aşağıda açık ilanlar var.' : ''}
+          {firmanin.length || benzer.length ? 'Aşağıda başvurabileceğin açık ilanlar bulunuyor.' : ''}
         </p>
         {firmanin.length > 0 && (
           <section>

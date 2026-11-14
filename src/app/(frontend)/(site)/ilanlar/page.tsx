@@ -113,7 +113,7 @@ export default async function IlanlarSayfasi({ searchParams }: Props) {
             )}
             <div className="liste-bas">
               <p aria-live="polite">
-                <strong>{sonuc.length}</strong> ilan
+                <strong>{sonuc.length}</strong> ilan bulundu
               </p>
               <label className="siralama kucuk">
                 Sırala
@@ -129,11 +129,11 @@ export default async function IlanlarSayfasi({ searchParams }: Props) {
               ))}
               {!sonuc.length && (
                 <div className="bos">
-                  <p className="b3">{tumu.length ? 'Bu filtrelerle ilan yok.' : 'Şu an yayında ilan yok.'}</p>
+                  <p className="b3">{tumu.length ? 'Seçtiğin filtrelere uyan ilan bulunmuyor.' : 'Şu anda yayında ilan bulunmuyor.'}</p>
                   {oneri && (
                     <>
                       <p>
-                        “{oneri.ad}” filtresini kaldırırsan {oneri.sayi} ilan var.
+                        “{oneri.ad}” filtresini kaldırırsan {oneri.sayi} ilan listelenir.
                       </p>
                       <Link className="dugme dugme--ikincil" href={`/ilanlar${filtreAdresi(filtreDegistir(f, oneri.k, oneri.deger))}`} scroll={false}>
                         “{oneri.ad}” filtresini kaldır

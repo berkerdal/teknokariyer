@@ -79,7 +79,7 @@ export default async function ProfilSayfasi() {
         <p className="kucuk ikincil">
           {[a.deneyimSeviyesi ? DENEYIM_ADI[a.deneyimSeviyesi as Deneyim] : null, t?.sehir].filter(Boolean).join(' · ')}
         </p>
-        <p className="kucuk ikincil">Firmalar başvurularında bu profilin başvuru anındaki kopyasını görür.</p>
+        <p className="kucuk ikincil">Başvurduğun firmalar, profilinin başvuru anındaki kopyasını görür.</p>
       </header>
 
       {eksikler.length > 0 ? (

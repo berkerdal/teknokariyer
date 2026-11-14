@@ -72,7 +72,7 @@ export default async function HesapSayfasi() {
 
       <section className="profil-bolum">
         <h2 className="b3 kare-bas">Verilerin</h2>
-        <p>Hesabın, profilin, başvuruların ve onay kayıtların tek bir dosyada (JSON). CV dosyaların profil sayfasında.</p>
+        <p>Hesap bilgilerini, profilini, başvurularını ve onay kayıtlarını tek bir dosya (JSON) olarak indirebilirsin. CV dosyaların profil sayfasında yer alır.</p>
         <div className="dugme-grubu">
           <a className="dugme dugme--ikincil" href="/hesabim/verilerim" download>
             <Ikon ad="indir" /> Verilerimi indir
