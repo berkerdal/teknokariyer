@@ -52,7 +52,15 @@ const cloudflareGunlugu = {
 // OpenNext'in bağlam fonksiyonu derleme sırasında "remote" işaretli bağlantılar için Cloudflare'e bağlanmaya çalışıyor;
 // bu yüzden yalnızca Workers içinde kullanılır.
 const workersIcinde = typeof navigator !== 'undefined' && navigator.userAgent === 'Cloudflare-Workers'
-const cloudflare = workersIcinde ? await getCloudflareContext({ async: true }) : await wranglerBaglami()
+// `next build` sayfa bilgisini birkaç işlemle paralel toplar; her işlem yerel simülasyonu açarsa aynı SQLite dosyasında
+// "database is locked" ile derleme rastgele düşer (Cloudflare derleme kaydı, 14.11.2026). Tüm sayfalar dinamik olduğu
+// için derlemede veritabanına hiç gidilmez: bağlantılar boş bırakılır, yalnızca istek anında kullanılır.
+const derlemeAsamasi = process.env.NEXT_PHASE === 'phase-production-build'
+const cloudflare: Pick<CloudflareContext, 'env'> = workersIcinde
+  ? await getCloudflareContext({ async: true })
+  : derlemeAsamasi
+    ? { env: {} as CloudflareContext['env'] }
+    : await wranglerBaglami()
 void komutSatiri
 
 export default buildConfig(

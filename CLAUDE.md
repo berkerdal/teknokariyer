@@ -264,6 +264,9 @@ Claude tarafından yapılacak.
     Tarayıcı parantezi `%28` olarak ister, Cloudflare statik sunucusu bulamaz, Next aynı adrese 307 verir: sonsuz döngü,
     sayfa etkileşimsiz. Kökteki `worker.ts` sarmalayıcısı kodlanmış adresi çözüp dosyayı doğrudan `ASSETS`'ten verir.
     curl ile denenince görünmez (curl kodlamaz); tarayıcıyla denenmeli.
+  - **Derlemede veritabanı yok:** `next build` sayfa bilgisini 3 işlemle paralel toplar; her biri yerel D1 simülasyonunu
+    açınca "database is locked" ile derleme rastgele düşüyordu (Cloudflare'deki aralıklı "Failed" derlemelerin sebebi).
+    `NEXT_PHASE === 'phase-production-build'` iken bağlantılar boş bırakılır.
   - **Derleme:** Ön yüz `force-dynamic`; derleme veritabanına bağlanmaz ve `.env` olmadan çalışır. Oturum okuyan kod önce
     `headers()` çağırır. Aksi hâlde derleme, sayfaları önceden üretirken Payload'un göç sorusunda takılıyordu.
 - **Arayüz geliştirmesinden öğrenilenler:**
