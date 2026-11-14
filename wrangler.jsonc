@@ -3,6 +3,8 @@
   "main": "worker.ts",
   "name": "teknokariyer-test",
   "compatibility_date": "2026-11-01",
+  // Kalıcı Worker kayıtları (Cloudflare panelinde "Observability"; API ile de sorgulanır).
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
   "compatibility_flags": [
     // Enable Node.js API
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag
