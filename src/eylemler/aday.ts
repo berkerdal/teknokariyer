@@ -3,6 +3,7 @@
  * Aday sunucu eylemleri: başvuru, geri çekme, CV, profil ve CV havuzu ayarları.
  * Kural mantığı servislerdedir; burada yalnızca form verisi okunur, oturum denetlenir ve sonuç arayüze döner.
  */
+import { basvuruKaynagi } from '@/alan/basvuru'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { FormDurumu } from '@/arayuz/form'
@@ -113,6 +114,7 @@ export async function basvurEylemi(_: BasvuruDurumu, f: FormData): Promise<Basvu
       cevaplar,
       aydinlatmaOnay: Boolean(f.get('aydinlatma')),
       havuzaKatil: havuz,
+      kaynak: basvuruKaynagi(metin(f, 'kaynak')) ?? 'portal',
     })
     revalidatePath('/hesabim')
     hedef = `/basvuru-tamam?b=${b.id}${havuz ? '&havuz=1' : ''}`

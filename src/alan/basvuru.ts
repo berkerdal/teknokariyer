@@ -66,3 +66,9 @@ export function adimKareleri(durum: string): Array<'gecti' | 'simdi' | 'olumsuz'
 
 /** Aday başvurusunu ancak firma karar vermeden geri çekebilir. */
 export const geriCekilebilirMi = (durum: string) => durum === 'alindi' || durum === 'inceleniyor'
+
+/** Başvurunun geldiği yer. Yalnızca bilinen değerler kabul edilir; adresteki başka bir değer yok sayılır. */
+export const BASVURU_KAYNAKLARI = ['linkedin', 'google', 'dogrudan'] as const
+export type BasvuruKaynagi = (typeof BASVURU_KAYNAKLARI)[number] | 'portal'
+export const basvuruKaynagi = (d?: string | null): (typeof BASVURU_KAYNAKLARI)[number] | undefined =>
+  (BASVURU_KAYNAKLARI as readonly string[]).includes(d ?? '') ? (d as (typeof BASVURU_KAYNAKLARI)[number]) : undefined

@@ -19,6 +19,18 @@ export function IlanEtiketleri({ ilan, uzun = false }: { ilan: IlanAyrintisi; uz
   )
 }
 
+const MODEL_ACIKLAMA: Record<string, string> = {
+  ofiste: 'Ofiste (Teknokent’te)',
+  hibrit: 'Hibrit (ofiste ve uzaktan)',
+  uzaktan: 'Uzaktan',
+}
+
+/** “Tam zamanlı iş”, “Zorunlu staj”: ilan türü ve çalışma şekli tek ifadede. */
+export function ilanTuruMetni(ilan: Pick<IlanAyrintisi, 'tur' | 'altTur'>): string {
+  const alt = ALT_TUR_ADI[ilan.altTur] ?? ilan.altTur
+  return ilan.tur === 'staj' ? alt : `${alt} iş`
+}
+
 /** İlanın özet bilgileri. Başvuru sayısı aralıkla gösterilir (K23); görüntülenme herkese açık sayfada yok. */
 export function IlanOzetListesi({ ilan, kisa = false }: { ilan: IlanAyrintisi; kisa?: boolean }) {
   const k = kalanGun(new Date(ilan.sonBasvuru), new Date())
@@ -40,6 +52,24 @@ export function IlanOzetListesi({ ilan, kisa = false }: { ilan: IlanAyrintisi; k
       )}
       {!kisa && (
         <>
+          <div>
+            <dt>İlan türü</dt>
+            <dd>{ilanTuruMetni(ilan)}</dd>
+          </div>
+          <div>
+            <dt>Çalışma modeli</dt>
+            <dd>{MODEL_ACIKLAMA[ilan.model] ?? MODEL_ADI[ilan.model]}</dd>
+          </div>
+          <div>
+            <dt>Aranan deneyim</dt>
+            <dd>{DENEYIM_ADI[ilan.deneyim]}</dd>
+          </div>
+          {ilan.pauOncelik && (
+            <div>
+              <dt>Öncelik</dt>
+              <dd>Pamukkale Üniversitesi öğrencilerine öncelik veriliyor</dd>
+            </div>
+          )}
           <div>
             <dt>Konum</dt>
             <dd>Pamukkale Teknokent, {ilan.firma.konum}</dd>

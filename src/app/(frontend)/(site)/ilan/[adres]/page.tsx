@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { basvuruKaynagi } from '@/alan/basvuru'
+import { DENEYIM_ADI } from '@/alan/eslesme'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { sirala } from '@/alan/ilanFiltre'
 import { suresiDolduMu } from '@/alan/ilan'
@@ -7,7 +9,7 @@ import { ilgiEki } from '@/alan/metin'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
 import { Ikon } from '@/arayuz/Ikon'
 import { BeceriListesi, IlanSatiri } from '@/arayuz/IlanSatiri'
-import { EslesmeKutusu, IlanEtiketleri, IlanOzetListesi, Metin } from '@/arayuz/IlanParcalari'
+import { EslesmeKutusu, IlanOzetListesi, Metin } from '@/arayuz/IlanParcalari'
 import { BaglantiyiKopyala } from '@/arayuz/BaglantiyiKopyala'
 import { Ust } from '@/arayuz/Ust'
 import { ilanAdresi, tarihYaz } from '@/arayuz/bicim'
@@ -17,7 +19,7 @@ import { oturum } from '@/veri/payload'
 
 export const dynamic = 'force-dynamic'
 
-type Props = { params: Promise<{ adres: string }> }
+type Props = { params: Promise<{ adres: string }>; searchParams?: Promise<{ kaynak?: string }> }
 
 const EGITIM_ADI: Record<string, string> = { lise: 'Lise', onlisans: 'Önlisans', lisans: 'Lisans', 'yuksek-lisans': 'Yüksek lisans', doktora: 'Doktora' }
 const SGK_ADI: Record<string, string> = { okul: 'Okul karşılıyor', firma: 'Firma karşılıyor' }
@@ -66,8 +68,9 @@ function jobPosting(ilan: IlanAyrintisi) {
   }
 }
 
-export default async function IlanSayfasi({ params }: Props) {
+export default async function IlanSayfasi({ params, searchParams }: Props) {
   const { adres } = await params
+  const kaynak = basvuruKaynagi((await searchParams)?.kaynak)
   const ilan = await ilanAl(adres)
   const dogru = ilanAdresi(ilan).replace('/ilan/', '')
   if (adres !== dogru) permanentRedirect(ilanAdresi(ilan))
@@ -78,7 +81,8 @@ export default async function IlanSayfasi({ params }: Props) {
   const profil = aday ? eslesmeProfili(aday) : null
   const sahip = profil ? new Set(profil.beceriler.map((b) => b.toLocaleLowerCase('tr'))) : undefined
   const f = ilan.firma
-  const basvur = `${ilanAdresi(ilan)}/basvur`
+  // Paylaşım bağlantısıyla gelen adayın kaynağı (ör. ?kaynak=linkedin) başvuruya taşınır; istatistikte ayrı görünür.
+  const basvur = `${ilanAdresi(ilan)}/basvur${kaynak ? `?kaynak=${kaynak}` : ''}`
 
   return (
     <>
@@ -101,7 +105,6 @@ export default async function IlanSayfasi({ params }: Props) {
             </div>
           </div>
           <h1 className="b1">{ilan.pozisyonAdi}</h1>
-          <IlanEtiketleri ilan={ilan} uzun />
         </div>
 
         <aside className="id-yan" aria-label="İlan özeti">
@@ -131,6 +134,9 @@ export default async function IlanSayfasi({ params }: Props) {
               <summary>Aranan nitelikler</summary>
               <div className="icerik">
                 <Metin metin={ilan.nitelikler} />
+                <p>
+                  <strong>Deneyim:</strong> {DENEYIM_ADI[ilan.deneyim]}
+                </p>
                 <p>
                   <strong>Eğitim:</strong> {EGITIM_ADI[ilan.egitim] ?? ilan.egitim}
                   {ilan.bolumler.length ? ` · ${ilan.bolumler.join(', ')}` : ''}

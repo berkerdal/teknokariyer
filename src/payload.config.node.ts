@@ -18,7 +18,7 @@ import { DOSYA_KOLEKSIYONLARI } from './koleksiyonlar'
 
 export default buildConfig(
   ortakYapilandirma({
-    db: postgresAdapter({ pool: { connectionString: process.env.DATABASE_URL || '' } }),
+    db: postgresAdapter({ pool: { connectionString: process.env.DATABASE_URL || '' }, push: false }),
     eklentiler: [
       s3Storage({
         collections: Object.fromEntries(DOSYA_KOLEKSIYONLARI.map((k) => [k, true])),

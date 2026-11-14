@@ -79,6 +79,7 @@ export interface Config {
     'islem-kayitlari': IslemKayitlari;
     dosyalar: Dosyalar;
     'test-postalar': TestPostalar;
+    talepler: Talepler;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +99,7 @@ export interface Config {
     'islem-kayitlari': IslemKayitlariSelect<false> | IslemKayitlariSelect<true>;
     dosyalar: DosyalarSelect<false> | DosyalarSelect<true>;
     'test-postalar': TestPostalarSelect<false> | TestPostalarSelect<true>;
+    talepler: TaleplerSelect<false> | TaleplerSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -148,6 +150,10 @@ export interface KullanicilarAuthOperations {
 export interface Kullanicilar {
   id: number;
   ad: string;
+  /**
+   * Örnek: İnsan Kaynakları Uzmanı. Firma panelinde adın yanında görünür.
+   */
+  unvan?: string | null;
   rol: 'yonetici' | 'moderator' | 'raporlayici' | 'firma' | 'aday';
   firma?: (number | null) | Firmalar;
   firmaYetkisi?: ('yonetici' | 'ilan-sorumlusu' | 'degerlendirici') | null;
@@ -603,6 +609,41 @@ export interface TestPostalar {
   createdAt: string;
 }
 /**
+ * Firmaların ve adayların listede bulamadığı beceri, pozisyon ailesi, bölüm veya dil için gönderdiği istekler. Onaylanan öğeler listeye kendiliğinden eklenir.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talepler".
+ */
+export interface Talepler {
+  id: number;
+  ozet?: string | null;
+  taksonomiTuru: 'beceri' | 'pozisyon-ailesi' | 'sektor' | 'universite' | 'bolum' | 'dil';
+  /**
+   * Yazımı düzeltebilirsiniz. Eklemek istemediğiniz öğenin “Kabul” işaretini kaldırın.
+   */
+  oneriler?:
+    | {
+        ad: string;
+        kabul?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  aciklama?: string | null;
+  kaynak?: string | null;
+  talepEden?: (number | null) | Kullanicilar;
+  firma?: (number | null) | Firmalar;
+  durum: 'bekliyor' | 'onaylandi' | 'kismen' | 'reddedildi';
+  /**
+   * Reddederken nedenini yazın; talep eden bu notu görür.
+   */
+  sonucNotu?: string | null;
+  eklenenler?: (number | Taksonomiler)[] | null;
+  sonuclandiran?: (number | null) | Kullanicilar;
+  sonucTarihi?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -673,6 +714,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'test-postalar';
         value: number | TestPostalar;
+      } | null)
+    | ({
+        relationTo: 'talepler';
+        value: number | Talepler;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -722,6 +767,7 @@ export interface PayloadMigration {
  */
 export interface KullanicilarSelect<T extends boolean = true> {
   ad?: T;
+  unvan?: T;
   rol?: T;
   firma?: T;
   firmaYetkisi?: T;
@@ -1088,6 +1134,32 @@ export interface TestPostalarSelect<T extends boolean = true> {
   html?: T;
   metin?: T;
   ortam?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talepler_select".
+ */
+export interface TaleplerSelect<T extends boolean = true> {
+  ozet?: T;
+  taksonomiTuru?: T;
+  oneriler?:
+    | T
+    | {
+        ad?: T;
+        kabul?: T;
+        id?: T;
+      };
+  aciklama?: T;
+  kaynak?: T;
+  talepEden?: T;
+  firma?: T;
+  durum?: T;
+  sonucNotu?: T;
+  eklenenler?: T;
+  sonuclandiran?: T;
+  sonucTarihi?: T;
   updatedAt?: T;
   createdAt?: T;
 }

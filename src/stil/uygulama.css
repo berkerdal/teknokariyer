@@ -298,3 +298,19 @@ dialog.alt-panel:not([open]) { display: none; }
 .kopya-listesi { padding: 0 var(--b4); max-width: 780px; }
 .kopya-listesi li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--cizgi); flex-wrap: wrap; }
 .kopya-listesi li:last-child { border-bottom: 0; }
+
+/* ---------- Öneri listesi ve talep ---------- */
+.oneri-kap { position: relative; flex: 1; min-width: 0; }
+.oneri-panel { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 30; background: var(--yuzey); border: 1px solid var(--cizgi-kontrol); border-radius: var(--kose-panel); box-shadow: var(--golge-katman); max-height: 280px; overflow: auto; }
+.oneri-panel ul { list-style: none; margin: 0; padding: 4px; }
+.oneri-panel li { padding: 11px 12px; border-radius: var(--kose-kontrol); cursor: pointer; min-height: var(--dokunma); display: flex; align-items: center; }
+.oneri-panel li[aria-selected="true"] { background: var(--lacivert-acik); color: var(--lacivert-koyu); font-weight: 600; }
+.oneri-yok { padding: 12px; display: grid; gap: 6px; font-size: var(--boy-kucuk); }
+.oneri-yok p { margin: 0; color: var(--metin-2); }
+.talep-baglanti { border: 0; background: none; padding: 6px 0; color: var(--baglanti); font: 600 var(--boy-kucuk)/var(--sat-kucuk) var(--font-govde); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; min-height: 32px; }
+.talep-pencere .govde { padding-bottom: calc(var(--b4) + env(safe-area-inset-bottom)); }
+.alan-grubu { display: grid; gap: 2px; }
+.adimlar { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.f-hesap-ad { line-height: 1.2; text-align: right; }
+.f-hesap-unvan { display: block; font-weight: 400; font-size: var(--boy-etiket); color: var(--metin-2); }
+@media (min-width: 900px) { .f-hesap-ad { display: grid; } }

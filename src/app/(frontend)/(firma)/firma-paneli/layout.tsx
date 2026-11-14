@@ -22,7 +22,7 @@ export default async function FirmaPaneliDuzeni({ children }: { children: React.
   const yeni = ilanlar.reduce((n, i) => n + i.yeni, 0)
   return (
     <>
-      <FirmaUst firma={{ kisaAd: firma.kisaAd, konum: firma.konum, logo: dosyaAdresi(firma.logo) }} kisi={k.ad ?? k.email} yetki={firmaYetkisi(k)} />
+      <FirmaUst firma={{ kisaAd: firma.kisaAd, konum: firma.konum, logo: dosyaAdresi(firma.logo) }} kisi={k.ad ?? k.email} unvan={k.unvan} yetki={firmaYetkisi(k)} />
       <div className="f-masa">
         <FirmaMenusu yer="yan" yeniBasvuru={yeni} />
         <main id="icerik" className="f-icerik">

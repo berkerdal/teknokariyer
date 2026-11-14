@@ -5,7 +5,7 @@ import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { Ikon } from '@/arayuz/Ikon'
 import { IlanIslemleri } from '@/arayuz/firma/IlanIslemleri'
 import { ilanAdresi, tarihYaz } from '@/arayuz/bicim'
-import { firmaIlanlari, firmaOturumu, ilanYonetebilirMi, tarihSiniri, type FirmaIlani } from '@/veri/firma'
+import { oturumdakiFirma, paylasimBilgisi, firmaIlanlari, firmaOturumu, ilanYonetebilirMi, tarihSiniri, type FirmaIlani } from '@/veri/firma'
 
 export const metadata: Metadata = { title: 'İlanlar · Firma paneli' }
 
@@ -45,7 +45,8 @@ function ayrinti(i: FirmaIlani, simdi: Date): string {
 
 export default async function FirmaIlanlari({ searchParams }: { searchParams: Promise<{ durum?: string; gonderildi?: string; sonuc?: string }> }) {
   const k = await firmaOturumu('/firma-paneli/ilanlar')
-  const [ilanlar, sinir, p] = await Promise.all([firmaIlanlari(), tarihSiniri(), searchParams])
+  const [ilanlar, sinir, p, firma] = await Promise.all([firmaIlanlari(), tarihSiniri(), searchParams, oturumdakiFirma()])
+  const firmaAdi = firma?.kisaAd ?? ''
   const yonetir = ilanYonetebilirMi(k)
   const sekme = SEKMELER.find(([s]) => s === p.durum) ?? SEKMELER[0]!
   const uygun = (i: FirmaIlani, durumlar: IlanDurumu[] | null) => !durumlar || durumlar.includes(i.durum)
@@ -58,6 +59,7 @@ export default async function FirmaIlanlari({ searchParams }: { searchParams: Pr
     sonBasvuru: i.sonBasvuru,
     basvuru: i.basvuru,
     adres: herkeseAcik(i.durum) ? ilanAdresi(i) : undefined,
+    paylasim: paylasimBilgisi(i, firmaAdi),
   })
   const anaEylem = (i: FirmaIlani) => {
     if (!yonetir) return null

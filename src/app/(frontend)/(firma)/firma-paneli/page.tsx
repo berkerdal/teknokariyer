@@ -5,7 +5,7 @@ import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { Ikon } from '@/arayuz/Ikon'
 import { HizliIslem, IlanIslemleri } from '@/arayuz/firma/IlanIslemleri'
 import { ilanAdresi, tarihYaz } from '@/arayuz/bicim'
-import { firmaIlanlari, firmaKurallari, firmaOturumu, ilanYonetebilirMi, oturumdakiFirma, tarihSiniri, type FirmaIlani } from '@/veri/firma'
+import { paylasimBilgisi, firmaIlanlari, firmaKurallari, firmaOturumu, ilanYonetebilirMi, oturumdakiFirma, tarihSiniri, type FirmaIlani } from '@/veri/firma'
 
 export const metadata: Metadata = { title: 'Firma paneli' }
 
@@ -17,6 +17,7 @@ export default async function FirmaOzeti() {
   const k = await firmaOturumu()
   const [firma, ilanlar, kurallar, sinir] = await Promise.all([oturumdakiFirma(), firmaIlanlari(), firmaKurallari(), tarihSiniri()])
   if (!firma) return null
+  const firmaAdi = firma.kisaAd
   const yonetir = ilanYonetebilirMi(k)
   const simdi = new Date()
   const yeniler = ilanlar.filter((i) => i.yeni > 0)
@@ -34,6 +35,7 @@ export default async function FirmaOzeti() {
     sonBasvuru: i.sonBasvuru,
     basvuru: i.basvuru,
     adres: herkeseAcik(i.durum) ? ilanAdresi(i) : undefined,
+    paylasim: paylasimBilgisi(i, firmaAdi),
   })
 
   return (

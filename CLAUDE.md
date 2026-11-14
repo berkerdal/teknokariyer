@@ -241,6 +241,18 @@ Claude tarafından yapılacak.
       Onay arayüzü Yönetici A.Ş. panelinde yazılacak.
     - K30 bilgi kutuları: `ModulBilgisi` (sayfa başı, gizlenebilir) ve `AlanBilgisi` (“?” düğmesi). Türkçe takvim: `TarihSecici`.
     - Örnek veri `ORNEK_SIFRE` ile kurgusal firma kullanıcısı açar (`kodpit@kariyer.test`, Kodpit firma yöneticisi).
+  - **Kullanıcı geri bildirimi 2 (14.11.2026):**
+    - İlan sayfasında tür, çalışma modeli ve deneyim etiket yerine özet tablosunda adlarıyla (“İlan türü: Tam zamanlı iş”).
+    - Yazdıkça öneri: `OneriliGirdi` (erişilebilir combobox; sıralama `src/alan/oneri.ts`). Tarayıcı `datalist` kullanılmaz.
+    - Taksonomi talepleri (`talepler` koleksiyonu, `TalepPenceresi`): her liste türüne özel küçük form; talep eden ve firması
+      otomatik bağlanır. Yönetici A.Ş. “onaylandı/kısmen” dediğinde kabul edilen öğeler koleksiyon kancasıyla listeye eklenir
+      (Payload ekranından da çalışır). Onay ekranı Yönetici A.Ş. panelinde tek yerde toplanacak.
+      Öğrenilen: pencere öneri panelinin içinde oluşturulursa panel kapanınca kaybolur; pencere dışarıda, açma isteği içeride.
+    - LinkedIn paylaşımı: ilan işlemlerinde adım adım (metni kopyala → LinkedIn paylaşım penceresi → yapıştır). Bağlantıdaki
+      `?kaynak=linkedin` başvuruya kadar taşınır ve başvurunun kaynağı olarak kaydedilir.
+    - Kullanıcıya “Görevi” (`unvan`) alanı; firma panelinde adın altında görünür. Örnek firma kullanıcısı İK uzmanı.
+    - Şema push kapalı (`push: false`): geliştirmede de şema yalnızca göçle değişir. Entegrasyon testleri geçici veritabanını
+      göçlerle kurar (`tests/entegrasyon/hazirlik.ts`); her çalıştırmada göçler baştan denenir.
   - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

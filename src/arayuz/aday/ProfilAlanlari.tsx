@@ -2,6 +2,7 @@
  * Profil alan grupları (K28). Düzenleme pencereleri ve profil sihirbazı aynı grupları kullanır.
  * Metinler: docs/tasarim/metin-kilavuzu.md (tam cümle; adaya “sen”).
  */
+import { TalepPenceresi } from '../TalepPenceresi'
 import type { Adaylar } from '@/payload-types'
 import { CEFR, DENEYIM_ADI, DENEYIM_SIRASI } from '@/alan/eslesme'
 import { SINIFLAR } from '@/alan/basvuru'
@@ -82,8 +83,14 @@ export function EgitimAlanlari({ aday, okullar, bolumler }: { aday: Adaylar; oku
   const m = ayYil(aday.mezuniyet)
   return (
     <>
-      <Secim id="okul" etiket="Okul" secenekler={okullar} deger={kimlik(aday.okul)} ipucu="Okulun listede yoksa Yönetici A.Ş.’ye yaz; listeye ekleriz." />
-      <Secim id="bolum" etiket="Bölüm" secenekler={bolumler} deger={kimlik(aday.bolum)} />
+      <div className="alan-grubu">
+        <Secim id="okul" etiket="Okul" secenekler={okullar} deger={kimlik(aday.okul)} />
+        <TalepPenceresi tur="universite" kaynak="aday-profil:okul" hitap="sen" dugme="Okulun listede yok mu? Eklenmesini iste" />
+      </div>
+      <div className="alan-grubu">
+        <Secim id="bolum" etiket="Bölüm" secenekler={bolumler} deger={kimlik(aday.bolum)} />
+        <TalepPenceresi tur="bolum" kaynak="aday-profil:bolum" hitap="sen" dugme="Bölümün listede yok mu? Eklenmesini iste" />
+      </div>
       <div className="iki-alan">
         <Secim id="sinif" etiket="Sınıf" secenekler={SINIFLAR.map((s) => ({ id: s, ad: s }))} deger={aday.sinif} />
         <div className="alan">

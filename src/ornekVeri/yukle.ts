@@ -236,15 +236,15 @@ export async function ornekVeriYukle(payload: Payload, simdi = new Date()): Prom
       })
       sonuc.kullanici++
     }
-    /* Örnek firma kullanıcısı (kurgusal kişi, Kodpit'in firma yöneticisi). `.test` alan adı gerçek bir kişiye ait olamaz. */
-    const fk = { eposta: 'kodpit@kariyer.test', ad: 'Selin Aydemir' }
+    /* Örnek firma kullanıcısı (kurgusal kişi: Kodpit'in İK uzmanı; panelde tam yetkili). `.test` alan adı gerçek bir kişiye ait olamaz. */
+    const fk = { eposta: 'kodpit@kariyer.test', ad: 'Selin Aydemir', unvan: 'İnsan Kaynakları Uzmanı' }
     const varMi = await payload.count({ collection: 'kullanicilar', where: { email: { equals: fk.eposta } }, overrideAccess: true })
     if (kodpit && !varMi.totalDocs) {
       await payload.create({
         collection: 'kullanicilar',
         overrideAccess: true,
         disableVerificationEmail: true,
-        data: { email: fk.eposta, password: sifre, ad: fk.ad, rol: 'firma', firma: kodpit, firmaYetkisi: 'yonetici', _verified: true } as never,
+        data: { email: fk.eposta, password: sifre, ad: fk.ad, unvan: fk.unvan, rol: 'firma', firma: kodpit, firmaYetkisi: 'yonetici', _verified: true } as never,
       })
       sonuc.kullanici++
     }

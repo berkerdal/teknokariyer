@@ -8,7 +8,7 @@ import { IlanFormu } from '@/arayuz/firma/IlanFormu'
 import { IlanIslemleri } from '@/arayuz/firma/IlanIslemleri'
 import { ilanAdresi } from '@/arayuz/bicim'
 import type { BekleyenDegisiklik } from '@/servisler/ilanFormu'
-import { firmaIlani, firmaIlanlari, firmaOturumu, ilanFormuBaslangici, ilanFormuSecenekleri, ilanYonetebilirMi, tarihSiniri } from '@/veri/firma'
+import { oturumdakiFirma, paylasimBilgisi, firmaIlani, firmaIlanlari, firmaOturumu, ilanFormuBaslangici, ilanFormuSecenekleri, ilanYonetebilirMi, tarihSiniri } from '@/veri/firma'
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ kopya?: string; kaydedildi?: string }> }
 
@@ -35,7 +35,7 @@ export default async function IlanDuzenle({ params, searchParams }: Props) {
   if (!ilanYonetebilirMi(k)) redirect('/firma-paneli/ilanlar')
   const ilan = await firmaIlani(Number(id))
   if (!ilan) notFound()
-  const [secenekler, sinir, ilanlar] = await Promise.all([ilanFormuSecenekleri(), tarihSiniri(), firmaIlanlari()])
+  const [secenekler, sinir, ilanlar, firma] = await Promise.all([ilanFormuSecenekleri(), tarihSiniri(), firmaIlanlari(), oturumdakiFirma()])
   const durum = ilan.durum as IlanDurumu
   const kopyaKaynagi = p.kopya ? ilanlar.find((x) => x.id === Number(p.kopya)) : undefined
   const bekleyen = ilan.bekleyenDegisiklik as unknown as BekleyenDegisiklik | null
@@ -62,7 +62,15 @@ export default async function IlanDuzenle({ params, searchParams }: Props) {
             <Ikon ad="goz" kucuk /> Önizle
           </Link>
           <IlanIslemleri
-            ilan={{ id: ilan.id, pozisyonAdi: ilan.pozisyonAdi, durum, sonBasvuru: ilan.sonBasvuru ?? '', basvuru: ozet?.basvuru ?? 0, adres: herkeseAcik ? ilanAdresi(ilan) : undefined }}
+            ilan={{
+              id: ilan.id,
+              pozisyonAdi: ilan.pozisyonAdi,
+              durum,
+              sonBasvuru: ilan.sonBasvuru ?? '',
+              basvuru: ozet?.basvuru ?? 0,
+              adres: herkeseAcik ? ilanAdresi(ilan) : undefined,
+              paylasim: paylasimBilgisi(ilan, firma?.kisaAd ?? ''),
+            }}
             islemler={yapilabilecekIslemler(durum).filter((x) => x !== 'duzenle')}
             sinir={sinir}
           />

@@ -7,6 +7,8 @@ import { useActionState, useEffect, useState } from 'react'
 import { cvSilEylemi, cvYukleEylemi, profilKaydetEylemi } from '@/eylemler/aday'
 import { CEFR } from '@/alan/eslesme'
 import { Ikon } from '../Ikon'
+import { OneriliGirdi } from '../OneriliGirdi'
+import { TalepPenceresi, useTalepAcma } from '../TalepPenceresi'
 import { DosyaSecici, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 
 type Satir = { ad: string; seviye: string }
@@ -22,16 +24,12 @@ export function ListeDuzenleyici(props: {
   enFazla: number
 }) {
   const [satirlar, setSatirlar] = useState<Satir[]>(props.baslangic)
-  const [yeni, setYeni] = useState('')
   const [hata, setHata] = useState('')
+  const talepAcma = useTalepAcma(false)
   const idBul = (ad: string) => props.secenekler.find((s) => s.ad.toLocaleLowerCase('tr') === ad.trim().toLocaleLowerCase('tr'))
-  const listeId = `${props.ad}-liste`
-  const ekle = () => {
-    const s = idBul(yeni)
-    if (!s) return setHata(`“${yeni}” listede yok. Lütfen listeden bir seçenek seç; listede olmayan seçenekleri Yönetici A.Ş. ekler.`)
+  const ekle = (s: { id: number; ad: string }) => {
     if (satirlar.some((x) => x.ad === s.ad)) return setHata(`${s.ad} zaten listende bulunuyor.`)
     setSatirlar([...satirlar, { ad: s.ad, seviye: props.seviyeler[1]?.[0] ?? props.seviyeler[0]![0] }])
-    setYeni('')
     setHata('')
   }
   return (
@@ -70,35 +68,20 @@ export function ListeDuzenleyici(props: {
       </ul>
       {satirlar.length < props.enFazla && (
         <div className={hata ? 'alan alan--hata' : 'alan'}>
-          <label htmlFor={`${props.ad}-yeni`}>{props.ad === 'beceri' ? 'Beceri ekle' : 'Dil ekle'}</label>
+          <span className="alan-ad">{props.ad === 'beceri' ? 'Beceri ekle' : 'Dil ekle'}</span>
           {hata && <p className="hata-metni">{hata}</p>}
-          <div className="arama">
-            <input
-              id={`${props.ad}-yeni`}
-              className="girdi"
-              list={listeId}
-              value={yeni}
-              onChange={(e) => setYeni(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  ekle()
-                }
-              }}
-              placeholder={props.ad === 'beceri' ? 'Ör. Python, SolidWorks' : 'Ör. İngilizce'}
-              autoComplete="off"
-            />
-            <button type="button" className="dugme dugme--ikincil" onClick={ekle}>
-              Ekle
-            </button>
-          </div>
-          <datalist id={listeId}>
-            {props.secenekler.map((s) => (
-              <option key={s.id} value={s.ad} />
-            ))}
-          </datalist>
+          <OneriliGirdi
+            id={`${props.ad}-yeni`}
+            etiket={props.ad === 'beceri' ? 'Beceri ekle' : 'Dil ekle'}
+            secenekler={props.secenekler}
+            haric={satirlar.map((x) => idBul(x.ad)?.id ?? -1)}
+            sec={ekle}
+            placeholder={props.ad === 'beceri' ? 'Yazmaya başla: Python, SolidWorks…' : 'Yazmaya başla: İngilizce'}
+            bulunamadi={talepAcma.baglanti}
+          />
         </div>
       )}
+      <TalepPenceresi tur={props.ad} kaynak={`aday-profil:${props.ad}`} hitap="sen" baslangic={talepAcma.talep.metin} disAcma={talepAcma.talep.n} tetikYok />
     </fieldset>
   )
 }

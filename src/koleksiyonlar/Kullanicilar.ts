@@ -61,6 +61,13 @@ export const Kullanicilar: CollectionConfig = {
   fields: [
     { name: 'ad', label: 'Ad soyad', type: 'text', required: true },
     {
+      name: 'unvan',
+      label: 'Görevi',
+      type: 'text',
+      maxLength: 80,
+      admin: { condition: (veri) => veri?.rol !== 'aday', description: 'Örnek: İnsan Kaynakları Uzmanı. Firma panelinde adın yanında görünür.' },
+    },
+    {
       name: 'rol',
       label: 'Rol',
       type: 'select',

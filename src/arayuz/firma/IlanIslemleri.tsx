@@ -24,6 +24,8 @@ export interface IslemIlani {
   basvuru: number
   /** Herkese açık sayfa adresi (yayında, duraklatılmış veya kapanmışsa) */
   adres?: string
+  /** Yayındaki ilanı LinkedIn'de paylaşmak için hazır metin ve tam adres */
+  paylasim?: { metin: string; adres: string }
 }
 
 export interface TarihSiniri {
@@ -33,7 +35,7 @@ export interface TarihSiniri {
   gun: number
 }
 
-type Gorunum = 'liste' | 'uzat' | 'kapat' | 'sil'
+type Gorunum = 'liste' | 'uzat' | 'kapat' | 'sil' | 'paylas'
 
 /** İşlem sonrası kısa bildirim; birkaç saniye sonra kaybolur. */
 function useBildirim(durum: FormDurumu) {
@@ -164,7 +166,15 @@ export function IlanIslemleri({ ilan, islemler, sinir, dugme = 'İşlemler' }: {
         <div className="tutamak" aria-hidden="true" />
         <div className="bas">
           <h2 className="b3" id={baslikId}>
-            {gorunum === 'liste' ? ilan.pozisyonAdi : gorunum === 'uzat' ? 'Son başvuru tarihini uzat' : gorunum === 'kapat' ? 'İlanı kapat' : 'Taslağı sil'}
+            {gorunum === 'liste'
+              ? ilan.pozisyonAdi
+              : gorunum === 'uzat'
+                ? 'Son başvuru tarihini uzat'
+                : gorunum === 'kapat'
+                  ? 'İlanı kapat'
+                  : gorunum === 'paylas'
+                    ? 'LinkedIn’de paylaş'
+                    : 'Taslağı sil'}
           </h2>
           <button type="button" className="ikon-dugme" aria-label="Pencereyi kapat" onClick={kapat}>
             <Ikon ad="kapat" />
@@ -202,6 +212,17 @@ export function IlanIslemleri({ ilan, islemler, sinir, dugme = 'İşlemler' }: {
                       İlanı adayların gördüğü gibi aç<span className="ipucu">Yeni sekmede açılır.</span>
                     </span>
                   </Link>
+                </li>
+              )}
+              {ilan.paylasim && ilan.durum === 'yayinda' && (
+                <li>
+                  <button type="button" onClick={() => setGorunum('paylas')}>
+                    <Ikon ad="paylas" />
+                    <span>
+                      LinkedIn’de paylaş
+                      <span className="ipucu">Paylaşım metni ve ilan bağlantısı hazırlanır; nasıl paylaşacağınız adım adım gösterilir.</span>
+                    </span>
+                  </button>
                 </li>
               )}
               {ilan.basvuru > 0 && (
@@ -311,6 +332,7 @@ export function IlanIslemleri({ ilan, islemler, sinir, dugme = 'İşlemler' }: {
               </div>
             </form>
           )}
+          {gorunum === 'paylas' && ilan.paylasim && <LinkedinPaylasimi paylasim={ilan.paylasim} geri={() => setGorunum('liste')} />}
           {gorunum === 'sil' && (
             <form action={eylem} className="form-yigin islem-form">
               {gizli('sil')}
@@ -337,4 +359,58 @@ export function IlanIslemleri({ ilan, islemler, sinir, dugme = 'İşlemler' }: {
 /** Son başvuru gününden (Türkiye saati) sonraki gün: uzatmada seçilebilecek en erken gün. */
 function ertesiGun(iso: string) {
   return trGunMetni(new Date(new Date(iso).getTime() + 86_400_000))
+}
+
+/** LinkedIn paylaşımı: metni kopyala → LinkedIn paylaşım penceresini aç → yapıştır ve paylaş. */
+function LinkedinPaylasimi({ paylasim, geri }: { paylasim: { metin: string; adres: string }; geri: () => void }) {
+  const izliAdres = `${paylasim.adres}${paylasim.adres.includes('?') ? '&' : '?'}kaynak=linkedin`
+  const [metin, setMetin] = useState(`${paylasim.metin}\n\n${izliAdres}`)
+  const [kopyalandi, setKopyalandi] = useState<'' | 'tamam' | 'hata'>('')
+  const kopyala = async () => {
+    try {
+      await navigator.clipboard.writeText(metin)
+      setKopyalandi('tamam')
+    } catch {
+      setKopyalandi('hata')
+    }
+  }
+  return (
+    <div className="form-yigin islem-form">
+      <ol className="adimlar">
+        <li>
+          <strong>Paylaşım metnini kopyalayın.</strong> Metin, ilan formundaki “LinkedIn metni” alanından gelir; burada değiştirebilirsiniz. Sonunda ilanın
+          bağlantısı vardır.
+        </li>
+        <li>
+          <strong>LinkedIn’i açın.</strong> LinkedIn’in paylaşım penceresi ilan bağlantısıyla açılır. LinkedIn hesabınıza giriş yapmış olmanız gerekir.
+        </li>
+        <li>
+          <strong>Kopyaladığınız metni paylaşım kutusuna yapıştırıp paylaşın.</strong>
+        </li>
+      </ol>
+      <div className="alan">
+        <label htmlFor="linkedin-paylasim">Paylaşım metni</label>
+        <textarea id="linkedin-paylasim" className="metin-alani" rows={6} value={metin} onChange={(e) => setMetin(e.target.value)} />
+      </div>
+      <div className="dugme-grubu">
+        <button type="button" className="dugme dugme--ikincil" onClick={kopyala}>
+          <Ikon ad="kopya" kucuk /> Metni kopyala
+        </button>
+        <a className="dugme" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(izliAdres)}`} target="_blank" rel="noopener noreferrer">
+          LinkedIn’i aç<span className="gizli"> (yeni sekmede)</span>
+        </a>
+        <button type="button" className="dugme dugme--sade" onClick={geri}>
+          Geri dön
+        </button>
+      </div>
+      {kopyalandi && (
+        <p className={kopyalandi === 'tamam' ? 'basari-kutu kucuk' : 'hata-metni'} role="status">
+          {kopyalandi === 'tamam' ? 'Metin kopyalandı. Şimdi “LinkedIn’i aç” düğmesine basın.' : 'Metin kopyalanamadı. Metni kutudan seçip elle kopyalayın.'}
+        </p>
+      )}
+      <p className="kucuk ikincil">
+        Bağlantının sonundaki “kaynak=linkedin” sayesinde LinkedIn’den gelen başvurular, başvuru listenizde “LinkedIn” kaynağıyla işaretlenir.
+      </p>
+    </div>
+  )
 }

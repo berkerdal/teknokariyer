@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { DENEYIM_ADI } from '@/alan/eslesme'
 import { notFound } from 'next/navigation'
 import { DURUM_ADI, ilanEksikleri, islemYapilabilirMi, type IlanDurumu } from '@/alan/ilan'
 import { Ikon } from '@/arayuz/Ikon'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
-import { IlanEtiketleri, IlanOzetListesi, Metin } from '@/arayuz/IlanParcalari'
+import { IlanOzetListesi, Metin } from '@/arayuz/IlanParcalari'
 import { BeceriListesi } from '@/arayuz/IlanSatiri'
 import { YayinaGonder } from '@/arayuz/firma/YayinaGonder'
 import { firmaIlani, firmaKurallari, firmaOturumu, oturumdakiFirma } from '@/veri/firma'
@@ -90,12 +91,14 @@ export default async function IlanOnizleme({ params }: Props) {
             </div>
           </div>
           <h2 className="b2">{a.pozisyonAdi}</h2>
-          <IlanEtiketleri ilan={a} uzun />
           <IlanOzetListesi ilan={a} />
           <h3 className="b3 kare-bas">Ne yapacaksın?</h3>
           <Metin metin={a.isTanimi} />
           <h3 className="b3 kare-bas">Aranan nitelikler</h3>
           <Metin metin={a.nitelikler} />
+          <p>
+            <strong>Deneyim:</strong> {DENEYIM_ADI[a.deneyim]}
+          </p>
           <p>
             <strong>Eğitim:</strong> {EGITIM_ADI[a.egitim] ?? a.egitim}
             {a.bolumler.length ? ` · ${a.bolumler.join(', ')}` : ''}

@@ -9,6 +9,8 @@ import { VARSAYILAN_EN_UZUN_SURE_GUN, VARSAYILAN_ONAYLI_ILAN_SAYISI, type IlanDu
 import type { Kullanici } from '@/servisler/ortak'
 import type { IlanFormBaslangici, Secenek } from '@/arayuz/firma/IlanFormu'
 import { trGunMetni } from '@/alan/tarih'
+import { siteAdresi } from '@/altyapi/epostaSablonlari'
+import { ilanAdresi } from '@/arayuz/bicim'
 import { oturum, payloadAl } from './payload'
 
 /**
@@ -50,6 +52,7 @@ export interface FirmaIlani {
   basvuru: number
   /** Henüz incelenmemiş (“Alındı” durumundaki) başvurular */
   yeni: number
+  linkedinMetni?: string | null
 }
 
 /** Firmanın bütün ilanları, başvuru sayılarıyla. Sayılar elle değil, başvuru kayıtlarından hesaplanır. */
@@ -99,6 +102,7 @@ export const firmaIlanlari = cache(async (): Promise<FirmaIlani[]> => {
     goruntulenme: i.goruntulenme ?? 0,
     basvuru: sayi.get(i.id)?.basvuru ?? 0,
     yeni: sayi.get(i.id)?.yeni ?? 0,
+    linkedinMetni: i.linkedinMetni,
   }))
 })
 
@@ -236,5 +240,13 @@ export function ilanFormuBaslangici(i: Ilanlar): IlanFormBaslangici {
     sgk: i.sgk ?? '',
     stajBelgesi: i.stajBelgesi !== false,
     pauOncelik: Boolean(i.pauOncelik),
+  }
+}
+
+/** LinkedIn paylaşımı için metin ve ilanın tam adresi. Metin boşsa ilan ve firma adından kısa bir cümle kurulur. */
+export function paylasimBilgisi(i: { id: number; pozisyonAdi: string; linkedinMetni?: string | null }, firmaAd: string) {
+  return {
+    metin: i.linkedinMetni?.trim() || `${firmaAd}, Pamukkale Teknokent’teki ekibine “${i.pozisyonAdi}” arıyor. Ayrıntılar ve başvuru için ilan bağlantısı aşağıdadır.`,
+    adres: `${siteAdresi()}${ilanAdresi(i)}`,
   }
 }

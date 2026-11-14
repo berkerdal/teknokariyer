@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { adayMi } from '@/erisim'
 import { ilgiEki } from '@/alan/metin'
+import { basvuruKaynagi } from '@/alan/basvuru'
 import { suresiDolduMu } from '@/alan/ilan'
 import { BasvuruAkisi } from '@/arayuz/aday/BasvuruAkisi'
 import { Ust } from '@/arayuz/Ust'
@@ -17,16 +18,17 @@ import { kimlik } from '@/servisler/ortak'
 export const metadata: Metadata = { title: 'Başvuru', robots: { index: false } }
 export const dynamic = 'force-dynamic'
 
-type Props = { params: Promise<{ adres: string }> }
+type Props = { params: Promise<{ adres: string }>; searchParams?: Promise<{ kaynak?: string }> }
 
 const boyut = (b?: number) => (b ? `${(b / 1024 / 1024).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} MB` : '')
 
-export default async function BasvuruSayfasi({ params }: Props) {
+export default async function BasvuruSayfasi({ params, searchParams }: Props) {
   const { adres } = await params
+  const kaynak = basvuruKaynagi((await searchParams)?.kaynak)
   const id = Number(adres.match(/^(\d+)/)?.[1])
   if (!id) notFound()
   const k = await oturum()
-  if (!k) redirect(`/giris?donus=${encodeURIComponent(`/ilan/${adres}/basvur`)}`)
+  if (!k) redirect(`/giris?donus=${encodeURIComponent(`/ilan/${adres}/basvur${kaynak ? `?kaynak=${kaynak}` : ''}`)}`)
   if (!adayMi(k))
     return (
       <Bilgi baslik="Başvuru aday hesabıyla yapılır">
@@ -68,6 +70,7 @@ export default async function BasvuruSayfasi({ params }: Props) {
       aydinlatma={{ surum: METINLER['basvuru-aydinlatma'].surum, tarih: tarihYaz(METINLER['basvuru-aydinlatma'].tarih, true) }}
       havuzMetni={{ surum: METINLER.havuz.surum }}
       havuzda={Boolean(aday.havuz?.rizaTarihi) && aday.havuz?.gorunurluk !== 'gizli'}
+      kaynak={kaynak}
     />
   )
 }

@@ -17,6 +17,8 @@ import { IS_ALT_TURLERI, STAJ_ALT_TURLERI } from '@/alan/ilan'
 import { ALT_TUR_ADI } from '@/alan/ilanFiltre'
 import { EN_FAZLA_BECERI, EN_FAZLA_SORU, EN_FAZLA_YAN_HAK } from '@/alan/ilanFormu'
 import { AlanBilgisi } from '../BilgiKutusu'
+import { OneriliGirdi } from '../OneriliGirdi'
+import { TalepPenceresi, useTalepAcma } from '../TalepPenceresi'
 import { HataOzeti, GonderDugmesi, type FormDurumu } from '../form'
 import { Ikon } from '../Ikon'
 import { TarihSecici, tarihMetni } from '../TarihSecici'
@@ -101,22 +103,16 @@ function CipSecici(p: {
   /** Seçim değişince güncel kimlikler (ör. zorunlu beceriler tercih listesinde tekrar edilmesin diye) */
   secimDegisti?: (idler: number[]) => void
   haric?: number[]
+  talepTuru: 'beceri' | 'bolum'
 }) {
   const [secili, setSecili] = useState<Secenek[]>(p.baslangic)
-  const [yeni, setYeni] = useState('')
   const [uyari, setUyari] = useState('')
-  const listeId = `${p.id}-liste`
-  const ekle = () => {
-    const ad = yeni.trim().toLocaleLowerCase('tr')
-    if (!ad) return
-    const s = p.secenekler.find((x) => x.ad.toLocaleLowerCase('tr') === ad)
-    if (!s) return setUyari(`“${yeni.trim()}” listede yok. Listeden bir seçenek seçin; listede olmayan bir seçeneğin eklenmesini Yönetici A.Ş.’den isteyebilirsiniz.`)
-    if (secili.some((x) => x.id === s.id)) return setUyari(`${s.ad} zaten ekli.`)
+  const talepAcma = useTalepAcma()
+  const ekle = (s: Secenek) => {
     if (p.haric?.includes(s.id)) return setUyari(`${s.ad} diğer listede ekli. Bir beceri yalnızca bir listede olabilir.`)
     const yeniListe = [...secili, s]
     setSecili(yeniListe)
     p.secimDegisti?.(yeniListe.map((x) => x.id))
-    setYeni('')
     setUyari('')
     p.degisti()
   }
@@ -124,7 +120,10 @@ function CipSecici(p: {
     <div className={p.hata ? 'alan alan--hata' : 'alan'} id={p.id}>
       <span className="alan-ad">
         {p.etiket}
-        <AlanBilgisi etiket={p.etiket}>{p.bilgi}</AlanBilgisi>
+        <AlanBilgisi etiket={p.etiket}>
+          {p.bilgi}{' '}
+          <TalepPenceresi tur={p.talepTuru} kaynak={`ilan-formu:${p.id}:bilgi`} dugme={`Aradığınız ${p.talepTuru === 'beceri' ? 'beceri' : 'bölüm'} listede yoksa eklenmesini isteyin.`} />
+        </AlanBilgisi>
       </span>
       {p.ipucu && <span className="ipucu">{p.ipucu}</span>}
       <Hata metin={p.hata} />
@@ -151,34 +150,15 @@ function CipSecici(p: {
         </ul>
       )}
       {secili.length < p.enFazla ? (
-        <div className="arama">
-          <label className="gizli" htmlFor={`${p.id}-girdi`}>
-            {p.etiket}: ekle
-          </label>
-          <input
-            id={`${p.id}-girdi`}
-            className="girdi"
-            list={listeId}
-            value={yeni}
-            placeholder={p.ornek}
-            autoComplete="off"
-            onChange={(e) => setYeni(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                ekle()
-              }
-            }}
-          />
-          <button type="button" className="dugme dugme--ikincil" onClick={ekle}>
-            Ekle
-          </button>
-          <datalist id={listeId}>
-            {p.secenekler.map((s) => (
-              <option key={s.id} value={s.ad} />
-            ))}
-          </datalist>
-        </div>
+        <OneriliGirdi
+          id={`${p.id}-girdi`}
+          etiket={`${p.etiket}: ekle`}
+          secenekler={p.secenekler}
+          haric={secili.map((x) => x.id)}
+          sec={ekle}
+          placeholder={p.ornek}
+          bulunamadi={talepAcma.baglanti}
+        />
       ) : (
         <p className="kucuk ikincil">En fazla {p.enFazla} öğe ekleyebilirsiniz.</p>
       )}
@@ -187,6 +167,7 @@ function CipSecici(p: {
           {uyari}
         </p>
       )}
+      <TalepPenceresi tur={p.talepTuru} kaynak={`ilan-formu:${p.id}`} baslangic={talepAcma.talep.metin} disAcma={talepAcma.talep.n} tetikYok />
     </div>
   )
 }
@@ -201,10 +182,9 @@ export function IlanFormu(p: IlanFormuProps) {
   useEffect(() => {
     if (!durum.surum || durum.surum === son.current) return
     son.current = durum.surum
-    /* eslint-disable react-hooks/set-state-in-effect -- kayıt bitti: form yeni değerlerle kurulur */
+    // Kayıt bitti: form sunucudan gelen yeni değerlerle yeniden kurulur.
     setAnahtar((a) => a + 1)
     setBildirim(durum.tamam ?? '')
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [durum])
   useEffect(() => {
     if (!bildirim) return
@@ -395,8 +375,8 @@ function FormGovdesi(p: IlanFormuProps & { formDurumu: FormDurumu; eylem: (f: Fo
                   <label htmlFor="aile">
                     Pozisyon ailesi
                     <AlanBilgisi etiket="Pozisyon ailesi">
-                      Adaylar ilanları bu gruba göre süzer. Örnek: “Yazılım geliştirme”, “Gömülü sistemler”. Uygun bir aile yoksa Yönetici A.Ş.’den
-                      eklemesini isteyebilirsiniz.
+                      Adaylar ilanları bu gruba göre süzer. Örnek: “Yazılım geliştirme”, “Gömülü sistemler”. Uygun bir aile yoksa aşağıdaki
+                      bağlantıdan Yönetici A.Ş.’den eklenmesini isteyebilirsiniz.
                     </AlanBilgisi>
                   </label>
                   <Hata metin={h.aile} />
@@ -408,6 +388,7 @@ function FormGovdesi(p: IlanFormuProps & { formDurumu: FormDurumu; eylem: (f: Fo
                       </option>
                     ))}
                   </select>
+                  <TalepPenceresi tur="pozisyon-ailesi" kaynak="ilan-formu:aile" />
                 </div>
               </div>
 
@@ -474,6 +455,7 @@ function FormGovdesi(p: IlanFormuProps & { formDurumu: FormDurumu; eylem: (f: Fo
             <>
               <CipSecici
                 id="zorunluBeceriler"
+                talepTuru="beceri"
                 ad="zorunluBeceri"
                 etiket="Zorunlu beceriler"
                 ipucu="Adayda mutlaka olması gerekenler. Eşleşme bu listeye göre hesaplanır."
@@ -493,6 +475,7 @@ function FormGovdesi(p: IlanFormuProps & { formDurumu: FormDurumu; eylem: (f: Fo
               />
               <CipSecici
                 id="tercihBeceriler"
+                talepTuru="beceri"
                 ad="tercihBeceri"
                 etiket="Tercih sebebi beceriler"
                 ipucu="Olursa iyi olur; olmaması başvuruyu engellemez."
@@ -523,6 +506,7 @@ function FormGovdesi(p: IlanFormuProps & { formDurumu: FormDurumu; eylem: (f: Fo
               </div>
               <CipSecici
                 id="bolumler"
+                talepTuru="bolum"
                 ad="bolum"
                 etiket="Tercih edilen bölümler (isteğe bağlı)"
                 bilgi="Boş bırakırsanız her bölümden aday başvurabilir. Seçerseniz adayın bölümü eşleşme açıklamasında karşılaştırılır."
@@ -606,6 +590,7 @@ function FormGovdesi(p: IlanFormuProps & { formDurumu: FormDurumu; eylem: (f: Fo
                     Ekle
                   </button>
                 </div>
+                <TalepPenceresi tur="dil" kaynak="ilan-formu:diller" />
               </fieldset>
 
               <div className={sinif('isTanimi')}>
@@ -904,9 +889,12 @@ function FormGovdesi(p: IlanFormuProps & { formDurumu: FormDurumu; eylem: (f: Fo
                 <label htmlFor="linkedinMetni">
                   LinkedIn metni <span className="istege-bagli">(isteğe bağlı)</span>
                   <AlanBilgisi etiket="LinkedIn metni">
-                    İlan yayına girdikten sonra “İlanı adayların gördüğü gibi aç” sayfasından bağlantıyı kopyalayıp bu metinle paylaşabilirsiniz.
+                    Bu metin yalnızca LinkedIn paylaşımında kullanılır; ilanda görünmez. İlan yayına girince İlanlar sayfasında ilanın
+                    “İşlemler” düğmesinden “LinkedIn’de paylaş”ı seçin: bu metin ve ilan bağlantısı hazır gelir, nasıl paylaşacağınız adım adım
+                    gösterilir. Boş bırakırsanız ilan ve firma adından kısa bir metin hazırlanır.
                   </AlanBilgisi>
                 </label>
+                <span className="ipucu">İlanda görünmez; yalnızca “LinkedIn’de paylaş” adımında kullanılır.</span>
                 <textarea
                   id="linkedinMetni"
                   name="linkedinMetni"

@@ -6,6 +6,7 @@
  * - Aydınlatma onayı ile CV havuzu rızası ayrı kutulardır; havuz kutusu varsayılan olarak işaretsizdir.
  * - Tek form: tüm adımlar aynı formda, yalnızca görünen adım değişir. Sunucu her şeyi yeniden denetler.
  */
+import { TalepPenceresi } from '../TalepPenceresi'
 import Link from 'next/link'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { basvurEylemi, type BasvuruDurumu } from '@/eylemler/aday'
@@ -20,6 +21,8 @@ const EKSIK_ADI: Record<string, string> = { okul: 'okul', bolum: 'bölüm', dene
 type Secenek = { id: number; ad: string }
 export interface BasvuruAkisiProps {
   ilan: { id: number; pozisyonAdi: string; firmaAd: string; firmaAdIlgi: string; adres: string }
+  /** Paylaşım bağlantısından gelindiyse (ör. linkedin) */
+  kaynak?: string
   sorular: Array<{ id: string; soru: string; tip: string; secenekler: string[] }>
   eksikler: string[]
   okullar: Secenek[]
@@ -130,6 +133,7 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
         }}
       >
         <input type="hidden" name="ilan" value={p.ilan.id} />
+        {p.kaynak && <input type="hidden" name="kaynak" value={p.kaynak} />}
         <input type="hidden" name="eksikler" value={p.eksikler.join(',')} />
         <main id="icerik" className="bv">
           <div className="bv-govde">
@@ -140,7 +144,10 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
                 <h1 className="b2">Bu ilan için {p.eksikler.length} bilgi eksik</h1>
                 <p className="ikincil">Cevapların profiline de kaydedilir; sonraki başvurularında bu bilgileri yeniden sormayız.</p>
                 {p.eksikler.includes('okul') && (
-                  <Secim id="okul" etiket="Okul" hata={hatalar.okul} secenekler={p.okullar} ipucu="Listede yoksa en yakın seçeneği seç; Yönetici A.Ş. listeyi günceller." />
+                  <>
+                    <Secim id="okul" etiket="Okul" hata={hatalar.okul} secenekler={p.okullar} ipucu="Listede yoksa şimdilik en yakın seçeneği seç ve eklenmesini iste." />
+                    <TalepPenceresi tur="universite" kaynak="basvuru:okul" hitap="sen" dugme="Okulun listede yok mu? Eklenmesini iste" />
+                  </>
                 )}
                 {p.eksikler.includes('bolum') && <Secim id="bolum" etiket="Bölüm" hata={hatalar.bolum} secenekler={p.bolumler} />}
                 {p.eksikler.includes('deneyim') && (

@@ -3,10 +3,14 @@ import { cikisEylemi } from '@/eylemler/hesap'
 import { FirmaKaro } from '../FirmaKaro'
 import { Ikon } from '../Ikon'
 
-const YETKI_ADI: Record<string, string> = { yonetici: 'Firma yöneticisi', 'ilan-sorumlusu': 'İlan sorumlusu', degerlendirici: 'Değerlendirici' }
+const YETKI_ADI: Record<string, string> = {
+  yonetici: 'Tam yetkili (ilanlar, başvurular, ekip ve firma profili)',
+  'ilan-sorumlusu': 'İlan sorumlusu (ilanlar ve başvurular)',
+  degerlendirici: 'Değerlendirici (başvuruları görür, not yazar)',
+}
 
 /** Firma paneli üst çubuğu: alt marka logosu, firma, kişi ve hesap menüsü (açılır liste, dokunmatikte de çalışır). */
-export function FirmaUst({ firma, kisi, yetki }: { firma: { kisaAd: string; konum: string; logo?: string | null }; kisi: string; yetki: string }) {
+export function FirmaUst({ firma, kisi, unvan, yetki }: { firma: { kisaAd: string; konum: string; logo?: string | null }; kisi: string; unvan?: string | null; yetki: string }) {
   return (
     <header className="f-ust">
       <div className="f-ust-ic">
@@ -22,15 +26,24 @@ export function FirmaUst({ firma, kisi, yetki }: { firma: { kisaAd: string; konu
         </span>
         <details className="f-hesap">
           <summary>
-            <span className="f-hesap-ad">{kisi}</span>
+            <span className="f-hesap-ad">
+              {kisi}
+              {unvan && <span className="f-hesap-unvan">{unvan}</span>}
+            </span>
             <span className="gizli">: hesap menüsü</span>
             <Ikon ad="menu" />
           </summary>
           <div className="f-hesap-menu">
             <p className="kucuk">
               <strong>{kisi}</strong>
+              {unvan && (
+                <>
+                  <br />
+                  {unvan}
+                </>
+              )}
               <br />
-              <span className="ikincil">{YETKI_ADI[yetki] ?? yetki}</span>
+              <span className="ikincil">Yetki: {YETKI_ADI[yetki] ?? yetki}</span>
             </p>
             <Link href="/firma-paneli/profil">Firma profili</Link>
             <Link href="/firma-paneli/ekip">Ekip</Link>

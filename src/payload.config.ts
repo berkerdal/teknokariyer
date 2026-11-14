@@ -66,7 +66,8 @@ void komutSatiri
 export default buildConfig(
   ortakYapilandirma({
     // Göçler Worker ilk açıldığında Cloudflare içinde çalışır (prodMigrations). Uzak bağlantı gerektirmez.
-    db: sqliteD1Adapter({ binding: cloudflare.env.D1, prodMigrations: migrations }),
+    // push kapalı: geliştirmede de şema yalnızca göçle değişir (D1'de push tablo yeniden kurup bağlı satırları silebilir).
+    db: sqliteD1Adapter({ binding: cloudflare.env.D1, prodMigrations: migrations, push: false }),
     logger: uretim ? cloudflareGunlugu : undefined,
     eklentiler: [
       r2Storage({
