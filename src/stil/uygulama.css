@@ -513,3 +513,34 @@ p.y-oge-satir { padding: 10px 14px; }
 .huni-3 { background: #183F82; }
 .huni-4 { background: var(--gece); }
 @media (max-width: 600px) { .cubuklar-liste li { grid-template-columns: 1fr auto; } .cubuk-iz { grid-column: 1 / -1; grid-row: 2; } }
+/* Rapor merkezi */
+.rapor-kartlari { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.rapor-kartlari li { display: grid; gap: 8px; align-content: start; }
+.rapor-kartlari h2, .rapor-kartlari p { margin: 0; }
+.rapor-donem { display: grid; gap: 12px; }
+.rapor-donem fieldset { border: 0; margin: 0; padding: 0; }
+.rapor-donem legend { font-weight: 600; margin-bottom: 6px; }
+.rapor-donem-secenek { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.rapor-ozel { display: grid; gap: 12px; }
+@media (min-width: 900px) { .rapor-ozel { grid-template-columns: 1fr 1fr; } }
+.rapor { display: grid; gap: 16px; }
+.rapor-bas { display: grid; gap: 4px; }
+.rapor-bas h1, .rapor-bas p { margin: 0; }
+.rapor-logo { display: none; }
+.rapor-notlar ul { margin: 0; padding-left: 18px; }
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+  .y-yan, .y-ust, .y-sekmeler, .a-alt, .rapor-eylemler, .f-ust, .f-menu, .f-alt-menu, .modul-bilgi, .modul-bilgi-kapali, .ortam-serit { display: none !important; }
+  .y-masa { display: block !important; background: none !important; }
+  .y-icerik, .f-icerik { padding: 0 !important; }
+  .f-masa { display: block !important; }
+  .rapor-logo { display: block; margin-bottom: 8px; }
+  .panel, .ozet-kutu { box-shadow: none !important; break-inside: avoid; }
+  .rapor-tablo { break-inside: auto; }
+  .rapor-tablo thead { display: table-header-group; }
+  .rapor-tablo tr { break-inside: avoid; }
+  .tablo-kap { overflow: visible !important; }
+  .ozet-serit { grid-template-columns: repeat(3, 1fr); }
+  body { background: #FFFFFF !important; }
+  a { color: inherit; text-decoration: none; }
+}

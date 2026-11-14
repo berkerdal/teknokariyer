@@ -3,6 +3,7 @@
  * ve sayfaya yalnızca toplam olarak gider. 5'ten küçük gruplar gizlenir (`gruplariGizle`).
  * Yayın ortamında test firmaları ve ilanları sayılmaz; test ortamında örnek veri test firmalarından oluştuğu için sayılır.
  */
+import { parcaliBul } from '@/altyapi/parcali'
 import { cache } from 'react'
 import type { Firmalar, Ilanlar } from '@/payload-types'
 import { ortam } from '@/altyapi/eposta'
@@ -142,7 +143,7 @@ export const ozetVerisi = cache(async (d: Donem) => {
   for (const a of havuz) for (const b of a.beceriler ?? []) arz.set(kimlik(b.beceri), (arz.get(kimlik(b.beceri)) ?? 0) + 1)
   const beceriAdlari = talep.size
     ? new Map(
-        (await payload.find({ collection: 'taksonomiler', where: { id: { in: [...talep.keys()] } }, select: { ad: true }, limit: 1000, depth: 0, overrideAccess: true })).docs.map((t) => [t.id, t.ad]),
+        (await parcaliBul([...talep.keys()], (p) => payload.find({ collection: 'taksonomiler', where: { id: { in: p } }, select: { ad: true }, limit: p.length, depth: 0, overrideAccess: true }))).map((t) => [t.id, t.ad]),
       )
     : new Map<number, string>()
   const yetenek = [...talep.entries()]

@@ -6,6 +6,7 @@
  * - Davet hatırlatmaları: 3., 7., 14. gün (talimatlar 0.3, 6)
  * - Profil tamamlama hatırlatmaları: devralındıktan sonra 3., 7., 14. gün
  */
+import { parcaliBul } from '@/altyapi/parcali'
 import type { Payload } from 'payload'
 import { SON_HATIRLATMA_UZATMA_GUN, hatirlatmaGunleri, siradakiHatirlatma } from '@/alan/hatirlatma'
 import { trGunFarki } from '@/alan/tarih'
@@ -48,10 +49,12 @@ async function profilHatirlatmalari(payload: Payload, simdi: Date, hatalar: stri
   const { docs: firmalar } = await payload.find({ collection: 'firmalar', where: { and: [{ asama: { equals: 'devralindi' } }, { yayinaHazir: { not_equals: true } }] }, limit: 2000, pagination: false, depth: 0, overrideAccess: true })
   if (!firmalar.length) return 0
   const ids = firmalar.map((f) => f.id)
-  const [davetler, kayitlar] = await Promise.all([
-    payload.find({ collection: 'davetler', where: { and: [{ firma: { in: ids } }, { kullanildi: { exists: true } }] }, select: { firma: true, kullanildi: true }, limit: 5000, pagination: false, depth: 0, overrideAccess: true }),
-    payload.find({ collection: 'islem-kayitlari', where: { and: [{ islem: { equals: PROFIL_HATIRLATMA_ISLEMI } }, { kayitId: { in: ids.map(String) } }] }, select: { kayitId: true, ayrinti: true }, limit: 10000, pagination: false, depth: 0, overrideAccess: true }),
+  const [davetlerDocs, kayitlarDocs] = await Promise.all([
+    parcaliBul(ids, (p) => payload.find({ collection: 'davetler', where: { and: [{ firma: { in: p } }, { kullanildi: { exists: true } }] }, select: { firma: true, kullanildi: true }, limit: 5000, pagination: false, depth: 0, overrideAccess: true })),
+    parcaliBul(ids.map(String), (p) => payload.find({ collection: 'islem-kayitlari', where: { and: [{ islem: { equals: PROFIL_HATIRLATMA_ISLEMI } }, { kayitId: { in: p } }] }, select: { kayitId: true, ayrinti: true }, limit: 10000, pagination: false, depth: 0, overrideAccess: true })),
   ])
+  const davetler = { docs: davetlerDocs }
+  const kayitlar = { docs: kayitlarDocs }
   const req = await istekOlustur(payload, null)
   let n = 0
   for (const f of firmalar) {

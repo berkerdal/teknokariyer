@@ -20,6 +20,7 @@ export function FirmaMenusu({ yer, yeniBasvuru }: { yer: 'yan' | 'alt'; yeniBasv
     { href: '/firma-paneli/havuz', ad: 'CV havuzu', kisa: 'Havuz', ikon: 'ara' },
   ]
   const ek: Oge[] = [
+    { href: '/firma-paneli/rapor', ad: 'Rapor', kisa: 'Rapor', ikon: 'grafik' },
     { href: '/firma-paneli/profil', ad: 'Firma profili', kisa: 'Profil', ikon: 'ofis' },
     { href: '/firma-paneli/ekip', ad: 'Ekip', kisa: 'Ekip', ikon: 'kisi' },
   ]

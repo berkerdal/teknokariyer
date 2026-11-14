@@ -2,6 +2,7 @@
  * Yönetici A.Ş. paneli verisi (yalnızca sunucuda). Kuyruklar kayıtlardan hesaplanır; sayılar elle yazılmaz.
  * Okumalar kurum kullanıcısının yetkisiyle yapılır (kurum her firmayı görür).
  */
+import { parcaliBul } from '@/altyapi/parcali'
 import { cache } from 'react'
 import type { Firmalar, Ilanlar, Talepler } from '@/payload-types'
 import { kurumKullanicisiMi } from '@/erisim'
@@ -253,25 +254,33 @@ export const basvurusuzBitenler = cache(async (): Promise<BasvurusuzIlan[]> => {
     populate: { firmalar: { kisaAd: true } },
   })
   if (!docs.length) return []
-  const b = await payload.find({
-    collection: 'basvurular',
-    where: { and: [{ ilan: { in: docs.map((d) => d.id) } }, { durum: { not_equals: 'geri-cekti' } }] },
-    select: { ilan: true },
-    depth: 0,
-    limit: 10000,
-    pagination: false,
-    overrideAccess: true,
-  })
+  const b = {
+    docs: await parcaliBul(docs.map((d) => d.id), (p) =>
+      payload.find({
+        collection: 'basvurular',
+        where: { and: [{ ilan: { in: p } }, { durum: { not_equals: 'geri-cekti' } }] },
+        select: { ilan: true },
+        depth: 0,
+        limit: 10000,
+        pagination: false,
+        overrideAccess: true,
+      }),
+    ),
+  }
   const basvurulu = new Set(b.docs.map((x) => Number(typeof x.ilan === 'object' ? x.ilan?.id : x.ilan)))
-  const h = await payload.find({
-    collection: 'islem-kayitlari',
-    where: { and: [{ islem: { equals: HATIRLATMA_ISLEMI } }, { kayitId: { in: docs.map((d) => String(d.id)) } }] },
-    select: { kayitId: true },
-    depth: 0,
-    limit: 1000,
-    pagination: false,
-    overrideAccess: true,
-  })
+  const h = {
+    docs: await parcaliBul(docs.map((d) => String(d.id)), (p) =>
+      payload.find({
+        collection: 'islem-kayitlari',
+        where: { and: [{ islem: { equals: HATIRLATMA_ISLEMI } }, { kayitId: { in: p } }] },
+        select: { kayitId: true },
+        depth: 0,
+        limit: 1000,
+        pagination: false,
+        overrideAccess: true,
+      }),
+    ),
+  }
   const hatirlatilan = new Set(h.docs.map((x) => Number(x.kayitId)))
   return docs
     .filter((i) => !basvurulu.has(i.id) && kalanGun(new Date(i.sonBasvuru), simdi) >= 0)

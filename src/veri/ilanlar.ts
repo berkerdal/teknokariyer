@@ -2,6 +2,7 @@
  * Herkese açık ilan ve firma verisi (ön yüz).
  * Okuma, ziyaretçinin erişim kuralıyla yapılır (overrideAccess: false); firma bilgisinden yalnızca herkese açık alanlar alınır.
  */
+import { parcaliBul } from '@/altyapi/parcali'
 import { cache } from 'react'
 import type { Firmalar, Ilanlar, Taksonomiler } from '@/payload-types'
 import type { IlanOzeti, IlanTuru } from '@/alan/ilanFiltre'
@@ -41,14 +42,16 @@ export const firmaOzeti = (f: Firmalar): FirmaOzeti => ({
 export async function firmalariAl(idler: number[]): Promise<Map<number, FirmaOzeti>> {
   if (!idler.length) return new Map()
   const payload = await payloadAl()
-  const { docs } = await payload.find({
-    collection: 'firmalar',
-    where: { id: { in: [...new Set(idler)] } },
-    depth: 1,
-    limit: idler.length,
-    overrideAccess: true, // herkese açık alanlar aşağıda seçilir; yetkili kişi bilgisi dışarı çıkmaz
-    select: { kisaAd: true, unvan: true, slug: true, konum: true, sektor: true, asama: true, testFirmasi: true },
-  })
+  const docs = await parcaliBul(idler, (parca) =>
+    payload.find({
+      collection: 'firmalar',
+      where: { id: { in: parca } },
+      depth: 1,
+      limit: parca.length,
+      overrideAccess: true, // herkese açık alanlar aşağıda seçilir; yetkili kişi bilgisi dışarı çıkmaz
+      select: { kisaAd: true, unvan: true, slug: true, konum: true, sektor: true, asama: true, testFirmasi: true },
+    }),
+  )
   return new Map(docs.filter(firmaGorunurMu).map((f) => [f.id, firmaOzeti(f as Firmalar)]))
 }
 

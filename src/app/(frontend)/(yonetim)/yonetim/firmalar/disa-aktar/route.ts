@@ -3,6 +3,7 @@
  * Excel'in Türkçe ayarında doğrudan açılsın diye noktalı virgülle ayrılmış, BOM'lu UTF-8 CSV.
  * Kişisel veri içermez: yetkili adı ve e-postası listeye yazılmaz, yalnızca neyin eksik olduğu yazılır.
  */
+import { parcaliBul } from '@/altyapi/parcali'
 import { kurumKullanicisiMi } from '@/erisim'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { istekOlustur } from '@/servisler/ortak'
@@ -18,7 +19,11 @@ export async function GET() {
   if (!k || !kurumKullanicisiMi(k)) return new Response('Bu listeyi yalnızca Yönetici A.Ş. indirebilir.', { status: 403 })
   const payload = await payloadAl()
   const { yetkiliEksik } = await kurulumOzeti()
-  const firmalar = await payload.find({ collection: 'firmalar', where: { id: { in: yetkiliEksik.map((f) => f.id) } }, select: { unvan: true, kisaAd: true, konum: true, web: true }, limit: 5000, pagination: false, depth: 0, overrideAccess: true })
+  const firmalar = {
+    docs: await parcaliBul(yetkiliEksik.map((f) => f.id), (p) =>
+      payload.find({ collection: 'firmalar', where: { id: { in: p } }, select: { unvan: true, kisaAd: true, konum: true, web: true }, limit: p.length, pagination: false, depth: 0, overrideAccess: true }),
+    ),
+  }
   const satirlar = [
     ['Kısa ad', 'Unvan', 'Teknokent’teki yeri', 'Web sitesi', 'Eksik'],
     ...firmalar.docs.map((f) => {

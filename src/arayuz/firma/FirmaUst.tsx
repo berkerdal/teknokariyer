@@ -47,6 +47,7 @@ export function FirmaUst({ firma, kisi, unvan, yetki }: { firma: { kisaAd: strin
             </p>
             <Link href="/firma-paneli/profil">Firma profili</Link>
             <Link href="/firma-paneli/ekip">Ekip</Link>
+            <Link href="/firma-paneli/rapor">Rapor</Link>
             <Link href="/">Portalın ana sayfası</Link>
             <form action={cikisEylemi}>
               <button type="submit">Çıkış yap</button>

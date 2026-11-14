@@ -15,6 +15,7 @@ export function YonetimMenusu({ yer, sayilar, teknik }: { yer: 'yan' | 'sekme'; 
   const ana: Oge[] = [
     { href: '/yonetim', ad: 'Bugün', sayi: sayilar.toplam },
     { href: '/yonetim/ozet', ad: 'Yönetici özeti' },
+    { href: '/yonetim/raporlar', ad: 'Raporlar' },
     { href: '/yonetim/onay', ad: 'İlan onayı', sayi: sayilar.onay },
     { href: '/yonetim/degisiklikler', ad: 'İlan değişiklikleri', sayi: sayilar.degisiklik },
     { href: '/yonetim/talepler', ad: 'Liste talepleri', sayi: sayilar.talep },

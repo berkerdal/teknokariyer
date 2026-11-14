@@ -366,8 +366,17 @@ Claude tarafından yapılacak.
       ton sıralı dizi, doğrulayıcıdan geçti.
     - Yayın ortamında test firmaları sayılmaz; test ortamında sayılır (örnek veri test firmalarından).
     - Not: huni, başvurunun yalnızca bugünkü durumunu bildiği için “ulaşılan aşama”yı durumdan çıkarır.
-  - **Sırada:** (1) rapor merkezi (Excel + PDF), (2) firma raporu, (3) KVKK talepleri ve işlem kayıtları ekranı,
-    (4) aday hesap silme (K27).
+  - **Rapor merkezi ve firma raporu (14.11.2026, K31):** `/yonetim/raporlar` (8 rapor: dönem faaliyet, ilan, firma
+    etkinlik, başvuru ve sonuç, yetenek açığı, aday kaynak, hizmet, KVKK). Dönem: bu/geçen ay, çeyrek, yıl veya özel aralık
+    (`src/alan/raporDonemi.ts`). Hesaplar `src/veri/raporlar.ts` (`raporHazirla`, `raporSayfalari`); ekran gövdesi ortak
+    (`src/arayuz/RaporGovdesi.tsx`).
+    - **Excel:** `src/altyapi/excel.ts`, kitaplıksız .xlsx (fflate ile zip; ilk sayfa özet ve notlar, her tablo ayrı sayfa,
+      kalın ve sabit başlık). openpyxl ile doğrulandı. İndirme işlem kaydına geçer.
+    - **PDF:** tarayıcının yazdırma penceresi (“PDF olarak kaydet”); A4 baskı stili panel menülerini gizler, logo gösterir.
+    - **Firma raporu:** `/firma-paneli/rapor` (+ `/excel`), `src/veri/firmaRaporu.ts`; yalnızca kendi firmasının ilanları,
+      başka firmayla karşılaştırma yok. Firma başvuruları zaten tek tek gördüğü için kanal sayıları gizlenmez.
+    - KVKK raporundaki ilgili kişi talepleri, talepler ekranı yazılınca dolacak.
+  - **Sırada:** (1) KVKK talepleri ve işlem kayıtları ekranı, (2) aday hesap silme (K27).
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
@@ -425,6 +434,10 @@ Claude tarafından yapılacak.
     her zaman kayıtlı API anahtarıyla değiştiriyor (yanlış anahtarla deneyip doğrulandı). Statik dosya yüklemesi ise
     yüklemeye özel kısa ömürlü bir anahtar istediği için 401 alıyor. API çağrıları (D1, R2, gizli değişken, ayar) çalışır;
     tam dağıtım Workers Builds ile yapılır.
+  - **D1 sorgu sınırı:** Bir sorguda en fazla 100 bağlı parametre olabilir. Uzun `in` listeleri ve Payload'un toplu
+    silmesi (100'den fazla kayıt) “too many SQL variables” verir. Kimlik listeleri `src/altyapi/parcali.ts`
+    (`parcaliBul`, `parcalara`, 80'lik parça) ile sorgulanır; toplu silme sayfalı bulup kimlikle parça parça yapılır.
+    SQLite testleri bunu yakalamaz; saklama testi yakaladı.
   - **Göçü Worker'a bırakma:** `prodMigrations` ilk istekte çalışır. Aynı anda birden çok istek gelince göç yarıda
     kaldı (49/56 tablo, göç kaydı yok) ve her istek 500 verdi. Yeni ortamda veya şema değişikliğinde göç, trafik açılmadan
     önce D1 API'si üzerinden sırayla uygulanmalı ve `payload_migrations` kaydı yazılmalı. Bunun için bir betik yazılacak.

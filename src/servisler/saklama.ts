@@ -6,6 +6,7 @@
  * durum, kaynak, tarih ve ilan bağlantısı raporlar için kalır. CV dosyası başka yerde (adayın profili, başka başvuru)
  * kullanılmıyorsa silinir.
  */
+import { PARCA, parcaliBul } from '@/altyapi/parcali'
 import type { Payload } from 'payload'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { istekOlustur, kimlik } from './ortak'
@@ -28,14 +29,18 @@ export async function basvurulariAnonimlestir(payload: Payload, simdi: Date, ay:
     overrideAccess: true,
   })
   if (!ilanlar.length) return { basvuru: 0, dosya: 0 }
-  const { docs } = await payload.find({
-    collection: 'basvurular',
-    where: { and: [{ ilan: { in: ilanlar.map((i) => i.id) } }, { anonimlestirildi: { exists: false } }] },
-    select: { cv: true },
-    limit: 500, // bir çalışmada en fazla 500; kalanlar sonraki çalışmada
-    depth: 0,
-    overrideAccess: true,
-  })
+  const docs = (
+    await parcaliBul(ilanlar.map((i) => i.id), (parca) =>
+      payload.find({
+        collection: 'basvurular',
+        where: { and: [{ ilan: { in: parca } }, { anonimlestirildi: { exists: false } }] },
+        select: { cv: true },
+        limit: 500,
+        depth: 0,
+        overrideAccess: true,
+      }),
+    )
+  ).slice(0, 500) // bir çalışmada en fazla 500; kalanlar sonraki çalışmada
   const req = await istekOlustur(payload, null)
   const dosyalar = new Set<number>()
   for (const b of docs) {
@@ -65,10 +70,16 @@ export async function basvurulariAnonimlestir(payload: Payload, simdi: Date, ay:
 
 /** İşlem kayıtları süre dolunca silinir. Silme özeti yeni bir kayıt olarak yazılır. */
 export async function eskiIslemKayitlariniSil(payload: Payload, simdi: Date, ay: number): Promise<number> {
-  const where = { createdAt: { less_than: ayOnce(simdi, ay).toISOString() } }
-  const { totalDocs } = await payload.count({ collection: 'islem-kayitlari', where, overrideAccess: true })
-  if (!totalDocs) return 0
-  await payload.delete({ collection: 'islem-kayitlari', where, overrideAccess: true })
-  await islemKaydet(await istekOlustur(payload, null), { islem: 'Saklama süresi dolan işlem kayıtları silindi', tur: 'kisisel-veri', ayrinti: { adet: totalDocs, sureAy: ay } })
-  return totalDocs
+  const sinir = ayOnce(simdi, ay).toISOString()
+  // D1 sorgu başına en fazla 100 parametre kabul eder; silme 80'lik parçalarla yapılır (bir çalışmada en fazla 8.000)
+  let toplam = 0
+  for (let tur = 0; tur < 100; tur++) {
+    const { docs } = await payload.find({ collection: 'islem-kayitlari', where: { createdAt: { less_than: sinir } }, select: { islem: true }, limit: PARCA, depth: 0, overrideAccess: true })
+    if (!docs.length) break
+    await payload.delete({ collection: 'islem-kayitlari', where: { id: { in: docs.map((d) => d.id) } }, overrideAccess: true })
+    toplam += docs.length
+  }
+  if (toplam)
+    await islemKaydet(await istekOlustur(payload, null), { islem: 'Saklama süresi dolan işlem kayıtları silindi', tur: 'kisisel-veri', ayrinti: { adet: toplam, sureAy: ay } })
+  return toplam
 }

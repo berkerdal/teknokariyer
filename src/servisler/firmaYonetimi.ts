@@ -2,6 +2,7 @@
  * Yönetici A.Ş.'nin firma işleri (talimatlar 0.3; K3): iskelet kayıt, Yönetici A.Ş. alanları, yetkili, pasif yapma,
  * takip notu ve toplu davet. Davetin kendisi ekip servisindedir (`davetGonder`); burada yalnızca çağrılır.
  */
+import { parcaliBul } from '@/altyapi/parcali'
 import type { Payload } from 'payload'
 import type { Firmalar } from '@/payload-types'
 import { moderasyonYapabilirMi, yoneticiMi } from '@/erisim'
@@ -157,7 +158,7 @@ export interface TopluDavetSonucu {
 export async function topluDavet(payload: Payload, k: Kullanici, firmaIdler: number[]): Promise<TopluDavetSonucu> {
   if (!moderasyonYapabilirMi(k)) throw new IslemHatasi('Toplu daveti yalnızca Yönetici A.Ş. gönderebilir.', 403)
   if (!firmaIdler.length) throw new FormHatasi({ firma: 'Davet göndereceğiniz en az bir firma seçin.' })
-  const { docs } = await payload.find({ collection: 'firmalar', where: { id: { in: firmaIdler.slice(0, 200) } }, limit: 200, depth: 0, overrideAccess: true })
+  const docs = await parcaliBul(firmaIdler.slice(0, 200), (p) => payload.find({ collection: 'firmalar', where: { id: { in: p } }, limit: p.length, depth: 0, overrideAccess: true }))
   const sonuc: TopluDavetSonucu = { gonderilen: [], atlanan: [] }
   for (const f of docs) {
     const durum = yetkiliDurumu(f)
