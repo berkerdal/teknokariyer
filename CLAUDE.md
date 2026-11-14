@@ -316,7 +316,14 @@ Claude tarafından yapılacak.
     (`src/alan/hatirlatma.ts`). Her çalışma işlem kaydına yazılır; “Bugün” sayfası son çalışmayı gösterir.
     Yerelde denemek için: `opennextjs-cloudflare build`, ardından uzak D1 bağlantısı çıkarılmış geçici bir yapılandırmayla
     `wrangler dev --test-scheduled` ve `/__scheduled?cron=...`.
-  - **Sırada:** rehberden firma içe aktarma, kullanıcılar ve listeler ekranı.
+  - **Rehberden içe aktarma (14.11.2026):** `/yonetim/firmalar/ice-aktar` (yalnızca rol `yonetici`). Excel CSV'si tarayıcıda
+    okunur (UTF-8 değilse Windows-1254; Türkçe Excel varsayılanı), `;` veya `,` ayraç, tırnaklı alanlar. Başlıklar Türkçe
+    yazım farklarına dayanıklı eşlenir; kısa ad boşsa unvandan şirket ekleri atılarak türetilir (`src/alan/iceAktarma.ts`).
+    Önizleme: yeni / zaten kayıtlı / dosyada tekrar / eksik bilgi; uyarılar: genel e-posta, yetkili adı yok, sektör listede
+    yok, şirket türü yazmayan unvan (şahıs firması, kişi adı olabilir). Seçilen satırlar 20'şerli parçalarla
+    `firmalariIceAktar` servisine gider; sunucu her satırı yeniden denetler. Aktarma e-posta göndermez. Şablon:
+    `/yonetim/firmalar/ice-aktar/sablon` (kurgusal örnek satır). Gerçek rehber verisi depoya konmaz.
+  - **Sırada:** kullanıcılar, listeler (taksonomi) ve ayarlar ekranları; ardından Payload ekranının menüden kaldırılması.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

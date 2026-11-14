@@ -175,3 +175,40 @@ export async function topluDavet(payload: Payload, k: Kullanici, firmaIdler: num
   }
   return sonuc
 }
+
+export interface AktarmaSonucu {
+  satir: number
+  kisaAd: string
+  eklendi: boolean
+  mesaj: string
+  firmaId?: number
+}
+
+/**
+ * Rehberden içe aktarma (talimatlar 0.3, 1): her satır iskelet kayıt olur. Sunucu denetimleri (tekrar, e-posta) yeniden
+ * yapılır; önizlemedeki karar yalnızca yardımcıdır. Bir satırın hatası diğerlerini durdurmaz.
+ */
+export async function firmalariIceAktar(
+  payload: Payload,
+  k: Kullanici,
+  satirlar: Array<{ satir: number; unvan: string; kisaAd: string; konum: string; sektor: string; web: string; yetkiliAd: string; yetkiliEposta: string; yetkiliTelefon: string }>,
+): Promise<AktarmaSonucu[]> {
+  yonetici(k)
+  if (satirlar.length > 50) throw new IslemHatasi('Tek seferde en fazla 50 satır aktarılabilir.')
+  const { docs: sektorler } = await payload.find({ collection: 'taksonomiler', where: { tur: { equals: 'sektor' } }, select: { ad: true }, limit: 500, pagination: false, depth: 0, overrideAccess: true })
+  const sonuc: AktarmaSonucu[] = []
+  for (const s of satirlar) {
+    const sektor = sektorler.find((x) => normallestir(x.ad) === normallestir(s.sektor ?? ''))?.id ?? null
+    try {
+      const f = await iskeletFirmaOlustur(payload, k, { ...s, sektor })
+      sonuc.push({ satir: s.satir, kisaAd: f.kisaAd, eklendi: true, mesaj: 'İskelet kayıt oluşturuldu.', firmaId: f.id })
+    } catch (e) {
+      const mesaj = e instanceof FormHatasi ? Object.values(e.alanlar).join(' ') : e instanceof IslemHatasi ? e.message : 'Kayıt oluşturulamadı.'
+      if (!(e instanceof IslemHatasi)) console.error(e)
+      sonuc.push({ satir: s.satir, kisaAd: s.kisaAd, eklendi: false, mesaj })
+    }
+  }
+  const req = await istekOlustur(payload, k)
+  await islemKaydet(req, { islem: 'Firma rehberinden içe aktarma', tur: 'kurulum', ayrinti: { eklenen: sonuc.filter((x) => x.eklendi).length, atlanan: sonuc.filter((x) => !x.eklendi).length } })
+  return sonuc
+}

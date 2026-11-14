@@ -107,3 +107,27 @@ describe('takip notu ve pasiflik', () => {
     expect(geri.asama).toBe('devralindi') // etkin kullanıcısı var, profili tamam değil
   })
 })
+
+describe('rehberden içe aktarma', () => {
+  it('her satır ayrı denetlenir: yeni eklenir, kayıtlı ve hatalı atlanır; sektör adla eşlenir; yalnızca tam yetkili', async () => {
+    const { firmalariIceAktar } = await import('@/servisler/firmaYonetimi')
+    await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'sektor', ad: `Elektronik ${ek}` } as any })
+    const s = (n: number, ad: string, v: Record<string, string> = {}) => ({ satir: n, unvan: `${ad} A.Ş.`, kisaAd: ad, konum: 'B Blok 9', sektor: '', web: '', yetkiliAd: '', yetkiliEposta: '', yetkiliTelefon: '', ...v })
+    await expect(firmalariIceAktar(payload, moderator, [s(2, `Aktar ${ek}`)])).rejects.toMatchObject({ durumKodu: 403 })
+    const r = await firmalariIceAktar(payload, yonetici, [
+      s(2, `Aktar ${ek}`, { sektor: `elektronik ${ek}`, yetkiliEposta: `info@aktar-${ek}.com` }),
+      s(3, `Alfa ${ek}`), // ilk testte açıldı
+      s(4, `Bos ${ek}`, { konum: '' }),
+    ])
+    expect(r.map((x) => x.eklendi)).toEqual([true, false, false])
+    expect(r[1]!.mesaj).toMatch(/zaten kayıtlı/)
+    expect(r[2]!.mesaj).toMatch(/yerini yazın/)
+    const f = await payload.findByID({ collection: 'firmalar', id: r[0]!.firmaId!, depth: 1, overrideAccess: true })
+    expect(f.asama).toBe('iskelet')
+    expect((f.sektor as any)?.ad).toBe(`Elektronik ${ek}`)
+    expect(f.yetkiliEposta).toBe(`info@aktar-${ek}.com`)
+    // aktarma e-posta göndermez
+    const posta = await payload.count({ collection: 'test-postalar', where: { kime: { contains: `aktar-${ek}` } }, overrideAccess: true })
+    expect(posta.totalDocs).toBe(0)
+  })
+})

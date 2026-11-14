@@ -48,6 +48,9 @@ export default async function Firmalar({ searchParams }: Props) {
         </div>
         {yoneticiMi(k) && (
           <div className="dugme-grubu">
+            <Link className="dugme dugme--ikincil dugme--kucuk" href="/yonetim/firmalar/ice-aktar">
+              <Ikon ad="yukle" kucuk /> Rehberden içe aktar
+            </Link>
             <Link className="dugme dugme--ikincil dugme--kucuk" href="/yonetim/firmalar/toplu-davet">
               Toplu davet ({ozet.davetHazir.length})
             </Link>

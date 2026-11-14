@@ -435,3 +435,7 @@ dialog.alt-panel:not([open]) { display: none; }
 .y-form-bolum legend { padding: 0; margin-bottom: 8px; float: left; width: 100%; }
 .y-form-bolum legend + * { clear: both; }
 .b4 { font: 600 16px/22px var(--font-baslik); margin: 8px 0 0; }
+.y-adimlar { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.y-aktarma td { vertical-align: top; }
+.y-aktarma td p { margin: 0 0 4px; }
+.y-aktarma td:last-child { min-width: 260px; }

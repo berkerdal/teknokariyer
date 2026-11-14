@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { FormDurumu } from '@/arayuz/form'
 import { davetGonder, davetiIptalEt, davetiYenidenGonder } from '@/servisler/ekip'
-import { firmaKaydiniGuncelle, firmaPasifligi, iskeletFirmaOlustur, takipNotuEkle, topluDavet, type KurumAlanlari } from '@/servisler/firmaYonetimi'
+import { firmaKaydiniGuncelle, firmaPasifligi, firmalariIceAktar, iskeletFirmaOlustur, takipNotuEkle, topluDavet, type AktarmaSonucu, type KurumAlanlari } from '@/servisler/firmaYonetimi'
 import { FormHatasi, IslemHatasi } from '@/servisler/ortak'
 import { payloadAl } from '@/veri/payload'
 import { yonetimOturumu } from '@/veri/yonetim'
@@ -118,5 +118,36 @@ export async function topluDavetEylemi(_: FormDurumu, f: FormData): Promise<Form
     }
   } catch (e) {
     return hata(e)
+  }
+}
+
+/** İçe aktarma: istemci seçili satırları 20'şerli parçalar hâlinde gönderir (Worker süre sınırı için). */
+export async function iceAktarEylemi(satirlarJson: string): Promise<{ sonuc?: AktarmaSonucu[]; hata?: string }> {
+  const k = await yonetimOturumu()
+  let satirlar: unknown
+  try {
+    satirlar = JSON.parse(satirlarJson)
+  } catch {
+    return { hata: 'Gönderilen veri okunamadı. Sayfayı yenileyip dosyayı yeniden yükleyin.' }
+  }
+  if (!Array.isArray(satirlar)) return { hata: 'Gönderilen veri okunamadı.' }
+  const str = (x: unknown) => (typeof x === 'string' ? x.slice(0, 300) : '')
+  const temiz = satirlar.slice(0, 50).map((s: Record<string, unknown>) => ({
+    satir: Number(s.satir) || 0,
+    unvan: str(s.unvan),
+    kisaAd: str(s.kisaAd),
+    konum: str(s.konum),
+    sektor: str(s.sektor),
+    web: str(s.web),
+    yetkiliAd: str(s.yetkiliAd),
+    yetkiliEposta: str(s.yetkiliEposta),
+    yetkiliTelefon: str(s.yetkiliTelefon),
+  }))
+  try {
+    const sonuc = await firmalariIceAktar(await payloadAl(), k, temiz)
+    revalidatePath('/yonetim', 'layout')
+    return { sonuc }
+  } catch (e) {
+    return { hata: e instanceof IslemHatasi ? e.message : 'Aktarma sırasında beklenmeyen bir sorun oluştu.' }
   }
 }
