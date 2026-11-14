@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(istek: Request) {
   await oturumKapat()
-  const pasif = new URL(istek.url).searchParams.get('pasif') === '1'
-  return NextResponse.redirect(new URL(pasif ? '/giris?firma=1&pasif=1' : '/', istek.url), 303)
+  const pasif = new URL(istek.url).searchParams.get('pasif')
+  const hedef = pasif === '1' ? '/giris?firma=1&pasif=1' : pasif === 'kurum' ? '/giris?pasif=kurum' : '/'
+  return NextResponse.redirect(new URL(hedef, istek.url), 303)
 }

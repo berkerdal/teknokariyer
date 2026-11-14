@@ -81,7 +81,8 @@ export default async function Firmalar({ searchParams }: Props) {
           </li>
         </ul>
         <p>
-          Bir firma davetten veya devralmadan sonra {14} gün ilerlemezse “Kişisel takip” listesine düşer. Firmayı arayıp sonucu firma sayfasına not olarak
+          İlerlemeyen firmaya {ozet.esik.hatirlatmalar.join('., ')}. günlerde otomatik hatırlatma gider. {ozet.esik.gun} gün sonunda hâlâ ilerleme
+          yoksa firma “Kişisel takip” listesine düşer. Firmayı arayıp sonucu firma sayfasına not olarak
           yazın.
         </p>
       </ModulBilgisi>
@@ -108,7 +109,7 @@ export default async function Firmalar({ searchParams }: Props) {
         <section className="panel">
           <header className="panel-ic y-panel-bas">
             <h2 className="b3">Kişisel takip gerekiyor</h2>
-            <span className="kucuk ikincil">14 gündür ilerleme yok</span>
+            <span className="kucuk ikincil">{ozet.esik.gun} gündür ilerleme yok</span>
           </header>
           {ozet.takip.length === 0 ? (
             <p className="panel-ic ikincil">Takip gerektiren firma yok.</p>

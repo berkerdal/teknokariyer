@@ -323,7 +323,24 @@ Claude tarafından yapılacak.
     yok, şirket türü yazmayan unvan (şahıs firması, kişi adı olabilir). Seçilen satırlar 20'şerli parçalarla
     `firmalariIceAktar` servisine gider; sunucu her satırı yeniden denetler. Aktarma e-posta göndermez. Şablon:
     `/yonetim/firmalar/ice-aktar/sablon` (kurgusal örnek satır). Gerçek rehber verisi depoya konmaz.
-  - **Sırada:** kullanıcılar, listeler (taksonomi) ve ayarlar ekranları; ardından Payload ekranının menüden kaldırılması.
+  - **Yönetici A.Ş. paneli Y3 (14.11.2026):**
+    - `/yonetim/listeler`: türe göre sekmeler, arama, sayfalama; çoklu ekleme (zaten olan ve aynı kökteki yazım eklenmez,
+      “yine de ekle” ile geçilir); ad, eş anlamlılar ve “seçilebilir” düzenleme (ad ve eş anlamlı başka öğeyle çakışamaz).
+      Silme yok. Servis `src/servisler/listeler.ts`.
+    - `/yonetim/kullanicilar`: Yönetici A.Ş. hesapları. Hesap açılınca kişiye 7 gün geçerli şifre belirleme bağlantısı gider
+      (`forgotPassword` + `kurumHesabiEpostasi`). Roller `src/alan/kurumRolleri.ts`. Kimse kendi rolünü değiştiremez, kendini
+      kapatamaz; son etkin tam yetkili korunur.
+    - **Kapatılan (pasif) kurum hesabı hiçbir yetki taşımaz:** `yoneticiMi`, `moderasyonYapabilirMi`, `kurumKullanicisiMi`
+      artık `pasif` olmayanı arar; açık oturum `/cikis?pasif=kurum` ile kapanır.
+    - `/yonetim/ayarlar`: yalnızca etkisi olan ayarlar (onaydan geçecek ilan sayısı, en uzun ilan süresi, hatırlatma
+      günleri, havuz rızası süresi). Hatırlatma günleri zamanlanmış işlere ve kişisel takip eşiğine bağlandı (son gün = eşik).
+      Onay hedefi (`onayHedefiIsGunu`) kodda kullanılıyor ama ekranda yok: firma panelindeki “1 iş günü” metinleri sabit.
+      Eşleşme ağırlıkları, başvuru anonimleştirme ve işlem kaydı saklama süreleri henüz hiçbir yerde uygulanmıyor; bu yüzden
+      ekranda yok. **Saklama süreleri (KVKK) için zamanlanmış iş yazılmalı.**
+    - **Payload ekranı:** `access.admin` artık yalnızca `teknikSorumlu` işaretli etkin kurum kullanıcısı. İşareti yalnızca
+      teknik sorumlu verir. Göç `20261114_174215_teknik_sorumlu` o anki tam yetkilileri teknik sorumlu yaptı (test ortamında
+      yalnızca test yöneticisi). Menüdeki bağlantı yalnızca teknik sorumluya görünür.
+  - **Sırada:** KVKK saklama süreleri işi, KVKK talepleri ve işlem kayıtları ekranı, pano; aday hesap silme (K27).
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

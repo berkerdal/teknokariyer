@@ -75,7 +75,7 @@ export default async function Bugun({ searchParams }: Props) {
             eklenir.
           </li>
           <li>
-            <strong>Kurulumda kişisel takip:</strong> Davet gönderildikten veya hesap devralındıktan sonra 14 gün ilerlemeyen firmalar. Firmayı arayıp
+            <strong>Kurulumda kişisel takip:</strong> Davet gönderildikten veya hesap devralındıktan sonra {kurulum.esik.gun} gün ilerlemeyen firmalar. Firmayı arayıp
             sonucu not olarak yazın.
           </li>
           <li>
@@ -137,7 +137,7 @@ export default async function Bugun({ searchParams }: Props) {
           ))}
         </Kuyruk>
 
-        <Kuyruk baslik="Kurulumda kişisel takip" sayi={kurulum.takip.length} bilgi="14 gündür ilerlemeyen firmalar" hedef="/yonetim/firmalar?asama=takip#liste" bos="Takip gerektiren firma yok.">
+        <Kuyruk baslik="Kurulumda kişisel takip" sayi={kurulum.takip.length} bilgi={`${kurulum.esik.gun} gündür ilerlemeyen firmalar`} hedef="/yonetim/firmalar?asama=takip#liste" bos="Takip gerektiren firma yok.">
           {kurulum.takip.slice(0, 6).map((f) => (
             <li key={f.id}>
               <Link href={`/yonetim/firmalar/${f.id}`}>

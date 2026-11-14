@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
-import { alanSadeceYonetici, kullanici, kurumKullanicisiMi, sistemIslemiMi, yoneticiMi } from '../erisim'
+import { alanSadeceYonetici, kullanici, kurumKullanicisiMi, sistemIslemiMi, teknikSorumluMu, yoneticiMi } from '../erisim'
 import { dogrulamaEpostasi, sifreSifirlamaEpostasi } from '../altyapi/epostaSablonlari'
 
 /**
@@ -44,14 +44,24 @@ export const Kullanicilar: CollectionConfig = {
       return k ? { id: { equals: k.id } } : false
     },
     delete: ({ req }) => yoneticiMi(kullanici(req)),
-    admin: ({ req }) => kurumKullanicisiMi(kullanici(req)),
+    // Payload'un hazır yönetim ekranı yalnızca teknik sorumluya açık (kullanıcı kararı, 14.11.2026).
+    // Kurumsal İletişim personeli /yonetim panelini kullanır.
+    admin: ({ req }) => teknikSorumluMu(kullanici(req)),
   },
   hooks: {
     // Ekipten çıkarılan (pasif) kullanıcı giriş yapamaz.
     beforeLogin: [
       ({ user }) => {
-        if ((user as { pasif?: boolean }).pasif)
-          throw new APIError('Bu hesap firmanın ekibinden çıkarıldı. Yeniden erişim için firmanızın yöneticisine başvurun.', 403, undefined, true)
+        const u = user as { pasif?: boolean; rol?: string }
+        if (u.pasif)
+          throw new APIError(
+            u.rol === 'firma'
+              ? 'Bu hesap firmanın ekibinden çıkarıldı. Yeniden erişim için firmanızın yöneticisine başvurun.'
+              : 'Bu hesap kapatıldı. Yeniden erişim için Yönetici A.Ş.’de tam yetkili bir kullanıcıya başvurun.',
+            403,
+            undefined,
+            true,
+          )
         return user
       },
     ],
@@ -119,6 +129,15 @@ export const Kullanicilar: CollectionConfig = {
       access: { update: () => false }, // yalnızca doğrulama akışı değiştirir
     },
     { name: 'totpGizli', type: 'text', hidden: true, access: { read: () => false, update: () => false } },
+    {
+      name: 'teknikSorumlu',
+      label: 'Teknik sorumlu',
+      type: 'checkbox',
+      defaultValue: false,
+      // Yalnızca teknik sorumlu başka birini teknik sorumlu yapabilir
+      access: { create: ({ req }) => teknikSorumluMu(kullanici(req)), update: ({ req }) => teknikSorumluMu(kullanici(req)) },
+      admin: { description: 'Gelişmiş yönetim ekranına (Payload) girebilir. Yalnızca teknik bilgisi olan kişiye verin.', condition: (veri) => veri?.rol !== 'aday' && veri?.rol !== 'firma' },
+    },
     {
       name: 'pasif',
       label: 'Pasif (ekipten çıkarıldı)',

@@ -7,13 +7,13 @@
  * - Profil tamamlama hatırlatmaları: devralındıktan sonra 3., 7., 14. gün
  */
 import type { Payload } from 'payload'
-import { SON_HATIRLATMA_UZATMA_GUN, siradakiHatirlatma } from '@/alan/hatirlatma'
+import { SON_HATIRLATMA_UZATMA_GUN, hatirlatmaGunleri, siradakiHatirlatma } from '@/alan/hatirlatma'
 import { trGunFarki } from '@/alan/tarih'
 import { profilHatirlatmaEpostasi } from '@/altyapi/epostaSablonlari'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { davetHatirlat } from './ekip'
 import { suresiDolanlariKapat } from './ilanIslemleri'
-import { istekOlustur, kimlik } from './ortak'
+import { ayarlar, istekOlustur, kimlik } from './ortak'
 
 export const PROFIL_HATIRLATMA_ISLEMI = 'Profil tamamlama hatırlatması gönderildi'
 
@@ -24,14 +24,14 @@ export interface ZamanliSonuc {
   hatalar: string[]
 }
 
-async function davetHatirlatmalari(payload: Payload, simdi: Date, hatalar: string[]): Promise<number> {
+async function davetHatirlatmalari(payload: Payload, simdi: Date, hatalar: string[], gunler: number[]): Promise<number> {
   const { docs } = await payload.find({ collection: 'davetler', where: { kullanildi: { exists: false } }, limit: 2000, pagination: false, depth: 0, overrideAccess: true })
   let n = 0
   for (const d of docs) {
-    const gun = siradakiHatirlatma(trGunFarki(new Date(d.createdAt), simdi), (d.hatirlatmalar ?? []).map((h) => h.gun ?? 0))
+    const gun = siradakiHatirlatma(trGunFarki(new Date(d.createdAt), simdi), (d.hatirlatmalar ?? []).map((h) => h.gun ?? 0), gunler)
     if (gun === null) continue
     try {
-      if (await davetHatirlat(payload, d.id, gun, gun === 14, SON_HATIRLATMA_UZATMA_GUN, simdi)) n++
+      if (await davetHatirlat(payload, d.id, gun, gun === gunler[gunler.length - 1], SON_HATIRLATMA_UZATMA_GUN, simdi)) n++
     } catch (e) {
       hatalar.push(`Davet ${d.id}: ${e instanceof Error ? e.message : String(e)}`)
     }
@@ -39,7 +39,7 @@ async function davetHatirlatmalari(payload: Payload, simdi: Date, hatalar: strin
   return n
 }
 
-async function profilHatirlatmalari(payload: Payload, simdi: Date, hatalar: string[]): Promise<number> {
+async function profilHatirlatmalari(payload: Payload, simdi: Date, hatalar: string[], gunler: number[]): Promise<number> {
   const { docs: firmalar } = await payload.find({ collection: 'firmalar', where: { and: [{ asama: { equals: 'devralindi' } }, { yayinaHazir: { not_equals: true } }] }, limit: 2000, pagination: false, depth: 0, overrideAccess: true })
   if (!firmalar.length) return 0
   const ids = firmalar.map((f) => f.id)
@@ -53,7 +53,7 @@ async function profilHatirlatmalari(payload: Payload, simdi: Date, hatalar: stri
     const devralma = davetler.docs.filter((d) => kimlik(d.firma) === f.id).map((d) => d.kullanildi!).sort()[0]
     if (!devralma) continue
     const gonderilen = kayitlar.docs.filter((k) => k.kayitId === String(f.id)).map((k) => Number((k.ayrinti as { gun?: number } | null)?.gun ?? 0))
-    const gun = siradakiHatirlatma(trGunFarki(new Date(devralma), simdi), gonderilen)
+    const gun = siradakiHatirlatma(trGunFarki(new Date(devralma), simdi), gonderilen, gunler)
     if (gun === null) continue
     try {
       const eksikler = [!f.logo && 'logo', !f.kisaTanitim?.trim() && 'kısa tanıtım', !f.sektor && 'sektör'].filter((x): x is string => Boolean(x))
@@ -66,7 +66,7 @@ async function profilHatirlatmalari(payload: Payload, simdi: Date, hatalar: stri
         overrideAccess: true,
       })
       for (const u of yoneticiler) {
-        const e = profilHatirlatmaEpostasi({ ad: u.ad, firma: f.kisaAd, eksikler, son: gun === 14 })
+        const e = profilHatirlatmaEpostasi({ ad: u.ad, firma: f.kisaAd, eksikler, son: gun === gunler[gunler.length - 1] })
         await payload.sendEmail({ to: u.email, subject: e.konu, html: e.html, text: e.metin })
       }
       await islemKaydet(req, { islem: PROFIL_HATIRLATMA_ISLEMI, tur: 'kurulum', kayitTuru: 'firmalar', kayitId: f.id, ayrinti: { gun, alici: yoneticiler.length } })
@@ -95,9 +95,10 @@ export async function zamanliIsleriCalistir(payload: Payload, simdi = new Date()
       return 0
     }
   }
+  const gunler = hatirlatmaGunleri((await ayarlar(payload).catch((): null => null))?.hatirlatmaGunleri)
   const kapananIlan = await guvenli('Süre dolumu', () => suresiDolanlariKapat(payload, simdi))
-  const davetHatirlatma = hatirlatmalar ? await guvenli('Davet hatırlatmaları', () => davetHatirlatmalari(payload, simdi, hatalar)) : 0
-  const profilHatirlatma = hatirlatmalar ? await guvenli('Profil hatırlatmaları', () => profilHatirlatmalari(payload, simdi, hatalar)) : 0
+  const davetHatirlatma = hatirlatmalar ? await guvenli('Davet hatırlatmaları', () => davetHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
+  const profilHatirlatma = hatirlatmalar ? await guvenli('Profil hatırlatmaları', () => profilHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const sonuc = { kapananIlan, davetHatirlatma, profilHatirlatma, hatalar }
   await islemKaydet(await istekOlustur(payload, null), { islem: 'Zamanlanmış işler çalıştı', tur: 'ayarlar', ayrinti: sonuc }).catch((): undefined => undefined)
   return sonuc

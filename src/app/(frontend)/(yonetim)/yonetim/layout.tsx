@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { kurumKullanicisiMi } from '@/erisim'
+import { kurumKullanicisiMi, teknikSorumluMu } from '@/erisim'
 import { Alt } from '@/arayuz/Alt'
 import { YonetimMenusu } from '@/arayuz/yonetim/YonetimMenusu'
 import { cikisEylemi } from '@/eylemler/hesap'
@@ -20,6 +20,7 @@ const ROL_ADI: Record<string, string> = { yonetici: 'Yönetici', moderator: 'Mod
 export default async function YonetimDuzeni({ children }: { children: React.ReactNode }) {
   const k = await oturum()
   if (!k) redirect('/giris?donus=%2Fyonetim')
+  if (k.pasif) redirect('/cikis?pasif=kurum')
   if (!kurumKullanicisiMi(k)) redirect(rolAnaSayfasi(String(k.rol)))
   const sayilar = await yonetimSayilari()
   const kisi = `${k.ad ?? k.email} · ${ROL_ADI[String(k.rol)] ?? k.rol}`
@@ -36,7 +37,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
           </button>
         </form>
       </header>
-      <YonetimMenusu yer="sekme" sayilar={sayilar} />
+      <YonetimMenusu yer="sekme" sayilar={sayilar} teknik={teknikSorumluMu(k)} />
       <div className="y-masa">
         <nav className="y-yan" aria-label="Yönetim menüsü">
           <div className="y-logo">
@@ -45,7 +46,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
             </Link>
             <span className="y-rol">Yönetici A.Ş.</span>
           </div>
-          <YonetimMenusu yer="yan" sayilar={sayilar} />
+          <YonetimMenusu yer="yan" sayilar={sayilar} teknik={teknikSorumluMu(k)} />
           <div className="y-kisi">
             <p>{kisi}</p>
             <form action={cikisEylemi}>

@@ -3,7 +3,8 @@
  */
 import { cache } from 'react'
 import type { Davetler, Firmalar, Kullanicilar } from '@/payload-types'
-import { ASAMA_ADI, TAKIP_GUN, huniBasamagi, huniSayilari, yetkiliDurumu, type KurulumAsamasi, type YetkiliDurumu } from '@/alan/kurulum'
+import { hatirlatmaGunleri } from '@/alan/hatirlatma'
+import { ASAMA_ADI, huniBasamagi, huniSayilari, yetkiliDurumu, type KurulumAsamasi, type YetkiliDurumu } from '@/alan/kurulum'
 import { normallestir } from '@/alan/metin'
 import { payloadAl } from './payload'
 
@@ -30,9 +31,17 @@ export interface FirmaSatiri {
 }
 
 /** Bütün firmalar, kurulum bilgisiyle. Bir istekte bir kez hesaplanır. */
+export const takipEsigi = cache(async () => {
+  const payload = await payloadAl()
+  const ayar = await payload.findGlobal({ slug: 'ayarlar', overrideAccess: true })
+  const gunler = hatirlatmaGunleri(ayar.hatirlatmaGunleri)
+  return { gun: gunler[gunler.length - 1]!, hatirlatmalar: gunler }
+})
+
 export const firmaSatirlari = cache(async (): Promise<FirmaSatiri[]> => {
   const payload = await payloadAl()
   const tum = <T,>(r: { docs: T[] }) => r.docs
+  const TAKIP_GUN = (await takipEsigi()).gun // son otomatik hatırlatmadan sonra kişisel takip
   const [firmalar, uyeler, davetler, ilanlar] = await Promise.all([
     payload.find({ collection: 'firmalar', limit: 5000, pagination: false, depth: 0, overrideAccess: true, sort: 'kisaAd' }).then(tum),
     payload
@@ -97,6 +106,7 @@ export const kurulumOzeti = cache(async () => {
     yetkiliEksik: etkin.filter((f) => f.asama === 'iskelet' && f.yetkili !== 'tamam'),
     davetHazir: etkin.filter((f) => f.asama === 'iskelet' && f.yetkili === 'tamam'),
     pasif: s.length - etkin.length,
+    esik: await takipEsigi(),
   }
 })
 

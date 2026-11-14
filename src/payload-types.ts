@@ -160,6 +160,10 @@ export interface Kullanicilar {
   ikiAsamaliAcik?: boolean | null;
   totpGizli?: string | null;
   /**
+   * Gelişmiş yönetim ekranına (Payload) girebilir. Yalnızca teknik bilgisi olan kişiye verin.
+   */
+  teknikSorumlu?: boolean | null;
+  /**
    * Pasif kullanıcı giriş yapamaz. Notları ve işlem kayıtları silinmez.
    */
   pasif?: boolean | null;
@@ -777,6 +781,7 @@ export interface KullanicilarSelect<T extends boolean = true> {
   firmaYetkisi?: T;
   ikiAsamaliAcik?: T;
   totpGizli?: T;
+  teknikSorumlu?: T;
   pasif?: T;
   updatedAt?: T;
   createdAt?: T;

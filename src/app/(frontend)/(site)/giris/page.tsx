@@ -36,6 +36,11 @@ export default async function GirisSayfasi({ searchParams }: Props) {
               Hesabınız firmanızın ekibinden çıkarıldığı için oturumunuz kapatıldı. Yeniden erişim için firmanızın yöneticisine başvurun.
             </div>
           )}
+          {p.pasif === 'kurum' && (
+            <div className="uyari-kutu" role="status">
+              Hesabınız kapatıldığı için oturumunuz sonlandırıldı. Yeniden erişim için Yönetici A.Ş.’de tam yetkili bir kullanıcıya başvurun.
+            </div>
+          )}
           {p.dogrulandi === '1' && (
             <div className="basari-kutu" role="status">
               E-posta adresin doğrulandı. Şimdi giriş yapabilirsin.

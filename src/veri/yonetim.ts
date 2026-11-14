@@ -21,6 +21,7 @@ export async function yonetimOturumu(donus = '/yonetim'): Promise<Kullanici> {
   const { rolAnaSayfasi } = await import('./cerez')
   const k = await oturum()
   if (!k) redirect(`/giris?donus=${encodeURIComponent(donus)}`)
+  if (k.pasif) redirect('/cikis?pasif=kurum') // kapatılan hesabın açık kalmış oturumu
   if (!kurumKullanicisiMi(k)) redirect(rolAnaSayfasi(String(k.rol)))
   return k
 }
@@ -55,7 +56,7 @@ export function isSaati(iso: string, simdi = new Date()): number {
 export const kurumKurallari = cache(async () => {
   const payload = await payloadAl()
   const a = await payload.findGlobal({ slug: 'ayarlar', overrideAccess: true })
-  return { onayliIlanSayisi: a.onayliIlanSayisi ?? VARSAYILAN_ONAYLI_ILAN_SAYISI }
+  return { onayliIlanSayisi: a.onayliIlanSayisi ?? VARSAYILAN_ONAYLI_ILAN_SAYISI, onayHedefiIsGunu: Math.max(1, a.onayHedefiIsGunu ?? 1) }
 })
 
 export interface OnayKaydi {
@@ -92,6 +93,7 @@ export const onayKuyrugu = cache(async (): Promise<OnayKaydi[]> => {
     populate: { firmalar: { kisaAd: true, konum: true, guvenilir: true, onaylanmisIlanSayisi: true } },
   })
   const simdi = new Date()
+  const { onayHedefiIsGunu } = await kurumKurallari()
   return docs.map((i) => {
     const f = firmaNesnesi(i.firma)
     const onayli = f?.onaylanmisIlanSayisi ?? 0
@@ -102,7 +104,7 @@ export const onayKuyrugu = cache(async (): Promise<OnayKaydi[]> => {
       kacinci: onayli + 1,
       gonderim: i.updatedAt,
       bekleme: beklemeMetni(i.updatedAt, simdi),
-      gecikti: isSaati(i.updatedAt, simdi) > 24,
+      gecikti: isSaati(i.updatedAt, simdi) > 24 * onayHedefiIsGunu,
       uyari: ilanTara(TARANACAK(i)).filter((b) => b.tur === 'uyari').length,
       duzeltilmis: Boolean(i.duzeltmeGerekcesi),
     }

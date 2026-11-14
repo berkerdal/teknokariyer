@@ -18,6 +18,7 @@ export interface OturumKullanicisi {
   firma?: string | number | { id: string | number } | null
   firmaYetkisi?: FirmaYetkisi | null
   pasif?: boolean | null
+  teknikSorumlu?: boolean | null
   collection?: string
 }
 
@@ -36,14 +37,18 @@ export const firmaKimligi = (k: OturumKullanicisi | null) => (k ? kimlik(k.firma
 export const sistemIslemiMi = (req: PayloadRequest) => !req.user && req.payloadAPI === 'local'
 
 /* ---------- Rol sorguları ---------- */
-export const yoneticiMi = (k: OturumKullanicisi | null) => k?.rol === 'yonetici'
+/** Kapatılan (pasif) hesabın açık oturumu hiçbir kurum yetkisi taşımaz. */
+const etkin = (k: OturumKullanicisi | null) => Boolean(k) && !k!.pasif
+export const yoneticiMi = (k: OturumKullanicisi | null) => k?.rol === 'yonetici' && etkin(k)
 /** İlan onayı ve içerik denetimi yapabilenler (moderatör ayarları değiştiremez) */
-export const moderasyonYapabilirMi = (k: OturumKullanicisi | null) => k?.rol === 'yonetici' || k?.rol === 'moderator'
+export const moderasyonYapabilirMi = (k: OturumKullanicisi | null) => (k?.rol === 'yonetici' || k?.rol === 'moderator') && etkin(k)
 /** Yönetici A.Ş. tarafındaki herhangi bir rol (raporlayıcı yalnızca okur) */
 export const kurumKullanicisiMi = (k: OturumKullanicisi | null) =>
-  k?.rol === 'yonetici' || k?.rol === 'moderator' || k?.rol === 'raporlayici'
+  (k?.rol === 'yonetici' || k?.rol === 'moderator' || k?.rol === 'raporlayici') && etkin(k)
 /** Etkin firma kullanıcısı: ekipten çıkarılan (pasif) kullanıcı oturumu sürse bile firma verisine erişemez. */
 export const firmaKullanicisiMi = (k: OturumKullanicisi | null) => k?.rol === 'firma' && firmaKimligi(k) !== null && !k.pasif
+/** Payload'un hazır yönetim ekranına girebilen teknik sorumlu (yalnızca etkin kurum kullanıcısı). */
+export const teknikSorumluMu = (k: OturumKullanicisi | null) => kurumKullanicisiMi(k) && Boolean(k!.teknikSorumlu) && !k!.pasif
 export const adayMi = (k: OturumKullanicisi | null) => k?.rol === 'aday'
 
 /** Firma içindeki yetki (talimatlar 2: ekip üyesi verilen yetki kadar işlem yapar). */

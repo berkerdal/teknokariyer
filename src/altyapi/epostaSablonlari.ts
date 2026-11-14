@@ -314,3 +314,17 @@ export function profilHatirlatmaEpostasi(d: { ad?: string | null; firma: string;
     'siz',
   )
 }
+
+export function kurumHesabiEpostasi(d: { ad: string; rolAdi: string; acan: string; anahtar: string; gun: number }): Eposta {
+  return eposta(
+    'TeknoKariyer yönetim hesabınız açıldı',
+    [
+      `Merhaba ${d.ad},`,
+      `${d.acan}, Pamukkale Teknokent’in kariyer portalı TeknoKariyer’de size bir Yönetici A.Ş. hesabı açtı. Yetkiniz: ${d.rolAdi}.`,
+      'Hesabınızı kullanmaya başlamak için aşağıdaki bağlantıdan şifrenizi belirleyin. Ardından e-posta adresiniz ve şifrenizle giriş yapabilirsiniz.',
+    ],
+    { metin: 'Şifremi belirle', adres: `${siteAdresi()}/sifre-yenile?anahtar=${encodeURIComponent(d.anahtar)}` },
+    [`Bu bağlantı ${d.gun} gün geçerlidir. Süresi dolarsa giriş sayfasındaki “Şifremi unuttum” bağlantısını kullanın.`, 'Bu hesabı beklemiyorsanız bu e-postayı yanıtlayarak bildirin.'],
+    'siz',
+  )
+}
