@@ -33,6 +33,8 @@ export function ortakYapilandirma({
       user: 'kullanicilar',
       importMap: { baseDir: path.resolve(klasor) },
       meta: { titleSuffix: ' · TeknoKariyer yönetim' },
+      // Profil resmi dış servisten (Gravatar) çekilmez: kişisel e-posta özeti dışarı gitmez, kırık görsel olmaz.
+      avatar: 'default',
     },
     collections: koleksiyonlar,
     globals: globaller,

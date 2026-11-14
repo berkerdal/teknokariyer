@@ -208,6 +208,8 @@ Claude tarafından yapılacak.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
+  - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayından önce YÖK üniversite ve
+    bölüm listesinin içe aktarılması gerekiyor (aksi hâlde aday okulunu bulamaz).
   - **Test ortamı yayında (14.11.2026):** https://teknokariyer-test.teknokariyer.workers.dev
     - Dağıtım Cloudflare **Workers Builds** ile: `claude/funny-cerf-r7h64q` dalına her gönderim derleyip yayınlar.
       Derleme `pnpm exec opennextjs-cloudflare build`, dağıtım `pnpm exec opennextjs-cloudflare deploy`; ön izleme kapalı.
@@ -215,7 +217,12 @@ Claude tarafından yapılacak.
     - İlk göç D1 API'si üzerinden elle uygulandı (Worker içinde yarım kalmıştı, aşağıda).
     - Test yöneticisi `yonetici@kariyer.test` (şifre kullanıcıya iletildi; depoda yok). `.test` alan adı bilinçli:
       gerçek bir kişiye ait olamaz.
-    - Örnek veri `POST /yonetim-islem/ornek-veri` ile yüklendi (yalnızca yönetici, yayında kapalı).
+    - Örnek veri `POST /yonetim-islem/ornek-veri` ile yüklendi (yalnızca yönetici, yayında kapalı). curl ile çağrılırken
+      `Origin` başlığı gerekir (serverURL ayarlı olduğu için Payload çerezli istekte kaynak adresini denetler).
+    - Aday akışı canlıda tarayıcıyla uçtan uca doğrulandı (14.11.2026). Deneme hesapları, başvuru, CV ve test e-postaları
+      sonra silindi; veritabanında yalnızca yönetici ve örnek veri var.
+    - Kayıtlar (observability) açık; hatalar Cloudflare telemetri API'siyle okunabiliyor.
+    - Yönetim paneli şimdilik Payload'un hazır arayüzü; Yönetici A.Ş. paneli prototipe göre ayrıca yazılacak.
 
 **Öğrenilenler:**
 
