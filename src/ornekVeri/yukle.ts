@@ -21,6 +21,19 @@ const SEVIYE: Record<string, 'baslangic' | 'orta' | 'iyi' | 'uzman'> = { Başlan
 const EGITIM = (s: string) => (s.startsWith('Önlisans') ? 'onlisans' : s.startsWith('Yüksek') ? 'yuksek-lisans' : 'lisans')
 const GUN = 86_400_000
 
+const TEMEL_UNIVERSITELER = [
+  'Pamukkale Üniversitesi', 'Ege Üniversitesi', 'Dokuz Eylül Üniversitesi', 'İzmir Yüksek Teknoloji Enstitüsü',
+  'Muğla Sıtkı Koçman Üniversitesi', 'Afyon Kocatepe Üniversitesi', 'Uşak Üniversitesi', 'Süleyman Demirel Üniversitesi',
+  'Orta Doğu Teknik Üniversitesi', 'İstanbul Teknik Üniversitesi', 'Hacettepe Üniversitesi', 'Boğaziçi Üniversitesi',
+  'Bilkent Üniversitesi', 'Yıldız Teknik Üniversitesi', 'Anadolu Üniversitesi (Açıköğretim)',
+]
+const TEMEL_BOLUMLER = [
+  'Bilgisayar Mühendisliği', 'Yazılım Mühendisliği', 'Elektrik-Elektronik Mühendisliği', 'Makine Mühendisliği',
+  'Endüstri Mühendisliği', 'Biyomedikal Mühendisliği', 'Mekatronik Mühendisliği', 'İnşaat Mühendisliği',
+  'Tekstil Mühendisliği', 'Kimya Mühendisliği', 'Yönetim Bilişim Sistemleri', 'İstatistik', 'Matematik', 'Fizik',
+  'İşletme', 'İktisat', 'Bilgisayar Programcılığı', 'Elektronik Teknolojisi', 'Grafik Tasarım', 'Endüstriyel Tasarım',
+]
+
 interface OrnekIlan {
   firma: string
   poz: string
@@ -69,6 +82,11 @@ export async function ornekVeriYukle(payload: Payload, simdi = new Date()): Prom
     onbellek.set(anahtar, id)
     return id
   }
+
+  /* Temel listeler: başvuruda okul ve bölüm seçilebilsin. Kalıcı çözüm, Yönetici A.Ş.'nin tam YÖK listesini içe aktarması. */
+  for (const ad of TEMEL_UNIVERSITELER) await taksonomi('universite', ad)
+  for (const ad of TEMEL_BOLUMLER) await taksonomi('bolum', ad)
+  for (const ad of ['İngilizce', 'Almanca', 'Fransızca', 'Rusça', 'Arapça']) await taksonomi('dil', ad)
 
   /* Firmalar */
   const firmaId = new Map<string, number>()
