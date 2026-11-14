@@ -164,6 +164,8 @@ Claude tarafından yapılacak.
 - **K25 — Cinsiyet:** İsteğe bağlı profil alanı ("belirtmek istemiyorum" seçeneğiyle). Havuzda görünür ama arama, filtre,
   sıralama ve eşleştirmede kullanılmaz.
 - **K26 — Onay:** Prototip (29 ekran), favicon ve teknoloji önerisi onaylandı. Geliştirmeye geçildi.
+- **K27 — Hesap silme (14.11.2026):** Aday hesabını silince başvuruları firmada “aday hesabını sildi” olarak kalır;
+  ad, iletişim bilgisi ve CV hemen silinir. Hukuk birimine de danışılması önerildi.
 
 **İlerleme (13.11.2026):**
 
@@ -200,8 +202,7 @@ Claude tarafından yapılacak.
     eksikler sorulur, CV zorunlu ve yalnızca geçerli PDF), başarı sayfası ve “başvurun alındı” e-postası, aday paneli
     (başvurularım, profil ve CV’ler, CV havuzu ayarları, hesap ve gizlilik, veri indirme). Tarayıcıda uçtan uca denendi.
     - KVKK metinleri `src/metinler/` altında, sürümlü ve **taslak** (`onayli: false`); hukuk birimi onayı bekliyor.
-    - Hesap silme şimdilik kvkk@ adresine e-postayla. Silinen hesabın başvurularının firmada nasıl görüneceği kurumla
-      konuşulacak (talimatlar 12: “aday hesabını sildi”).
+    - Hesap silme şimdilik kvkk@ adresine e-postayla; K27'ye göre panelden silme yazılacak.
     - Kaydedilen ilanlar ve kayıtlı aramalar henüz yok (veri modelinde koleksiyon yok).
   - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.

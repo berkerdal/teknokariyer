@@ -188,6 +188,20 @@
           "notNull": false,
           "autoincrement": false
         },
+        "_verified": {
+          "name": "_verified",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "_verificationtoken": {
+          "name": "_verificationtoken",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "login_attempts": {
           "name": "login_attempts",
           "type": "numeric",
@@ -6684,6 +6698,6 @@
   "internal": {
     "indexes": {}
   },
-  "id": "2ab7a947-5fbe-4abe-b754-e91cdc052040",
+  "id": "2ac0cf0d-d348-4914-a5fe-87147dc4d667",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

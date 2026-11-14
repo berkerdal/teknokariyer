@@ -28,6 +28,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	\`salt\` text,
   	\`hash\` text,
   	\`reset_password_requested_at\` text,
+  	\`_verified\` integer,
+  	\`_verificationtoken\` text,
   	\`login_attempts\` numeric DEFAULT 0,
   	\`lock_until\` text,
   	FOREIGN KEY (\`firma_id\`) REFERENCES \`firmalar\`(\`id\`) ON UPDATE no action ON DELETE set null

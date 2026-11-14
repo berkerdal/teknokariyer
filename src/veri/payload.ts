@@ -11,7 +11,8 @@ export const payloadAl = () => getPayload({ config })
 
 /** Bu isteğin oturumu (Payload çerezi). Oturum yoksa null. İstek başına bir kez çözülür. */
 export const oturum = cache(async (): Promise<Kullanici | null> => {
+  const basliklar = await headers() // önce istek: derleme sırasında dinamik olduğu anlaşılır, veritabanına gidilmez
   const payload = await payloadAl()
-  const { user } = await payload.auth({ headers: await headers() })
+  const { user } = await payload.auth({ headers: basliklar })
   return (user as Kullanici | null) ?? null
 })

@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   applicationName: 'TeknoKariyer',
 }
 
+/** Tüm sayfalar veritabanına ve oturuma bağlı: derlemede önceden üretilmez. */
+export const dynamic = 'force-dynamic'
+
 export const viewport: Viewport = { themeColor: '#FFFFFF', width: 'device-width', initialScale: 1 }
 
 export default function KokDuzen({ children }: { children: React.ReactNode }) {

@@ -39,6 +39,7 @@ olursa bu bölüm geçerlidir.
 | K24 | CV havuzunda görünürlük | Aday havuza katılırken açık rıza verir. Rıza metni, Teknokent firmalarının adını, iletişim bilgisini ve CV’sini ayrıca izin istemeden görebileceğini açıkça yazar. Arama sonuç listesinde ad ve iletişim bilgisi gizlidir (anonim özet). Firma bir profili açtığında ad, iletişim bilgisi ve CV görünür; adaya ayrıca sorulmaz. Her açılış kayda geçer; aday yalnızca sayıyı görür (K5). 7. bölümdeki “iletişim talebi” akışı bu kararla kaldırılır. |
 | K25 | Cinsiyet | Aday profilinde isteğe bağlı alan; “belirtmek istemiyorum” seçeneği vardır. Havuzdaki anonim özette ve profilde görünür. Cinsiyete göre arama, filtreleme ve sıralama yapılamaz; eşleştirmede kullanılmaz (İş Kanunu md. 5, eşit davranma ilkesi). |
 | K26 | Prototip ve teknoloji önerisi | Prototip (29 ekran), favicon ve `docs/teknoloji-onerisi.md` onaylandı (13 Kasım 2026). Geliştirmeye geçildi. |
+| K27 | Hesap silme | Aday hesabını silince başvuruları firmada “aday hesabını sildi” olarak kalır; ad, iletişim bilgisi ve CV hemen silinir (14 Kasım 2026). |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 
