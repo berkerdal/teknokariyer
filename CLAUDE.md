@@ -208,11 +208,14 @@ Claude tarafından yapılacak.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
-  - **Test ortamı dağıtımı (14.11.2026):** Workers ücretli plan aktif. Bu oturumdan `wrangler deploy` statik dosya
-    yüklemesinde 401 alıyor (aşağıda). Dağıtım Cloudflare **Workers Builds** ile GitHub'dan yapılacak; kullanıcı bağlantıyı
-    kuruyor. Adres: https://teknokariyer-test.teknokariyer.workers.dev (bu oturumun ağ izinlerine eklendi).
-    Kurulumdan sonra: `PAYLOAD_SECRET` Worker gizli değişkeni API ile yazılır, ilk yönetici oluşturulur,
-    örnek veri `POST /yonetim-islem/ornek-veri` ile (yalnızca yönetici, yayında kapalı) yüklenir.
+  - **Test ortamı yayında (14.11.2026):** https://teknokariyer-test.teknokariyer.workers.dev
+    - Dağıtım Cloudflare **Workers Builds** ile: `claude/funny-cerf-r7h64q` dalına her gönderim derleyip yayınlar.
+      Derleme `pnpm exec opennextjs-cloudflare build`, dağıtım `pnpm exec opennextjs-cloudflare deploy`; ön izleme kapalı.
+    - `PAYLOAD_SECRET` Worker gizli değişkeni (API ile yazıldı; değeri hiçbir yerde yok).
+    - İlk göç D1 API'si üzerinden elle uygulandı (Worker içinde yarım kalmıştı, aşağıda).
+    - Test yöneticisi `yonetici@kariyer.test` (şifre kullanıcıya iletildi; depoda yok). `.test` alan adı bilinçli:
+      gerçek bir kişiye ait olamaz.
+    - Örnek veri `POST /yonetim-islem/ornek-veri` ile yüklendi (yalnızca yönetici, yayında kapalı).
 
 **Öğrenilenler:**
 
@@ -252,6 +255,15 @@ Claude tarafından yapılacak.
     her zaman kayıtlı API anahtarıyla değiştiriyor (yanlış anahtarla deneyip doğrulandı). Statik dosya yüklemesi ise
     yüklemeye özel kısa ömürlü bir anahtar istediği için 401 alıyor. API çağrıları (D1, R2, gizli değişken, ayar) çalışır;
     tam dağıtım Workers Builds ile yapılır.
+  - **Göçü Worker'a bırakma:** `prodMigrations` ilk istekte çalışır. Aynı anda birden çok istek gelince göç yarıda
+    kaldı (49/56 tablo, göç kaydı yok) ve her istek 500 verdi. Yeni ortamda veya şema değişikliğinde göç, trafik açılmadan
+    önce D1 API'si üzerinden sırayla uygulanmalı ve `payload_migrations` kaydı yazılmalı. Bunun için bir betik yazılacak.
+  - **Şifre özeti:** Workers PBKDF2'de en fazla 100.000 tekrar kabul eder; Payload varsayılanı 600.000.
+    `auth.passwordHashIterations: 100000`. Özet önekli (`pbkdf2-sha256-100k-v1:`), ileride artırılabilir.
+  - **Parantezli rota grupları ve statik dosyalar:** JS parçaları `/_next/static/chunks/app/(frontend)/…` altında.
+    Tarayıcı parantezi `%28` olarak ister, Cloudflare statik sunucusu bulamaz, Next aynı adrese 307 verir: sonsuz döngü,
+    sayfa etkileşimsiz. Kökteki `worker.ts` sarmalayıcısı kodlanmış adresi çözüp dosyayı doğrudan `ASSETS`'ten verir.
+    curl ile denenince görünmez (curl kodlamaz); tarayıcıyla denenmeli.
   - **Derleme:** Ön yüz `force-dynamic`; derleme veritabanına bağlanmaz ve `.env` olmadan çalışır. Oturum okuyan kod önce
     `headers()` çağırır. Aksi hâlde derleme, sayfaları önceden üretirken Payload'un göç sorusunda takılıyordu.
 - **Arayüz geliştirmesinden öğrenilenler:**
