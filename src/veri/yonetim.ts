@@ -280,5 +280,14 @@ export const basvurusuzBitenler = cache(async (): Promise<BasvurusuzIlan[]> => {
 export const yonetimSayilari = cache(async () => {
   const [onay, degisiklik, talep, tumBasvurusuz] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler()])
   const basvurusuz = tumBasvurusuz.filter((i) => !i.hatirlatildi)
-  return { onay: onay.length, degisiklik: degisiklik.length, talep: talep.length, basvurusuz: basvurusuz.length, toplam: onay.length + degisiklik.length + talep.length + basvurusuz.length }
+  const { kurulumOzeti } = await import('./firmaYonetimi')
+  const takip = (await kurulumOzeti()).takip.length
+  return {
+    onay: onay.length,
+    degisiklik: degisiklik.length,
+    talep: talep.length,
+    basvurusuz: basvurusuz.length,
+    takip,
+    toplam: onay.length + degisiklik.length + talep.length + basvurusuz.length + takip,
+  }
 })

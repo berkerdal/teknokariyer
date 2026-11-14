@@ -54,6 +54,8 @@ export const Firmalar: CollectionConfig = {
         // Kısmi güncellemede data yalnızca değişen alanları taşıyabilir; mevcut kayıtla birleştirilir.
         const v = { ...(originalDoc ?? {}), ...data }
         data.yayinaHazir = Boolean(v.logo && v.kisaTanitim?.trim() && v.sektor)
+        // Huni: devralan firma profili tamamlayınca “Profil tamam” aşamasına kendiliğinden geçer (talimatlar 0.3, 7).
+        if (v.asama === 'devralindi' && data.yayinaHazir) data.asama = 'profil-tamam'
         data.arama = aramaMetni([v.unvan, v.kisaAd, v.konum])
         return data
       },

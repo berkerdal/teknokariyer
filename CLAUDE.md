@@ -293,7 +293,23 @@ Claude tarafından yapılacak.
       neden zorunlu); her öğenin altında listede benzer adlar gösterilir (`benzerAdlar`: aynı kök “React.js”~“React”, yazım
       hatası, önek). Aynı kök varsa karar “Ekleme” ve hazır neden metniyle gelir. Panelde “esaslı alan” yerine
       “onay gerektiren alan” denir (zorunlu alanla karıştırılmasın). Yan menü sütunu alt bilgiye kesintisiz bağlanır.
-  - **Sırada:** Yönetici A.Ş. paneli Y2 (firmalar, iskelet kayıt, davet, kurulum hunisi), ardından kullanıcılar.
+  - **Yönetici A.Ş. paneli Y2 (14.11.2026):** `/yonetim/firmalar` (kare birimli kurulum hunisi, kişisel takip, yetkilisi eksik
+    firmalar ve CSV dışa aktarma, aranabilir ve aşamaya göre süzülen liste), `/yonetim/firmalar/yeni` (iskelet kayıt),
+    `/yonetim/firmalar/[id]` (Yönetici A.Ş. alanları, yetkiliye davet, davetleri yeniden gönderme ve iptal, takip notları,
+    ilanlar, son işlemler, pasif yapma), `/yonetim/firmalar/toplu-davet`.
+    - Kurallar `src/alan/kurulum.ts` (huni, genel e-posta `info@` gibi, adres adı), servis `src/servisler/firmaYonetimi.ts`,
+      veri `src/veri/firmaYonetimi.ts`. Huninin son basamağı (“İlk ilan verildi”) yayın tarihi olan ilandan hesaplanır.
+    - Kişisel takip: davetten veya devralmadan sonra 14 gün ilerleme yok (`TAKIP_GUN`). “Bugün”de ayrı kuyruk.
+    - Devralan firma profili tamamlayınca (logo, kısa tanıtım, sektör) aşama kendiliğinden “Profil tamam” olur (Firmalar kancası).
+    - Pasif firma: yayındaki, duraklatılmış ve onaydaki ilanları kapanır; geri alınınca aşama ekibe göre belirlenir.
+    - CSV dışa aktarma kişisel veri içermez (yetkili adı ve e-postası yazılmaz); indirme işlem kaydına geçer.
+  - **Payload ekranı kararı (14.11.2026, kullanıcı onayı):** Payload altyapı olarak kalır. `/admin` ekranı, kendi ekranlarımız
+    (kullanıcılar, listeler, ayarlar) tamamlanınca Kurumsal İletişim menüsünden kaldırılır ve yalnızca teknik sorumluya açık
+    ayrı bir yetkiye bağlanır.
+  - **Eksik (önemli):** Zamanlanmış işler bağlı değil. `suresiDolanlariKapat` hiçbir yerden çağrılmıyor; Worker'da
+    `scheduled` işleyicisi yok. Süresi dolan ilan, kapanma işi bağlanana kadar “yayında” kalır. Davet hatırlatmaları
+    (3., 7., 14. gün) da aynı işleyiciye bağlanacak.
+  - **Sırada:** zamanlanmış işler (süre dolumu, davet hatırlatmaları), rehberden firma içe aktarma, kullanıcılar ve listeler ekranı.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

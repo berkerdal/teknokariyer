@@ -10,13 +10,14 @@ const etkinMi = (yol: string, href: string) => (href === '/yonetim' ? yol === hr
  * Yönetici A.Ş. menüsü: masaüstünde koyu yan menü, mobilde yatay kaydırılan sekmeler (prototip “Yönetim”).
  * Sayılar bekleyen işlerdir; sayfa sunucuda her istekte hesaplar.
  */
-export function YonetimMenusu({ yer, sayilar }: { yer: 'yan' | 'sekme'; sayilar: { toplam: number; onay: number; degisiklik: number; talep: number } }) {
+export function YonetimMenusu({ yer, sayilar }: { yer: 'yan' | 'sekme'; sayilar: { toplam: number; onay: number; degisiklik: number; talep: number; takip: number } }) {
   const yol = usePathname()
   const ana: Oge[] = [
     { href: '/yonetim', ad: 'Bugün', sayi: sayilar.toplam },
     { href: '/yonetim/onay', ad: 'İlan onayı', sayi: sayilar.onay },
     { href: '/yonetim/degisiklikler', ad: 'İlan değişiklikleri', sayi: sayilar.degisiklik },
     { href: '/yonetim/talepler', ad: 'Liste talepleri', sayi: sayilar.talep },
+    { href: '/yonetim/firmalar', ad: 'Firmalar ve kurulum', sayi: sayilar.takip },
   ]
   const baglanti = (o: Oge) => (
     <Link key={o.href} href={o.href} aria-current={etkinMi(yol, o.href) ? 'page' : undefined}>

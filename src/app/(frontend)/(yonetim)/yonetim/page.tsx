@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { HatirlatDugmesi } from '@/arayuz/yonetim/Kararlar'
 import { moderasyonYapabilirMi } from '@/erisim'
+import { kurulumOzeti } from '@/veri/firmaYonetimi'
 import { basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, onayKuyrugu, yonetimOturumu, yonetimSayilari } from '@/veri/yonetim'
 
 export const metadata: Metadata = { title: 'Bugün · Yönetim' }
@@ -35,7 +36,7 @@ export default async function Bugun({ searchParams }: Props) {
   const sp = await searchParams
   const k = await yonetimOturumu()
   const karar = moderasyonYapabilirMi(k)
-  const [onay, degisiklik, talep, basvurusuz, sayilar] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), yonetimSayilari()])
+  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), yonetimSayilari(), kurulumOzeti()])
   const enEski = onay[0]
   return (
     <>
@@ -71,6 +72,10 @@ export default async function Bugun({ searchParams }: Props) {
           <li>
             <strong>Liste talepleri:</strong> Firmalar ve adaylar listede bulamadıkları beceri, bölüm veya dili buradan ister. Onayladığınız öğe listeye hemen
             eklenir.
+          </li>
+          <li>
+            <strong>Kurulumda kişisel takip:</strong> Davet gönderildikten veya hesap devralındıktan sonra 14 gün ilerlemeyen firmalar. Firmayı arayıp
+            sonucu not olarak yazın.
           </li>
           <li>
             <strong>Başvurusuz bitmek üzere:</strong> Son başvuruya 7 günden az kalmış ve hiç başvuru almamış ilanlar. Firmaya tek düğmeyle hatırlatma
@@ -126,6 +131,23 @@ export default async function Bugun({ searchParams }: Props) {
                   </span>
                 </span>
                 <span className="y-sure">{t.bekleme}</span>
+              </Link>
+            </li>
+          ))}
+        </Kuyruk>
+
+        <Kuyruk baslik="Kurulumda kişisel takip" sayi={kurulum.takip.length} bilgi="14 gündür ilerlemeyen firmalar" hedef="/yonetim/firmalar?asama=takip#liste" bos="Takip gerektiren firma yok.">
+          {kurulum.takip.slice(0, 6).map((f) => (
+            <li key={f.id}>
+              <Link href={`/yonetim/firmalar/${f.id}`}>
+                <span>
+                  <strong>{f.kisaAd}</strong>
+                  <span className="kucuk">
+                    {f.asamaAdi}
+                    {f.sonNot ? ` · son not: ${f.sonNot.not.slice(0, 60)}` : ' · not yok'}
+                  </span>
+                </span>
+                <span className="y-sure">{f.takipGun} gün</span>
               </Link>
             </li>
           ))}
