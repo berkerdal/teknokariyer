@@ -7,7 +7,7 @@ import type { Payload } from 'payload'
 import { moderasyonYapabilirMi, yoneticiMi } from '@/erisim'
 import { eksikKontroller } from '@/alan/moderasyon'
 import { kalanGun } from '@/alan/ilan'
-import { TALEP_TUR_ADI } from '@/alan/talep'
+import { TALEP_TUR_ADI, mevcutlariAyir } from '@/alan/talep'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { basvurusuzHatirlatmaEpostasi, degisiklikSonucuEpostasi, ilanDuzeltmeEpostasi, ilanOnaylandiEpostasi, talepSonucuEpostasi } from '@/altyapi/epostaSablonlari'
 import { ilanAdresi } from '@/arayuz/bicim'
@@ -73,18 +73,59 @@ export async function degisiklikKarari(payload: Payload, k: Kullanici, ilanId: n
   return { ilan, eposta }
 }
 
-export async function talepKarari(payload: Payload, k: Kullanici, talepId: number, karar: { onay: boolean; kabulEdilenler?: string[]; not?: string }) {
-  if (karar.onay && karar.kabulEdilenler && karar.kabulEdilenler.length === 0)
-    throw new FormHatasi({ kabul: 'Eklenecek en az bir öğe seçin. Hiçbirini eklemeyecekseniz talebi reddedin.' })
-  const t = await talebiSonuclandir(payload, k, talepId, karar)
+export interface OgeKarari {
+  /** Talep edilen ad */
+  ad: string
+  kabul: boolean
+  /** Kabul edilirse listeye girecek yazım (boşsa talep edilen ad) */
+  yeniAd?: string
+  /** Kabul edilmezse talep edene gidecek neden (zorunlu) */
+  neden?: string
+}
+
+/**
+ * Talebi öğe öğe sonuçlandırır: her öğe ayrı ayrı eklenir veya gerekçeyle eklenmez. Eklenecek yazım düzeltilebilir;
+ * düzeltilen yazım listede zaten varsa ekleme yerine “listede var” denmesi istenir.
+ */
+export async function talepKarari(payload: Payload, k: Kullanici, talepId: number, kararlar: OgeKarari[], genelNot = '') {
+  const t0 = await payload.findByID({ collection: 'talepler', id: talepId, depth: 0, overrideAccess: true }).catch((): null => null)
+  if (!t0) throw new IslemHatasi('Talep bulunamadı.', 404)
+  const istenen = (t0.oneriler ?? []).map((o) => o.ad)
+  const hatalar: Record<string, string> = {}
+  const { docs } = await payload.find({ collection: 'taksonomiler', where: { tur: { equals: t0.taksonomiTuru } }, select: { ad: true }, limit: 10000, pagination: false, depth: 0, overrideAccess: true })
+  const mevcut = docs.map((d) => d.ad)
+  istenen.forEach((ad, i) => {
+    const kr = kararlar.find((x) => x.ad === ad)
+    if (!kr) return void (hatalar[`oge-${i}`] = `“${ad}” için karar verin: listeye eklensin mi, eklenmesin mi?`)
+    if (kr.kabul) {
+      const yeni = (kr.yeniAd ?? '').replace(/\s+/g, ' ').trim() || ad
+      if (yeni.length < 2 || yeni.length > 80) hatalar[`ad-${i}`] = 'Eklenecek yazım 2 ile 80 karakter arasında olmalı.'
+      else if (mevcutlariAyir([yeni], mevcut).zatenVar.length)
+        hatalar[`ad-${i}`] = `“${yeni}” listede zaten var. Bu öğeyi eklemeyin; talep edene listedeki adı seçmesini yazın.`
+    } else if (!kr.neden?.trim()) hatalar[`neden-${i}`] = `“${ad}” neden eklenmiyor? Talep edene kısaca yazın.`
+  })
+  if (Object.keys(hatalar).length) throw new FormHatasi(hatalar)
+
+  const kabul = kararlar.filter((x) => x.kabul && istenen.includes(x.ad))
+  const red = kararlar.filter((x) => !x.kabul && istenen.includes(x.ad))
+  const yeniAdlar = Object.fromEntries(kabul.filter((x) => x.yeniAd?.trim() && x.yeniAd.trim() !== x.ad).map((x) => [x.ad, x.yeniAd!.replace(/\s+/g, ' ').trim()]))
+  const satirlar = [
+    genelNot.trim(),
+    ...Object.entries(yeniAdlar).map(([a, y]) => `“${a}”, “${y}” yazımıyla eklendi.`),
+    ...red.map((x) => `“${x.ad}” eklenmedi: ${x.neden!.trim()}`),
+  ].filter(Boolean)
+  const t = await talebiSonuclandir(payload, k, talepId, { onay: kabul.length > 0, kabulEdilenler: kabul.map((x) => x.ad), yeniAdlar, not: satirlar.join('\n') })
   const eklenenler = (t.oneriler ?? []).filter((o) => o.kabul).map((o) => o.ad)
-  const reddedilenler = (t.oneriler ?? []).filter((o) => !o.kabul).map((o) => o.ad)
+  const reddedilenler = red.map((x) => ({ ad: x.ad, neden: x.neden!.trim() }))
   // Sonuç işlem kaydına koleksiyon kancasında yazılır (Talepler.ts)
   const eden = await payload.findByID({ collection: 'kullanicilar', id: kimlik(t.talepEden), depth: 0, overrideAccess: true }).catch((): null => null)
   let eposta = false
   if (eden && !eden.pasif) {
     const liste = TALEP_TUR_ADI[String(t.taksonomiTuru)]?.cogul ?? 'liste'
-    const e = talepSonucuEpostasi({ ad: eden.ad, rol: eden.rol }, { liste: liste.charAt(0).toLocaleUpperCase('tr') + liste.slice(1), eklenenler, reddedilenler, not: karar.not })
+    const e = talepSonucuEpostasi(
+      { ad: eden.ad, rol: eden.rol },
+      { liste: liste.charAt(0).toLocaleUpperCase('tr') + liste.slice(1), eklenenler, reddedilenler, duzeltilenler: yeniAdlar, not: genelNot },
+    )
     eposta = await guvenliGonder(() => payload.sendEmail({ to: eden.email, subject: e.konu, html: e.html, text: e.metin }))
   }
   return { talep: t, eklenenler, reddedilenler, eposta }

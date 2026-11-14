@@ -32,13 +32,15 @@ export default async function Degisiklikler({ searchParams }: Props) {
       )}
       <ModulBilgisi kimlik="yonetim-degisiklik" baslik="Bu sayfa ne işe yarar?">
         <p>
-          Henüz güvenilir olmayan bir firma yayındaki ilanında <strong>esaslı bir alanı</strong> (pozisyon adı, ilan türü, çalışma şekli veya ücret)
-          değiştirirse değişiklik hemen yansımaz; burada onayınızı bekler. Bu sırada ilan önceki hâliyle yayında kalır.
+          Onayınızdan geçmiş bir ilan yayındayken firma ilanın niteliğini değiştirebilir. Bunu önlemek için dört alan{' '}
+          <strong>onay gerektiren alan</strong> sayılır: pozisyon adı, ilan türü, çalışma şekli ve ücret. Henüz güvenilir olmayan bir firma bu
+          alanlardan birini değiştirirse değişiklik hemen yansımaz, burada onayınızı bekler. Bu sırada ilan önceki hâliyle yayında kalır.
         </p>
         <ul>
           <li>Tabloda alanın şu anki değeri ve firmanın istediği değer yan yana görünür.</li>
           <li>Onaylarsanız değişiklik ilana yansır. Onaylamazsanız firmaya nedenini yazmanız gerekir; ilan değişmeden kalır.</li>
-          <li>Açıklama ve nitelikler gibi diğer alanlardaki değişiklikler onay beklemeden yansır.</li>
+          <li>İş tanımı ve aranan nitelikler gibi diğer alanlardaki değişiklikler onay beklemeden yansır.</li>
+          <li>Bu, ilan formundaki zorunlu alanlarla ilgili değildir. Zorunlu alanlar, ilan yayına gönderilmeden önce formda denetlenir.</li>
         </ul>
       </ModulBilgisi>
       {liste.map((d) => (

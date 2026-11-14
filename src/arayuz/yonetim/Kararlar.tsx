@@ -129,42 +129,91 @@ export function DegisiklikKarari({ ilanId }: { ilanId: number }) {
   )
 }
 
-export function TalepKarari({ talepId, ogeler }: { talepId: number; ogeler: string[] }) {
+type Benzer = { ad: string; ayni: boolean }
+
+/** Her öğe ayrı karar: listeye ekle (yazımı düzeltilebilir) veya ekleme (talep edene neden yazılır). */
+function OgeKarari({ i, ad, benzer, sen, hatalar }: { i: number; ad: string; benzer: Benzer[]; sen: boolean; hatalar: Record<string, string> }) {
+  const ayni = benzer.find((b) => b.ayni)
+  const [karar, setKarar] = useState<'ekle' | 'ekleme'>(ayni ? 'ekleme' : 'ekle')
+  const varsayilanNeden = ayni
+    ? `Listede “${ayni.ad}” olarak var; ${sen ? 'onu seçebilirsin' : 'onu seçebilirsiniz'}.`
+    : ''
+  const hata = hatalar[`oge-${i}`] ?? hatalar[`ad-${i}`] ?? hatalar[`neden-${i}`]
+  return (
+    <fieldset className={hata ? 'y-oge alan--hata' : 'y-oge'} id={`oge-${i}`}>
+      <legend>{ad}</legend>
+      <input type="hidden" name={`oge-${i}`} value={ad} />
+      {benzer.length ? (
+        <p className="y-benzer kucuk">
+          {ayni && ayni.ad.toLocaleLowerCase('tr') === ad.toLocaleLowerCase('tr')
+            ? 'Bu öğe listeye sonradan eklendi; listede zaten var: '
+            : ayni
+              ? 'Listede büyük olasılıkla aynı öğe var: '
+              : 'Listede benzer adlar var: '}
+          {benzer.map((b, n) => (
+            <span key={b.ad}>
+              {n > 0 && ', '}
+              <strong>{b.ad}</strong>
+            </span>
+          ))}
+          .
+        </p>
+      ) : (
+        <p className="kucuk ikincil">Listede benzer bir ad yok.</p>
+      )}
+      {hata && <p className="hata-metni">{hata}</p>}
+      <div className="y-oge-secim" role="radiogroup" aria-label={`${ad} için karar`}>
+        <label className="secenek">
+          <input type="radio" name={`karar-${i}`} value="ekle" checked={karar === 'ekle'} onChange={() => setKarar('ekle')} /> <span>Listeye ekle</span>
+        </label>
+        <label className="secenek">
+          <input type="radio" name={`karar-${i}`} value="ekleme" checked={karar === 'ekleme'} onChange={() => setKarar('ekleme')} /> <span>Ekleme</span>
+        </label>
+      </div>
+      {karar === 'ekle' ? (
+        <div className="alan">
+          <label htmlFor={`ad-${i}-${ad}`}>Listede görünecek yazım</label>
+          <span className="ipucu">Gerekirse yazımı düzeltin (ör. “React.JS” yerine “React.js”).</span>
+          <input id={`ad-${i}-${ad}`} name={`ad-${i}`} className="girdi" defaultValue={ad} maxLength={80} />
+        </div>
+      ) : (
+        <div className="alan">
+          <label htmlFor={`neden-${i}-${ad}`}>Talep edene neden</label>
+          <input id={`neden-${i}-${ad}`} name={`neden-${i}`} className="girdi" defaultValue={varsayilanNeden} maxLength={300} />
+        </div>
+      )}
+    </fieldset>
+  )
+}
+
+export function TalepKarari({ talepId, ogeler, benzerler, sen }: { talepId: number; ogeler: string[]; benzerler: Record<string, Benzer[]>; sen: boolean }) {
   const [durum, eylem] = useActionState<FormDurumu, FormData>(talepKarariEylemi, {})
   const id = `t-not-${talepId}`
+  const hatalar = durum.hatalar ?? {}
   return (
     <form action={eylem} className="y-karar">
       <input type="hidden" name="talep" value={talepId} />
-      {durum.genel && (
+      <input type="hidden" name="adet" value={ogeler.length} />
+      {(durum.genel || Object.keys(hatalar).length > 0) && (
         <p className="hata-metni" role="alert">
-          {durum.genel}
+          {durum.genel ?? 'Kararlar kaydedilmedi. İşaretli öğeleri düzeltin.'}
         </p>
       )}
-      <fieldset className={durum.hatalar?.kabul ? 'alan alan--hata' : 'alan'}>
-        <legend>Listeye eklenecekler</legend>
-        <span className="ipucu">Eklemek istemediğiniz öğenin işaretini kaldırın. Yazımı düzeltmek gerekirse talebi reddedip notta doğru yazımı belirtin.</span>
-        {durum.hatalar?.kabul && <p className="hata-metni">{durum.hatalar.kabul}</p>}
-        {ogeler.map((o) => (
-          <label key={o} className="secenek">
-            <input type="checkbox" name="kabul" value={o} defaultChecked /> <span>{o}</span>
-          </label>
-        ))}
-      </fieldset>
-      <div className={durum.hatalar?.not ? 'alan alan--hata' : 'alan'}>
+      {ogeler.map((o, i) => (
+        <OgeKarari key={o} i={i} ad={o} benzer={benzerler[o] ?? []} sen={sen} hatalar={hatalar} />
+      ))}
+      <div className="alan">
         <label htmlFor={id}>
-          Talep edene not <span className="istege-bagli">(reddederseniz zorunlu)</span>
+          Talep edene genel not <span className="istege-bagli">(isteğe bağlı)</span>
         </label>
-        {durum.hatalar?.not && <p className="hata-metni">{durum.hatalar.not}</p>}
         <textarea id={id} name="not" className="metin-alani" rows={2} maxLength={500} />
       </div>
       <div className="dugme-grubu">
-        <button type="submit" name="karar" value="ret" className="dugme dugme--ikincil">
-          Reddet
-        </button>
-        <button type="submit" name="karar" value="onay" className="dugme">
-          Seçilenleri ekle
-        </button>
+        <GonderDugmesi className="dugme" bekleme="Kaydediliyor…">
+          Kararları kaydet
+        </GonderDugmesi>
       </div>
+      <p className="kucuk ikincil">Eklenen öğeler listeye hemen girer. Sonuç talep edene tek e-postayla, her öğenin kararıyla birlikte bildirilir.</p>
     </form>
   )
 }

@@ -110,13 +110,39 @@ describe('esaslı değişiklik ve hatırlatma', () => {
 })
 
 describe('liste talepleri', () => {
-  it('kabul edilen öğe eklenir, talep edene sonuç e-postası gider; boş seçimle onay reddedilir', async () => {
-    const t = await taksonomiTalebiOlustur(payload, sorumlu, { tur: 'beceri', ogeler: `Gleam ${ek}\nYanlis ${ek}` })
-    await expect(talepKarari(payload, moderator, t.talep.id, { onay: true, kabulEdilenler: [] })).rejects.toBeInstanceOf(FormHatasi)
-    const s = await talepKarari(payload, moderator, t.talep.id, { onay: true, kabulEdilenler: [`Gleam ${ek}`], not: 'Yazımı düzeltildi.' })
-    expect(s.eklenenler).toEqual([`Gleam ${ek}`])
-    expect(s.reddedilenler).toEqual([`Yanlis ${ek}`])
+  it('her öğe ayrı karar alır: eklenen yazımı düzeltilebilir, eklenmeyen nedenle bildirilir', async () => {
+    await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'beceri', ad: `Gleam ${ek}` } as any })
+    const t = await taksonomiTalebiOlustur(payload, sorumlu, { tur: 'beceri', ogeler: `Zig ${ek}\nGleam.js ${ek}\nYanlis ${ek}` })
+    const id = t.talep.id
+    // karar verilmeyen öğe ve nedensiz ret alan hatasıyla döner
+    const h = await talepKarari(payload, moderator, id, [{ ad: `Zig ${ek}`, kabul: true }, { ad: `Gleam.js ${ek}`, kabul: false }]).catch((e) => e)
+    expect(h).toBeInstanceOf(FormHatasi)
+    expect(Object.keys((h as FormHatasi).alanlar).sort()).toEqual(['neden-1', 'oge-2'])
+    // düzeltilen yazım listede zaten varsa eklenmez
+    const v = await talepKarari(payload, moderator, id, [
+      { ad: `Zig ${ek}`, kabul: true, yeniAd: `gleam ${ek}` },
+      { ad: `Gleam.js ${ek}`, kabul: false, neden: 'Listede var.' },
+      { ad: `Yanlis ${ek}`, kabul: false, neden: 'Anlaşılmadı.' },
+    ]).catch((e) => e)
+    expect((v as FormHatasi).alanlar['ad-0']).toMatch(/zaten var/)
+    const s = await talepKarari(payload, moderator, id, [
+      { ad: `Zig ${ek}`, kabul: true, yeniAd: `Zig Dili ${ek}` },
+      { ad: `Gleam.js ${ek}`, kabul: false, neden: `Listede “Gleam ${ek}” olarak var; onu seçebilirsiniz.` },
+      { ad: `Yanlis ${ek}`, kabul: false, neden: 'Bu bir beceri adı değil.' },
+    ])
+    expect(s.eklenenler).toEqual([`Zig Dili ${ek}`])
+    expect(s.talep.durum).toBe('kismen')
     expect(s.eposta).toBe(true)
-    expect(await postalar(`ms-${ek}`)).toContain('Talebiniz sonuçlandı: 1 öğe eklendi')
+    const liste = await payload.find({ collection: 'taksonomiler', where: { ad: { equals: `Zig Dili ${ek}` } }, overrideAccess: true })
+    expect(liste.docs).toHaveLength(1)
+    const posta = await payload.find({ collection: 'test-postalar', where: { kime: { contains: `ms-${ek}` } }, overrideAccess: true, sort: '-createdAt', limit: 1 })
+    expect(JSON.stringify(posta.docs[0])).toMatch(/Gleam\.js .*eklenmedi/)
+  })
+
+  it('hiçbiri eklenmezse talep reddedilmiş olur', async () => {
+    const t = await taksonomiTalebiOlustur(payload, sorumlu, { tur: 'beceri', ogeler: `Bilinmez ${ek}` })
+    const s = await talepKarari(payload, moderator, t.talep.id, [{ ad: `Bilinmez ${ek}`, kabul: false, neden: 'Anlaşılmadı.' }])
+    expect(s.talep.durum).toBe('reddedildi')
+    expect(s.eklenenler).toEqual([])
   })
 })

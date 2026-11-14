@@ -289,6 +289,10 @@ Claude tarafından yapılacak.
       `yonetici` ve `ilan-sorumlusu` kullanıcılarına gider (`src/servisler/bildirim.ts`). E-posta gitmezse karar geçerli
       kalır, sayfada uyarı çıkar. Başvurusuz ilan hatırlatması ilan başına bir kez.
     - Raporlayıcı rolü paneli görür ama karar düğmelerini görmez.
+    - **Geri bildirim (14.11.2026):** Liste talebinde her öğe ayrı karar alır (ekle, yazımı düzeltilebilir / ekleme,
+      neden zorunlu); her öğenin altında listede benzer adlar gösterilir (`benzerAdlar`: aynı kök “React.js”~“React”, yazım
+      hatası, önek). Aynı kök varsa karar “Ekleme” ve hazır neden metniyle gelir. Panelde “esaslı alan” yerine
+      “onay gerektiren alan” denir (zorunlu alanla karıştırılmasın). Yan menü sütunu alt bilgiye kesintisiz bağlanır.
   - **Sırada:** Yönetici A.Ş. paneli Y2 (firmalar, iskelet kayıt, davet, kurulum hunisi), ardından kullanıcılar.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

@@ -243,15 +243,18 @@ export function degisiklikSonucuEpostasi(i: { pozisyonAdi: string; id: number; o
   )
 }
 
-export function talepSonucuEpostasi(k: Hitap, t: { liste: string; eklenenler: string[]; reddedilenler: string[]; not?: string }): Eposta {
+export function talepSonucuEpostasi(
+  k: Hitap,
+  t: { liste: string; eklenenler: string[]; reddedilenler: Array<{ ad: string; neden: string }>; duzeltilenler?: Record<string, string>; not?: string },
+): Eposta {
   const siz = !sen(k)
-  const selam = `Merhaba ${k.ad ?? ''},`.trim()
-  const paragraf = [selam]
+  const paragraf = [`Merhaba ${k.ad ?? ''},`.trim()]
   if (t.eklenenler.length)
     paragraf.push(
       `${t.liste} listesine eklenmesini ${siz ? 'istediğiniz' : 'istediğin'} şu öğeler eklendi: ${t.eklenenler.join(', ')}. Artık ${siz ? 'seçebilirsiniz' : 'seçebilirsin'}.`,
     )
-  if (t.reddedilenler.length) paragraf.push(`Şu öğeler listeye eklenmedi: ${t.reddedilenler.join(', ')}.`)
+  for (const [a, y] of Object.entries(t.duzeltilenler ?? {})) paragraf.push(`“${a}” listeye “${y}” yazımıyla eklendi.`)
+  for (const r of t.reddedilenler) paragraf.push(`“${r.ad}” listeye eklenmedi. ${r.neden}`)
   if (t.not?.trim()) paragraf.push(`Yönetici A.Ş.’nin notu: ${t.not.trim()}`)
   return eposta(
     `${siz ? 'Talebiniz' : 'Talebin'} sonuçlandı${t.eklenenler.length ? `: ${t.eklenenler.length} öğe eklendi` : ''}`,

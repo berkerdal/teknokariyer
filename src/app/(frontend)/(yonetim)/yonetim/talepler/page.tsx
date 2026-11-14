@@ -6,7 +6,7 @@ import { bekleyenTalepler, yonetimOturumu } from '@/veri/yonetim'
 
 export const metadata: Metadata = { title: 'Liste talepleri · Yönetim' }
 
-type Props = { searchParams: Promise<{ sonuc?: string; eklenen?: string; eposta?: string }> }
+type Props = { searchParams: Promise<{ sonuc?: string; eklenen?: string; eklenmeyen?: string; eposta?: string }> }
 
 const buyukHarf = (s: string) => s.charAt(0).toLocaleUpperCase('tr') + s.slice(1)
 
@@ -25,9 +25,8 @@ export default async function Talepler({ searchParams }: Props) {
       {sp.sonuc && (
         <div role="status">
           <p className="basari-kutu">
-            {sp.sonuc === 'onay'
-              ? `Talep onaylandı. Listeye eklenenler: ${sp.eklenen || 'yok'}. Bu öğeler hemen seçilebilir.`
-              : 'Talep reddedildi ve talep edene notunuz iletildi.'}
+            {sp.eklenen ? `Listeye eklendi: ${sp.eklenen}. Bu öğeler hemen seçilebilir.` : 'Listeye öğe eklenmedi.'}
+            {sp.eklenmeyen ? ` Eklenmedi: ${sp.eklenmeyen}.` : ''} Sonuç talep edene bildirildi.
           </p>
           {sp.eposta === '0' && <p className="uyari-kutu">Karar kaydedildi ancak talep edene e-posta gönderilemedi.</p>}
         </div>
@@ -38,9 +37,13 @@ export default async function Talepler({ searchParams }: Props) {
           bulamazsa buradan eklenmesini ister. Bütün talepler bu tek sayfada toplanır.
         </p>
         <ul>
-          <li>Eklemek istediğiniz öğeleri işaretli bırakın ve “Seçilenleri ekle” düğmesine basın. Öğeler listeye hemen eklenir.</li>
-          <li>Talep edene sonuç e-postayla bildirilir. Reddederken nedenini yazmanız gerekir.</li>
-          <li>Aynı şeyin farklı yazımlarını (ör. “React.js” ve “React”) eklemeyin; filtre ve eşleştirme ortak adlara dayanır.</li>
+          <li>Bir talepte birden fazla öğe olabilir. Her öğe için ayrı karar verirsiniz: “Listeye ekle” veya “Ekleme”.</li>
+          <li>
+            Her öğenin altında listede benzer adlar varsa gösterilir. Örneğin “React.js” istenmişse ve listede “React” varsa, ikisi aynı şeydir; eklemeyin,
+            talep edene listedeki adı seçmesini yazın. Bu durumda karar kendiliğinden “Ekleme” gelir ve neden metni hazır yazılır.
+          </li>
+          <li>Eklerken yazımı düzeltebilirsiniz. Eklemediğiniz her öğe için kısa bir neden yazmanız gerekir; talep eden bu nedeni e-postada görür.</li>
+          <li>Aynı şeyin farklı yazımlarını eklemeyin; filtre ve eşleştirme ortak adlara dayanır.</li>
         </ul>
       </ModulBilgisi>
       {liste.map((t) => (
@@ -72,7 +75,7 @@ export default async function Talepler({ searchParams }: Props) {
                 </div>
               )}
             </dl>
-            {karar && <TalepKarari talepId={t.id} ogeler={t.ogeler} />}
+            {karar && <TalepKarari talepId={t.id} ogeler={t.ogeler} benzerler={t.benzerler} sen={t.sen} />}
           </div>
         </section>
       ))}

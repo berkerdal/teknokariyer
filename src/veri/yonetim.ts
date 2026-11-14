@@ -9,7 +9,7 @@ import { ilanTara, type TaramaBulgusu } from '@/alan/moderasyon'
 import { kalanGun, VARSAYILAN_ONAYLI_ILAN_SAYISI } from '@/alan/ilan'
 import { ESASLI_ALANLAR, ESASLI_ALAN_ADI, type EsasliAlan } from '@/alan/ilan'
 import { yaz } from '@/alan/ilanGecmisi'
-import { TALEP_TUR_ADI } from '@/alan/talep'
+import { TALEP_TUR_ADI, benzerAdlar, talepKaynagi, type BenzerAd } from '@/alan/talep'
 import { tarihYaz } from '@/arayuz/bicim'
 import type { BekleyenDegisiklik } from '@/servisler/ilanFormu'
 import type { Kullanici } from '@/servisler/ortak'
@@ -182,7 +182,11 @@ export interface TalepKaydi {
   kaynak?: string | null
   isteyen: string
   isteyenTuru: string
+  /** Talep edene “sen” mi “siz” mi denir (aday: sen) */
+  sen: boolean
   bekleme: string
+  /** Her öğe için listede benzer adlar */
+  benzerler: Record<string, BenzerAd[]>
 }
 
 export const bekleyenTalepler = cache(async (): Promise<TalepKaydi[]> => {
@@ -197,6 +201,11 @@ export const bekleyenTalepler = cache(async (): Promise<TalepKaydi[]> => {
     populate: { kullanicilar: { ad: true, rol: true, unvan: true }, firmalar: { kisaAd: true } },
   })
   const simdi = new Date()
+  const turler = [...new Set(docs.map((t) => t.taksonomiTuru))]
+  const liste = turler.length
+    ? await payload.find({ collection: 'taksonomiler', where: { tur: { in: turler } }, select: { ad: true, tur: true }, limit: 20000, pagination: false, depth: 0, overrideAccess: true })
+    : { docs: [] as Array<{ ad: string; tur: string }> }
+  const adlar = (tur: string) => liste.docs.filter((d) => d.tur === tur).map((d) => d.ad)
   return docs.map((t: Talepler) => {
     const eden = t.talepEden && typeof t.talepEden === 'object' ? t.talepEden : null
     const firma = firmaNesnesi(t.firma)
@@ -207,11 +216,13 @@ export const bekleyenTalepler = cache(async (): Promise<TalepKaydi[]> => {
       turAdi: TALEP_TUR_ADI[t.taksonomiTuru]?.tekil ?? t.taksonomiTuru,
       ogeler: (t.oneriler ?? []).map((o) => o.ad),
       aciklama: t.aciklama,
-      kaynak: t.kaynak,
+      kaynak: talepKaynagi(t.kaynak),
       // Aday talebinde ad gösterilmez: karar için gerekmez (veri en aza indirme)
       isteyen: eden?.rol === 'aday' ? 'Bir aday' : (eden?.ad ?? 'Bilinmeyen kullanıcı'),
       isteyenTuru,
+      sen: eden?.rol === 'aday',
       bekleme: beklemeMetni(t.createdAt, simdi),
+      benzerler: Object.fromEntries((t.oneriler ?? []).map((o) => [o.ad, benzerAdlar(o.ad, adlar(t.taksonomiTuru))])),
     }
   })
 })

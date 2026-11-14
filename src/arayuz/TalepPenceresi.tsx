@@ -7,7 +7,7 @@
 import { useActionState, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { talepEylemi } from '@/eylemler/talep'
-import { TALEP_TUR_ADI } from '@/alan/talep'
+import { TALEP_EN_FAZLA_OGE, TALEP_TUR_ADI } from '@/alan/talep'
 import { GonderDugmesi, type FormDurumu } from './form'
 import { Ikon } from './Ikon'
 
@@ -47,7 +47,9 @@ export function TalepPenceresi(p: {
       ? `Aradığınız ${ad.tekil} listede yoksa Yönetici A.Ş.’den eklenmesini isteyebilirsiniz. Adınız ve firmanız talebe otomatik eklenir; ayrıca bilgi vermenize gerek yoktur.`
       : `Aradığın ${ad.tekil} listede yoksa Yönetici A.Ş.’den eklenmesini isteyebilirsin. Adın ve e-posta adresin talebe otomatik eklenir.`,
     alan: `Eklenmesini ${siz ? 'istediğiniz' : 'istediğin'} ${ad.cogul}`,
-    ipucu: `Her satıra bir ${ad.tekil} yazın. Yazımı resmî ve açık olsun: “Gömülü Linux”, “Yapay Zekâ Mühendisliği”.`.replace('yazın', siz ? 'yazın' : 'yaz'),
+    ipucu: siz
+      ? `Tek talepte en fazla ${TALEP_EN_FAZLA_OGE} ${ad.tekil} isteyebilirsiniz; her satıra bir tane yazın. Yazımı resmî ve açık olsun: “Gömülü Linux”, “Yapay Zekâ Mühendisliği”. Yönetici A.Ş. her birini ayrı değerlendirir.`
+      : `Tek talepte en fazla ${TALEP_EN_FAZLA_OGE} ${ad.tekil} isteyebilirsin; her satıra bir tane yaz. Yazımı resmî ve açık olsun: “Gömülü Linux”, “Yapay Zekâ Mühendisliği”. Yönetici A.Ş. her birini ayrı değerlendirir.`,
   }
 
   return (

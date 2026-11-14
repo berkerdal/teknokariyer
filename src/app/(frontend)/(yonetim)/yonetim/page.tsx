@@ -65,7 +65,8 @@ export default async function Bugun({ searchParams }: Props) {
             kırmızı çizgiyle öne çıkar.
           </li>
           <li>
-            <strong>İlan değişiklikleri:</strong> Yayındaki ilanda pozisyon adı, ilan türü veya ücret değişirse değişiklik sizin onayınızla yansır.
+            <strong>İlan değişiklikleri:</strong> Yayındaki ilanda pozisyon adı, ilan türü, çalışma şekli veya ücret değişirse değişiklik sizin
+            onayınızla yansır.
           </li>
           <li>
             <strong>Liste talepleri:</strong> Firmalar ve adaylar listede bulamadıkları beceri, bölüm veya dili buradan ister. Onayladığınız öğe listeye hemen
@@ -98,7 +99,7 @@ export default async function Bugun({ searchParams }: Props) {
           ))}
         </Kuyruk>
 
-        <Kuyruk baslik="İlan değişiklikleri" sayi={degisiklik.length} bilgi="Yayındaki ilanda esaslı değişiklik" hedef="/yonetim/degisiklikler" bos="Onay bekleyen değişiklik yok.">
+        <Kuyruk baslik="İlan değişiklikleri" sayi={degisiklik.length} bilgi="Yayındaki ilanda onay gerektiren değişiklik" hedef="/yonetim/degisiklikler" bos="Onay bekleyen değişiklik yok.">
           {degisiklik.slice(0, 6).map((d) => (
             <li key={d.id}>
               <Link href={`/yonetim/degisiklikler#d-${d.id}`}>

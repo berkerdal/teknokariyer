@@ -6,7 +6,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { FormDurumu } from '@/arayuz/form'
-import { basvurusuzHatirlat, degisiklikKarari, ilanDuzeltmeIste, ilanOnayla, talepKarari } from '@/servisler/moderasyon'
+import { basvurusuzHatirlat, degisiklikKarari, ilanDuzeltmeIste, ilanOnayla, talepKarari, type OgeKarari } from '@/servisler/moderasyon'
 import { FormHatasi, IslemHatasi } from '@/servisler/ortak'
 import { yonetimOturumu } from '@/veri/yonetim'
 import { payloadAl } from '@/veri/payload'
@@ -61,13 +61,20 @@ export async function degisiklikKarariEylemi(_: FormDurumu, f: FormData): Promis
 export async function talepKarariEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
   const k = await yonetimOturumu()
   const talepId = Number(metin(f, 'talep'))
-  const onay = metin(f, 'karar') === 'onay'
+  const adet = Math.min(Number(metin(f, 'adet')) || 0, 20)
+  const kararlar: OgeKarari[] = []
+  for (let i = 0; i < adet; i++) {
+    const karar = metin(f, `karar-${i}`)
+    if (karar !== 'ekle' && karar !== 'ekleme') continue // karar verilmemiş öğe serviste hata olarak döner
+    kararlar.push({ ad: metin(f, `oge-${i}`), kabul: karar === 'ekle', yeniAd: metin(f, `ad-${i}`), neden: metin(f, `neden-${i}`) })
+  }
   let hedef: string
   try {
-    const s = await talepKarari(await payloadAl(), k, talepId, { onay, kabulEdilenler: onay ? f.getAll('kabul').map(String) : undefined, not: metin(f, 'not') })
+    const s = await talepKarari(await payloadAl(), k, talepId, kararlar, metin(f, 'not'))
     hedef = sonuc('/yonetim/talepler', {
-      sonuc: onay ? 'onay' : 'ret',
+      sonuc: 'tamam',
       eklenen: s.eklenenler.join(', '),
+      eklenmeyen: s.reddedilenler.map((r) => r.ad).join(', '),
       eposta: s.eposta ? '1' : '0',
     })
   } catch (e) {

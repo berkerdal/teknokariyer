@@ -383,7 +383,13 @@ dialog.alt-panel:not([open]) { display: none; }
 .y-karar .secenek { align-items: flex-start; }
 .y-onay-karar .eslesme { margin: 0; }
 .y-talep { display: grid; gap: 12px; }
-.y-talep fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
-.y-talep legend { font-weight: 600; margin-bottom: 4px; }
 .y-panel-bas h2 { margin: 0; }
 .y-onay-ilan .il-bas { display: flex; gap: 12px; align-items: center; }
+.y-oge { border: 1px solid var(--cizgi); border-radius: var(--kose-kontrol); padding: 10px 14px 14px; margin: 0; display: grid; gap: 8px; }
+.y-oge legend { font-weight: 700; font-size: 17px; padding: 0 6px; margin-left: -6px; }
+.y-oge .alan { margin: 0; }
+.y-oge.alan--hata { border-color: var(--hata); }
+.y-oge-secim { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.y-benzer { background: var(--uyari-zemin); border-left: 3px solid var(--uyari); padding: 6px 10px; margin: 0; }
+/* Yan menünün koyu sütunu alt bilgiye kesintisiz bağlanır */
+.y-masa + .a-alt { margin-top: 0; }

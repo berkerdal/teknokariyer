@@ -44,14 +44,17 @@ export async function talebiSonuclandir(
   payload: Payload,
   k: Kullanici,
   talepId: number,
-  karar: { onay: boolean; kabulEdilenler?: string[]; not?: string },
+  karar: { onay: boolean; kabulEdilenler?: string[]; not?: string; /** Kabul edilen öğenin listeye girecek yazımı (talep edilen ad → yeni ad) */ yeniAdlar?: Record<string, string> },
 ) {
   if (!moderasyonYapabilirMi(k)) throw new IslemHatasi('Talepleri yalnızca Yönetici A.Ş. sonuçlandırır.', 403)
   const t = await payload.findByID({ collection: 'talepler', id: talepId, depth: 0, overrideAccess: true })
   if (t.durum !== 'bekliyor') throw new IslemHatasi('Bu talep daha önce sonuçlandırıldı.', 409)
   if (!karar.onay && !karar.not?.trim()) throw new FormHatasi({ not: 'Talep edene neden reddettiğinizi yazın.' })
   const kabul = karar.kabulEdilenler
-  const oneriler = (t.oneriler ?? []).map((o) => ({ ad: o.ad, kabul: karar.onay && (!kabul || kabul.includes(o.ad)) }))
+  const oneriler = (t.oneriler ?? []).map((o) => {
+    const k = karar.onay && (!kabul || kabul.includes(o.ad))
+    return { ad: (k && karar.yeniAdlar?.[o.ad]?.trim()) || o.ad, kabul: k }
+  })
   const hepsi = oneriler.every((o) => o.kabul)
   const req = await istekOlustur(payload, k)
   return payload.update({
