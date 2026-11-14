@@ -113,7 +113,7 @@ describe('ilan formu servisi', () => {
     expect(kopya.yanHaklar?.[0]?.ad).toBe('Yemek kartı')
     expect(kopya.onElemeSorulari).toHaveLength(1)
     await taslakSil(payload, firma, kopya.id)
-    expect(await payload.findByID({ collection: 'ilanlar', id: kopya.id, overrideAccess: true }).catch(() => null)).toBeNull()
+    expect(await payload.findByID({ collection: 'ilanlar', id: kopya.id, overrideAccess: true }).catch((): null => null)).toBeNull()
     await yayinaGonder(payload, firma, ilan.id)
     await expect(taslakSil(payload, firma, ilan.id)).rejects.toThrow(/silinemez/)
     await expect(taslakSil(payload, diger, ilan.id)).rejects.toThrow(/yetkiniz yok/)
