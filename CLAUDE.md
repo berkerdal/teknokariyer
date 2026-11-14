@@ -276,7 +276,20 @@ Claude tarafından yapılacak.
       referansına dönüşür). Ortak sabitler saf modülde durur (`src/alan/ekip.ts`).
     - Öğrenilen: işlem sonrası satırı başka listeye taşınan bileşenin bildirimi kaybolur; sonuç sayfa düzeyinde
       (`?sonuc=`) gösterilir.
-  - **Sırada:** Yönetici A.Ş. paneli (ilan onayı, bekleyen değişiklik onayı, talepler, firma kurulumu ve davet, kullanıcılar).
+  - **Yönetici A.Ş. paneli Y1 (14.11.2026):** `/yonetim` (Payload'un `/admin` paneli “Gelişmiş yönetim ekranı” olarak
+    duruyor). Kurum rolleri girişte buraya gelir (`rolAnaSayfasi`). Koyu yan menü masaüstünde, sekmeler mobilde.
+    - **Bugün:** iş listesi (ilan onayı, ilan değişiklikleri, liste talepleri, başvurusuz bitmek üzere). Henüz modeli
+      olmayan kuyruklar (KVKK, şikâyet, firma hesap talebi) sahte veriyle gösterilmez.
+    - **İlan onayı:** adayın göreceği gövde (`IlanGovdesi`, firma önizlemesiyle ortak), otomatik tarama
+      (`src/alan/moderasyon.ts` → `ilanTara`), kontrol listesi (`KONTROL_LISTESI`, onay için hepsi işaretli olmalı; sunucuda
+      da denetlenir), hazır gerekçeyle düzeltme isteği, güvenilir firma işareti (yalnızca rol `yonetici`). Hedef 1 iş günü;
+      hafta sonu sayılmaz (`isSaati`). Gönderim anı olarak ilanın son güncellemesi kullanılır.
+    - **İlan değişiklikleri** (şu an / istenen tablosu) ve **liste talepleri** (öğe öğe kabul) tek sayfada.
+    - Kararlar `src/servisler/moderasyon.ts` üzerinden: işlem kaydı + e-posta. Firma bildirimleri yalnızca firmanın etkin
+      `yonetici` ve `ilan-sorumlusu` kullanıcılarına gider (`src/servisler/bildirim.ts`). E-posta gitmezse karar geçerli
+      kalır, sayfada uyarı çıkar. Başvurusuz ilan hatırlatması ilan başına bir kez.
+    - Raporlayıcı rolü paneli görür ama karar düğmelerini görmez.
+  - **Sırada:** Yönetici A.Ş. paneli Y2 (firmalar, iskelet kayıt, davet, kurulum hunisi), ardından kullanıcılar.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

@@ -352,3 +352,38 @@ dialog.alt-panel:not([open]) { display: none; }
 .ekip-listesi .etiket { margin-left: 8px; }
 .ekip-islemleri, .yetki-formu { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .tehlike-metin { color: var(--hata); }
+
+/* ---------- Yönetici A.Ş. paneli ---------- */
+/* Prototip cihaza göre ayrı işaretleme çiziyordu; uygulamada iki menü birlikte çizilir, medya sorgusu seçer. */
+.y-masa { min-height: calc(100dvh - 52px); }
+.y-yan .ust-logo { display: block; }
+.y-kisi p { margin: 0 0 6px; }
+.y-cikis { color: var(--gece-metin); padding-inline: 8px; }
+.y-cikis:hover { background: var(--gece-2); color: #FFFFFF; }
+.y-ust .y-cikis { color: #FFFFFF; }
+.y-ust .ust-logo { display: block; }
+@media (max-width: 899px) {
+  .y-masa { display: block; min-height: 0; }
+  .y-yan { display: none; }
+  .y-icerik { padding: 16px; }
+  .y-sekmeler { position: sticky; top: 52px; z-index: 24; }
+}
+@media (min-width: 900px) {
+  .y-ust, .y-sekmeler { display: none; }
+  /* Menü sütununun koyu zemini içerik uzadıkça devam eder; menünün kendisi ekrana yapışık kalır. */
+  .y-masa { background: linear-gradient(to right, var(--gece) 232px, transparent 232px); }
+  .y-yan { height: 100dvh; overflow-y: auto; align-self: start; }
+}
+.y-sekmeler .y-sayi { margin-left: 2px; }
+.y-bos { padding: 12px 14px; margin: 0; }
+.y-kuyruk ul { list-style: none; margin: 0; padding: 0; }
+.y-eylemli { flex-wrap: wrap; }
+.y-hatirlat { display: grid; gap: 4px; justify-items: end; }
+.y-karar-formu { display: grid; gap: 12px; }
+.y-karar .secenek { align-items: flex-start; }
+.y-onay-karar .eslesme { margin: 0; }
+.y-talep { display: grid; gap: 12px; }
+.y-talep fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+.y-talep legend { font-weight: 600; margin-bottom: 4px; }
+.y-panel-bas h2 { margin: 0; }
+.y-onay-ilan .il-bas { display: flex; gap: 12px; align-items: center; }

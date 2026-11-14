@@ -71,7 +71,8 @@ function sade(x: unknown): unknown {
   return x ?? null
 }
 
-function yaz(alan: string, d: unknown, tarihYaz: (iso: string) => string): string {
+/** Alan değerinin okunur hâli (seçenek adları, evet/hayır, tutar, tarih). */
+export function yaz(alan: string, d: unknown, tarihYaz: (iso: string) => string = (s) => s.slice(0, 10)): string {
   if (d === null || d === undefined || d === '') return 'boş'
   if (SECENEK_ADI[alan]) return SECENEK_ADI[alan]![String(d)] ?? String(d)
   if (typeof d === 'boolean') return d ? 'evet' : 'hayır'

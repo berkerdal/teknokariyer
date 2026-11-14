@@ -208,3 +208,71 @@ export function davetEpostasi(d: { ad: string; firma: string; davetEden: string;
     'siz',
   )
 }
+
+/* ---------- Yönetici A.Ş. kararları: firmaya ve talep edene bildirim (siz) ---------- */
+
+export function ilanOnaylandiEpostasi(i: { pozisyonAdi: string; id: number; adres: string }): Eposta {
+  return eposta(
+    `İlanınız yayına girdi: ${i.pozisyonAdi}`,
+    ['Merhaba,', `“${i.pozisyonAdi}” ilanınız Yönetici A.Ş. tarafından onaylandı ve yayına girdi. Adaylar artık ilanınızı görüp başvurabilir.`],
+    { metin: 'İlanı görüntüle', adres: `${siteAdresi()}${i.adres}` },
+    ['Başvurular geldikçe firma panelinizin “Başvurular” sayfasında listelenir.'],
+    'siz',
+  )
+}
+
+export function ilanDuzeltmeEpostasi(i: { pozisyonAdi: string; id: number; gerekce: string }): Eposta {
+  return eposta(
+    `İlanınızda düzeltme istendi: ${i.pozisyonAdi}`,
+    ['Merhaba,', `Yönetici A.Ş., “${i.pozisyonAdi}” ilanınızı yayınlamadan önce bir düzeltme istedi.`, `Yönetici A.Ş.’nin notu: ${i.gerekce}`, 'İlanı düzelttikten sonra yeniden yayına gönderin; düzeltilen ilanlar öncelikle incelenir.'],
+    { metin: 'İlanı düzelt', adres: `${siteAdresi()}/firma-paneli/ilanlar/${i.id}` },
+    [],
+    'siz',
+  )
+}
+
+export function degisiklikSonucuEpostasi(i: { pozisyonAdi: string; id: number; onay: boolean; gerekce?: string }): Eposta {
+  return eposta(
+    i.onay ? `İlan değişikliğiniz onaylandı: ${i.pozisyonAdi}` : `İlan değişikliğiniz onaylanmadı: ${i.pozisyonAdi}`,
+    i.onay
+      ? ['Merhaba,', `“${i.pozisyonAdi}” ilanınızda istediğiniz değişiklik onaylandı ve yayındaki ilana yansıdı.`]
+      : ['Merhaba,', `“${i.pozisyonAdi}” ilanınızda istediğiniz değişiklik onaylanmadı. İlan önceki hâliyle yayında kalıyor.`, `Yönetici A.Ş.’nin notu: ${i.gerekce ?? ''}`],
+    { metin: 'İlanı aç', adres: `${siteAdresi()}/firma-paneli/ilanlar/${i.id}` },
+    [],
+    'siz',
+  )
+}
+
+export function talepSonucuEpostasi(k: Hitap, t: { liste: string; eklenenler: string[]; reddedilenler: string[]; not?: string }): Eposta {
+  const siz = !sen(k)
+  const selam = `Merhaba ${k.ad ?? ''},`.trim()
+  const paragraf = [selam]
+  if (t.eklenenler.length)
+    paragraf.push(
+      `${t.liste} listesine eklenmesini ${siz ? 'istediğiniz' : 'istediğin'} şu öğeler eklendi: ${t.eklenenler.join(', ')}. Artık ${siz ? 'seçebilirsiniz' : 'seçebilirsin'}.`,
+    )
+  if (t.reddedilenler.length) paragraf.push(`Şu öğeler listeye eklenmedi: ${t.reddedilenler.join(', ')}.`)
+  if (t.not?.trim()) paragraf.push(`Yönetici A.Ş.’nin notu: ${t.not.trim()}`)
+  return eposta(
+    `${siz ? 'Talebiniz' : 'Talebin'} sonuçlandı${t.eklenenler.length ? `: ${t.eklenenler.length} öğe eklendi` : ''}`,
+    paragraf,
+    undefined,
+    [],
+    siz ? 'siz' : 'sen',
+  )
+}
+
+export function basvurusuzHatirlatmaEpostasi(i: { pozisyonAdi: string; id: number; kalan: number }): Eposta {
+  const sure = i.kalan === 0 ? 'bugün sona eriyor' : `${i.kalan} gün sonra sona eriyor`
+  return eposta(
+    `İlanınız henüz başvuru almadı: ${i.pozisyonAdi}`,
+    [
+      'Merhaba,',
+      `“${i.pozisyonAdi}” ilanınızın başvuru süresi ${sure} ve ilan henüz başvuru almadı.`,
+      'Daha fazla adaya ulaşmak için ilanı LinkedIn’de paylaşabilir, aranan nitelikleri gözden geçirebilir veya son başvuru tarihini uzatabilirsiniz. CV havuzunda ilanınıza uygun adayları da arayabilirsiniz.',
+    ],
+    { metin: 'İlanı aç', adres: `${siteAdresi()}/firma-paneli/ilanlar?durum=yayinda#ilan-${i.id}` },
+    ['Bu hatırlatmayı Yönetici A.Ş. gönderdi. Yardım isterseniz bu e-postayı yanıtlayabilirsiniz.'],
+    'siz',
+  )
+}
