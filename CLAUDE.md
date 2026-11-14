@@ -167,6 +167,11 @@ Claude tarafından yapılacak.
 - **K27 — Hesap silme (14.11.2026):** Aday hesabını silince başvuruları firmada “aday hesabını sildi” olarak kalır;
   ad, iletişim bilgisi ve CV hemen silinir. Hukuk birimine de danışılması önerildi.
 
+- **K31 — Yönetici özeti ve raporlama (14.11.2026):** Yönetici A.Ş. paneline grafikli, canlı güncellenen “Yönetici özeti”
+  (bütün ilanlar ve başvuru sayıları dahil) ve rapor merkezi (Excel + PDF). Tasarım: `docs/raporlama.md`.
+  Power BI yalnızca görünüm örneğiydi (dış besleme yok); aylık otomatik rapor e-postası yok; firma panelinde firma raporu var;
+  kurum şablonu yok, önerilen gösterge seti kullanılır. Raporlar kişisel veri içermez; 5'ten küçük gruplar gizlenir.
+
 **Kullanıcının ilk test geri bildirimi (14.11.2026; talimatlar K28–K30):**
 
 - **K28 — Profil:** Okunur özet + bölüm bazında “Düzenle” → açılır pencere (mobilde tam boy alt panel). Kaydedince kapanır,
@@ -340,7 +345,9 @@ Claude tarafından yapılacak.
     - **Payload ekranı:** `access.admin` artık yalnızca `teknikSorumlu` işaretli etkin kurum kullanıcısı. İşareti yalnızca
       teknik sorumlu verir. Göç `20261114_174215_teknik_sorumlu` o anki tam yetkilileri teknik sorumlu yaptı (test ortamında
       yalnızca test yöneticisi). Menüdeki bağlantı yalnızca teknik sorumluya görünür.
-  - **Sırada:** KVKK saklama süreleri işi, KVKK talepleri ve işlem kayıtları ekranı, pano; aday hesap silme (K27).
+  - **Sırada:** (1) günlük özet tablosu ve gece işi (trend geçmişi birikmeye başlasın), (2) KVKK saklama süreleri işi,
+    (3) Yönetici özeti (canlı pano, K31), (4) rapor merkezi (Excel + PDF), (5) firma raporu, (6) KVKK talepleri ve işlem
+    kayıtları ekranı, (7) aday hesap silme (K27).
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
