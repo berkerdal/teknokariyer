@@ -1,7 +1,12 @@
 /**
- * E-posta şablonları. Sade HTML (tek sütun, sistem yazı tipi, görsel yok) ve aynı içerikte düz metin.
- * Hitap: adaya “sen”, firma ve kurum kullanıcısına “siz” (K9).
+ * E-posta şablonları ve aynı içerikte düz metin. Hitap: adaya “sen”, firma ve kurum kullanıcısına “siz” (K9).
+ *
+ * Düzen: lacivert üst bant (TeknoKariyer negatif logosu), beyaz kart, gece zeminli kurumsal alt bilgi (Teknokent ve TTO
+ * logoları, adres, bağlantılar). E-posta istemcileri için tablo tabanlı ve satır içi stillidir; Outlook dahil çalışır.
+ * Logolar PNG'dir (istemciler SVG göstermez) ve `public/eposta/` altından sunulur: `tools/kimlik/eposta_png.cjs`.
+ * Görseller engellenirse alt metinler zemin üzerinde okunur kalır.
  */
+import { KURUM } from './kurum'
 
 export const siteAdresi = () => (process.env.SITE_ADRESI || 'http://localhost:3000').replace(/\/$/, '')
 
@@ -13,23 +18,106 @@ export interface Eposta {
   metin: string
 }
 
-/** Paragraflar ve tek bir eylem düğmesi. */
-export function eposta(konu: string, paragraflar: string[], eylem?: { metin: string; adres: string }, son: string[] = []): Eposta {
+export type EpostaHitabi = 'sen' | 'siz'
+
+const R = {
+  zemin: '#F7F6F3',
+  yuzey: '#FFFFFF',
+  cizgi: '#E4E1DA',
+  metin: '#1E1E1C',
+  metin2: '#5B5852',
+  lacivert: '#2155AD',
+  camgobegi: '#05A1E6',
+  gece: '#13284F',
+  geceCizgi: '#1C3666',
+  geceMetin: '#C9D3E6',
+  geceMetin2: '#9AA9C6',
+}
+const YAZI = "'Source Sans 3','Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+
+function altBilgi(site: string, hitap: EpostaHitabi) {
+  const bag = (ad: string, adres: string) => `<a href="${kac(adres)}" style="color:#FFFFFF;text-decoration:none">${kac(ad)}</a>`
+  const neden =
+    hitap === 'sen'
+      ? `Bu e-postayı TeknoKariyer hesabınla ilgili bir işlem yapıldığı için aldın. Kişisel verilerinle ilgili soruların için ${KURUM.kvkkEposta} adresine yazabilirsin.`
+      : `Bu e-postayı TeknoKariyer hesabınızla ilgili bir işlem yapıldığı için aldınız. Kişisel verilerle ilgili sorularınız için ${KURUM.kvkkEposta} adresine yazabilirsiniz.`
+  const baglantilar =
+    hitap === 'sen'
+      ? [bag('İlanlar', `${site}/ilanlar`), bag('Hesabım', `${site}/hesabim`), bag('Aydınlatma metni', `${site}/metin/aday-aydinlatma`), bag('pauteknokent.com.tr', KURUM.web)]
+      : [bag('İlanlar', `${site}/ilanlar`), bag('Firma girişi', `${site}/giris?firma=1`), bag('pauteknokent.com.tr', KURUM.web)]
+  return `<tr><td style="background:${R.gece};padding:28px 32px 8px" class="ic">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="padding:0 20px 0 0;border-right:1px solid ${R.geceCizgi}"><a href="${KURUM.web}"><img src="${site}/eposta/teknokent-negatif.png" width="120" height="63" alt="Pamukkale Teknokent" style="display:block;border:0;color:#FFFFFF;font:700 14px ${YAZI}"></a></td>
+<td style="padding:0 0 0 20px"><img src="${site}/eposta/tto-beyaz.png" width="56" height="56" alt="Pamukkale Teknoloji Transfer Ofisi" style="display:block;border:0;color:#FFFFFF;font:12px ${YAZI}"></td>
+</tr></table>
+</td></tr>
+<tr><td style="background:${R.gece};padding:16px 32px 0;color:${R.geceMetin};font:14px/20px ${YAZI}" class="ic">
+<strong style="color:#FFFFFF">${kac(KURUM.unvan)}</strong><br>${kac(KURUM.adres)}<br>
+<a href="tel:${KURUM.telefonHam}" style="color:${R.geceMetin};text-decoration:none">${kac(KURUM.telefon)}</a> &middot; <a href="mailto:${KURUM.eposta}" style="color:${R.geceMetin};text-decoration:none">${KURUM.eposta}</a>
+</td></tr>
+<tr><td style="background:${R.gece};padding:16px 32px 0;font:600 14px/22px ${YAZI}" class="ic">
+${baglantilar.join('<span style="color:' + R.geceMetin2 + '"> &nbsp;&middot;&nbsp; </span>')}
+</td></tr>
+<tr><td style="background:${R.gece};padding:16px 32px 28px;color:${R.geceMetin2};font:13px/18px ${YAZI}" class="ic">
+<div style="border-top:1px solid ${R.geceCizgi};padding-top:16px">${kac(neden)}</div>
+</td></tr>`
+}
+
+/**
+ * Başlık, paragraflar, tek bir eylem düğmesi ve düğmeden sonraki notlar.
+ * İlk paragraf “Merhaba …” selamıysa ön izleme metni ikinci paragraftan alınır.
+ */
+export function eposta(
+  konu: string,
+  paragraflar: string[],
+  eylem?: { metin: string; adres: string },
+  son: string[] = [],
+  hitap: EpostaHitabi = 'sen',
+): Eposta {
+  const site = siteAdresi()
   const p = (x: string) => `<p style="margin:0 0 16px">${kac(x)}</p>`
+  const onizleme = paragraflar.find((x) => !/^Merhaba\b/.test(x)) ?? konu
   const dugme = eylem
-    ? `<p style="margin:24px 0"><a href="${kac(eylem.adres)}" style="display:inline-block;background:#2155AD;color:#FFFFFF;padding:12px 20px;border-radius:4px;font-weight:600;text-decoration:none">${kac(eylem.metin)}</a></p>
-<p style="margin:0 0 16px;font-size:14px;color:#5B5852">Düğme çalışmazsa bu adresi tarayıcıya yapıştırın:<br><span style="word-break:break-all">${kac(eylem.adres)}</span></p>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px"><tr><td style="background:${R.lacivert};border-radius:4px">
+<a href="${kac(eylem.adres)}" style="display:inline-block;padding:13px 22px;color:#FFFFFF;font:700 16px/20px ${YAZI};text-decoration:none;border-radius:4px">${kac(eylem.metin)}</a>
+</td></tr></table>`
     : ''
-  const html = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${kac(konu)}</title></head>
-<body style="margin:0;background:#F7F6F3;color:#1E1E1C;font:16px/1.5 -apple-system,'Segoe UI',Roboto,Arial,sans-serif">
-<div style="max-width:560px;margin:0 auto;padding:24px 16px">
-<p style="margin:0 0 24px;font-weight:700;color:#2155AD">TeknoKariyer · Pamukkale Teknokent</p>
-<div style="background:#FFFFFF;border:1px solid #E4E1DA;border-radius:6px;padding:24px">
-${paragraflar.map(p).join('\n')}${dugme}${son.map(p).join('\n')}
-</div>
-<p style="margin:24px 0 0;font-size:13px;color:#5B5852">Pamukkale Teknoloji Geliştirme Bölgesi Yönetici A.Ş. · Çamlaraltı Mah. Hüseyin Yılmaz Cad. No:67 Pamukkale/Denizli</p>
-</div></body></html>`
-  const metin = [...paragraflar, ...(eylem ? [`${eylem.metin}: ${eylem.adres}`] : []), ...son, '—', 'TeknoKariyer · Pamukkale Teknokent'].join('\n\n')
+  const yedek = eylem
+    ? `<p style="margin:0 0 16px;font-size:14px;line-height:20px;color:${R.metin2}">${hitap === 'sen' ? 'Düğme çalışmazsa bu adresi tarayıcına yapıştır' : 'Düğme çalışmazsa bu adresi tarayıcınıza yapıştırın'}:<br><a href="${kac(eylem.adres)}" style="color:${R.lacivert};word-break:break-all">${kac(eylem.adres)}</a></p>`
+    : ''
+  const notlar = son.length
+    ? `<div style="border-top:1px solid ${R.cizgi};margin-top:8px;padding-top:16px;font-size:14px;line-height:20px;color:${R.metin2}">${son.map((x) => `<p style="margin:0 0 8px">${kac(x)}</p>`).join('')}</div>`
+    : ''
+  const html = `<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
+<title>${kac(konu)}</title>
+<style>@media (max-width:600px){.ic{padding-left:20px!important;padding-right:20px!important}.kart{padding:24px 20px!important}}</style>
+</head>
+<body style="margin:0;padding:0;background:${R.zemin};-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${R.zemin}">${kac(onizleme)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${R.zemin}"><tr><td align="center" style="padding:24px 8px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;border-collapse:collapse">
+<tr><td style="background:${R.lacivert};padding:22px 32px;border-bottom:3px solid ${R.camgobegi}" class="ic">
+<a href="${site}/" style="text-decoration:none"><img src="${site}/eposta/teknokariyer-negatif.png" width="200" height="23" alt="TeknoKariyer · Pamukkale Teknokent" style="display:block;border:0;color:#FFFFFF;font:700 18px ${YAZI}"></a>
+</td></tr>
+<tr><td style="background:${R.yuzey};padding:32px;color:${R.metin};font:16px/24px ${YAZI}" class="kart">
+<h1 style="margin:0 0 20px;font:700 22px/28px ${YAZI};color:${R.metin}">${kac(konu)}</h1>
+${paragraflar.map(p).join('\n')}
+${dugme}${yedek}${notlar}
+</td></tr>
+${altBilgi(site, hitap)}
+</table>
+</td></tr></table>
+</body></html>`
+  const metin = [
+    ...paragraflar,
+    ...(eylem ? [`${eylem.metin}: ${eylem.adres}`] : []),
+    ...son,
+    '—',
+    `TeknoKariyer · ${KURUM.kisaAd}`,
+    `${KURUM.unvan}, ${KURUM.adres}, ${KURUM.telefon}`,
+  ].join('\n\n')
   return { konu, html, metin }
 }
 
@@ -42,7 +130,7 @@ export function dogrulamaEpostasi(k: Hitap, anahtar: string): Eposta {
     ? eposta('E-posta adresini doğrula', [`Merhaba ${k.ad ?? ''},`.trim(), 'TeknoKariyer hesabını açtın. Hesabını kullanmaya başlamak için e-posta adresini doğrula.'], { metin: 'E-posta adresimi doğrula', adres }, [
         'Bu hesabı sen açmadıysan bu e-postayı yok sayabilirsin; adres doğrulanmadan hesap kullanılamaz.',
       ])
-    : eposta('E-posta adresinizi doğrulayın', [`Merhaba ${k.ad ?? ''},`.trim(), 'TeknoKariyer hesabınızı kullanmaya başlamak için e-posta adresinizi doğrulayın.'], { metin: 'E-posta adresimi doğrula', adres })
+    : eposta('E-posta adresinizi doğrulayın', [`Merhaba ${k.ad ?? ''},`.trim(), 'TeknoKariyer hesabınızı kullanmaya başlamak için e-posta adresinizi doğrulayın.'], { metin: 'E-posta adresimi doğrula', adres }, [], 'siz')
 }
 
 export function sifreSifirlamaEpostasi(k: Hitap, anahtar: string): Eposta {
@@ -53,7 +141,7 @@ export function sifreSifirlamaEpostasi(k: Hitap, anahtar: string): Eposta {
       ])
     : eposta('Şifrenizi yenileyin', [`Merhaba ${k.ad ?? ''},`.trim(), 'Şifrenizi yenilemek için bir istek aldık. Yeni şifrenizi aşağıdaki bağlantıdan belirleyebilirsiniz. Bağlantı 1 saat geçerlidir.'], { metin: 'Yeni şifre belirle', adres }, [
         'Bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz; şifreniz değişmez.',
-      ])
+      ], 'siz')
 }
 
 /** Var olan bir adresle yeniden kayıt denendiğinde: hesabın varlığı ekranda belli edilmez, sahibine bilgi gider. */

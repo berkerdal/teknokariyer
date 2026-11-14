@@ -219,6 +219,17 @@ Claude tarafından yapılacak.
     - Profil form kuralları `src/alan/profilFormu.ts`: yalnızca formdaki bölümler (`profilBolumu` gizli alanları) güncellenir.
     - Öğrenilen: gizli alan adı `bolum`, okulun “bölüm” seçimiyle çakışıp bölümü kaydettirmiyordu. Form alan adları çakışmamalı.
     - Öğrenilen: React form eylemi sonrası formu sıfırlar; açılır pencerede form kayıttan sonra `key` ile yeniden kurulur.
+  - **Kurumsal alt bilgi ve e-posta tasarımı (14.11.2026, kullanıcı isteği):**
+    - Alt bilgi (`src/arayuz/Alt.tsx`): gece zemini, solda Teknokent (negatif) ve Pamukkale TTO (beyaz) logoları ile
+      iletişim, sağda dört sütunlu site haritası (Adaylar, Firmalar, Pamukkale Teknokent, Kişisel veriler), altta telif şeridi.
+      Başvuru akışında yalnızca sade şerit (`<Alt sade />`). Firma ve Yönetici A.Ş. panelleri de aynı bileşeni kullanacak.
+    - Kurum bilgileri tek yerde: `src/altyapi/kurum.ts` (alt bilgi, e-posta, KVKK metinleri buradan okur).
+    - Kurum logoları kaynak PDF'lerden üretildi: `docs/kimlik/kaynak/`, `tools/kimlik/kurum_logolari.py` + `kirp.cjs`
+      → `public/logo/kurum/`. Kullanıcının gönderdiği sloganlı negatif logo (webp) onaysız olduğu için kullanılmadı.
+    - E-posta şablonu: tablo tabanlı; lacivert üst bant (TeknoKariyer negatif), beyaz kart ve başlık, gece zeminli
+      kurumsal alt bilgi; hitaba göre (sen/siz) alt bilgi metni ve bağlantılar; gizli ön izleme metni.
+      E-posta istemcileri SVG göstermediği için logolar PNG (`public/eposta/`, `tools/kimlik/eposta_png.cjs`).
+    - TTO'nun web adresi bilinmediği için TTO logosu bağlantısız. Adres öğrenilince eklenecek.
   - **Sırada:** Firma paneli (ilan yönetimi, başvuru değerlendirme, havuz araması), ardından Yönetici A.Ş. paneli.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

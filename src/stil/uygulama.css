@@ -171,3 +171,28 @@ html:has(dialog[open]) { overflow: hidden; }
 .sihirbaz-adimlar a { color: var(--metin-2); text-decoration: none; }
 .sihirbaz-adimlar [aria-current="step"] a { color: var(--metin); font-weight: 700; text-decoration: underline; text-decoration-color: var(--lacivert); text-decoration-thickness: 3px; text-underline-offset: 6px; }
 .sihirbaz-ayak { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: var(--b4); border-top: 1px solid var(--cizgi); }
+
+/* ---------- Kurumsal alt bilgi (gece zemini; logolar negatif) ---------- */
+.a-alt { margin-top: var(--b7); background: var(--gece); color: var(--gece-metin); border-top: 3px solid var(--camgobegi); font-size: var(--boy-kucuk); line-height: var(--sat-kucuk); }
+.tk .a-alt :focus-visible { outline-color: #fff; }
+.a-alt a { color: #fff; text-decoration: none; }
+.a-alt a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.a-alt-ic { max-width: 1200px; margin: 0 auto; padding: var(--b6) 16px var(--b5); display: grid; gap: var(--b6); }
+.a-alt-kurum { display: grid; gap: var(--b4); align-content: start; }
+.a-alt-logolar { display: flex; align-items: center; gap: var(--b5); }
+.a-alt-logolar img { display: block; height: auto; }
+.a-alt-logolar a { display: block; }
+.a-alt-ayrac { width: 1px; align-self: stretch; background: var(--gece-2); }
+.a-alt address { font-style: normal; display: grid; gap: 2px; }
+.a-alt address a { color: var(--gece-metin); }
+.a-alt-harita { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--b5) var(--b4); }
+.a-alt-harita h2 { font-family: var(--font-govde); font-size: var(--boy-etiket); line-height: var(--sat-etiket); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gece-metin-2); margin: 0 0 var(--b2); }
+.a-alt-harita ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.a-alt-harita li a { display: inline-block; padding: 5px 0; }
+.a-alt-taban { max-width: 1200px; margin: 0 auto; padding: var(--b4) 16px calc(var(--b4) + env(safe-area-inset-bottom)); border-top: 1px solid var(--gece-2); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 24px; color: var(--gece-metin-2); font-size: var(--boy-etiket); line-height: var(--sat-etiket); }
+.a-alt-taban p { margin: 0; }
+.a-alt--sade .a-alt-taban { border-top: 0; }
+@media (min-width: 900px) {
+  .a-alt-ic { grid-template-columns: minmax(260px, 4fr) 8fr; gap: var(--b7); padding-top: var(--b7); }
+  .a-alt-harita { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

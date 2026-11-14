@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Alt } from '@/arayuz/Alt'
 import './(frontend)/styles.css'
 
 export const metadata: Metadata = { title: 'Sayfa bulunamadı · TeknoKariyer', robots: { index: false } }
@@ -29,6 +30,7 @@ export default function GenelBulunamadi() {
             </Link>
           </p>
         </main>
+        <Alt />
       </body>
     </html>
   )

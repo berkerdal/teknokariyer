@@ -40,9 +40,7 @@
 .a-ust-sag { margin-left: auto; display: flex; align-items: center; gap: 16px; }
 .a-firma-giris { font-size: 14px; color: var(--metin-2); }
 .a-ust-kisi { display: inline-grid; place-items: center; width: 36px; height: 36px; background: var(--metin); color: #FFFFFF; font: 600 13px/1 var(--font-baslik); text-decoration: none; border-radius: 2px; }
-.a-alt { background: var(--yuzey); border-top: 1px solid var(--cizgi); margin-top: var(--b7); }
-.a-alt-ic { max-width: 1200px; margin: 0 auto; padding: var(--b5) 16px; display: grid; gap: 6px; font-size: 14px; }
-.a-alt-bag { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; }
+/* Alt bilgi: uygulamada kurumsal alt bilgiyle değiştirildi (uygulama.css). */
 .a-alt-menu { position: sticky; bottom: 0; z-index: 25; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--yuzey); border-top: 1px solid var(--cizgi); }
 .a-alt-menu a { display: grid; justify-items: center; gap: 2px; padding: 8px 0 10px; text-decoration: none; color: var(--metin-2); font-size: 12px; font-weight: 600; position: relative; }
 .a-alt-menu a[aria-current="page"] { color: var(--lacivert); }

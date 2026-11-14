@@ -7,6 +7,8 @@
  *   sayfada “taslak” uyarısı görünür. Yurt dışına aktarım bölümü veri yeri kararına bağlıdır (CLAUDE.md 7).
  */
 
+import { KURUM } from '@/altyapi/kurum'
+
 export type MetinKimligi = 'aday-aydinlatma' | 'basvuru-aydinlatma' | 'havuz' | 'ticari-ileti'
 
 export interface Metin {
@@ -18,8 +20,8 @@ export interface Metin {
   govde: string
 }
 
-const SORUMLU = 'Pamukkale Teknoloji Geliştirme Bölgesi Yönetici A.Ş. (Çamlaraltı Mah. Hüseyin Yılmaz Cad. No:67 Pamukkale/Denizli)'
-const HAKLAR = `KVKK’nın 11. maddesindeki haklarını (verinin işlenip işlenmediğini öğrenme, düzeltme, silme, itiraz ve diğerleri) kvkk@pauteknokent.com.tr adresine yazarak kullanabilirsin. Verilerinin bir kopyasını ve hesabının silinmesini “Hesap ve gizlilik” sayfasından da isteyebilirsin.`
+const SORUMLU = `${KURUM.unvan} (${KURUM.adres})`
+const HAKLAR = `KVKK’nın 11. maddesindeki haklarını (verinin işlenip işlenmediğini öğrenme, düzeltme, silme, itiraz ve diğerleri) ${KURUM.kvkkEposta} adresine yazarak kullanabilirsin. Verilerinin bir kopyasını ve hesabının silinmesini “Hesap ve gizlilik” sayfasından da isteyebilirsin.`
 
 export const METINLER: Record<MetinKimligi, Metin> = {
   'aday-aydinlatma': {
