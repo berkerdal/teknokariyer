@@ -291,3 +291,13 @@ export const yonetimSayilari = cache(async () => {
     toplam: onay.length + degisiklik.length + talep.length + basvurusuz.length + takip,
   }
 })
+
+/** Zamanlanmış işlerin son çalışması (panelde güven için gösterilir). */
+export const sonZamanliCalisma = cache(async () => {
+  const payload = await payloadAl()
+  const { docs } = await payload.find({ collection: 'islem-kayitlari', where: { islem: { equals: 'Zamanlanmış işler çalıştı' } }, sort: '-createdAt', limit: 1, depth: 0, overrideAccess: true })
+  const d = docs[0]
+  if (!d) return null
+  const a = (d.ayrinti ?? {}) as { kapananIlan?: number; davetHatirlatma?: number; profilHatirlatma?: number; hatalar?: string[] }
+  return { tarih: d.createdAt, kapananIlan: a.kapananIlan ?? 0, hatirlatma: (a.davetHatirlatma ?? 0) + (a.profilHatirlatma ?? 0), hata: (a.hatalar ?? []).length }
+})

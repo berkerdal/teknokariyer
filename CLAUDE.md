@@ -306,10 +306,17 @@ Claude tarafından yapılacak.
   - **Payload ekranı kararı (14.11.2026, kullanıcı onayı):** Payload altyapı olarak kalır. `/admin` ekranı, kendi ekranlarımız
     (kullanıcılar, listeler, ayarlar) tamamlanınca Kurumsal İletişim menüsünden kaldırılır ve yalnızca teknik sorumluya açık
     ayrı bir yetkiye bağlanır.
-  - **Eksik (önemli):** Zamanlanmış işler bağlı değil. `suresiDolanlariKapat` hiçbir yerden çağrılmıyor; Worker'da
-    `scheduled` işleyicisi yok. Süresi dolan ilan, kapanma işi bağlanana kadar “yayında” kalır. Davet hatırlatmaları
-    (3., 7., 14. gün) da aynı işleyiciye bağlanacak.
-  - **Sırada:** zamanlanmış işler (süre dolumu, davet hatırlatmaları), rehberden firma içe aktarma, kullanıcılar ve listeler ekranı.
+  - **Zamanlanmış işler (14.11.2026):** `wrangler.jsonc` → `triggers.crons` (UTC 21:05 = TR 00:05; UTC 07:00 = TR 10:00).
+    `worker.ts` `scheduled` işleyicisi isteği ağa çıkarmadan `/yonetim-islem/zamanli` adresine iletir; kimlik doğrulama
+    `globalThis` üzerinde tek kullanımlık rastgele anahtarla (aynı çalışma alanı). Dışarıdan gelen istek bu adreste 404 alır
+    (worker.ts önce keser). İşler `src/servisler/zamanli.ts`: süresi dolan ilanların kapanması, davet hatırlatmaları
+    (3./7./14. gün; her hatırlatma yeni anahtar üretir, eski bağlantı geçersiz olur; 14. günde süresi biten davet 7 gün
+    uzar), profil tamamlama hatırlatmaları (devralındıktan sonra 3./7./14. gün, tam yetkililere, eksiklerle).
+    Hatırlatmalar yalnızca TR 09.00–19.00 arasında gider. Kaçırılan günlerde yalnızca son eşik gönderilir
+    (`src/alan/hatirlatma.ts`). Her çalışma işlem kaydına yazılır; “Bugün” sayfası son çalışmayı gösterir.
+    Yerelde denemek için: `opennextjs-cloudflare build`, ardından uzak D1 bağlantısı çıkarılmış geçici bir yapılandırmayla
+    `wrangler dev --test-scheduled` ve `/__scheduled?cron=...`.
+  - **Sırada:** rehberden firma içe aktarma, kullanıcılar ve listeler ekranı.
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

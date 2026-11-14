@@ -20,6 +20,10 @@
     // E-postalardaki bağlantılar ve sayfa adresleri bu kökü kullanır.
     "SITE_ADRESI": "https://teknokariyer-test.teknokariyer.workers.dev",
   },
+  // Zamanlanmış işler (UTC): 21:05 = Türkiye 00:05, gün dönünce süresi dolan ilanlar kapanır;
+  // 07:00 = Türkiye 10:00, davet ve profil hatırlatmaları gider (hatırlatmalar yalnızca 09.00–19.00 arasında gönderilir).
+  // İşler tekrar çalıştırılabilir; ikinci çalışma yalnızca o ana kadar biriken işi yapar.
+  "triggers": { "crons": ["5 21 * * *", "0 7 * * *"] },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",

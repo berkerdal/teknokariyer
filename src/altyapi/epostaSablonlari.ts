@@ -279,3 +279,38 @@ export function basvurusuzHatirlatmaEpostasi(i: { pozisyonAdi: string; id: numbe
     'siz',
   )
 }
+
+/* ---------- Kurulum hatırlatmaları (talimatlar 0.3, 6) ---------- */
+
+export function davetHatirlatmaEpostasi(d: { ad: string; firma: string; anahtar: string; sonGun: string; son: boolean }): Eposta {
+  return eposta(
+    d.son ? `Son hatırlatma: ${d.firma} için TeknoKariyer davetiniz` : `${d.firma} için TeknoKariyer davetiniz bekliyor`,
+    [
+      `Merhaba ${d.ad},`,
+      `Pamukkale Teknokent’in kariyer portalı TeknoKariyer’de ${d.firma} adına bir davetiniz var. Daveti kabul ettiğinizde firmanızın ilanlarını yayınlayabilir ve başvuruları tek yerden yönetebilirsiniz.`,
+      'Hesabınızı açmak birkaç dakika sürer: aşağıdaki bağlantıyı açın ve kendinize bir şifre belirleyin.',
+    ],
+    { metin: 'Daveti kabul et', adres: `${siteAdresi()}/davet?anahtar=${encodeURIComponent(d.anahtar)}` },
+    [
+      `Bu bağlantı ${d.sonGun} tarihine kadar geçerlidir. Önceki e-postalardaki bağlantılar artık çalışmaz.`,
+      d.son
+        ? 'Bu son otomatik hatırlatmadır. Sorunuz varsa bu e-postayı yanıtlayabilir veya Yönetici A.Ş.’yi arayabilirsiniz.'
+        : 'Daveti beklemiyorsanız bu e-postayı yanıtlayarak bize bildirin.',
+    ],
+    'siz',
+  )
+}
+
+export function profilHatirlatmaEpostasi(d: { ad?: string | null; firma: string; eksikler: string[]; son: boolean }): Eposta {
+  return eposta(
+    `${d.firma} profilini tamamlayın`,
+    [
+      `Merhaba ${d.ad ?? ''},`.trim(),
+      `${d.firma} firmasının TeknoKariyer profili henüz tamamlanmadı. Profil tamamlanana kadar firma sayfanız adaylara görünmez.`,
+      `Eksik olanlar: ${d.eksikler.join(', ')}. Bu bilgileri girmeniz birkaç dakika sürer.`,
+    ],
+    { metin: 'Profili tamamla', adres: `${siteAdresi()}/firma-paneli/profil` },
+    [d.son ? 'Bu son otomatik hatırlatmadır. Yardım isterseniz bu e-postayı yanıtlayabilirsiniz.' : 'Yardım isterseniz bu e-postayı yanıtlayabilirsiniz.'],
+    'siz',
+  )
+}

@@ -26,3 +26,16 @@ describe('firma kurulumu', () => {
     expect(adresAdi('  3D Probox ')).toBe('3d-probox')
   })
 })
+
+import { siradakiHatirlatma } from '@/alan/hatirlatma'
+
+describe('kurulum hatırlatmaları', () => {
+  it('3., 7. ve 14. günde birer kez; kaçırılan günlerde yalnızca son eşik', () => {
+    expect(siradakiHatirlatma(2, [])).toBeNull()
+    expect(siradakiHatirlatma(3, [])).toBe(3)
+    expect(siradakiHatirlatma(4, [3])).toBeNull()
+    expect(siradakiHatirlatma(9, [])).toBe(7) // 3. gün kaçırıldıysa yalnızca 7. gün gider
+    expect(siradakiHatirlatma(15, [3, 7])).toBe(14)
+    expect(siradakiHatirlatma(30, [3, 7, 14])).toBeNull()
+  })
+})

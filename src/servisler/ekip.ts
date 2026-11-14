@@ -10,7 +10,7 @@
 import type { Payload } from 'payload'
 import type { Davetler, Kullanicilar } from '@/payload-types'
 import { firmaKimligi, firmaYetkisiVarMi, moderasyonYapabilirMi, type FirmaYetkisi } from '@/erisim'
-import { davetEpostasi } from '@/altyapi/epostaSablonlari'
+import { davetEpostasi, davetHatirlatmaEpostasi } from '@/altyapi/epostaSablonlari'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { DAVET_GECERLILIK_GUN } from '@/koleksiyonlar/Davetler'
 import { epostaGecerliMi, epostaNormallestir, sifreHatasi } from './hesapKurallari'
@@ -117,6 +117,32 @@ export async function davetiIptalEt(payload: Payload, k: Kullanici, davetId: num
   const req = await istekOlustur(payload, k)
   await payload.delete({ collection: 'davetler', id: davetId, overrideAccess: true, req })
   await islemKaydet(req, { islem: 'Ekip daveti iptal edildi', tur: 'kurulum', kayitTuru: 'davetler', kayitId: davetId })
+}
+
+/**
+ * Zamanlanmış hatırlatma: bekleyen davete yeni anahtarla hatırlatma gönderir (eski bağlantılar geçersiz olur).
+ * Son hatırlatmada süresi biten davet uzatılır. Kullanıcı işlemi değil, sistem işidir.
+ */
+export async function davetHatirlat(payload: Payload, davetId: number, gun: number, son: boolean, uzatmaGun: number, simdi = new Date()) {
+  const davet = await payload.findByID({ collection: 'davetler', id: davetId, depth: 0, overrideAccess: true })
+  if (davet.kullanildi) return false
+  const firma = await payload.findByID({ collection: 'firmalar', id: kimlik(davet.firma), depth: 0, overrideAccess: true })
+  if (firma.asama === 'pasif') return false
+  const anahtar = yeniAnahtar()
+  const sonGecerlilik =
+    son && new Date(davet.sonGecerlilik).getTime() < simdi.getTime() + uzatmaGun * 86_400_000
+      ? new Date(simdi.getTime() + uzatmaGun * 86_400_000).toISOString()
+      : davet.sonGecerlilik
+  await payload.update({
+    collection: 'davetler',
+    id: davetId,
+    data: { anahtarOzeti: await ozet(anahtar), sonGecerlilik, hatirlatmalar: [...(davet.hatirlatmalar ?? []), { tarih: simdi.toISOString(), gun }] },
+    overrideAccess: true,
+  })
+  const sonGun = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul' }).format(new Date(sonGecerlilik))
+  const e = davetHatirlatmaEpostasi({ ad: davet.ad, firma: firma.kisaAd, anahtar, sonGun, son })
+  await payload.sendEmail({ to: davet.eposta, subject: e.konu, html: e.html, text: e.metin })
+  return true
 }
 
 /** Bağlantıdaki anahtarla geçerli daveti bulur. Geçersizse null (neden ayrıca söylenir). */

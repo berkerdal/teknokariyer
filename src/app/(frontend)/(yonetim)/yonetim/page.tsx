@@ -4,10 +4,11 @@ import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { HatirlatDugmesi } from '@/arayuz/yonetim/Kararlar'
 import { moderasyonYapabilirMi } from '@/erisim'
 import { kurulumOzeti } from '@/veri/firmaYonetimi'
-import { basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, onayKuyrugu, yonetimOturumu, yonetimSayilari } from '@/veri/yonetim'
+import { sonZamanliCalisma, basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, onayKuyrugu, yonetimOturumu, yonetimSayilari } from '@/veri/yonetim'
 
 export const metadata: Metadata = { title: 'Bugün · Yönetim' }
 
+const SAAT = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })
 const GUN = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long', timeZone: 'Europe/Istanbul' })
 
 function Kuyruk({ baslik, sayi, bilgi, hedef, bos, children }: { baslik: string; sayi: number; bilgi: string; hedef?: string; bos: string; children: React.ReactNode }) {
@@ -36,7 +37,7 @@ export default async function Bugun({ searchParams }: Props) {
   const sp = await searchParams
   const k = await yonetimOturumu()
   const karar = moderasyonYapabilirMi(k)
-  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), yonetimSayilari(), kurulumOzeti()])
+  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum, zamanli] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), yonetimSayilari(), kurulumOzeti(), sonZamanliCalisma()])
   const enEski = onay[0]
   return (
     <>
@@ -172,6 +173,12 @@ export default async function Bugun({ searchParams }: Props) {
           ))}
         </Kuyruk>
       </div>
+
+      <p className="kucuk ikincil y-zamanli">
+        {zamanli
+          ? `Otomatik işler en son ${SAAT.format(new Date(zamanli.tarih))} tarihinde çalıştı: ${zamanli.kapananIlan} ilanın süresi doldu, ${zamanli.hatirlatma} hatırlatma gönderildi.${zamanli.hata ? ` ${zamanli.hata} işlemde hata oluştu; teknik sorumluya bildirin.` : ''}`
+          : 'Otomatik işler henüz çalışmadı. Her gece süresi dolan ilanlar kapanır, her sabah davet ve profil hatırlatmaları gönderilir.'}
+      </p>
     </>
   )
 }
