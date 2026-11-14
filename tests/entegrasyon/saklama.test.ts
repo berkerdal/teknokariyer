@@ -78,11 +78,14 @@ describe('KVKK saklama', () => {
   })
 
   it('süresi dolan işlem kayıtları silinir ve silme kayda geçer', async () => {
-    const once = await payload.count({ collection: 'islem-kayitlari', overrideAccess: true })
-    expect(once.totalDocs).toBeGreaterThan(0)
-    const silinen = await eskiIslemKayitlariniSil(payload, new Date(Date.now() + 30 * 31 * 86_400_000), 24)
-    expect(silinen).toBe(once.totalDocs)
-    const kalan = await payload.find({ collection: 'islem-kayitlari', overrideAccess: true })
-    expect(kalan.docs.map((d) => d.islem)).toEqual(['Saklama süresi dolan işlem kayıtları silindi'])
+    // Diğer test dosyaları aynı anda kayıt yazabildiği için kesin sayı yerine sonuç denetlenir
+    const ileride = new Date(Date.now() + 30 * 31 * 86_400_000)
+    const sinir = new Date(ileride)
+    sinir.setUTCMonth(sinir.getUTCMonth() - 24)
+    const silinen = await eskiIslemKayitlariniSil(payload, ileride, 24)
+    expect(silinen).toBeGreaterThan(0)
+    // Sınırdan eski kalan tek kayıt, silme işleminin kendi kaydıdır (şimdi yazıldı; deneme anı ileride olduğu için “eski”)
+    const eski = await payload.find({ collection: 'islem-kayitlari', where: { createdAt: { less_than: sinir.toISOString() } }, overrideAccess: true })
+    expect(eski.docs.map((d) => d.islem)).toEqual(['Saklama süresi dolan işlem kayıtları silindi'])
   })
 })

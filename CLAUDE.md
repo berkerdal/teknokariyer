@@ -354,8 +354,20 @@ Claude tarafından yapılacak.
       işlem kayıtları N ay sonra (varsayılan 24, en az 12) silinir. Bir çalışmada en fazla 500 başvuru.
     - Kapanış tarihi Ilanlar kancasında yazılır; göçten önce kapanmışlarda `updated_at` kullanıldı.
     - İki süre de Ayarlar ekranında (hukuk onayı notuyla). Firma panelinde anonimleştirilen başvuru açıklamayla görünür.
-  - **Sırada:** (1) Yönetici özeti (canlı pano, K31), (2) rapor merkezi (Excel + PDF), (3) firma raporu, (4) KVKK talepleri
-    ve işlem kayıtları ekranı, (5) aday hesap silme (K27).
+  - **Yönetici özeti (14.11.2026, K31):** `/yonetim/ozet` (menüde “Bugün”ün altında). Dönem seçimi (7/30/90 gün, 12 ay
+    haftalık) bütün sayfayı kapsar; `CanliYenileme` sayfa görünürken dakikada bir `router.refresh()` yapar (durdurulabilir).
+    - Üst şerit (yayındaki ilan, dönem başvurusu ve yeni aday hesabı önceki döneme göre, ilan veren firma, onay bekleyen),
+      iki ayrı sütun grafiği (başvuru, yayına giren ilan; tek eksen kuralı), bütün ilanlar tablosu (durum ve metin süzgeci,
+      sütuna göre sıralama, ilk 50 + “hepsini göster”, Excel için CSV: `/yonetim/ozet/ilanlar-csv`), sonuç hunisi, aktif
+      firmalar, yetenek açığı tablosu, aday kaynakları (üniversite, bölüm, kanal; 5'ten küçük gruplar “Diğer”/“5'ten az”).
+    - Kurallar `src/alan/ozet.ts` (dönem, dilimler, gizleme, huni, eksen), veri `src/veri/ozet.ts` (kişisel veri yalnızca
+      sunucuda sayılır), tablo `src/veri/ozetTablo.ts`. Grafikler `src/arayuz/grafik/` (dataviz kılavuzu: ≤24 px sütun,
+      4 px uç, ince sürekli ızgara, seçici etiket, fare ve ok tuşuyla bilgi kutusu, “Tablo olarak göster”). Huni renkleri tek
+      ton sıralı dizi, doğrulayıcıdan geçti.
+    - Yayın ortamında test firmaları sayılmaz; test ortamında sayılır (örnek veri test firmalarından).
+    - Not: huni, başvurunun yalnızca bugünkü durumunu bildiği için “ulaşılan aşama”yı durumdan çıkarır.
+  - **Sırada:** (1) rapor merkezi (Excel + PDF), (2) firma raporu, (3) KVKK talepleri ve işlem kayıtları ekranı,
+    (4) aday hesap silme (K27).
     Ayrıca: iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

@@ -454,3 +454,62 @@ p.y-oge-satir { padding: 10px 14px; }
 .secim--kucuk { min-height: 36px; padding-top: 4px; padding-bottom: 4px; font-size: 14px; }
 .y-birimli { display: flex; align-items: center; gap: 8px; max-width: 220px; }
 .y-birimli .girdi { flex: 1; min-width: 0; }
+/* Yönetici özeti (K31) */
+.ozet-serit { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.ozet-kutu { background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: var(--kose-panel); padding: 14px 16px; display: grid; gap: 4px; align-content: start; }
+.ozet-kutu p { margin: 0; }
+.ozet-ad { font-size: 14px; color: var(--metin-2); font-weight: 600; }
+.ozet-deger { font: 600 32px/1.1 var(--font-govde); color: var(--metin); }
+.ozet-tanim { font-size: 13px; color: var(--metin-2); }
+.ozet-degisim { font-size: 13px; }
+.ozet-degisim.iyi { color: var(--basari); }
+.ozet-degisim.kotu { color: var(--hata); }
+.ozet-degisim .ikincil { color: var(--metin-2); }
+.ozet-bolum { display: grid; gap: 12px; align-content: start; }
+.ozet-bolum h2 { margin: 0; }
+.ozet-ikili > div { display: grid; gap: 6px; }
+@media (min-width: 900px) { .ozet-ikili { grid-template-columns: 1fr 1fr; } }
+.ozet-tablo-suzgec { flex-wrap: wrap; max-width: none; }
+.ozet-tablo-suzgec .girdi { max-width: 280px; }
+.ozet-tablo td { vertical-align: top; }
+.ozet-baslik-alti { caption-side: top; text-align: left; padding: 0 0 6px; }
+.y-sirala { color: inherit; text-decoration: none; white-space: nowrap; }
+.y-sirala:hover { text-decoration: underline; }
+.canli { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; color: var(--metin-2); }
+.canli-isaret { width: 8px; height: 8px; border-radius: 50%; background: var(--notr); display: inline-block; }
+.canli-isaret.acik { background: var(--basari); }
+@media (prefers-reduced-motion: no-preference) { .canli-isaret.acik { animation: canli 2s ease-in-out infinite; } }
+@keyframes canli { 50% { opacity: .35; } }
+
+/* Grafikler (dataviz kuralları: ince işaret, sürekli ince ızgara, metin rengi metin jetonu) */
+.grafik { margin: 0; display: grid; gap: 6px; }
+.grafik-kap { position: relative; }
+.grafik svg { width: 100%; height: auto; display: block; overflow: visible; }
+.grafik svg:focus-visible { outline: 2px solid var(--lacivert); outline-offset: 4px; border-radius: 2px; }
+.grafik-izgara { stroke: var(--cizgi); stroke-width: 1; shape-rendering: crispEdges; }
+.grafik-taban { stroke: var(--cizgi-kontrol); stroke-width: 1; shape-rendering: crispEdges; }
+.grafik-eksen { fill: var(--metin-2); font: 11px var(--font-govde); font-variant-numeric: tabular-nums; }
+.grafik-deger { fill: var(--metin); font: 600 12px var(--font-govde); }
+.grafik-sutun { fill: var(--lacivert); }
+.grafik-sutun.etkin { fill: var(--lacivert-koyu); }
+.grafik-ipucu { position: absolute; top: 2px; transform: translateX(-50%); background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: var(--kose-kontrol); box-shadow: var(--golge-katman); padding: 6px 10px; font-size: 13px; white-space: nowrap; pointer-events: none; display: grid; gap: 1px; z-index: 2; }
+.grafik-ipucu.sol { transform: translateX(-12px); }
+.grafik-ipucu.sag { transform: translateX(calc(-100% + 12px)); }
+.grafik-ipucu strong { font-size: 16px; }
+.grafik-ipucu span { color: var(--metin-2); }
+.grafik-tablo summary { cursor: pointer; font-size: 14px; color: var(--lacivert); font-weight: 600; }
+.grafik-tablo .tablo-kap { max-height: 260px; overflow-y: auto; margin-top: 6px; }
+.cubuklar-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cubuklar-liste li { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 14px; }
+.cubuk-ad { overflow-wrap: anywhere; }
+.cubuk-iz { height: 12px; display: block; }
+.cubuk-dolgu { display: block; height: 100%; background: var(--lacivert); border-radius: 0 4px 4px 0; min-width: 2px; }
+.cubuk-deger { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+.cubuk-deger .ikincil { font-weight: 400; }
+/* Huni: sıralı aşamalar tek ton ramp (açıktan koyuya) */
+.huni-0 { background: #7C97C9; }
+.huni-1 { background: #5A7DBC; }
+.huni-2 { background: var(--lacivert); }
+.huni-3 { background: #183F82; }
+.huni-4 { background: var(--gece); }
+@media (max-width: 600px) { .cubuklar-liste li { grid-template-columns: 1fr auto; } .cubuk-iz { grid-column: 1 / -1; grid-row: 2; } }
