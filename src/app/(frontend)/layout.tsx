@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { IkonSeti } from '@/arayuz/Ikon'
 import { OrtamSeridi } from '@/arayuz/OrtamSeridi'
+import { GezinmeGostergesi } from '@/arayuz/GezinmeGostergesi'
 import { siteAdresi } from '@/altyapi/epostaSablonlari'
 import './styles.css'
 
@@ -27,6 +28,9 @@ export default function KokDuzen({ children }: { children: React.ReactNode }) {
         </a>
         <IkonSeti />
         <OrtamSeridi />
+        <Suspense fallback={null}>
+          <GezinmeGostergesi />
+        </Suspense>
         {children}
       </body>
     </html>

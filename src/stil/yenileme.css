@@ -282,6 +282,56 @@
 .toplu-cubuk { background: var(--gece); }
 .bildirim { background: var(--gece); border-radius: var(--kose-panel); box-shadow: var(--golge-katman); }
 
+/* ---------- Firmalar (kompakt kart ızgarası) ---------- */
+.fl { width: 100%; max-width: 1200px; margin: 0 auto; padding: var(--b5) 16px var(--b6); display: grid; gap: var(--b5); }
+.fl-bas { display: grid; gap: 12px; }
+.fl-bas .hap { gap: 6px; }
+.blok-isaret { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.blok-isaret--b { background: var(--lacivert); } .blok-isaret--c { background: var(--petrol); } .blok-isaret--d { background: var(--kiremit); }
+.fl-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.fl-kart { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: start; padding: 16px;
+  background: var(--yuzey); border-radius: var(--kose-panel); box-shadow: var(--golge-panel); transition: box-shadow var(--sure) ease; }
+.fl-govde { display: grid; gap: 2px; min-width: 0; }
+.fl-ad { font: 600 17px/1.3 var(--font-baslik); color: var(--metin); text-decoration: none; letter-spacing: -.01em; }
+.fl-ad::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.fl-ad:focus-visible { outline: none; }
+.fl-kart:has(.fl-ad:focus-visible) { outline: 3px solid var(--lacivert); outline-offset: 2px; }
+.fl-ilanlar { margin-top: 8px; display: grid; gap: 2px; font-size: 14px; }
+.fl-ilanlar li { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 6px; align-items: baseline; }
+.fl-ilanlar li::before { content: ""; width: 5px; height: 5px; background: var(--camgobegi); transform: translateY(-2px); }
+.fl-ilanlar a, .fl-daha { position: relative; z-index: 1; color: var(--baglanti); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fl-daha { margin-left: 16px; color: var(--metin-2); }
+.fl-sayi { white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) {
+  .fl-kart:hover { box-shadow: 0 1px 2px rgba(30, 30, 28, .08), 0 10px 28px rgba(30, 30, 28, .10); }
+  .fl-kart:hover .fl-ad { color: var(--lacivert); }
+  .fl-ilanlar a:hover, .fl-daha:hover { text-decoration: underline; }
+}
+@media (min-width: 900px) {
+  .fl { padding: var(--b6) 32px var(--b7); }
+  .fl-bas { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+}
+
+/* ---------- Sayfa geçiş göstergesi ---------- */
+.gezinme-cubuk { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 200; background: var(--lacivert); transform-origin: left;
+  animation: gezinme-ilerle 8s cubic-bezier(.08, .75, .1, 1) forwards; }
+@keyframes gezinme-ilerle { from { transform: scaleX(0); } 6% { transform: scaleX(.35); } to { transform: scaleX(.92); } }
+.gezinme-ortu { position: fixed; inset: 0; z-index: 199; display: grid; place-items: center; background: rgba(243, 241, 236, .62);
+  animation: gezinme-belir 220ms var(--egri) both; cursor: progress; }
+@keyframes gezinme-belir { from { opacity: 0; } }
+.gezinme-isaret { position: relative; width: 84px; height: 84px; display: grid; place-items: center; background: #FFFFFF; border-radius: 50%;
+  box-shadow: var(--golge-panel); animation: gezinme-buyu 260ms var(--egri) both; }
+@keyframes gezinme-buyu { from { transform: scale(.92); opacity: 0; } }
+.gezinme-isaret img { width: 42px; height: 42px; border-radius: 6px; }
+.gezinme-halka { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); animation: gezinme-don 900ms linear infinite; }
+.gezinme-halka circle { fill: none; stroke: var(--lacivert-acik); stroke-width: 3; }
+.gezinme-halka .yay { stroke: var(--lacivert); stroke-linecap: round; stroke-dasharray: 26 74; }
+@keyframes gezinme-don { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .gezinme-cubuk { animation: none; transform: scaleX(.5); }
+  .gezinme-halka { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tk *, .tk *::before, .tk *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
 }
