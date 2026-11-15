@@ -81,14 +81,15 @@ export const Dosyalar: CollectionConfig = {
     { name: 'sahip', type: 'relationship', relationTo: 'kullanicilar', index: true, access: { update: () => false } },
     {
       name: 'taramaDurumu',
-      label: 'Virüs taraması',
+      // K34: ayrı virüs tarayıcı yok; CV'ler yüklenirken etkisizleştirilir ve “temiz” işaretlenir (değerler göçsüz korundu)
+      label: 'Güvenlik denetimi',
       type: 'select',
       defaultValue: 'bekliyor',
       access: { update: () => false },
       options: [
-        { label: 'Bekliyor', value: 'bekliyor' },
-        { label: 'Temiz', value: 'temiz' },
-        { label: 'Zararlı', value: 'zararli' },
+        { label: 'Denetlenmedi', value: 'bekliyor' },
+        { label: 'Etkisizleştirildi (betik ve ekler çıkarıldı)', value: 'temiz' },
+        { label: 'Reddedildi', value: 'zararli' },
       ],
     },
   ],

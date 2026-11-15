@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CvGoruntuleyici } from '@/arayuz/firma/CvGoruntuleyici'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CINSIYET_ADI, GORUNURLUK_ADI } from '@/alan/havuz'
@@ -58,16 +59,17 @@ export default async function HavuzProfili({ params }: { params: Promise<{ id: s
                 <li key={c.dosya} className="dosya-satiri">
                   <Ikon ad="dosya" />
                   <span className="ad">{c.ad || 'CV'}</span>
-                  <a className="dugme dugme--ikincil dugme--kucuk" href={`/firma-paneli/havuz/${id}/cv/${c.dosya}`}>
-                    <Ikon ad="indir" kucuk /> İndir<span className="gizli">: {c.ad}</span>
-                  </a>
+                  <CvGoruntuleyici adres={`/firma-paneli/havuz/${id}/cv/${c.dosya}?goruntule=1`} indirAdres={`/firma-paneli/havuz/${id}/cv/${c.dosya}`} baslik={`${c.ad || 'CV'} · ${p.ad}`} />
                 </li>
               ))}
             </ul>
           ) : (
             <p className="ikincil">Aday henüz CV yüklemedi.</p>
           )}
-          <p className="kucuk ikincil">İndirilen CV’nin her sayfasının altına firmanızın adı ve indirme tarihi yazılır; her indirme kayda geçer.</p>
+          <p className="kucuk ikincil">
+            CV, betik çalıştırmayan güvenli görüntüleyicide açılır; indirme ve yazdırma oradan yapılır. Her sayfanın altına firmanızın adı ve tarih yazılır;
+            her görüntüleme ve indirme kayda geçer.
+          </p>
         </section>
         {p.tanitim && (
           <section>

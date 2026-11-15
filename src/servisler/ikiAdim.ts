@@ -30,6 +30,7 @@ import {
   type TaninanCihaz,
 } from '@/alan/ikiAdim'
 import { coz, sifrele } from '@/altyapi/sifreleme'
+import { ortam } from '@/altyapi/eposta'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { girisKoduEpostasi, ikiAdimSifirlandiEpostasi } from '@/altyapi/epostaSablonlari'
 import { FormHatasi, IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
@@ -45,6 +46,8 @@ interface EpostaKodu {
   ozet: string
   son: string
   gonderimler: string[]
+  /** Yalnızca yayın dışı ortamda: e-posta dışarı çıkmadığı için kodun ekranda yeniden gösterilebilmesi */
+  test?: string
 }
 
 interface IkiAdimKaydi {
@@ -95,6 +98,8 @@ export interface BekleyenGiris {
   adres?: string
   /** Yalnızca yayın dışı ortamda: e-postalar dışarı çıkmadığı için kod ekranda gösterilir */
   testKodu?: string
+  /** Yeni kod gönderilmedi; az önce gönderilen ve hâlâ geçerli kod kullanılacak */
+  oncekiKod?: boolean
   son: number
 }
 
@@ -165,17 +170,35 @@ export async function cihazlariTemizle(payload: Payload, kullaniciId: number) {
  * (varsayılan: 60 saniyede bir, saatte en fazla 5, 10 dakika).
  * Kodun yalnızca özeti saklanır. Yayın dışı ortamda kod, ekranda gösterilmek üzere döner.
  */
-export async function epostaKoduGonder(payload: Payload, kullaniciId: number, simdi = new Date()): Promise<{ kod: string; eposta: boolean }> {
+export async function epostaKoduGonder(
+  payload: Payload,
+  kullaniciId: number,
+  simdi = new Date(),
+  /**
+   * Girişte çağrıldığında: hâlâ geçerli bir kod varken bekleme veya saatlik sınır sürüyorsa yenisi gönderilmez, o kullanılır.
+   * Geçerli kod yoksa bekleme uygulanmaz (ör. bir cihazda kod kullanıldıktan hemen sonra başka cihazdan giriş); saatlik sınır geçerlidir.
+   */
+  girisSirasinda = false,
+): Promise<{ kod: string | null; eposta: boolean; onceki?: boolean }> {
   const k = await kayit(payload, kullaniciId)
   const { yenidenGonderSaniye: YENIDEN_GONDER_SANIYE, saatteEnFazlaKod: SAATTE_EN_FAZLA_KOD, epostaKoduDakika: EPOSTA_KODU_DAKIKA } = await guvenlikAyarlariniAl(payload)
   const onceki = (k.epostaKodu?.gonderimler ?? []).filter((t) => simdi.getTime() - new Date(t).getTime() < 3_600_000)
   const sonGonderim = onceki.at(-1)
-  if (sonGonderim && simdi.getTime() - new Date(sonGonderim).getTime() < YENIDEN_GONDER_SANIYE * 1000)
-    throw new IslemHatasi(`Yeni kod istemeden önce ${YENIDEN_GONDER_SANIYE} saniye bekleyin.`, 409)
-  if (onceki.length >= SAATTE_EN_FAZLA_KOD) throw new IslemHatasi('Bir saat içinde çok sayıda kod istendi. Biraz sonra yeniden deneyin.', 409)
+  const beklemede = Boolean(sonGonderim && simdi.getTime() - new Date(sonGonderim).getTime() < YENIDEN_GONDER_SANIYE * 1000)
+  const sinirda = onceki.length >= SAATTE_EN_FAZLA_KOD
+  const gecerliKod = Boolean(k.epostaKodu?.ozet && new Date(k.epostaKodu.son) > simdi)
+  if (girisSirasinda && (beklemede || sinirda) && gecerliKod) return { kod: k.epostaKodu?.test ?? null, eposta: true, onceki: true }
+  // Bekleme yalnızca “Yeni kod gönder” düğmesi içindir; girişte kod göndermek doğru şifre ister ve IP sınırına bağlıdır.
+  if (beklemede && !girisSirasinda) throw new IslemHatasi(`Yeni kod istemeden önce ${YENIDEN_GONDER_SANIYE} saniye bekleyin.`, 409)
+  if (sinirda) throw new IslemHatasi('Bir saat içinde çok sayıda kod istendi. Biraz sonra yeniden deneyin.', 409)
   const kod = epostaKoduUret()
   await guncelle(payload, kullaniciId, {
-    epostaKodu: { ozet: await ozet(`${kullaniciId}:${kod}`), son: new Date(simdi.getTime() + EPOSTA_KODU_DAKIKA * 60_000).toISOString(), gonderimler: [...onceki, simdi.toISOString()] },
+    epostaKodu: {
+      ozet: await ozet(`${kullaniciId}:${kod}`),
+      son: new Date(simdi.getTime() + EPOSTA_KODU_DAKIKA * 60_000).toISOString(),
+      gonderimler: [...onceki, simdi.toISOString()],
+      ...(ortam() !== 'yayin' ? { test: kod } : {}),
+    },
   })
   const e = girisKoduEpostasi({ ad: k.ad ?? '', kod, dakika: EPOSTA_KODU_DAKIKA, hitap: k.rol === 'aday' ? 'sen' : 'siz' })
   try {
@@ -257,7 +280,7 @@ export async function ikinciAdimDogrula(payload: Payload, kullaniciId: number, g
     const ek = k.epostaKodu
     if (!ek || new Date(ek.son) <= simdi) throw new FormHatasi({ kod: siz ? 'Kodun süresi doldu. “Yeni kod gönder” düğmesiyle yeni bir kod isteyin.' : 'Kodun süresi doldu. “Yeni kod gönder” düğmesiyle yeni bir kod iste.' })
     if ((await ozet(`${kullaniciId}:${temiz.replace(/\s/g, '')}`)) === ek.ozet) {
-      await guncelle(payload, kullaniciId, { epostaKodu: { ...ek, ozet: '', son: simdi.toISOString() }, ikiAdimHata: 0, ikiAdimKilit: null })
+      await guncelle(payload, kullaniciId, { epostaKodu: { ...ek, ozet: '', test: undefined, son: simdi.toISOString() }, ikiAdimHata: 0, ikiAdimKilit: null })
       return { kurtarmaKullanildi: false, kalanKurtarma: ozetler.length }
     }
     return hataSay(payload, k, simdi, siz)

@@ -26,8 +26,12 @@ export default async function IkinciAdimSayfasi() {
           {eposta ? (
             <p>
               {siz
-                ? `Bu cihazdan ilk kez giriş yapıyorsunuz. ${g.adres} adresine 6 haneli bir kod gönderdik. Kod ${EPOSTA_KODU_DAKIKA} dakika geçerlidir.`
-                : `Bu cihazdan ilk kez giriş yapıyorsun. ${g.adres} adresine 6 haneli bir kod gönderdik. Kod ${EPOSTA_KODU_DAKIKA} dakika geçerlidir.`}
+                ? g.oncekiKod
+                  ? `Bu cihazdan ilk kez giriş yapıyorsunuz. ${g.adres} adresine az önce gönderdiğimiz kod hâlâ geçerli; o kodu yazın.`
+                  : `Bu cihazdan ilk kez giriş yapıyorsunuz. ${g.adres} adresine 6 haneli bir kod gönderdik. Kod ${EPOSTA_KODU_DAKIKA} dakika geçerlidir.`
+                : g.oncekiKod
+                  ? `Bu cihazdan ilk kez giriş yapıyorsun. ${g.adres} adresine az önce gönderdiğimiz kod hâlâ geçerli; o kodu yaz.`
+                  : `Bu cihazdan ilk kez giriş yapıyorsun. ${g.adres} adresine 6 haneli bir kod gönderdik. Kod ${EPOSTA_KODU_DAKIKA} dakika geçerlidir.`}
             </p>
           ) : (
             <p>

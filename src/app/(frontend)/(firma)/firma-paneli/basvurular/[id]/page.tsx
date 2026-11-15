@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CvGoruntuleyici } from '@/arayuz/firma/CvGoruntuleyici'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { BASVURU_DURUM_ADI } from '@/alan/basvuru'
@@ -109,11 +110,7 @@ export default async function BasvuruAyrintisi({ params }: Props) {
                 CV ve iletişim
               </h2>
               <div className="dugme-grubu">
-                {b.cv && (
-                  <a className="dugme dugme--ikincil dugme--kucuk" href={`/firma-paneli/basvurular/${b.id}/cv`}>
-                    <Ikon ad="indir" kucuk /> CV’yi indir (PDF)
-                  </a>
-                )}
+                {b.cv && <CvGoruntuleyici adres={`/firma-paneli/basvurular/${b.id}/cv?goruntule=1`} indirAdres={`/firma-paneli/basvurular/${b.id}/cv`} baslik={`CV · ${p.ad ?? 'Aday'}`} />}
                 {p.eposta && (
                   <a className="dugme dugme--sade dugme--kucuk" href={`mailto:${p.eposta}`}>
                     <Ikon ad="mesaj" kucuk /> {p.eposta}

@@ -8,11 +8,12 @@ import { oturum, payloadAl } from '@/veri/payload'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(istek: Request, { params }: { params: Promise<{ id: string }> }) {
+  const goruntule = new URL(istek.url).searchParams.get('goruntule') === '1'
   const k = await oturum()
   if (!k) return new Response('Bu dosyayı indirmek için firma hesabınızla giriş yapın.', { status: 401, headers: { 'content-type': 'text/plain; charset=utf-8' } })
   try {
-    const { icerik, dosyaAdi } = await basvuruCvsi(await payloadAl(), k, Number((await params).id))
+    const { icerik, dosyaAdi } = await basvuruCvsi(await payloadAl(), k, Number((await params).id), goruntule ? 'goruntule' : 'indir')
     return new Response(icerik as unknown as BodyInit, {
       headers: {
         'content-type': 'application/pdf',

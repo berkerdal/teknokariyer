@@ -82,16 +82,25 @@ describe('yeni cihazda e-posta kodu', () => {
     expect(posta.docs[0]?.konu).toBe('TeknoKariyer giriş kodu')
     expect(posta.docs[0]?.metin).toContain(`${kod.slice(0, 3)} ${kod.slice(3)}`)
     const ham = (await payload.findByID({ collection: 'kullanicilar', id: uye.id, overrideAccess: true, showHiddenFields: true })) as any
-    expect(JSON.stringify(ham.epostaKodu)).not.toContain(kod)
+    expect(ham.epostaKodu.ozet).not.toContain(kod)
+    // Açık kod yalnızca yayın dışı ortamda (ekranda yeniden göstermek için) tutulur
+    expect(ham.epostaKodu.test).toBe(process.env.ORTAM === 'yayin' ? undefined : kod)
+    // Girişte bekleme süresi dolmadan yeni kod istenirse hâlâ geçerli olan kod kullanılır
+    expect(await epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 5_000), true)).toMatchObject({ onceki: true, eposta: true })
     await expect(epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 10_000))).rejects.toThrow(/60 saniye/)
     await ikinciAdimDogrula(payload, uye.id, kod, 'eposta', new Date(an.getTime() + 20_000))
+    // Kod kullanıldıktan hemen sonra başka cihazdan giriş: bekleme uygulanmaz, yeni kod gider (düğmede uygulanır)
+    const baskaCihaz = await epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 25_000), true)
+    expect(baskaCihaz.onceki).toBeUndefined()
+    await ikinciAdimDogrula(payload, uye.id, baskaCihaz.kod!, 'eposta', new Date(an.getTime() + 26_000))
     await expect(ikinciAdimDogrula(payload, uye.id, kod, 'eposta', new Date(an.getTime() + 30_000))).rejects.toThrow(/süresi doldu/)
     // süresi dolan kod
-    const ikinci = await epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 61_000))
-    await expect(ikinciAdimDogrula(payload, uye.id, ikinci.kod, 'eposta', new Date(an.getTime() + 61_000 + 11 * 60_000))).rejects.toThrow(/süresi doldu/)
-    // saatte en fazla 5
-    for (let i = 2; i < 5; i++) await epostaKoduGonder(payload, uye.id, new Date(an.getTime() + i * 61_000))
-    await expect(epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 5 * 61_000))).rejects.toThrow(/Bir saat/)
+    const ikinci = await epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 90_000))
+    await expect(ikinciAdimDogrula(payload, uye.id, ikinci.kod!, 'eposta', new Date(an.getTime() + 90_000 + 11 * 60_000))).rejects.toThrow(/süresi doldu/)
+    // saatte en fazla 5 (şimdiye kadar 3 kod gönderildi: 0., 25. ve 90. saniye)
+    await epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 160_000))
+    await epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 230_000))
+    await expect(epostaKoduGonder(payload, uye.id, new Date(an.getTime() + 300_000))).rejects.toThrow(/Bir saat/)
   })
 
   it('5 hatalı e-posta kodunda kilit; kilitte doğru kod da geçmez', async () => {

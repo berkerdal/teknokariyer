@@ -4,12 +4,13 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { getPayload, type Payload } from 'payload'
 import config from '@/payload.config'
+import { PDFDocument } from 'pdf-lib'
 import { duraklat, duzeltmeIste, kapat, kopyala, onayla, sureUzat, suresiDolanlariKapat, yayinaGonder } from '@/servisler/ilanIslemleri'
 import { basvur } from '@/servisler/basvuru'
 import { goruntuleyenFirmaSayisi, havuzAra, havuzProfiliAc } from '@/servisler/havuz'
 import { cvYukle, profilGuncelle } from '@/servisler/profil'
 
-const PDF = new TextEncoder().encode('%PDF-1.4\n1 0 obj<< /Type /Catalog >>endobj\nxref\n0 2\n0000000000 65535 f \n0000000009 00000 n \ntrailer<< /Size 2 /Root 1 0 R >>\nstartxref\n47\n%%EOF\n')
+let PDF: Uint8Array // gerçek, tek sayfalık PDF (beforeAll içinde üretilir)
 
 let payload: Payload
 const ek = `s${Date.now().toString(36)}`
@@ -30,6 +31,9 @@ async function taslakIlan(firmaId: number, ad = 'Flutter Geliştirici', ekVeri: 
 }
 
 beforeAll(async () => {
+  const ornek = await PDFDocument.create()
+  ornek.addPage([595, 842])
+  PDF = await ornek.save({ useObjectStreams: false })
   payload = await getPayload({ config })
   aile = (await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'pozisyon-ailesi', ad: `Yazılım ${ek}` } as any })).id
   beceri = (await payload.create({ collection: 'taksonomiler', overrideAccess: true, data: { tur: 'beceri', ad: `Dart ${ek}` } as any })).id
@@ -126,7 +130,7 @@ describe('başvuru ve havuz (K24, K25, K5)', () => {
     await expect(cvYukle(payload, adayK, { ad: 'Sahte', dosya: { veri: new TextEncoder().encode('<html>'), boyut: 6 } })).rejects.toThrow(/Yalnızca PDF/)
     cvId = (await cvYukle(payload, adayK, { ad: 'CV – Türkçe', dosya: { veri: PDF, boyut: PDF.length } })).id
     const dosya = await payload.findByID({ collection: 'dosyalar', id: cvId, overrideAccess: true })
-    expect(dosya).toMatchObject({ tur: 'cv', taramaDurumu: 'bekliyor' })
+    expect(dosya).toMatchObject({ tur: 'cv', taramaDurumu: 'temiz' })
     expect(dosya.filename).not.toContain('Kişi')
   })
   it('aydınlatma onayı ve sorular cevaplanmadan başvurulamaz', async () => {

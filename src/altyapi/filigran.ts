@@ -1,10 +1,12 @@
 /**
  * İndirilen CV'ye filigran (K6): her sayfanın altına küçük, gri bir satır — firma adı ve indirme tarihi.
+ * Kopya, filigrandan önce etkisizleştirilir (betik, açılış komutu, gömülü ek çıkarılır; K34).
  * Saf JavaScript (pdf-lib); Workers'ta ve Node'da aynı çalışır. Türkçe harfler için Source Sans 3 alt kümesi gömülür.
  */
 import { PDFDocument, rgb } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { FILIGRAN_YAZI_TIPI } from './filigranYaziTipi'
+import { belgeyiTemizle } from './pdfTemizle'
 
 const yaziTipiBaytlari = () => Uint8Array.from(atob(FILIGRAN_YAZI_TIPI), (c) => c.charCodeAt(0))
 
@@ -15,6 +17,8 @@ export function filigranMetni(firmaAd: string, tarih: Date): string {
 
 export async function pdfFiligranla(pdf: Uint8Array, metin: string): Promise<Uint8Array> {
   const belge = await PDFDocument.load(pdf, { ignoreEncryption: true, updateMetadata: false })
+  // Firmaya giden her kopya etkisizleştirilir (K34); bu düzen öncesi yüklenmiş CV'ler de kapsanır.
+  belgeyiTemizle(belge)
   belge.registerFontkit(fontkit)
   const yazi = await belge.embedFont(yaziTipiBaytlari(), { subset: true })
   const boy = 7.5

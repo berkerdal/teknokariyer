@@ -75,7 +75,7 @@ export async function epostaKoduYenidenEylemi(_: FormDurumu): Promise<FormDurumu
   try {
     const r = await epostaKoduGonder(await payloadAl(), g.kullaniciId)
     const { kullaniciId, token, bitis, rol, donus, yontem, adres } = g
-    const { paket, son } = await bekleyenGirisPaketle({ kullaniciId, token, bitis, rol, donus, yontem, adres, testKodu: ortam() !== 'yayin' ? r.kod : undefined })
+    const { paket, son } = await bekleyenGirisPaketle({ kullaniciId, token, bitis, rol, donus, yontem, adres, testKodu: ortam() !== 'yayin' ? (r.kod ?? undefined) : undefined })
     await bekleyenGirisYaz(paket, son)
     return {
       tamam: r.eposta ? 'Yeni kod gönderildi. Önceki kod artık geçersiz.' : siz ? 'Kod oluşturuldu, ancak e-posta gönderilemedi. Biraz sonra yeniden deneyin.' : 'Kod oluşturuldu, ancak e-posta gönderilemedi. Biraz sonra yeniden dene.',

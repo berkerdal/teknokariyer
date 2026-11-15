@@ -36,10 +36,12 @@ async function girisiSurdur(s: GirisSonucu, donus: string, eposta: string): Prom
     return donus
   }
   let testKodu: string | undefined
+  let oncekiKod = false
   if (yontem === 'eposta') {
-    const r = await epostaKoduGonder(payload, s.kullaniciId)
+    const r = await epostaKoduGonder(payload, s.kullaniciId, new Date(), true)
+    oncekiKod = Boolean(r.onceki)
     // E-postalar yayın dışı ortamda dışarı çıkmaz; kod yalnızca orada ekranda gösterilir
-    if (ortam() !== 'yayin') testKodu = r.kod
+    if (ortam() !== 'yayin') testKodu = r.kod ?? undefined
   }
   const { paket, son } = await bekleyenGirisPaketle({
     kullaniciId: s.kullaniciId,
@@ -50,6 +52,7 @@ async function girisiSurdur(s: GirisSonucu, donus: string, eposta: string): Prom
     yontem,
     adres: yontem === 'eposta' ? epostaMaskele(eposta) : undefined,
     testKodu,
+    oncekiKod,
   })
   await bekleyenGirisYaz(paket, son)
   return '/giris/ikinci-adim'

@@ -88,7 +88,7 @@ export async function puanVer(payload: Payload, k: Kullanici, id: number, puan: 
 }
 
 /** Başvurudaki CV, firma adı ve tarih filigranıyla (K6). İndirme kayda geçer. */
-export async function basvuruCvsi(payload: Payload, k: Kullanici, id: number): Promise<{ icerik: Uint8Array; dosyaAdi: string }> {
+export async function basvuruCvsi(payload: Payload, k: Kullanici, id: number, amac: 'indir' | 'goruntule' = 'indir'): Promise<{ icerik: Uint8Array; dosyaAdi: string }> {
   const b = await firmaninBasvurusu(payload, k, id)
   if (!b.cv) throw new IslemHatasi('Bu başvuruda CV yok. Aday hesabını silmiş olabilir.', 404)
   const dosya = (await payload.findByID({ collection: 'dosyalar', id: kimlik(b.cv), depth: 0, overrideAccess: true }).catch((): null => null)) as Dosyalar | null
@@ -102,7 +102,7 @@ export async function basvuruCvsi(payload: Payload, k: Kullanici, id: number): P
     throw new IslemHatasi('CV’ye filigran eklenemediği için dosya indirilemiyor. Bu durumu Yönetici A.Ş.’ye bildirin.', 409)
   }
   const req = await istekOlustur(payload, k)
-  await islemKaydet(req, { islem: 'Başvurudaki CV indirildi', tur: 'kisisel-veri', kayitTuru: 'basvurular', kayitId: id, ayrinti: { firma: firma.kisaAd } })
+  await islemKaydet(req, { islem: amac === 'goruntule' ? 'Başvurudaki CV görüntülendi' : 'Başvurudaki CV indirildi', tur: 'kisisel-veri', kayitTuru: 'basvurular', kayitId: id, ayrinti: { firma: firma.kisaAd } })
   const ad = String((b.profilKopyasi as { ad?: string } | null)?.ad ?? 'aday')
   return { icerik, dosyaAdi: `CV - ${ad}.pdf` }
 }

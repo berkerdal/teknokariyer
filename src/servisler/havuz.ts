@@ -133,7 +133,7 @@ export async function goruntuleyenFirmaSayisi(payload: Payload, kullanici: Kulla
 }
 
 /** Havuzdaki adayın CV'si, firma adı ve tarih filigranıyla (K6). Aday görünür değilse veya dosya onun değilse 404. */
-export async function havuzCvsi(payload: Payload, kullanici: Kullanici, adayId: number, dosyaId: number): Promise<{ icerik: Uint8Array; dosyaAdi: string }> {
+export async function havuzCvsi(payload: Payload, kullanici: Kullanici, adayId: number, dosyaId: number, amac: 'indir' | 'goruntule' = 'indir'): Promise<{ icerik: Uint8Array; dosyaAdi: string }> {
   havuzYetkisi(kullanici)
   const aday = await payload.findByID({ collection: 'adaylar', id: adayId, depth: 0, overrideAccess: true }).catch((): null => null)
   if (!aday) throw new IslemHatasi('Aday bulunamadı.', 404)
@@ -152,7 +152,7 @@ export async function havuzCvsi(payload: Payload, kullanici: Kullanici, adayId: 
     throw new IslemHatasi('CV’ye filigran eklenemediği için dosya indirilemiyor. Bu durumu Yönetici A.Ş.’ye bildirin.', 409)
   }
   const req = await istekOlustur(payload, kullanici)
-  await islemKaydet(req, { islem: 'Havuzdaki CV indirildi', tur: 'kisisel-veri', kayitTuru: 'adaylar', kayitId: adayId, ayrinti: { firma: firma.kisaAd } })
+  await islemKaydet(req, { islem: amac === 'goruntule' ? 'Havuzdaki CV görüntülendi' : 'Havuzdaki CV indirildi', tur: 'kisisel-veri', kayitTuru: 'adaylar', kayitId: adayId, ayrinti: { firma: firma.kisaAd } })
   return { icerik, dosyaAdi: `CV - ${aday.kod ?? 'aday'} - ${cv.ad ?? 'CV'}.pdf` }
 }
 

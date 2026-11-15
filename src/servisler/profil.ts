@@ -8,6 +8,8 @@ import { adayMi } from '@/erisim'
 import { surum } from '@/metinler'
 import { FormHatasi } from './hesap'
 import { IslemHatasi, istekOlustur, kimlik, type Kullanici } from './ortak'
+import { SifreliPdfHatasi, pdfTemizle, temizlikVarMi } from '@/altyapi/pdfTemizle'
+import { islemKaydet } from '@/altyapi/islemKaydi'
 
 export const EN_FAZLA_CV = 3
 export const CV_EN_BUYUK = 5 * 1024 * 1024
@@ -43,11 +45,23 @@ export async function cvYukle(payload: Payload, kullanici: Kullanici, g: CvGirdi
   if (!pdfMi(g.dosya.veri)) throw new FormHatasi({ cvDosya: 'Yalnızca PDF yüklenebilir ve dosya bozuk olmamalı. Belgeni PDF olarak yeniden kaydedip tekrar dene.' })
   const ad = (g.ad.trim() || `CV ${mevcut.length + 1}`).slice(0, 60)
 
+  // Etkin içerik (betik, açılış komutu, gömülü ek) çıkarılır; saklanan ve firmaya giden dosya temizdir (K34).
+  let temiz: Awaited<ReturnType<typeof pdfTemizle>>
+  try {
+    temiz = await pdfTemizle(g.dosya.veri)
+  } catch (e) {
+    if (e instanceof SifreliPdfHatasi)
+      throw new FormHatasi({ cvDosya: 'Bu PDF parola korumalı veya kısıtlamalı. Belgeni açıp “PDF olarak yazdır” ya da “Farklı kaydet → PDF” ile yeniden kaydet ve tekrar yükle.' })
+    throw new FormHatasi({ cvDosya: 'PDF okunamadı. Belgeni PDF olarak yeniden kaydedip tekrar dene.' })
+  }
+
   const req = await istekOlustur(payload, kullanici)
+  if (temizlikVarMi(temiz.rapor))
+    await islemKaydet(req, { islem: 'Yüklenen CV’den etkin içerik çıkarıldı', tur: 'kisisel-veri', kayitTuru: 'adaylar', kayitId: aday.id, ayrinti: temiz.rapor })
   const dosya = await payload.create({
     collection: 'dosyalar',
-    data: { tur: 'cv', sahip: kullanici.id } as never,
-    file: { data: Buffer.from(g.dosya.veri), mimetype: 'application/pdf', name: `cv-${aday.kod ?? aday.id}-${Date.now()}.pdf`, size: g.dosya.boyut },
+    data: { tur: 'cv', sahip: kullanici.id, taramaDurumu: 'temiz' } as never,
+    file: { data: Buffer.from(temiz.veri), mimetype: 'application/pdf', name: `cv-${aday.kod ?? aday.id}-${Date.now()}.pdf`, size: temiz.veri.length },
     overrideAccess: true,
     req,
   })

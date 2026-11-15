@@ -589,3 +589,24 @@ p.y-oge-satir { padding: 10px 14px; }
 .guvenlik-kaldir { margin-top: 20px; }
 .guvenlik-kaldir > summary { cursor: pointer; color: var(--metin-2); }
 .insan-dogrulama { min-height: 0; }
+
+/* Portal içi CV görüntüleyici (K34) */
+.cv-pencere { width: min(980px, 96vw); height: 92vh; max-height: 92vh; margin: auto; inset: 0; position: fixed; padding: 0; border: 1px solid var(--cizgi); display: none; flex-direction: column; }
+.cv-pencere[open] { display: flex; }
+.cv-pencere::backdrop { background: rgb(19 40 79 / 0.6); }
+.cv-arac { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--cizgi); background: var(--yuzey); }
+.cv-arac h2 { margin: 0; }
+.cv-arac-dugmeler { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.cv-olcek { min-width: 4ch; text-align: center; font-variant-numeric: tabular-nums; }
+.cv-govde { flex: 1; overflow: auto; background: var(--zemin); }
+.cv-sayfalar { display: grid; justify-items: center; gap: 16px; padding: 16px; }
+.cv-sayfa { background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); max-width: none; }
+.cv-bilgi { padding: 24px 16px; margin: 0; }
+.cv-not { margin: 0; padding: 8px 16px; border-top: 1px solid var(--cizgi); background: var(--yuzey); }
+@media (max-width: 899px) { .cv-pencere { width: 100vw; height: 100dvh; max-height: 100dvh; max-width: 100vw; margin: 0; } }
+.cv-yazdir-kap { display: none; }
+@media print {
+  html.cv-yazdiriliyor body > * { display: none !important; }
+  html.cv-yazdiriliyor body > .cv-yazdir-kap { display: block !important; }
+  .cv-yazdir-kap img { display: block; width: 100%; page-break-after: always; break-after: page; }
+}

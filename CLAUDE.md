@@ -180,6 +180,10 @@ Claude tarafından yapılacak.
   sayfasında. Firma ve kurum hesaplarında tanınmayan cihazdan girişte e-posta kodu zorunlu; cihaz 90 gün hatırlanır.
   Kullanıcının gerekçesi: zorunlu harici uygulama insanları yıldırır.
 
+- **K34 — CV güvenliği (15.11.2026):** Ayrı virüs tarayıcı (ClamAV) ve dış hizmet yok. Yüklenen PDF etkisizleştirilir;
+  firmalar CV'yi portal içindeki betik çalıştırmayan görüntüleyicide (pdf.js, kendi dosyalarımızdan) açar, indirme ve
+  yazdırma oradan.
+
 **Kullanıcının ilk test geri bildirimi (14.11.2026; talimatlar K28–K30):**
 
 - **K28 — Profil:** Okunur özet + bölüm bazında “Düzenle” → açılır pencere (mobilde tam boy alt panel). Kaydedince kapanır,
@@ -453,7 +457,22 @@ Claude tarafından yapılacak.
       koleksiyonunda; kaynak HMAC özeti (`anahtarliOzet`), IP adresi saklanmaz; süresi biten sayaçlar gece silinir.
       Hata 429, Türkçe ve kalan süreyle.
     - IP: `cf-connecting-ip`, yoksa `x-forwarded-for` ilk adres (`istemciAdresi`).
-  - **Sırada:** virüs taraması, YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
+  - **CV güvenliği (15.11.2026, K34):** Ayrı virüs tarayıcı yok (kullanıcı kararı; dış hizmet istenmiyor).
+    - **Etkisizleştirme** `src/altyapi/pdfTemizle.ts` (pdf-lib, alt düzey nesne gezinme): JavaScript ve tehlikeli eylemler
+      (Launch, GoToR, SubmitForm, ImportData, ortam), /OpenAction, /AA, gömülü dosyalar ve dosya eki notları, /AF, XFA
+      çıkarılır; bağlantılar (URI) ve belge içi gezinme kalır. Yüklemede (`cvYukle`) uygulanır, saklanan dosya temizdir,
+      `taramaDurumu: 'temiz'` (etiket “Etkisizleştirildi”); şifreli PDF anlaşılır hatayla reddedilir. Filigran adımı da
+      (`pdfFiligranla`) temizler: daha önce yüklenmiş CV'ler de firmaya temiz gider. Temizlik işlem kaydına (sayılarla) geçer.
+    - **Portal içi görüntüleyici** `src/arayuz/firma/CvGoruntuleyici.tsx`: pdf.js (`pdfjs-dist` 6.5) yalnızca tuvale çizer,
+      betik çalıştırmaz, XFA kapalı; işçi dosyası kendi statik dosyalarımızdan (`new URL(..., import.meta.url)`, webpack
+      `static/media/pdf.worker…mjs`). Masaüstünde ortalı büyük pencere, mobilde tam ekran; yakınlaştırma, indirme (ayrı
+      istek), yazdırma (sayfalar resim olarak, yalnızca CV basılır). Başvuru ayrıntısı ve havuz profilinde. `?goruntule=1`
+      ile açılış “CV görüntülendi” olarak, indirme “CV indirildi” olarak kayda geçer.
+    - Öğrenilen: pdf.js 5+ `isEvalSupported` seçeneğini kaldırdı (kod üretmiyor); belge kapatma `loadingTask.destroy()`.
+    - Öğrenilen: Bir cihazda e-posta kodu kullanıldıktan hemen sonra başka cihazdan girişte 60 saniyelik bekleme girişi
+      engelliyordu. Girişte bekleme uygulanmaz (yalnızca “Yeni kod gönder”); geçerli kod varsa o kullanılır (`girisSirasinda`).
+      Test ortamında açık kod `epostaKodu.test` alanında tutulur (yalnızca yayın dışı) ki ekranda yeniden gösterilebilsin.
+  - **Sırada:** YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
     `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
