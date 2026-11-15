@@ -82,6 +82,7 @@ export interface Config {
     talepler: Talepler;
     'gunluk-ozetler': GunlukOzetler;
     'kvkk-talepleri': KvkkTalepleri;
+    'istek-sinirlari': IstekSinirlari;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -104,6 +105,7 @@ export interface Config {
     talepler: TaleplerSelect<false> | TaleplerSelect<true>;
     'gunluk-ozetler': GunlukOzetlerSelect<false> | GunlukOzetlerSelect<true>;
     'kvkk-talepleri': KvkkTalepleriSelect<false> | KvkkTalepleriSelect<true>;
+    'istek-sinirlari': IstekSinirlariSelect<false> | IstekSinirlariSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -752,6 +754,20 @@ export interface KvkkTalepleri {
   createdAt: string;
 }
 /**
+ * Kötüye kullanıma karşı istek sayaçları. Kişisel veri içermez; günlük silinir.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "istek-sinirlari".
+ */
+export interface IstekSinirlari {
+  id: number;
+  anahtar: string;
+  sayi: number;
+  bitis: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -834,6 +850,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'kvkk-talepleri';
         value: number | KvkkTalepleri;
+      } | null)
+    | ({
+        relationTo: 'istek-sinirlari';
+        value: number | IstekSinirlari;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1334,6 +1354,17 @@ export interface KvkkTalepleriSelect<T extends boolean = true> {
         tarih?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "istek-sinirlari_select".
+ */
+export interface IstekSinirlariSelect<T extends boolean = true> {
+  anahtar?: T;
+  sayi?: T;
+  bitis?: T;
   updatedAt?: T;
   createdAt?: T;
 }

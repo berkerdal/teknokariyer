@@ -8,6 +8,7 @@ import * as migration_20261114_194152_kvkk_talepleri from './20261114_194152_kvk
 import * as migration_20261115_081840_iki_adim from './20261115_081840_iki_adim';
 import * as migration_20261115_083416_yeni_cihaz from './20261115_083416_yeni_cihaz';
 import * as migration_20261115_090859_guvenlik_ayarlari from './20261115_090859_guvenlik_ayarlari';
+import * as migration_20261115_092436_istek_sinirlari from './20261115_092436_istek_sinirlari';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20261115_090859_guvenlik_ayarlari.up,
     down: migration_20261115_090859_guvenlik_ayarlari.down,
-    name: '20261115_090859_guvenlik_ayarlari'
+    name: '20261115_090859_guvenlik_ayarlari',
+  },
+  {
+    up: migration_20261115_092436_istek_sinirlari.up,
+    down: migration_20261115_092436_istek_sinirlari.down,
+    name: '20261115_092436_istek_sinirlari'
   },
 ];

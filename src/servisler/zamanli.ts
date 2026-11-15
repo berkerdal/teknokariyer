@@ -11,6 +11,7 @@ import type { Payload } from 'payload'
 import { SON_HATIRLATMA_UZATMA_GUN, hatirlatmaGunleri, siradakiHatirlatma } from '@/alan/hatirlatma'
 import { trGunFarki } from '@/alan/tarih'
 import { profilHatirlatmaEpostasi } from '@/altyapi/epostaSablonlari'
+import { eskiSayaclariSil } from './istekSiniri'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { davetHatirlat } from './ekip'
 import { suresiDolanlariKapat } from './ilanIslemleri'
@@ -24,6 +25,7 @@ export interface ZamanliSonuc {
   gunlukOzet: string | null
   anonimlestirilenBasvuru: number
   silinenIslemKaydi: number
+  silinenSayac: number
   kapananIlan: number
   davetHatirlatma: number
   profilHatirlatma: number
@@ -111,9 +113,10 @@ export async function zamanliIsleriCalistir(payload: Payload, simdi = new Date()
   await guvenli('Günlük özet', async () => ((gunlukOzet = await gunlukOzetYaz(payload, simdi)), 0))
   const anonimlestirilenBasvuru = await guvenli('Başvuru saklama süresi', async () => (await basvurulariAnonimlestir(payload, simdi, Math.max(1, a?.saklama?.basvuruAnonimlestirmeAy ?? 12))).basvuru)
   const silinenIslemKaydi = await guvenli('İşlem kaydı saklama süresi', () => eskiIslemKayitlariniSil(payload, simdi, Math.max(12, a?.saklama?.islemKaydiAy ?? 24)))
+  const silinenSayac = await guvenli('İstek sayaçları', () => eskiSayaclariSil(payload, simdi))
   const davetHatirlatma = hatirlatmalar ? await guvenli('Davet hatırlatmaları', () => davetHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const profilHatirlatma = hatirlatmalar ? await guvenli('Profil hatırlatmaları', () => profilHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
-  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, kapananIlan, davetHatirlatma, profilHatirlatma, hatalar }
+  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, silinenSayac, kapananIlan, davetHatirlatma, profilHatirlatma, hatalar }
   await islemKaydet(await istekOlustur(payload, null), { islem: 'Zamanlanmış işler çalıştı', tur: 'ayarlar', ayrinti: sonuc }).catch((): undefined => undefined)
   return sonuc
 }

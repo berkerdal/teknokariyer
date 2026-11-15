@@ -588,3 +588,4 @@ p.y-oge-satir { padding: 10px 14px; }
 .cihaz-listesi .etiket { margin-left: 8px; }
 .guvenlik-kaldir { margin-top: 20px; }
 .guvenlik-kaldir > summary { cursor: pointer; color: var(--metin-2); }
+.insan-dogrulama { min-height: 0; }

@@ -33,6 +33,7 @@ import {
   rolAnaSayfasi,
 } from '@/veri/cerez'
 import { oturum, payloadAl } from '@/veri/payload'
+import { ipSiniri } from '@/veri/koruma'
 
 const metin = (f: FormData, k: string) => String(f.get(k) ?? '')
 
@@ -53,6 +54,7 @@ export async function ikinciAdimEylemi(_: FormDurumu, f: FormData): Promise<Form
   const hatirla = f.get('hatirla') === 'on'
   let hedef: string
   try {
+    await ipSiniri('ikinci-adim', g.rol !== 'aday')
     const payload = await payloadAl()
     const r = await ikinciAdimDogrula(payload, g.kullaniciId, metin(f, 'kod'), g.yontem)
     if (hatirla) await cihaziHatirla(payload, g.kullaniciId, (await cihazAnahtari(true))!, (await headers()).get('user-agent'))

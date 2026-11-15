@@ -4,8 +4,9 @@ import { useActionState, useState } from 'react'
 import { sifreSifirlamaEylemi, sifreYenileEylemi, davetKabulEylemi } from '@/eylemler/hesap'
 import { SIFRE_KURALLARI } from '@/servisler/hesapKurallari'
 import { Alan, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
+import { InsanDogrulama } from './InsanDogrulama'
 
-export function SifreSifirlamaFormu() {
+export function SifreSifirlamaFormu({ insan }: { insan: string | null }) {
   const [durum, eylem] = useActionState<FormDurumu, FormData>(sifreSifirlamaEylemi, {})
   if (durum.tamam)
     return (
@@ -21,8 +22,9 @@ export function SifreSifirlamaFormu() {
     <form action={eylem} className="form-yigin" noValidate>
       <h1 className="b2">Şifremi unuttum</h1>
       <p>Hesabının e-posta adresini yaz; şifreni yenilemen için bir bağlantı gönderelim.</p>
-      <HataOzeti durum={durum} />
+      <HataOzeti durum={durum} alanlar={{ insan: 'insan-dogrulama' }} />
       <Alan id="eposta" etiket="E-posta" type="email" inputMode="email" autoComplete="email" required defaultValue={durum.degerler?.eposta} hata={durum.hatalar?.eposta} />
+      <InsanDogrulama site={insan} sifirla={durum} hata={durum.hatalar?.insan} />
       <GonderDugmesi>Bağlantı gönder</GonderDugmesi>
     </form>
   )

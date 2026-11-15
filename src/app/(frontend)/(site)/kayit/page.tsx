@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { insanDogrulamaSiteAnahtari } from '@/altyapi/insanDogrulama'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { KayitFormu } from '@/arayuz/hesap/KayitFormu'
@@ -20,7 +21,7 @@ export default async function KayitSayfasi() {
       <Ust />
       <main id="icerik" className="giris-ekran">
         <div className="giris-kutu">
-          <KayitFormu surum={m.surum} tarih={tarihYaz(m.tarih, true)} />
+          <KayitFormu surum={m.surum} tarih={tarihYaz(m.tarih, true)} insan={insanDogrulamaSiteAnahtari()} />
           <p className="kucuk">
             Hesabın var mı? <Link href="/giris">Giriş yap</Link>
           </p>

@@ -12,7 +12,7 @@ import type { OturumKullanicisi } from '@/erisim'
 export class IslemHatasi extends Error {
   constructor(
     message: string,
-    public durumKodu: 400 | 403 | 404 | 409 = 400,
+    public durumKodu: 400 | 403 | 404 | 409 | 429 = 400,
   ) {
     super(message)
     this.name = 'IslemHatasi'

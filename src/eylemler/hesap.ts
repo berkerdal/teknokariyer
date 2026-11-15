@@ -11,6 +11,7 @@ import { ortam } from '@/altyapi/eposta'
 import { IslemHatasi } from '@/servisler/ortak'
 import { bekleyenGirisYaz, cihazAnahtari, guvenliDonus, oturumAc, oturumKapat, rolAnaSayfasi } from '@/veri/cerez'
 import { payloadAl } from '@/veri/payload'
+import { insanDenetle, ipSiniri, kaynakSiniri } from '@/veri/koruma'
 import { davetiKabulEt } from '@/servisler/ekip'
 
 const metin = (f: FormData, k: string) => String(f.get(k) ?? '')
@@ -58,6 +59,8 @@ export async function girisEylemi(_: FormDurumu, f: FormData): Promise<FormDurum
   const eposta = metin(f, 'eposta')
   let hedef: string
   try {
+    await ipSiniri('giris', f.get('firma') === '1')
+    await insanDenetle(f, f.get('firma') === '1')
     const s = await girisYap(await payloadAl(), eposta, metin(f, 'sifre'))
     hedef = await girisiSurdur(s, guvenliDonus(f.get('donus'), rolAnaSayfasi(s.rol)), eposta)
   } catch (e) {
@@ -69,6 +72,8 @@ export async function girisEylemi(_: FormDurumu, f: FormData): Promise<FormDurum
 export async function kayitEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
   const degerler = { ad: metin(f, 'ad'), eposta: metin(f, 'eposta'), ticariIleti: f.get('ticariIleti') ? '1' : '' }
   try {
+    await ipSiniri('kayit')
+    await insanDenetle(f)
     await adayKaydi(await payloadAl(), {
       ad: degerler.ad,
       eposta: degerler.eposta,
@@ -85,6 +90,10 @@ export async function kayitEylemi(_: FormDurumu, f: FormData): Promise<FormDurum
 export async function sifreSifirlamaEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
   const eposta = metin(f, 'eposta')
   try {
+    await ipSiniri('sifre-sifirlama')
+    await insanDenetle(f)
+    // Aynı adrese bağlantı yağdırılmasın: adres başına da sınır
+    await kaynakSiniri('sifre-sifirlama', `eposta:${eposta.trim().toLowerCase()}`)
     await sifreSifirlamaIste(await payloadAl(), eposta)
   } catch (e) {
     return hataDurumu(e, { eposta })
@@ -95,6 +104,7 @@ export async function sifreSifirlamaEylemi(_: FormDurumu, f: FormData): Promise<
 export async function sifreYenileEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
   let hedef: string
   try {
+    await ipSiniri('sifre-sifirlama')
     const payload = await payloadAl()
     const s = await sifreYenile(payload, metin(f, 'anahtar'), metin(f, 'sifre'))
     // Şifre yenilenince tanınan cihazlar unutulur; bu cihaz da yeniden doğrulanır
@@ -117,6 +127,7 @@ export async function davetKabulEylemi(_: FormDurumu, f: FormData): Promise<Form
   const degerler = { ad: metin(f, 'ad'), unvan: metin(f, 'unvan') }
   let hedef: string
   try {
+    await ipSiniri('davet', true)
     const payload = await payloadAl()
     const u = await davetiKabulEt(payload, metin(f, 'anahtar'), { ...degerler, sifre: metin(f, 'sifre') })
     const s = await girisYap(payload, u.email, metin(f, 'sifre'))

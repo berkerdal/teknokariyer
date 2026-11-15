@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { insanDogrulamaSiteAnahtari } from '@/altyapi/insanDogrulama'
 import { SifreSifirlamaFormu } from '@/arayuz/hesap/SifreFormlari'
 import { Ust } from '@/arayuz/Ust'
 
@@ -10,7 +11,7 @@ export default function SifremiUnuttumSayfasi() {
       <Ust />
       <main id="icerik" className="giris-ekran">
         <div className="giris-kutu">
-          <SifreSifirlamaFormu />
+          <SifreSifirlamaFormu insan={insanDogrulamaSiteAnahtari()} />
         </div>
       </main>
     </>

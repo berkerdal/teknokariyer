@@ -26,6 +26,7 @@ import {
   type ProfilGuncellemesi,
 } from '@/servisler/profil'
 import { oturum, payloadAl } from '@/veri/payload'
+import { kaynakSiniri } from '@/veri/koruma'
 
 const metin = (f: FormData, k: string) => String(f.get(k) ?? '').trim()
 
@@ -83,6 +84,7 @@ export async function basvurEylemi(_: BasvuruDurumu, f: FormData): Promise<Basvu
   let hedef: string
   try {
     const k = await aday()
+    await kaynakSiniri('basvuru', `hesap:${k.id}`)
     const payload = await payloadAl()
     const ilanId = Number(metin(f, 'ilan'))
     const a = await kendiAdayKaydi(payload, k)

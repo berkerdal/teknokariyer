@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { insanDogrulamaSiteAnahtari } from '@/altyapi/insanDogrulama'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { GirisFormu } from '@/arayuz/hesap/GirisFormu'
@@ -58,7 +59,7 @@ export default async function GirisSayfasi({ searchParams }: Props) {
               Firma hesapları Yönetici A.Ş. davetiyle açılır. Davet e-postanızdaki bağlantıyla hesabınızı devralabilirsiniz.
             </p>
           )}
-          <GirisFormu firma={firma} donus={donus} />
+          <GirisFormu firma={firma} donus={donus} insan={insanDogrulamaSiteAnahtari()} />
           {firma ? (
             <p className="kucuk">
               Firmanız için hesap yoksa Yönetici A.Ş. ile iletişime geçin: <a href="mailto:info@pauteknokent.com.tr">info@pauteknokent.com.tr</a>

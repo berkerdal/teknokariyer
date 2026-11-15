@@ -4,8 +4,9 @@ import { useActionState, useState } from 'react'
 import { kayitEylemi } from '@/eylemler/hesap'
 import { SIFRE_KURALLARI } from '@/servisler/hesapKurallari'
 import { Alan, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
+import { InsanDogrulama } from './InsanDogrulama'
 
-export function KayitFormu({ surum, tarih }: { surum: string; tarih: string }) {
+export function KayitFormu({ surum, tarih, insan }: { surum: string; tarih: string; insan: string | null }) {
   const [durum, eylem] = useActionState<FormDurumu, FormData>(kayitEylemi, {})
   const [sifre, setSifre] = useState('')
   const h = durum.hatalar ?? {}
@@ -25,7 +26,7 @@ export function KayitFormu({ surum, tarih }: { surum: string; tarih: string }) {
   return (
     <form action={eylem} className="form-yigin" noValidate>
       <h1 className="b2">Hesap aç</h1>
-      <HataOzeti durum={durum} />
+      <HataOzeti durum={durum} alanlar={{ insan: 'insan-dogrulama' }} />
       <Alan id="ad" etiket="Ad soyad" autoComplete="name" required defaultValue={durum.degerler?.ad} hata={h.ad} />
       <Alan id="eposta" etiket="E-posta" type="email" inputMode="email" autoComplete="email" required defaultValue={durum.degerler?.eposta} hata={h.eposta} />
       <Alan
@@ -69,6 +70,7 @@ export function KayitFormu({ surum, tarih }: { surum: string; tarih: string }) {
           Teknokent kariyer etkinlikleri ve duyurularıyla ilgili e-posta almak istiyorum. <span className="istege-bagli">(isteğe bağlı)</span>
         </span>
       </label>
+      <InsanDogrulama site={insan} sifirla={durum} hata={durum.hatalar?.insan} />
       <GonderDugmesi bekleme="Hesap açılıyor…">Hesabı aç</GonderDugmesi>
       <p className="kucuk ikincil">E-posta adresini doğrulaman için bir bağlantı göndereceğiz.</p>
     </form>

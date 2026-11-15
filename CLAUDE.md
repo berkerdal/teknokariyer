@@ -438,7 +438,22 @@ Claude tarafından yapılacak.
       açıklama); hem `/yonetim/ayarlar` “Giriş güvenliği” bölümü hem Payload `ayarlar.guvenlik` grubu aynı açıklamaları
       gösterir. Sunucu sınır dışını reddeder; okurken sınır dışı değer yerine varsayılan kullanılır (`guvenlikAyarlari`).
   - **Üst bilgideki kişi bağlantısı** kurum kullanıcısında `/yonetim`'e gider (önceden `/admin`'e gidiyordu).
-  - **Sırada:** Turnstile ve istek sınırlama, virüs taraması, YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
+  - **Bot koruması ve istek sınırlama (15.11.2026):** Göç `20261115_092436_istek_sinirlari` (yalnızca CREATE/ADD).
+    - **Turnstile** (`src/altyapi/insanDogrulama.ts`, bileşen `src/arayuz/hesap/InsanDogrulama.tsx`): kayıt, giriş, şifremi
+      unuttum formlarında. Görünmez kip (`appearance: interaction-only`), Türkçe; anahtar `insan` adıyla gönderilir, her
+      gönderimden sonra araç yenilenir. Sunucu denetimi `src/veri/koruma.ts` → `insanDenetle`.
+      Ortama göre: geliştirmede kapalı; test ortamında Cloudflare'in herkese açık test anahtarları; **yayında
+      `TURNSTILE_SITE_ANAHTARI` ve `TURNSTILE_GIZLI_ANAHTAR` zorunlu** (yoksa formlar reddedilir, sessizce kapanmaz).
+      Yayına geçişte Cloudflare panelinde Turnstile aracı oluşturulup anahtarlar Worker'a eklenmeli (göç rehberine yazılacak).
+      Doğrulama adresi `TURNSTILE_DOGRULAMA_ADRESI` ile değiştirilebilir (yalnızca deneme için).
+    - Bu çalışma ortamından challenges.cloudflare.com erişilemiyor: tarayıcı denemesi sahte betik (Playwright `route`) ve
+      yerel sahte doğrulama sunucusuyla yapıldı.
+    - **İstek sınırları** (`src/alan/istekSiniri.ts`): giriş 10/15 dk, kayıt 5/saat, şifre yenileme 5/saat (IP ve e-posta
+      adresi ayrı ayrı), ikinci adım 20/15 dk, davet kabulü 10/saat (IP); başvuru 30/saat (hesap). Sayaçlar `istek-sinirlari`
+      koleksiyonunda; kaynak HMAC özeti (`anahtarliOzet`), IP adresi saklanmaz; süresi biten sayaçlar gece silinir.
+      Hata 429, Türkçe ve kalan süreyle.
+    - IP: `cf-connecting-ip`, yoksa `x-forwarded-for` ilk adres (`istemciAdresi`).
+  - **Sırada:** virüs taraması, YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
     `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).

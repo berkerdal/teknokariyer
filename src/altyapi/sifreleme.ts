@@ -50,3 +50,12 @@ export async function coz(veri: string, amac: string): Promise<string | null> {
     return null
   }
 }
+
+/** Anahtarlı özet (HMAC-SHA256, hex). IP adresi gibi değerleri geri çözülemez biçimde eşlemek için. */
+export async function anahtarliOzet(deger: string, amac: string): Promise<string> {
+  const gizli = process.env.PAYLOAD_SECRET
+  if (!gizli) throw new Error('PAYLOAD_SECRET tanımlı değil')
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(`${amac}:${gizli}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const h = new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(deger)))
+  return Array.from(h, (x) => x.toString(16).padStart(2, '0')).join('')
+}
