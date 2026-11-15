@@ -396,6 +396,15 @@ dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
 .sf-beceriler button { display: inline-grid; place-items: center; width: 26px; height: 26px; border: 0; background: none; color: inherit; cursor: pointer; border-radius: 3px; }
 @media (hover: hover) and (pointer: fine) { .sf-beceriler button:hover { background: rgba(24, 63, 130, .1); } }
 
+/* ---------- Eğitim ve tek seçim ---------- */
+.tek-secim { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 4px 4px 4px 12px; background: var(--yuzey);
+  border-radius: var(--kose-kontrol); box-shadow: inset 0 0 0 1px var(--cizgi-kontrol); }
+.tek-secim-ad { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; min-width: 0; }
+.tek-secim-ad .ikon { color: var(--basari); flex: none; }
+.eg-simge { font: 700 15px/1 var(--font-baslik); }
+.egitim-talepler { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.girdi--kisa { max-width: 160px; }
+
 /* ---------- Kaydet düğmesi ---------- */
 .kaydet { position: relative; z-index: 2; color: var(--metin-2); }
 .ikon-dugme.kaydet { width: 36px; height: 36px; margin: -6px -6px 0 0; }

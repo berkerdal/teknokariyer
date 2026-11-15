@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { SertifikaListesi, sertifikaGorunumu } from '@/arayuz/SertifikaListesi'
+import { EgitimListesi, egitimGorunumu } from '@/arayuz/EgitimListesi'
 import { CvGoruntuleyici } from '@/arayuz/firma/CvGoruntuleyici'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -122,6 +123,12 @@ export default async function HavuzProfili({ params }: { params: Promise<{ id: s
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+        {p.egitimler.length > 0 && (
+          <section>
+            <h2 className="b3 kare-bas">Eğitim</h2>
+            <EgitimListesi egitimler={p.egitimler.map((e) => egitimGorunumu(e as unknown as Record<string, unknown>))} />
           </section>
         )}
         {p.sertifikalar.length > 0 && (

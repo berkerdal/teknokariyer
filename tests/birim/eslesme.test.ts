@@ -50,3 +50,12 @@ describe('açıklanabilir eşleşme', () => {
     expect(eslesmeHesapla(gomulu, p, 'firma')).toEqual(eslesmeHesapla(gomulu, elif, 'firma'))
   })
 })
+
+describe('birden çok eğitim', () => {
+  it('ana bölüm uymasa da diğer eğitimlerin bölümü uyuyorsa bölüm koşulu sağlanır ve gerekçesi yazılır', () => {
+    const ilan: IlanKosullari = { zorunluBeceriler: [], tercihBeceriler: [], model: 'hibrit', bolumler: ['Bilgisayar Mühendisliği'], deneyim: 'yeni-mezun', diller: [] }
+    const profil: EslesmeProfili = { beceriler: [], modeller: [], bolum: 'Yapay Zekâ', ekBolumler: ['Yapay Zekâ', 'Bilgisayar Mühendisliği'], diller: [] }
+    const e = eslesmeHesapla(ilan, profil, 'aday')
+    expect(e.satirlar.find((s) => s.metin.includes('bölüm'))).toEqual({ durum: 'var', metin: 'Okuduğun bölümlerden biri (Bilgisayar Mühendisliği) ilanın tercih ettiği bölümler arasında.' })
+  })
+})

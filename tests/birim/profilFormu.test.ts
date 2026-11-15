@@ -9,11 +9,19 @@ const form = (v: Record<string, string | string[]>) => {
 
 describe('profil formu (K28)', () => {
   it('yalnızca formdaki bölümler güncellenir; diğerleri hiç yazılmaz', () => {
-    const { guncelleme } = profilFormunuOku(form({ profilBolumu: 'egitim', okul: '3', bolum: '12', mezuniyetAy: '6', mezuniyetYil: '2027' }))
-    expect(Object.keys(guncelleme).sort()).toEqual(['bolum', 'gano', 'mezuniyet', 'okul', 'sinif'])
-    expect(guncelleme.okul).toBe(3)
-    expect(guncelleme.bolum).toBe(12) // okulun bölümü, profil bölümüyle karışmaz
-    expect(guncelleme.mezuniyet).toBe('2027-06-15T09:00:00.000Z')
+    const egitimler = [
+      { duzey: 'lisans', okul: 3, bolum: 12, baslangicYil: 2019, bitisAy: 6, bitisYil: 2023, devam: false, gano: '3,1' },
+      { duzey: 'yuksek-lisans', okul: 4, bolum: 13, baslangicYil: 2024, bitisAy: 6, bitisYil: 2027, devam: true, sinif: '2. sınıf' },
+    ]
+    const { guncelleme } = profilFormunuOku(form({ profilBolumu: 'egitim', egitimlerJson: JSON.stringify(egitimler) }))
+    expect(Object.keys(guncelleme).sort()).toEqual(['bolum', 'egitimler', 'gano', 'mezuniyet', 'okul', 'sinif'])
+    // Ana eğitim devam eden yüksek lisans; üst alanlar ondan türetilir
+    expect(guncelleme.okul).toBe(4)
+    expect(guncelleme.bolum).toBe(13) // okulun bölümü, profil bölümüyle karışmaz
+    expect(guncelleme.sinif).toBe('2. sınıf')
+    expect(guncelleme.mezuniyet).toBe('2027-06-15T00:00:00.000Z')
+    expect(guncelleme.egitimler?.map((e) => e.duzey)).toEqual(['yuksek-lisans', 'lisans'])
+    expect(guncelleme.egitimler?.[1]?.gano).toBe(3.1)
     expect(guncelleme.beceriler).toBeUndefined()
     expect(guncelleme.tercihler).toBeUndefined()
   })
@@ -27,13 +35,21 @@ describe('profil formu (K28)', () => {
     expect(guncelleme.deneyimSeviyesi).toBe('ogrenci')
     expect(guncelleme.tercihler).toMatchObject({ modeller: ['hibrit'], turler: ['staj'], ucretBeklentisi: 30000, tasinmayaAcik: false })
   })
-  it('hatalar tam cümle ve Türkçe; yarım mezuniyet tarihi ve geçersiz GANO yakalanır', () => {
-    const { hatalar } = profilFormunuOku(form({ profilBolumu: ['egitim', 'kimlik'], mezuniyetAy: '6', gano: '4,5', telefon: 'abc' }))
+  it('hatalar tam cümle ve Türkçe; yarım mezuniyet tarihi, eksik bölüm ve geçersiz not yakalanır', () => {
+    const egitimler = [
+      { duzey: 'lisans', okul: 3, bolum: 12, bitisAy: 6 },
+      { duzey: 'lisans', okul: 3, bolum: 12, gano: '4,5' },
+      { duzey: 'onlisans', okul: 3 },
+      { duzey: 'lise', okulAdi: 'Denizli Anadolu Lisesi', bitisYil: 2018 },
+    ]
+    const { hatalar, guncelleme } = profilFormunuOku(form({ profilBolumu: ['egitim', 'kimlik'], egitimlerJson: JSON.stringify(egitimler), telefon: 'abc' }))
     expect(hatalar).toEqual({
-      mezuniyetAy: 'Mezuniyet tarihi için hem ayı hem yılı seç.',
-      gano: 'GANO 0 ile 4 arasında bir sayı olmalı (örneğin 3,12).',
+      'egitim-0': '1. eğitim: mezuniyet tarihi için ayı ve yılı birlikte seç.',
+      'egitim-1': '2. eğitim: not ortalaması 0 ile 4 arasında olmalı (örneğin 3,12).',
+      'egitim-2': '3. eğitim: bölümünü listeden seç.',
       telefon: 'Telefon numaranı 0 5xx xxx xx xx biçiminde yaz.',
     })
+    expect(guncelleme.egitimler).toEqual([expect.objectContaining({ duzey: 'lise', okulAdi: 'Denizli Anadolu Lisesi', bolum: null })])
   })
   it('iş deneyimi: zorunlu alanlar, tarih sırası, devam eden iş', () => {
     const satirlar = [

@@ -506,6 +506,21 @@ export interface Adaylar {
   sinif?: string | null;
   mezuniyet?: string | null;
   gano?: number | null;
+  egitimler?:
+    | {
+        duzey: 'lise' | 'onlisans' | 'lisans' | 'yuksek-lisans' | 'doktora';
+        okul?: (number | null) | Taksonomiler;
+        okulAdi?: string | null;
+        bolum?: (number | null) | Taksonomiler;
+        baslangicYil?: number | null;
+        bitisAy?: number | null;
+        bitisYil?: number | null;
+        devam?: boolean | null;
+        sinif?: string | null;
+        gano?: number | null;
+        id?: string | null;
+      }[]
+    | null;
   deneyimSeviyesi?: ('ogrenci' | 'yeni-mezun' | '1-3' | '3-5' | '5+') | null;
   deneyimler?:
     | {
@@ -1181,6 +1196,21 @@ export interface AdaylarSelect<T extends boolean = true> {
   sinif?: T;
   mezuniyet?: T;
   gano?: T;
+  egitimler?:
+    | T
+    | {
+        duzey?: T;
+        okul?: T;
+        okulAdi?: T;
+        bolum?: T;
+        baslangicYil?: T;
+        bitisAy?: T;
+        bitisYil?: T;
+        devam?: T;
+        sinif?: T;
+        gano?: T;
+        id?: T;
+      };
   deneyimSeviyesi?: T;
   deneyimler?:
     | T

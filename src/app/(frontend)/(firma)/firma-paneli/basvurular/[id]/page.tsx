@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { SertifikaListesi, sertifikaGorunumu } from '@/arayuz/SertifikaListesi'
+import { EgitimListesi, egitimGorunumu } from '@/arayuz/EgitimListesi'
 import { CvGoruntuleyici } from '@/arayuz/firma/CvGoruntuleyici'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -213,6 +214,12 @@ export default async function BasvuruAyrintisi({ params }: Props) {
                       </li>
                     ))}
                   </ul>
+                </>
+              )}
+              {(p.egitimler ?? []).length > 0 && (
+                <>
+                  <h3 className="b4">Eğitim</h3>
+                  <EgitimListesi egitimler={(p.egitimler ?? []).map((e) => egitimGorunumu(e))} />
                 </>
               )}
               {(p.sertifikalar ?? []).length > 0 && (

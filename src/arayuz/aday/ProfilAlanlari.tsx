@@ -10,6 +10,7 @@ import { CINSIYET_ADI } from '@/alan/havuz'
 import { ListeDuzenleyici } from './ProfilFormlari'
 import { SatirListesi } from './SatirListesi'
 import { SertifikaDuzenleyici } from './SertifikaDuzenleyici'
+import { EgitimDuzenleyici } from './EgitimDuzenleyici'
 
 export type Secenek = { id: number; ad: string }
 export const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
@@ -81,35 +82,48 @@ export function KimlikAlanlari({ aday }: { aday: Adaylar }) {
 }
 
 export function EgitimAlanlari({ aday, okullar, bolumler }: { aday: Adaylar; okullar: Secenek[]; bolumler: Secenek[] }) {
+  // Eski profillerde eğitim listesi yok: üst alanlardan tek satır kurulur, kaydedilince listeye dönüşür.
+  const eski = !aday.egitimler?.length && (aday.okul || aday.bolum)
   const m = ayYil(aday.mezuniyet)
+  const baslangic = eski
+    ? [
+        {
+          duzey: 'lisans',
+          okul: kimlik(aday.okul) ? Number(kimlik(aday.okul)) : null,
+          okulAdi: '',
+          bolum: kimlik(aday.bolum) ? Number(kimlik(aday.bolum)) : null,
+          baslangicYil: null as number | null,
+          bitisAy: m?.ay ? Number(m.ay) : null,
+          bitisYil: m?.yil ? Number(m.yil) : null,
+          devam: Boolean(aday.sinif) || (m?.yil ? Number(m.yil) > new Date().getFullYear() : false),
+          sinif: aday.sinif ?? '',
+          gano: aday.gano != null ? String(aday.gano).replace('.', ',') : '',
+        },
+      ]
+    : (aday.egitimler ?? []).map((e) => ({
+        duzey: e.duzey,
+        okul: e.okul ? Number(kimlik(e.okul)) : null,
+        okulAdi: e.okulAdi ?? '',
+        bolum: e.bolum ? Number(kimlik(e.bolum)) : null,
+        baslangicYil: e.baslangicYil ?? null,
+        bitisAy: e.bitisAy ?? null,
+        bitisYil: e.bitisYil ?? null,
+        devam: Boolean(e.devam),
+        sinif: e.sinif ?? '',
+        gano: e.gano != null ? String(e.gano).replace('.', ',') : '',
+      }))
   return (
-    <>
-      <div className="alan-grubu">
-        <Secim id="okul" etiket="Okul" secenekler={okullar} deger={kimlik(aday.okul)} />
-        <TalepPenceresi tur="universite" kaynak="aday-profil:okul" hitap="sen" dugme="Okulun listede yok mu? Eklenmesini iste" />
-      </div>
-      <div className="alan-grubu">
-        <Secim id="bolum" etiket="Bölüm" secenekler={bolumler} deger={kimlik(aday.bolum)} />
-        <TalepPenceresi tur="bolum" kaynak="aday-profil:bolum" hitap="sen" dugme="Bölümün listede yok mu? Eklenmesini iste" />
-      </div>
-      <div className="iki-alan">
-        <Secim id="sinif" etiket="Sınıf" secenekler={SINIFLAR.map((s) => ({ id: s, ad: s }))} deger={aday.sinif} />
-        <div className="alan">
-          <label htmlFor="gano">
-            Genel not ortalaması (GANO) <span className="istege-bagli">(isteğe bağlı)</span>
-          </label>
-          <input id="gano" name="gano" className="girdi" inputMode="decimal" placeholder="Örneğin 3,12" defaultValue={aday.gano != null ? String(aday.gano).replace('.', ',') : ''} />
+    <EgitimDuzenleyici
+      baslangic={baslangic}
+      okullar={okullar}
+      bolumler={bolumler}
+      talepler={
+        <div className="egitim-talepler">
+          <TalepPenceresi tur="universite" kaynak="aday-profil:okul" hitap="sen" dugme="Okulun listede yok mu? Eklenmesini iste" />
+          <TalepPenceresi tur="bolum" kaynak="aday-profil:bolum" hitap="sen" dugme="Bölümün listede yok mu? Eklenmesini iste" />
         </div>
-      </div>
-      <fieldset className="alan">
-        <legend>Mezuniyet tarihi</legend>
-        <span className="ipucu">Henüz mezun olmadıysan beklediğin tarihi seç.</span>
-        <div className="iki-alan">
-          <Secim id="mezuniyetAy" etiket="Ay" secenekler={AYLAR.map((x, n) => ({ id: n + 1, ad: x }))} deger={m?.ay} />
-          <Secim id="mezuniyetYil" etiket="Yıl" secenekler={Array.from({ length: 40 }, (_, n) => new Date().getFullYear() + 6 - n).map((y) => ({ id: y, ad: String(y) }))} deger={m?.yil} />
-        </div>
-      </fieldset>
-    </>
+      }
+    />
   )
 }
 

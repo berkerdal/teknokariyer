@@ -11,6 +11,7 @@ import * as migration_20261115_090859_guvenlik_ayarlari from './20261115_090859_
 import * as migration_20261115_092436_istek_sinirlari from './20261115_092436_istek_sinirlari';
 import * as migration_20261115_153138_kaydedilenler_trafik from './20261115_153138_kaydedilenler_trafik';
 import * as migration_20261115_161035_sertifika_ayrintilari from './20261115_161035_sertifika_ayrintilari';
+import * as migration_20261115_194523_egitimler from './20261115_194523_egitimler';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20261115_161035_sertifika_ayrintilari.up,
     down: migration_20261115_161035_sertifika_ayrintilari.down,
-    name: '20261115_161035_sertifika_ayrintilari'
+    name: '20261115_161035_sertifika_ayrintilari',
+  },
+  {
+    up: migration_20261115_194523_egitimler.up,
+    down: migration_20261115_194523_egitimler.down,
+    name: '20261115_194523_egitimler'
   },
 ];

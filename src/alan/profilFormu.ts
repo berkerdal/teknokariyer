@@ -5,6 +5,7 @@
  * Saf modül: FormData benzeri bir girdi alır, güncelleme ve Türkçe alan hatalarını döndürür.
  */
 import { CEFR, DENEYIM_SIRASI } from './eslesme'
+import { EN_FAZLA_EGITIM, anaEgitimAlanlari, egitimSatiri, egitimleriSirala, type EgitimSatiri } from './egitim'
 import { SINIFLAR } from './basvuru'
 
 export const PROFIL_BOLUMLERI = [
@@ -56,6 +57,7 @@ export interface ProfilGuncellemesiHam {
     baslama: string | null
     ucretBeklentisi: number | null
   }
+  egitimler?: EgitimSatiri[]
   sertifikalar?: Array<{
     ad: string
     kurum: string | null
@@ -125,17 +127,17 @@ export function profilFormunuOku(f: FormOkuyucu): ProfilFormuSonucu {
     g.tanitim = t || null
   }
   if (bolumler.has('egitim')) {
-    g.okul = Number(metin(f, 'okul')) || null
-    g.bolum = Number(metin(f, 'bolum')) || null
-    const s = metin(f, 'sinif')
-    g.sinif = (SINIFLAR as readonly string[]).includes(s) ? s : null
-    const ay = metin(f, 'mezuniyetAy')
-    const yil = metin(f, 'mezuniyetYil')
-    g.mezuniyet = ayYilTarihi(ay, yil)
-    if ((ay || yil) && !g.mezuniyet) h.mezuniyetAy = 'Mezuniyet tarihi için hem ayı hem yılı seç.'
-    const gano = metin(f, 'gano').replace(',', '.')
-    if (gano && !(Number(gano) >= 0 && Number(gano) <= 4)) h.gano = 'GANO 0 ile 4 arasında bir sayı olmalı (örneğin 3,12).'
-    g.gano = gano && !h.gano ? Number(gano) : null
+    // Birden çok eğitim; üst alanlar (okul, bölüm, sınıf, mezuniyet, GANO) ana eğitimden türetilir (src/alan/egitim.ts).
+    const liste: EgitimSatiri[] = []
+    jsonDizi(f, 'egitimlerJson')
+      .slice(0, EN_FAZLA_EGITIM)
+      .forEach((s, n) => {
+        const r = egitimSatiri(s, n)
+        if ('hata' in r) h[`egitim-${n}`] = r.hata
+        else liste.push(r.egitim)
+      })
+    g.egitimler = egitimleriSirala(liste)
+    Object.assign(g, anaEgitimAlanlari(liste))
   }
   if (bolumler.has('deneyim')) {
     const d = metin(f, 'deneyimSeviyesi')

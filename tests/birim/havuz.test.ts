@@ -53,3 +53,11 @@ describe('görünürlük (K24, K25)', () => {
     expect(sonOtuzGundeGoruntuleyenFirmaSayisi(g, simdi)).toBe(2)
   })
 })
+
+describe('aday kodu', () => {
+  it('A- ve 6 karakter; karışabilen 0, O, 1, I yok', async () => {
+    const { adayKoduUret } = await import('@/alan/havuz')
+    for (let i = 0; i < 200; i++) expect(adayKoduUret()).toMatch(/^A-[2-9A-HJ-NP-Z]{6}$/)
+    expect(adayKoduUret(() => new Uint8Array([0, 1, 2, 3, 4, 5]))).toBe('A-234567')
+  })
+})

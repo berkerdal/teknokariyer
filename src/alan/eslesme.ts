@@ -36,6 +36,8 @@ export interface EslesmeProfili {
   beceriler: string[]
   modeller: CalismaModeli[]
   bolum?: string
+  /** Ana eğitim dışındaki eğitimlerin bölümleri (yüksek lisans, çift ana dal…) */
+  ekBolumler?: string[]
   deneyim?: Deneyim
   diller: Array<{ dil: string; seviye: Cefr }>
 }
@@ -112,10 +114,17 @@ export function eslesmeHesapla(
 
   let bolumUyar = true
   if (ilan.bolumler.length) {
-    bolumUyar = Boolean(profil.bolum && ilan.bolumler.includes(profil.bolum))
+    const uyanEk = (profil.ekBolumler ?? []).find((b) => b !== profil.bolum && ilan.bolumler.includes(b))
+    bolumUyar = Boolean((profil.bolum && ilan.bolumler.includes(profil.bolum)) || uyanEk)
     satirlar.push(
       bolumUyar
-        ? { durum: 'var', metin: `${sen ? 'Bölümün' : 'Adayın bölümü'} ilanın tercih ettiği bölümler arasında.` }
+        ? {
+            durum: 'var',
+            metin:
+              profil.bolum && ilan.bolumler.includes(profil.bolum)
+                ? `${sen ? 'Bölümün' : 'Adayın bölümü'} ilanın tercih ettiği bölümler arasında.`
+                : `${sen ? 'Okuduğun bölümlerden biri' : 'Adayın okuduğu bölümlerden biri'} (${uyanEk}) ilanın tercih ettiği bölümler arasında.`,
+          }
         : {
             durum: 'notr',
             metin: profil.bolum

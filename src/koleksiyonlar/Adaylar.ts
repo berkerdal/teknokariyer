@@ -1,7 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { kullanici, kurumKullanicisiMi, kurumVeyaSahibi, yoneticiMi, alanKurum } from '../erisim'
 import { CEFR, DENEYIM_ADI, DENEYIM_SIRASI } from '../alan/eslesme'
-import { CINSIYET_ADI, GORUNURLUK_ADI } from '../alan/havuz'
+import { EGITIM_DUZEYLERI } from '../alan/egitim'
+import { CINSIYET_ADI, GORUNURLUK_ADI, adayKoduUret } from '../alan/havuz'
 
 /**
  * Aday profilleri (talimatlar 5, 7; K5, K24, K25).
@@ -35,8 +36,18 @@ export const Adaylar: CollectionConfig = {
     beforeChange: [
       async ({ data, operation, req }) => {
         if (operation === 'create' && !data.kod) {
-          const { totalDocs } = await req.payload.count({ collection: 'adaylar', overrideAccess: true, req })
-          data.kod = `A-${String(1000 + totalDocs + 1).padStart(4, '0')}`
+          // Rastgele ve hiç kullanılmamış kod: silinen adayın başvurularda kalan kodu yeni adaya verilmez.
+          for (let deneme = 0; deneme < 8; deneme++) {
+            const kod = adayKoduUret()
+            const [profilde, basvuruda] = await Promise.all([
+              req.payload.count({ collection: 'adaylar', where: { kod: { equals: kod } }, overrideAccess: true, req }),
+              req.payload.count({ collection: 'basvurular', where: { adayKodu: { equals: kod } }, overrideAccess: true, req }),
+            ])
+            if (!profilde.totalDocs && !basvuruda.totalDocs) {
+              data.kod = kod
+              break
+            }
+          }
         }
         return data
       },
@@ -59,6 +70,25 @@ export const Adaylar: CollectionConfig = {
     { name: 'sinif', label: 'Sınıf', type: 'text' },
     { name: 'mezuniyet', label: 'Mezuniyet tarihi', type: 'date' },
     { name: 'gano', label: 'GANO', type: 'number', min: 0, max: 4 },
+    {
+      // Birden çok eğitim (lisans, yüksek lisans, çift ana dal…). Üstteki okul, bölüm, sınıf, mezuniyet ve GANO, kayıtta
+      // “ana eğitim”den (devam eden veya en son biten) türetilir; eşleştirme ve başvuru kuralları onları kullanır.
+      name: 'egitimler',
+      label: 'Eğitim bilgileri',
+      type: 'array',
+      fields: [
+        { name: 'duzey', type: 'select', required: true, options: EGITIM_DUZEYLERI.map(([value, label]) => ({ value, label })) },
+        { name: 'okul', type: 'relationship', relationTo: 'taksonomiler', filterOptions: { tur: { equals: 'universite' } } },
+        { name: 'okulAdi', label: 'Okul adı (listede yoksa veya lise)', type: 'text' },
+        { name: 'bolum', type: 'relationship', relationTo: 'taksonomiler', filterOptions: { tur: { equals: 'bolum' } } },
+        { name: 'baslangicYil', type: 'number' },
+        { name: 'bitisAy', type: 'number' },
+        { name: 'bitisYil', type: 'number' },
+        { name: 'devam', type: 'checkbox' },
+        { name: 'sinif', type: 'text' },
+        { name: 'gano', type: 'number', min: 0, max: 4 },
+      ],
+    },
     {
       name: 'deneyimSeviyesi',
       label: 'Deneyim',

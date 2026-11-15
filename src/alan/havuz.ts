@@ -137,3 +137,13 @@ export function sonOtuzGundeGoruntuleyenFirmaSayisi(
   const sinir = simdi.getTime() - 30 * 86_400_000
   return new Set(goruntulemeler.filter((g) => g.tarih.getTime() >= sinir).map((g) => g.firmaId)).size
 }
+
+/**
+ * Aday kodu (“A-7K3M9P”): havuz listesinde ve başvurularda adın yerine görünür. Sayıdan türetilmez: bir aday hesabını
+ * silince sayı düşer ve sıradaki kod, silinen adayın başvurularda kalan koduyla çakışırdı (iki kişi karışırdı).
+ * Karışabilen harfler (0/O, 1/I) kullanılmaz; çakışma denetimi servistedir.
+ */
+const KOD_HARFLERI = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+export function adayKoduUret(rastgele: (n: number) => Uint8Array = (n) => crypto.getRandomValues(new Uint8Array(n))): string {
+  return `A-${Array.from(rastgele(6), (b) => KOD_HARFLERI[b % KOD_HARFLERI.length]).join('')}`
+}

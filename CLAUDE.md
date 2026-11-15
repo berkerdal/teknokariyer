@@ -601,6 +601,24 @@ Claude tarafından yapılacak.
       Göç `20261115_161035_sertifika_ayrintilari` (D1) ve PostgreSQL karşılığı: yalnızca ekleme (PG'de `ALTER TYPE … ADD VALUE`).
     - Öğrenilen: Yeni sunucu eylemi eklendikten sonra Turbopack geliştirme sunucusu “reading 'apply'” hatası verebilir
       (eski eylem kaydı); sunucu yeniden başlatılınca düzelir.
+  - **Kullanıcı geri bildirimi 5 (15.11.2026):**
+    - Modal pencereler `height: fit-content` (tarayıcı varsayılanı). `height: auto`, `inset: 0` olan modal pencereyi en
+      yüksek boya geriyordu; kısa formlarda yarısı boş pencere çıkıyordu.
+    - Üst çubukta yalnızca “Giriş yap” (firma girişi giriş sayfasındaki sekmede). Liste talebi örnekleri türe göre
+      (`TALEP_TUR_ADI[tur].ornek`).
+    - Firmalar: blok süzgeci ve blok açıklaması kaldırıldı (bloklar tek binanın koridorları); sektör düğmeleri (iki ve
+      daha çok sektörde), alfabetik. Ana sayfadaki firma listesi alfabetik, ilk 8 + “Bütün firmaları gör”.
+    - Yönetim yan menüsündeki hesap menüsü sütun genişliğinde açılır (yan sütun `overflow-y: auto` olduğu için taşan kesiliyordu).
+    - **Birden çok eğitim:** `adaylar.egitimler` (düzey, okul veya `okulAdi` (lise), bölüm, başlangıç yılı, mezuniyet
+      ay/yıl, `devam`, sınıf, GANO). Kurallar `src/alan/egitim.ts`; “ana eğitim” = devam eden, yoksa en son biten; üst
+      alanlar (okul, bölüm, sınıf, mezuniyet, GANO) kayıtta ondan türetilir, eşleştirme ve başvuru kuralları değişmedi.
+      Eşleşmede `ekBolumler` (bütün bölümler) de bakılır. Okul ve bölüm `TekSecimGirdisi` ile yazdıkça önerili.
+      Eski profillerde liste boşsa düzenleyici üst alanlardan tek satır kurar. Görünüm `EgitimListesi` (aday, başvuru
+      kopyası, havuz). Göçler `…_egitimler` (D1 ve PG; yalnızca ekleme).
+    - **Aday kodu** artık rastgele (`adayKoduUret`, “A-7K3M9P”, 0/O/1/I yok) ve adaylarda da başvurulardaki
+      `adayKodu`'nda da kullanılmamış olmalı. Eski kural (aday sayısı + 1000) hesap silindikten sonra var olan kodu
+      üretiyordu: yeni adayın profili açılamıyordu ve silinen adayın başvurularda kalan kodu yeni adaya geçebilirdi.
+      Entegrasyon testleri birlikte koşunca yakalandı.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

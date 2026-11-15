@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { SertifikaListesi, sertifikaGorunumu } from '@/arayuz/SertifikaListesi'
+import { EgitimListesi, egitimGorunumu } from '@/arayuz/EgitimListesi'
 import Link from 'next/link'
 import type { Adaylar } from '@/payload-types'
 import { DENEYIM_ADI, MODEL_ADI, type CalismaModeli, type Deneyim } from '@/alan/eslesme'
@@ -128,15 +129,16 @@ export default async function ProfilSayfasi() {
           <DuzenlemePenceresi
             baslik="Eğitim bilgileri"
             bolumler={['egitim']}
-            dugme={a.okul ? 'Düzenle' : 'Ekle'}
+            dugme={a.okul || a.egitimler?.length ? 'Düzenle' : 'Ekle'}
             tamamMetni="Eğitim bilgilerin kaydedildi."
-            alanlar={{ mezuniyetAy: 'mezuniyetAy' }}
           >
             <EgitimAlanlari aday={a} okullar={okullar} bolumler={bolumler} />
           </DuzenlemePenceresi>
         }
       >
-        {a.okul || a.bolum ? (
+        {a.egitimler?.length ? (
+          <EgitimListesi egitimler={a.egitimler.map((e) => egitimGorunumu(e as unknown as Record<string, unknown>))} />
+        ) : a.okul || a.bolum ? (
           <div className="profil-oge">
             <p className="profil-oge-bas">{ad(a.okul) || 'Okul seçilmedi'}</p>
             <p>{[ad(a.bolum), a.sinif].filter(Boolean).join(' · ')}</p>

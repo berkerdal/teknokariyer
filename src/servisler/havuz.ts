@@ -112,6 +112,7 @@ export async function havuzProfiliAc(payload: Payload, kullanici: Kullanici, ada
     tanitim: aday.tanitim,
     deneyimler: aday.deneyimler ?? [],
     sertifikalar: aday.sertifikalar ?? [],
+    egitimler: aday.egitimler ?? [],
   }
 }
 

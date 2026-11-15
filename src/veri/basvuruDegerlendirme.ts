@@ -15,6 +15,7 @@ export interface ProfilKopyasi {
   tanitim?: string | null
   okul?: string | null
   bolum?: string | null
+  egitimler?: Array<Record<string, unknown> & { bolum?: string | null }>
   sinif?: string | null
   mezuniyet?: string | null
   deneyimSeviyesi?: string | null
@@ -46,6 +47,7 @@ export function kopyaProfili(p: ProfilKopyasi): EslesmeProfili {
     beceriler: (p.beceriler ?? []).map((b) => b.ad).filter((x): x is string => Boolean(x)),
     modeller: (p.tercihler?.modeller ?? []) as CalismaModeli[],
     bolum: p.bolum ?? undefined,
+    ekBolumler: (p.egitimler ?? []).map((e) => e.bolum).filter((x): x is string => Boolean(x)),
     deneyim: (p.deneyimSeviyesi ?? undefined) as Deneyim | undefined,
     diller: (p.diller ?? []).flatMap((d) => (d.dil ? [{ dil: d.dil, seviye: d.seviye as Cefr }] : [])),
   }

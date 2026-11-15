@@ -31,6 +31,7 @@ export function eslesmeProfili(a: Adaylar): EslesmeProfili {
     beceriler: (a.beceriler ?? []).map((b) => ad(b.beceri)).filter((x): x is string => Boolean(x)),
     modeller: (a.tercihler?.modeller ?? []) as CalismaModeli[],
     bolum: ad(a.bolum) ?? undefined,
+    ekBolumler: (a.egitimler ?? []).map((e) => ad(e.bolum)).filter((x): x is string => Boolean(x)),
     deneyim: (a.deneyimSeviyesi ?? undefined) as Deneyim | undefined,
     diller: (a.diller ?? []).flatMap((d) => (ad(d.dil) ? [{ dil: ad(d.dil)!, seviye: d.seviye as Cefr }] : [])),
   }

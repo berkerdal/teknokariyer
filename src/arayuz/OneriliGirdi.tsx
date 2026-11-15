@@ -18,6 +18,8 @@ export function OneriliGirdi<T extends OneriSecenegi>(p: {
   placeholder?: string
   /** Eşleşme yokken listenin altında gösterilecek içerik; yazılan metni alır. */
   bulunamadi?: (yazilan: string) => React.ReactNode
+  /** Etiket dışarıda görünür olarak yazılıyorsa iç gizli etiket eklenmez (ekran okuyucu iki kez okumasın). */
+  disEtiket?: boolean
 }) {
   const [yazilan, setYazilan] = useState('')
   const [acik, setAcik] = useState(false)
@@ -37,9 +39,11 @@ export function OneriliGirdi<T extends OneriSecenegi>(p: {
 
   return (
     <div className="oneri-kap">
-      <label className="gizli" htmlFor={p.id}>
-        {p.etiket}
-      </label>
+      {!p.disEtiket && (
+        <label className="gizli" htmlFor={p.id}>
+          {p.etiket}
+        </label>
+      )}
       <input
         ref={girdi}
         id={p.id}
