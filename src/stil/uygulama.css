@@ -610,3 +610,10 @@ p.y-oge-satir { padding: 10px 14px; }
   html.cv-yazdiriliyor body > .cv-yazdir-kap { display: block !important; }
   .cv-yazdir-kap img { display: block; width: 100%; page-break-after: always; break-after: page; }
 }
+
+/* Listeye dosyadan aktarma */
+.liste-aktarma { margin-top: 12px; }
+.aktarma-tablo th { white-space: nowrap; }
+.aktarma-tablo td { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aktarma-tablo td.secili-sutun { background: var(--camgobegi-zemin, #e6f5fc); font-weight: 600; }
+.aktarma-adlar { max-height: 240px; overflow: auto; }

@@ -4,6 +4,7 @@ import { TALEP_TUR_ADI } from '@/alan/talep'
 import { yoneticiMi } from '@/erisim'
 import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { ListeEkleFormu, ListeOgesi } from '@/arayuz/yonetim/Listeler'
+import { ListeAktarma } from '@/arayuz/yonetim/ListeAktarma'
 import { LISTE_TURLERI, type ListeTuru } from '@/servisler/listeler'
 import { listeOgeleri, listeSayilari } from '@/veri/listeler'
 import { yonetimOturumu } from '@/veri/yonetim'
@@ -111,9 +112,17 @@ export default async function Listeler({ searchParams }: Props) {
           )}
         </section>
         {yonetici && (
-          <section className="panel panel-ic">
-            <ListeEkleFormu tur={tur} turAdi={ad.tekil} />
-          </section>
+          <div className="y-sutun">
+            <section className="panel panel-ic">
+              <ListeEkleFormu tur={tur} turAdi={ad.tekil} />
+            </section>
+            <section className="panel panel-ic">
+              <details>
+                <summary className="b4">Dosyadan toplu aktar</summary>
+                <ListeAktarma key={tur} tur={tur} turAdi={ad.tekil} />
+              </details>
+            </section>
+          </div>
         )}
       </div>
     </>

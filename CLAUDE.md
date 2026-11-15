@@ -472,11 +472,18 @@ Claude tarafından yapılacak.
     - Öğrenilen: Bir cihazda e-posta kodu kullanıldıktan hemen sonra başka cihazdan girişte 60 saniyelik bekleme girişi
       engelliyordu. Girişte bekleme uygulanmaz (yalnızca “Yeni kod gönder”); geçerli kod varsa o kullanılır (`girisSirasinda`).
       Test ortamında açık kod `epostaKodu.test` alanında tutulur (yalnızca yayın dışı) ki ekranda yeniden gösterilebilsin.
-  - **Sırada:** YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
-    `docs/goc-rehberi.md` ve test senaryoları belgesi.
+  - **Listeye dosyadan aktarma (15.11.2026):** `/yonetim/listeler` → “Dosyadan toplu aktar” (yalnızca rol `yonetici`).
+    Excel (.xlsx, kitaplıksız: `xlsxOku`) veya CSV tarayıcıda okunur; başlığa göre sütun önerilir, ilk satırlar gösterilir.
+    Ad temizliği `src/alan/listeAktarma.ts`: tamamı büyük harfli adlar Türkçe kurallarla düzeltilir (TOBB, MEF gibi
+    kısaltmalar korunur), üniversitede sondaki “(ŞEHİR)”, bölümde parantez içi ekler (İngilizce, Burslu, İÖ) atılır.
+    Önizleme (yeni / zaten var / başka yazımla var) → 200'erli parçalarla `listeyeTopluEkle`; sunucu her parçayı yeniden
+    denetler, en fazla 5000 ad, hiçbir şey silinmez, işlem kaydına dosya adıyla geçer.
+    - **ÖSYM/YÖK verisini bu çalışma ortamından indirmek izin sisteminde reddedildi.** Liste, kurum personelinin ÖSYM tercih
+      kılavuzu tablolarını (Excel) bu araçla yüklemesiyle doldurulacak.
+  - **Sırada:** site haritası (sitemap) ve hreflang, `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
-  - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayından önce YÖK üniversite ve
+  - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayından önce (Listeler → Dosyadan toplu aktar) YÖK üniversite ve
     bölüm listesinin içe aktarılması gerekiyor (aksi hâlde aday okulunu bulamaz).
   - **Test ortamı yayında (14.11.2026):** https://teknokariyer-test.teknokariyer.workers.dev
     - Dağıtım Cloudflare **Workers Builds** ile: `claude/funny-cerf-r7h64q` dalına her gönderim derleyip yayınlar.

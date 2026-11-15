@@ -7,7 +7,8 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { getPayload, type Payload } from 'payload'
 import config from '@/payload.config'
 import { kurumKullanicisiMi, moderasyonYapabilirMi, yoneticiMi } from '@/erisim'
-import { listeOgesiniGuncelle, listeyeEkle } from '@/servisler/listeler'
+import { aktarmaOnizle, listeOgesiniGuncelle, listeyeEkle, listeyeTopluEkle } from '@/servisler/listeler'
+import { aktarmaAdlari } from '@/alan/listeAktarma'
 import { kurumKullanicisiEkle, kurumKullanicisiPasifligi, kurumRoluDegistir, teknikSorumluYap } from '@/servisler/kurumKullanicilari'
 import { ayarlariGuncelle } from '@/servisler/ayarlar'
 import { girisYap, sifreYenile } from '@/servisler/hesap'
@@ -45,6 +46,26 @@ describe('listeler', () => {
     const g = await listeOgesiniGuncelle(payload, yonetici, id, { ad: `Svelte ${ek}`, esAnlamlilar: [`SvelteKit ${ek}`, `sveltekit ${ek}`], aktif: false })
     expect(g.aktif).toBe(false)
     expect(g.esAnlamlilar?.map((e) => e.ad)).toEqual([`SvelteKit ${ek}`])
+  })
+
+  it('dosyadan aktarma: önizleme yeni/var/benzer ayırır, parça yalnızca yenileri ekler, sınırlar ve yetki denetlenir', async () => {
+    const satirlar = [['Üniversite Adı'], [`DENEME ${ek.toUpperCase()} ÜNİVERSİTESİ (DENİZLİ)`], [`Deneme ${ek} Üniversitesi`], [`ÖRNEK ${ek.toUpperCase()} TEKNİK ÜNİVERSİTESİ (İZMİR)`]]
+    const adlar = aktarmaAdlari(satirlar, 0, 'universite')
+    expect(adlar).toHaveLength(2)
+    await expect(aktarmaOnizle(payload, moderator, 'universite', adlar)).rejects.toMatchObject({ durumKodu: 403 })
+    const o = await aktarmaOnizle(payload, yonetici, 'universite', adlar)
+    expect(o.yeni).toHaveLength(2)
+    const r = await listeyeTopluEkle(payload, yonetici, 'universite', o.yeni, 'deneme.xlsx')
+    expect(r).toEqual({ eklenen: 2, atlanan: 0 })
+    // Aynı dosya ikinci kez: hiçbir şey eklenmez
+    expect((await listeyeTopluEkle(payload, yonetici, 'universite', o.yeni, 'deneme.xlsx')).eklenen).toBe(0)
+    const ikinci = await aktarmaOnizle(payload, yonetici, 'universite', [...adlar, `Deneme ${ek} Üniversitesi.`])
+    expect(ikinci.yeni).toEqual([])
+    expect(ikinci.zatenVar).toBe(2)
+    // Parça sınırı
+    await expect(listeyeTopluEkle(payload, yonetici, 'universite', Array.from({ length: 201 }, (_, i) => `Ad ${i} ${ek}`), 'x')).rejects.toBeTruthy()
+    const kayit = await payload.find({ collection: 'islem-kayitlari', where: { islem: { contains: 'dosyadan aktarıldı' } }, sort: '-createdAt', limit: 1, overrideAccess: true })
+    expect((kayit.docs[0]?.ayrinti as { adet?: number })?.adet).toBe(2)
   })
 })
 

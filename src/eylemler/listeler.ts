@@ -2,7 +2,7 @@
 /** Yönetici A.Ş. liste eylemleri. Yetki ve kurallar serviste. */
 import { revalidatePath } from 'next/cache'
 import type { FormDurumu } from '@/arayuz/form'
-import { listeOgesiniGuncelle, listeyeEkle, type ListeTuru } from '@/servisler/listeler'
+import { aktarmaOnizle, listeOgesiniGuncelle, listeyeEkle, listeyeTopluEkle, type AktarmaSiniflamasi, type ListeTuru } from '@/servisler/listeler'
 import { FormHatasi, IslemHatasi } from '@/servisler/ortak'
 import { payloadAl } from '@/veri/payload'
 import { yonetimOturumu } from '@/veri/yonetim'
@@ -51,5 +51,31 @@ export async function listeOgesiEylemi(_: FormDurumu, f: FormData): Promise<Form
     return { tamam: 'Kaydedildi.', surum: Date.now() }
   } catch (e) {
     return hata(e, { ad: metin(f, 'ad'), esAnlamlilar: metin(f, 'esAnlamlilar') })
+  }
+}
+
+/* ---------- Dosyadan aktarma (istemci bileşeni doğrudan çağırır; sonuç veri olarak döner) ---------- */
+
+export async function aktarmaOnizleEylemi(tur: string, adlar: string[]): Promise<{ hata?: string; sonuc?: AktarmaSiniflamasi }> {
+  const k = await yonetimOturumu()
+  try {
+    return { sonuc: await aktarmaOnizle(await payloadAl(), k, tur as ListeTuru, adlar) }
+  } catch (e) {
+    if (e instanceof IslemHatasi) return { hata: e.message }
+    console.error(e)
+    return { hata: 'Önizleme yapılamadı. Sayfayı yenileyip yeniden deneyin.' }
+  }
+}
+
+export async function aktarmaParcaEylemi(tur: string, adlar: string[], kaynak: string): Promise<{ hata?: string; eklenen?: number; atlanan?: number }> {
+  const k = await yonetimOturumu()
+  try {
+    const r = await listeyeTopluEkle(await payloadAl(), k, tur as ListeTuru, adlar, kaynak)
+    revalidatePath('/yonetim/listeler')
+    return r
+  } catch (e) {
+    if (e instanceof IslemHatasi) return { hata: e.message }
+    console.error(e)
+    return { hata: 'Aktarma yarıda kaldı. Sayfayı yenileyip kalan kısmı yeniden deneyin; eklenenler tekrar eklenmez.' }
   }
 }
