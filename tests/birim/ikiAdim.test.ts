@@ -42,3 +42,16 @@ describe('kurtarma kodları ve kurallar', () => {
     expect(ikiAdimZorunluMu('aday')).toBe(false)
   })
 })
+
+describe('ayarlanabilir güvenlik değerleri', () => {
+  it('eksik veya sınır dışı değer yerine varsayılan; geçerli değer korunur', async () => {
+    const { GUVENLIK_AYARLARI, guvenlikAyarlari } = await import('@/alan/ikiAdim')
+    const v = guvenlikAyarlari(null)
+    for (const a of GUVENLIK_AYARLARI) {
+      expect(v[a.ad]).toBe(a.varsayilan)
+      expect(a.varsayilan).toBeGreaterThanOrEqual(a.en)
+      expect(a.varsayilan).toBeLessThanOrEqual(a.cok)
+    }
+    expect(guvenlikAyarlari({ epostaKoduDakika: 15, cihazGun: 1000, enFazlaHata: 2.5, kilitDakika: '30' })).toMatchObject({ epostaKoduDakika: 15, cihazGun: 90, enFazlaHata: 5, kilitDakika: 30 })
+  })
+})

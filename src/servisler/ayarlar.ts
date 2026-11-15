@@ -4,6 +4,7 @@
  */
 import type { Payload } from 'payload'
 import { yoneticiMi } from '@/erisim'
+import { GUVENLIK_AYARLARI, type GuvenlikAyarlari } from '@/alan/ikiAdim'
 import { FormHatasi, IslemHatasi, istekOlustur, type Kullanici } from './ortak'
 
 export interface AyarGirdisi {
@@ -13,6 +14,8 @@ export interface AyarGirdisi {
   havuzRizaAy: number
   basvuruAnonimlestirmeAy: number
   islemKaydiAy: number
+  /** Giriş güvenliği (K33); verilmezse kayıtlı değerler korunur */
+  guvenlik?: GuvenlikAyarlari
 }
 
 const tamSayi = (n: number, en: number, cok: number) => Number.isInteger(n) && n >= en && n <= cok
@@ -28,6 +31,8 @@ export async function ayarlariGuncelle(payload: Payload, k: Kullanici, g: AyarGi
   if (!tamSayi(g.havuzRizaAy, 1, 36)) h.havuzRizaAy = '1 ile 36 ay arasında bir sayı yazın.'
   if (!tamSayi(g.basvuruAnonimlestirmeAy, 1, 60)) h.basvuruAnonimlestirmeAy = '1 ile 60 ay arasında bir sayı yazın.'
   if (!tamSayi(g.islemKaydiAy, 12, 120)) h.islemKaydiAy = '12 ile 120 ay arasında bir sayı yazın. İşlem kayıtları en az 12 ay saklanır.'
+  for (const a of GUVENLIK_AYARLARI)
+    if (g.guvenlik && !tamSayi(g.guvenlik[a.ad], a.en, a.cok)) h[a.ad] = `${a.en} ile ${a.cok} ${a.birim} arasında bir tam sayı yazın. Önerilen değer ${a.varsayilan}.`
   if (Object.keys(h).length) throw new FormHatasi(h)
   const req = await istekOlustur(payload, k)
   const once = await payload.findGlobal({ slug: 'ayarlar', overrideAccess: true })
@@ -38,6 +43,7 @@ export async function ayarlariGuncelle(payload: Payload, k: Kullanici, g: AyarGi
       enUzunSureGun: g.enUzunSureGun,
       hatirlatmaGunleri: gunler.map((gun) => ({ gun })),
       saklama: { ...(once.saklama ?? {}), havuzRizaAy: g.havuzRizaAy, basvuruAnonimlestirmeAy: g.basvuruAnonimlestirmeAy, islemKaydiAy: g.islemKaydiAy },
+      ...(g.guvenlik ? { guvenlik: g.guvenlik } : {}),
     },
     overrideAccess: true,
     req,

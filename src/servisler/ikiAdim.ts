@@ -14,12 +14,9 @@
 import type { Payload } from 'payload'
 import { yoneticiMi, firmaKimligi, firmaYetkisiVarMi } from '@/erisim'
 import {
-  EN_FAZLA_HATA,
-  EPOSTA_KODU_DAKIKA,
-  KILIT_DAKIKA,
-  SAATTE_EN_FAZLA_KOD,
-  YENIDEN_GONDER_SANIYE,
   cihazAdi,
+  guvenlikAyarlari,
+  type GuvenlikAyarlari,
   cihazEkle,
   epostaKoduUret,
   gecerliCihazlar,
@@ -35,7 +32,7 @@ import {
 import { coz, sifrele } from '@/altyapi/sifreleme'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { girisKoduEpostasi, ikiAdimSifirlandiEpostasi } from '@/altyapi/epostaSablonlari'
-import { FormHatasi, IslemHatasi, istekOlustur, kimlik, type Kullanici } from './ortak'
+import { FormHatasi, IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
 
 const AMAC_GIZLI = 'iki-adim-gizli'
 const AMAC_BEKLEYEN = 'bekleyen-giris'
@@ -80,6 +77,11 @@ async function guncelle(payload: Payload, id: number, data: Record<string, unkno
 
 const uygulamaKurulu = (k: IkiAdimKaydi) => Boolean(k.ikiAsamaliAcik && k.totpGizli)
 
+/** Süreler ve sınırlar Yönetici A.Ş. → Ayarlar'dan gelir (sınır dışı veya boş değerde varsayılan). */
+export async function guvenlikAyarlariniAl(payload: Payload): Promise<GuvenlikAyarlari> {
+  return guvenlikAyarlari((await ayarlar(payload)).guvenlik)
+}
+
 /* ---------- Bekleyen giriş paketi ---------- */
 
 export interface BekleyenGiris {
@@ -117,10 +119,11 @@ export async function girisDogrulamaYontemi(payload: Payload, kullaniciId: numbe
   const uygulama = uygulamaKurulu(k)
   if (!uygulama && !ikiAdimZorunluMu(k.rol)) return 'yok'
   if (cihazAnahtari) {
+    const { cihazGun } = await guvenlikAyarlariniAl(payload)
     const o = await ozet(cihazAnahtari)
-    const c = gecerliCihazlar(k.taninanCihazlar, simdi).find((x) => x.ozet === o)
+    const c = gecerliCihazlar(k.taninanCihazlar, simdi, cihazGun).find((x) => x.ozet === o)
     if (c) {
-      await guncelle(payload, kullaniciId, { taninanCihazlar: cihazEkle(k.taninanCihazlar, { ozet: o, ad: c.ad }, simdi) })
+      await guncelle(payload, kullaniciId, { taninanCihazlar: cihazEkle(k.taninanCihazlar, { ozet: o, ad: c.ad }, simdi, cihazGun) })
       return 'yok'
     }
   }
@@ -130,13 +133,15 @@ export async function girisDogrulamaYontemi(payload: Payload, kullaniciId: numbe
 /** Doğrulamadan sonra cihazı hatırlar. */
 export async function cihaziHatirla(payload: Payload, kullaniciId: number, cihazAnahtari: string, tarayici: string | null, simdi = new Date()) {
   const k = await kayit(payload, kullaniciId)
-  await guncelle(payload, kullaniciId, { taninanCihazlar: cihazEkle(k.taninanCihazlar, { ozet: await ozet(cihazAnahtari), ad: cihazAdi(tarayici) }, simdi) })
+  const { cihazGun } = await guvenlikAyarlariniAl(payload)
+  await guncelle(payload, kullaniciId, { taninanCihazlar: cihazEkle(k.taninanCihazlar, { ozet: await ozet(cihazAnahtari), ad: cihazAdi(tarayici) }, simdi, cihazGun) })
 }
 
 export async function taninanCihazlar(payload: Payload, kullaniciId: number, cihazAnahtari?: string, simdi = new Date()) {
   const k = await kayit(payload, kullaniciId)
   const buCihaz = cihazAnahtari ? await ozet(cihazAnahtari) : null
-  return gecerliCihazlar(k.taninanCihazlar, simdi).map((c: TaninanCihaz) => ({ ...c, kimlik: c.ozet.slice(0, 16), buCihaz: c.ozet === buCihaz }))
+  const { cihazGun } = await guvenlikAyarlariniAl(payload)
+  return gecerliCihazlar(k.taninanCihazlar, simdi, cihazGun).map((c: TaninanCihaz) => ({ ...c, kimlik: c.ozet.slice(0, 16), buCihaz: c.ozet === buCihaz }))
 }
 
 /** Bir cihazı (kimliği özetin ilk 16 karakteri) veya hepsini unutur. */
@@ -156,11 +161,13 @@ export async function cihazlariTemizle(payload: Payload, kullaniciId: number) {
 /* ---------- E-posta kodu ---------- */
 
 /**
- * Yeni cihaz için e-posta kodu üretir ve gönderir. Aynı kişiye en erken 60 saniyede bir, saatte en fazla 5 kod.
+ * Yeni cihaz için e-posta kodu üretir ve gönderir. Bekleme süresi, saatlik sınır ve kodun süresi Ayarlar'dan gelir
+ * (varsayılan: 60 saniyede bir, saatte en fazla 5, 10 dakika).
  * Kodun yalnızca özeti saklanır. Yayın dışı ortamda kod, ekranda gösterilmek üzere döner.
  */
 export async function epostaKoduGonder(payload: Payload, kullaniciId: number, simdi = new Date()): Promise<{ kod: string; eposta: boolean }> {
   const k = await kayit(payload, kullaniciId)
+  const { yenidenGonderSaniye: YENIDEN_GONDER_SANIYE, saatteEnFazlaKod: SAATTE_EN_FAZLA_KOD, epostaKoduDakika: EPOSTA_KODU_DAKIKA } = await guvenlikAyarlariniAl(payload)
   const onceki = (k.epostaKodu?.gonderimler ?? []).filter((t) => simdi.getTime() - new Date(t).getTime() < 3_600_000)
   const sonGonderim = onceki.at(-1)
   if (sonGonderim && simdi.getTime() - new Date(sonGonderim).getTime() < YENIDEN_GONDER_SANIYE * 1000)
@@ -222,6 +229,7 @@ export interface DogrulamaSonucu {
 }
 
 async function hataSay(payload: Payload, k: IkiAdimKaydi, simdi: Date, siz: boolean): Promise<never> {
+  const { enFazlaHata: EN_FAZLA_HATA, kilitDakika: KILIT_DAKIKA } = await guvenlikAyarlariniAl(payload)
   const hata = (k.ikiAdimHata ?? 0) + 1
   if (hata >= EN_FAZLA_HATA) {
     await guncelle(payload, k.id, { ikiAdimHata: 0, ikiAdimKilit: new Date(simdi.getTime() + KILIT_DAKIKA * 60_000).toISOString(), epostaKodu: null })

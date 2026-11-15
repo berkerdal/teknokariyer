@@ -1399,6 +1399,35 @@ export interface Ayarlar {
     havuzRizaAy?: number | null;
     islemKaydiAy?: number | null;
   };
+  /**
+   * Firma ve Yönetici A.Ş. hesaplarında tanınmayan bir cihazdan girişte e-postayla kod istenir (K33). Bu değerler kodun süresini, cihazın ne kadar hatırlanacağını ve kötüye kullanıma karşı sınırları belirler. Her alanın altındaki sınırların dışında bir değer kaydedilemez.
+   */
+  guvenlik?: {
+    /**
+     * Yeni cihazdan girişte e-postayla gönderilen 6 haneli kod kaç dakika geçerli olsun? Kısa süre daha güvenlidir; e-postası geç gelen kullanıcılar için çok kısaltmayın. Süre dolarsa kişi “Yeni kod gönder” düğmesiyle yeni kod ister. En az 5, en fazla 30; önerilen 10.
+     */
+    epostaKoduDakika?: number | null;
+    /**
+     * “Bu cihazı hatırla” denen cihazdan bu süre içinde yeniden kod istenmez. Her girişte süre yeniden başlar. Süre uzadıkça kullanıcılar daha az kod girer; kısaldıkça kaybolan veya çalınan bir cihazın hesaba erişimi daha erken kesilir. Değişiklik mevcut cihazlara da hemen uygulanır. En az 1, en fazla 365; önerilen 90.
+     */
+    cihazGun?: number | null;
+    /**
+     * Kişi “Yeni kod gönder” düğmesine en erken kaç saniyede bir basabilsin? Bekleme, bir kişinin başkasının e-posta kutusunu kodlarla doldurmasını önler. En az 30, en fazla 600; önerilen 60.
+     */
+    yenidenGonderSaniye?: number | null;
+    /**
+     * Bir hesaba bir saat içinde en fazla kaç kod gönderilsin? Sınıra ulaşan kişi bir saat dolana kadar yeni kod alamaz; e-posta servisinin kötüye kullanılmasını da önler. En az 3, en fazla 20; önerilen 5.
+     */
+    saatteEnFazlaKod?: number | null;
+    /**
+     * Kaç hatalı koddan sonra ikinci adım geçici olarak kilitlensin? Kod tahmin edilerek hesaba girilmesini önler. Düşük sayı daha güvenlidir ama yanlış yazan kullanıcıyı da bekletir. En az 3, en fazla 10; önerilen 5.
+     */
+    enFazlaHata?: number | null;
+    /**
+     * Hatalı denemeler sınıra ulaşınca kişi kaç dakika beklesin? Kilit süresince doğru kod da kabul edilmez. Acil durumda tam yetkili kullanıcı kişinin doğrulamasını sıfırlayabilir. En az 5, en fazla 120; önerilen 15.
+     */
+    kilitDakika?: number | null;
+  };
   hatirlatmaGunleri?:
     | {
         gun: number;
@@ -1432,6 +1461,16 @@ export interface AyarlarSelect<T extends boolean = true> {
         basvuruAnonimlestirmeAy?: T;
         havuzRizaAy?: T;
         islemKaydiAy?: T;
+      };
+  guvenlik?:
+    | T
+    | {
+        epostaKoduDakika?: T;
+        cihazGun?: T;
+        yenidenGonderSaniye?: T;
+        saatteEnFazlaKod?: T;
+        enFazlaHata?: T;
+        kilitDakika?: T;
       };
   hatirlatmaGunleri?:
     | T

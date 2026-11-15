@@ -432,6 +432,11 @@ Claude tarafından yapılacak.
       sayfası, firma ekip sayfası (Bilgilerim), yönetim yan menüsü.
     - Sıfırlama (uygulamayı kaldırır, cihazları unutur): tam yetkili kurum herkesi, firmanın tam yetkilisi kendi ekibini;
       kimse kendini sıfırlayamaz; kişiye bilgi e-postası. Düğmeler kullanıcı listelerinde.
+    - **Süreler ve sınırlar ayarlanabilir** (kullanıcı isteği, 15.11.2026; göç `20261115_090859_guvenlik_ayarlari`):
+      e-posta kodu süresi, cihaz hatırlama günü, yeniden gönderme beklemesi, saatlik kod sınırı, hatalı deneme sınırı, kilit
+      süresi. Tek kaynak `GUVENLIK_AYARLARI` (`src/alan/ikiAdim.ts`: etiket, birim, varsayılan, güvenli alt/üst sınır,
+      açıklama); hem `/yonetim/ayarlar` “Giriş güvenliği” bölümü hem Payload `ayarlar.guvenlik` grubu aynı açıklamaları
+      gösterir. Sunucu sınır dışını reddeder; okurken sınır dışı değer yerine varsayılan kullanılır (`guvenlikAyarlari`).
   - **Üst bilgideki kişi bağlantısı** kurum kullanıcısında `/yonetim`'e gider (önceden `/admin`'e gidiyordu).
   - **Sırada:** Turnstile ve istek sınırlama, virüs taraması, YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
     `docs/goc-rehberi.md` ve test senaryoları belgesi.

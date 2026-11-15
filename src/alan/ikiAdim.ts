@@ -157,17 +157,101 @@ export interface TaninanCihaz {
 }
 
 /** Süresi dolmamış cihazlar; en yeni kullanılan önce. */
-export function gecerliCihazlar(liste: unknown, simdi: Date): TaninanCihaz[] {
+export function gecerliCihazlar(liste: unknown, simdi: Date, gun = CIHAZ_GUN): TaninanCihaz[] {
   if (!Array.isArray(liste)) return []
-  const sinir = simdi.getTime() - CIHAZ_GUN * 86_400_000
+  const sinir = simdi.getTime() - gun * 86_400_000
   return (liste as TaninanCihaz[]).filter((c) => c && typeof c.ozet === 'string' && new Date(c.son).getTime() > sinir).sort((a, b) => b.son.localeCompare(a.son))
 }
 
 /** Cihazı listeye ekler veya son kullanımını günceller; en fazla 10 cihaz tutulur (en eskisi düşer). */
-export function cihazEkle(liste: unknown, c: { ozet: string; ad: string }, simdi: Date): TaninanCihaz[] {
+export function cihazEkle(liste: unknown, c: { ozet: string; ad: string }, simdi: Date, gun = CIHAZ_GUN): TaninanCihaz[] {
   const an = simdi.toISOString()
-  const mevcut = gecerliCihazlar(liste, simdi)
+  const mevcut = gecerliCihazlar(liste, simdi, gun)
   const eski = mevcut.find((x) => x.ozet === c.ozet)
   const digerleri = mevcut.filter((x) => x.ozet !== c.ozet)
   return [{ ozet: c.ozet, ad: c.ad, ilk: eski?.ilk ?? an, son: an }, ...digerleri].slice(0, EN_FAZLA_CIHAZ)
+}
+
+
+/* ---------- Ayarlanabilir değerler (Yönetici A.Ş. → Ayarlar; Payload ekranında da aynı açıklamalarla) ---------- */
+
+export type GuvenlikAyari = 'epostaKoduDakika' | 'cihazGun' | 'yenidenGonderSaniye' | 'saatteEnFazlaKod' | 'enFazlaHata' | 'kilitDakika'
+export type GuvenlikAyarlari = Record<GuvenlikAyari, number>
+
+/**
+ * Tek kaynak: alan adı, etiket, birim, varsayılan, güvenli alt ve üst sınır, açıklama. Sınırlar, güvenliği bozacak
+ * değerlerin (ör. 1 günlük kod, sınırsız deneme) girilmesini önler; sunucu da aynı sınırlarla denetler.
+ */
+export const GUVENLIK_AYARLARI: Array<{ ad: GuvenlikAyari; etiket: string; birim: string; varsayilan: number; en: number; cok: number; ipucu: string; bilgi: string }> = [
+  {
+    ad: 'epostaKoduDakika',
+    etiket: 'E-posta kodunun geçerlilik süresi',
+    birim: 'dakika',
+    varsayilan: EPOSTA_KODU_DAKIKA,
+    en: 5,
+    cok: 30,
+    ipucu: 'Yeni cihazdan girişte e-postayla gönderilen 6 haneli kod kaç dakika geçerli olsun?',
+    bilgi: 'Kısa süre daha güvenlidir; e-postası geç gelen kullanıcılar için çok kısaltmayın. Süre dolarsa kişi “Yeni kod gönder” düğmesiyle yeni kod ister.',
+  },
+  {
+    ad: 'cihazGun',
+    etiket: 'Cihazın hatırlanma süresi',
+    birim: 'gün',
+    varsayilan: CIHAZ_GUN,
+    en: 1,
+    cok: 365,
+    ipucu: '“Bu cihazı hatırla” denen cihazdan bu süre içinde yeniden kod istenmez. Her girişte süre yeniden başlar.',
+    bilgi: 'Süre uzadıkça kullanıcılar daha az kod girer; kısaldıkça kaybolan veya çalınan bir cihazın hesaba erişimi daha erken kesilir. Değişiklik mevcut cihazlara da hemen uygulanır.',
+  },
+  {
+    ad: 'yenidenGonderSaniye',
+    etiket: 'Yeni kod istemek için bekleme',
+    birim: 'saniye',
+    varsayilan: YENIDEN_GONDER_SANIYE,
+    en: 30,
+    cok: 600,
+    ipucu: 'Kişi “Yeni kod gönder” düğmesine en erken kaç saniyede bir basabilsin?',
+    bilgi: 'Bekleme, bir kişinin başkasının e-posta kutusunu kodlarla doldurmasını önler.',
+  },
+  {
+    ad: 'saatteEnFazlaKod',
+    etiket: 'Bir saatte en fazla e-posta kodu',
+    birim: 'kod',
+    varsayilan: SAATTE_EN_FAZLA_KOD,
+    en: 3,
+    cok: 20,
+    ipucu: 'Bir hesaba bir saat içinde en fazla kaç kod gönderilsin?',
+    bilgi: 'Sınıra ulaşan kişi bir saat dolana kadar yeni kod alamaz; e-posta servisinin kötüye kullanılmasını da önler.',
+  },
+  {
+    ad: 'enFazlaHata',
+    etiket: 'Kilitlenmeden önce hatalı deneme',
+    birim: 'deneme',
+    varsayilan: EN_FAZLA_HATA,
+    en: 3,
+    cok: 10,
+    ipucu: 'Kaç hatalı koddan sonra ikinci adım geçici olarak kilitlensin?',
+    bilgi: 'Kod tahmin edilerek hesaba girilmesini önler. Düşük sayı daha güvenlidir ama yanlış yazan kullanıcıyı da bekletir.',
+  },
+  {
+    ad: 'kilitDakika',
+    etiket: 'Kilit süresi',
+    birim: 'dakika',
+    varsayilan: KILIT_DAKIKA,
+    en: 5,
+    cok: 120,
+    ipucu: 'Hatalı denemeler sınıra ulaşınca kişi kaç dakika beklesin?',
+    bilgi: 'Kilit süresince doğru kod da kabul edilmez. Acil durumda tam yetkili kullanıcı kişinin doğrulamasını sıfırlayabilir.',
+  },
+]
+
+/** Kayıtlı değerleri okur; eksik veya sınır dışı değer yerine varsayılanı kullanır. */
+export function guvenlikAyarlari(ham: unknown): GuvenlikAyarlari {
+  const h = (ham && typeof ham === 'object' ? ham : {}) as Record<string, unknown>
+  return Object.fromEntries(
+    GUVENLIK_AYARLARI.map((a) => {
+      const v = Number(h[a.ad])
+      return [a.ad, Number.isInteger(v) && v >= a.en && v <= a.cok ? v : a.varsayilan]
+    }),
+  ) as GuvenlikAyarlari
 }

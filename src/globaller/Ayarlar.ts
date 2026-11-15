@@ -4,6 +4,7 @@ import { VARSAYILAN_ONAYLI_ILAN_SAYISI, VARSAYILAN_EN_UZUN_SURE_GUN } from '../a
 import { VARSAYILAN_AGIRLIKLAR } from '../alan/eslesme'
 import { HAVUZ_RIZA_SURESI_AY } from '../alan/havuz'
 import { islemKaydet } from '../altyapi/islemKaydi'
+import { GUVENLIK_AYARLARI } from '../alan/ikiAdim'
 
 /** Sistem ayarları (talimatlar 10): onay politikası, süre sınırları, eşleşme ağırlıkları, saklama süreleri. */
 export const Ayarlar: GlobalConfig = {
@@ -40,6 +41,24 @@ export const Ayarlar: GlobalConfig = {
         { name: 'havuzRizaAy', label: 'Havuz rızası kaç ay geçerli?', type: 'number', min: 1, defaultValue: HAVUZ_RIZA_SURESI_AY },
         { name: 'islemKaydiAy', label: 'İşlem kayıtları kaç ay saklansın?', type: 'number', min: 12, defaultValue: 24 },
       ],
+    },
+    {
+      name: 'guvenlik',
+      label: 'Giriş güvenliği (iki aşamalı doğrulama)',
+      type: 'group',
+      admin: {
+        description:
+          'Firma ve Yönetici A.Ş. hesaplarında tanınmayan bir cihazdan girişte e-postayla kod istenir (K33). Bu değerler kodun süresini, cihazın ne kadar hatırlanacağını ve kötüye kullanıma karşı sınırları belirler. Her alanın altındaki sınırların dışında bir değer kaydedilemez.',
+      },
+      fields: GUVENLIK_AYARLARI.map((a) => ({
+        name: a.ad,
+        label: `${a.etiket} (${a.birim})`,
+        type: 'number' as const,
+        min: a.en,
+        max: a.cok,
+        defaultValue: a.varsayilan,
+        admin: { description: `${a.ipucu} ${a.bilgi} En az ${a.en}, en fazla ${a.cok}; önerilen ${a.varsayilan}.` },
+      })),
     },
     {
       name: 'hatirlatmaGunleri',

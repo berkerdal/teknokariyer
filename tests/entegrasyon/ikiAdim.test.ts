@@ -29,6 +29,8 @@ import {
   kurulumuTamamla,
   taninanCihazlar,
 } from '@/servisler/ikiAdim'
+import { ayarlariGuncelle } from '@/servisler/ayarlar'
+import { GUVENLIK_AYARLARI } from '@/alan/ikiAdim'
 
 let payload: Payload
 const ek = `ia${Date.now().toString(36)}`
@@ -182,5 +184,36 @@ describe('cihaz yönetimi, sıfırlama ve dışarıdan giriş', () => {
     expect((await bekleyenGirisAc(paket, simdi))?.token).toBe('gizli-oturum-anahtari')
     expect(await bekleyenGirisAc(paket, new Date(simdi.getTime() + 11 * 60_000))).toBeNull()
     expect(await bekleyenGirisAc(paket.slice(0, -2) + 'xx', simdi)).toBeNull()
+  })
+})
+
+describe('ayarlardan gelen süreler', () => {
+  const temel = { onayliIlanSayisi: 3, enUzunSureGun: 60, hatirlatmaGunleri: [3, 7, 14], havuzRizaAy: 12, basvuruAnonimlestirmeAy: 12, islemKaydiAy: 24 }
+  const varsayilan = Object.fromEntries(GUVENLIK_AYARLARI.map((a) => [a.ad, a.varsayilan])) as any
+
+  it('sınır dışı değer kaydedilmez; yalnızca tam yetkili değiştirir', async () => {
+    await expect(ayarlariGuncelle(payload, yonetici, { ...temel, guvenlik: { ...varsayilan, epostaKoduDakika: 1, cihazGun: 1000 } })).rejects.toThrow(/arasında/)
+    await expect(ayarlariGuncelle(payload, firmaA, { ...temel, guvenlik: varsayilan })).rejects.toThrow(/tam yetkili/)
+  })
+
+  it('değiştirilen kod süresi, cihaz süresi ve deneme sınırı hemen uygulanır', async () => {
+    const kisi = await k('iaz', { rol: 'firma', firma: firmaA.firma, firmaYetkisi: 'degerlendirici' })
+    await ayarlariGuncelle(payload, yonetici, { ...temel, guvenlik: { ...varsayilan, epostaKoduDakika: 5, cihazGun: 1, enFazlaHata: 3 } })
+    try {
+      const an = new Date(Date.now() + 5 * 3_600_000)
+      await cihaziHatirla(payload, kisi.id, 'kisa-cihaz', null, an)
+      expect(await girisDogrulamaYontemi(payload, kisi.id, 'kisa-cihaz', new Date(an.getTime() + 12 * 3_600_000))).toBe('yok')
+      expect(await girisDogrulamaYontemi(payload, kisi.id, 'kisa-cihaz', new Date(an.getTime() + 3 * 86_400_000))).toBe('eposta')
+      const { kod } = await epostaKoduGonder(payload, kisi.id, an)
+      await expect(ikinciAdimDogrula(payload, kisi.id, kod, 'eposta', new Date(an.getTime() + 6 * 60_000))).rejects.toThrow(/süresi doldu/)
+      const ikinci = await epostaKoduGonder(payload, kisi.id, new Date(an.getTime() + 7 * 60_000))
+      const yanlis = ikinci.kod === '000000' ? '111111' : '000000'
+      const t = new Date(an.getTime() + 7 * 60_000)
+      await expect(ikinciAdimDogrula(payload, kisi.id, yanlis, 'eposta', t)).rejects.toThrow(/deneme hakkınız/)
+      await expect(ikinciAdimDogrula(payload, kisi.id, yanlis, 'eposta', t)).rejects.toThrow(/deneme hakkınız/)
+      await expect(ikinciAdimDogrula(payload, kisi.id, yanlis, 'eposta', t)).rejects.toThrow(/15 dakika|beklemeniz/)
+    } finally {
+      await ayarlariGuncelle(payload, yonetici, { ...temel, guvenlik: varsayilan })
+    }
   })
 })

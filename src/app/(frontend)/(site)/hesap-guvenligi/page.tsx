@@ -1,11 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { CIHAZ_GUN } from '@/alan/ikiAdim'
 import { tarihYaz } from '@/arayuz/bicim'
 import { CihazUnutDugmesi, IkiAdimKapatFormu, KurtarmaYenileFormu } from '@/arayuz/hesap/IkiAdimFormlari'
 import { Ust } from '@/arayuz/Ust'
-import { guvenlikDurumu, taninanCihazlar } from '@/servisler/ikiAdim'
+import { guvenlikAyarlariniAl, guvenlikDurumu, taninanCihazlar } from '@/servisler/ikiAdim'
 import { cihazAnahtari, rolAnaSayfasi } from '@/veri/cerez'
 import { oturum, payloadAl } from '@/veri/payload'
 
@@ -27,7 +26,7 @@ export default async function HesapGuvenligi({ searchParams }: Props) {
   if (!k) redirect('/giris?donus=%2Fhesap-guvenligi')
   const sp = await searchParams
   const payload = await payloadAl()
-  const [d, cihazlar] = await Promise.all([guvenlikDurumu(payload, Number(k.id)), taninanCihazlar(payload, Number(k.id), await cihazAnahtari())])
+  const [d, cihazlar, { cihazGun: CIHAZ_GUN }] = await Promise.all([guvenlikDurumu(payload, Number(k.id)), taninanCihazlar(payload, Number(k.id), await cihazAnahtari()), guvenlikAyarlariniAl(payload)])
   const siz = k.rol !== 'aday'
   const kalan = sp.kurtarma !== undefined ? Number(sp.kurtarma) : null
   const cihazBolumu = d.zorunlu || d.uygulama || cihazlar.length > 0

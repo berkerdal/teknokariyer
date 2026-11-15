@@ -4,7 +4,6 @@
  * Her sonuçta form yeniden kurulur (key={surum}); React eylemden sonra formu sıfırlar.
  */
 import { useActionState, useState } from 'react'
-import { CIHAZ_GUN } from '@/alan/ikiAdim'
 import {
   cihazUnutEylemi,
   epostaKoduYenidenEylemi,
@@ -18,7 +17,7 @@ import { Alan, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 
 const KOD_GIRDISI = { autoComplete: 'one-time-code', inputMode: 'numeric' as const, maxLength: 7, pattern: '[0-9 ]*', className: 'girdi girdi--kod' }
 
-export function IkinciAdimFormu({ siz, yontem }: { siz: boolean; yontem: 'eposta' | 'uygulama' }) {
+export function IkinciAdimFormu({ siz, yontem, cihazGun }: { siz: boolean; yontem: 'eposta' | 'uygulama'; cihazGun: number }) {
   const [durum, eylem] = useActionState<FormDurumu, FormData>(ikinciAdimEylemi, {})
   const [kurtarma, setKurtarma] = useState(false)
   const hatirla = durum.degerler ? durum.degerler.hatirla === 'on' : true
@@ -57,7 +56,7 @@ export function IkinciAdimFormu({ siz, yontem }: { siz: boolean; yontem: 'eposta
       <label className="secenek">
         <input type="checkbox" name="hatirla" defaultChecked={hatirla} />{' '}
         <span>
-          Bu cihazı {CIHAZ_GUN} gün hatırla
+          Bu cihazı {cihazGun} gün hatırla
           <span className="ipucu">{siz ? 'Ortak kullanılan bir bilgisayardaysanız işareti kaldırın.' : 'Ortak kullanılan bir bilgisayardaysan işareti kaldır.'}</span>
         </span>
       </label>

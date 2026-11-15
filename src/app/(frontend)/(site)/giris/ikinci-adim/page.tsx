@@ -4,8 +4,8 @@ import { redirect } from 'next/navigation'
 import { IkinciAdimFormu, KoduYenidenGonder } from '@/arayuz/hesap/IkiAdimFormlari'
 import { Ust } from '@/arayuz/Ust'
 import { KURUM } from '@/altyapi/kurum'
-import { EPOSTA_KODU_DAKIKA } from '@/alan/ikiAdim'
-import { bekleyenGirisAc } from '@/servisler/ikiAdim'
+import { bekleyenGirisAc, guvenlikAyarlariniAl } from '@/servisler/ikiAdim'
+import { payloadAl } from '@/veri/payload'
 import { bekleyenGirisCerezi } from '@/veri/cerez'
 
 export const metadata: Metadata = { title: 'Giriş doğrulaması', robots: { index: false } }
@@ -16,6 +16,7 @@ export default async function IkinciAdimSayfasi() {
   if (!g) redirect('/giris?ikinci=sure')
   const siz = g.rol !== 'aday'
   const eposta = g.yontem === 'eposta'
+  const { epostaKoduDakika: EPOSTA_KODU_DAKIKA, cihazGun } = await guvenlikAyarlariniAl(await payloadAl())
   return (
     <>
       <Ust />
@@ -40,7 +41,7 @@ export default async function IkinciAdimSayfasi() {
               <strong>Test ortamı:</strong> E-postalar dışarı gönderilmediği için kod burada gösteriliyor: <strong className="test-kodu">{g.testKodu}</strong>
             </p>
           )}
-          <IkinciAdimFormu siz={siz} yontem={g.yontem} />
+          <IkinciAdimFormu siz={siz} yontem={g.yontem} cihazGun={cihazGun} />
           {eposta && <KoduYenidenGonder />}
           <p className="kucuk ikincil">
             {g.yontem === 'uygulama'

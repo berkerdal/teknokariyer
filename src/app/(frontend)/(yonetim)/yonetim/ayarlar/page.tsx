@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { VARSAYILAN_EN_UZUN_SURE_GUN, VARSAYILAN_ONAYLI_ILAN_SAYISI } from '@/alan/ilan'
 import { hatirlatmaGunleri } from '@/alan/hatirlatma'
 import { yoneticiMi } from '@/erisim'
+import { guvenlikAyarlari } from '@/alan/ikiAdim'
 import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { AyarlarFormu } from '@/arayuz/yonetim/Ayarlar'
 import { payloadAl } from '@/veri/payload'
@@ -32,6 +33,7 @@ export default async function Ayarlar() {
           havuzRizaAy: a.saklama?.havuzRizaAy ?? 12,
           basvuruAnonimlestirmeAy: a.saklama?.basvuruAnonimlestirmeAy ?? 12,
           islemKaydiAy: a.saklama?.islemKaydiAy ?? 24,
+          guvenlik: guvenlikAyarlari(a.guvenlik),
         }}
       />
     </>

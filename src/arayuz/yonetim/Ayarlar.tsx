@@ -1,10 +1,11 @@
 'use client'
 import { useActionState, useEffect, useState } from 'react'
 import { ayarlarEylemi } from '@/eylemler/ayarlar'
+import { GUVENLIK_AYARLARI, type GuvenlikAyarlari } from '@/alan/ikiAdim'
 import { AlanBilgisi } from '../BilgiKutusu'
 import { GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 
-type Deger = { onayliIlanSayisi: number; enUzunSureGun: number; hatirlatmaGunleri: number[]; havuzRizaAy: number; basvuruAnonimlestirmeAy: number; islemKaydiAy: number }
+type Deger = { onayliIlanSayisi: number; enUzunSureGun: number; hatirlatmaGunleri: number[]; havuzRizaAy: number; basvuruAnonimlestirmeAy: number; islemKaydiAy: number; guvenlik: GuvenlikAyarlari }
 
 function SayiAlani(p: { ad: string; etiket: string; bilgi: React.ReactNode; ipucu: string; durum: FormDurumu; deger: string; birim?: string; disabled: boolean }) {
   const hata = p.durum.hatalar?.[p.ad]
@@ -34,8 +35,8 @@ export function AyarlarFormu({ deger, yonetici }: { deger: Deger; yonetici: bool
     return () => window.removeEventListener('beforeunload', uyar)
   }, [kirli])
   return (
-    <form action={eylem} noValidate className="form-yigin" onChange={() => setKirli(true)} onSubmit={() => setKirli(false)}>
-      <HataOzeti durum={durum} siz alanlar={Object.fromEntries(['onayliIlanSayisi', 'enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy', 'basvuruAnonimlestirmeAy', 'islemKaydiAy'].map((a) => [a, `a-${a}`]))} />
+    <form key={durum.surum ?? 0} action={eylem} noValidate className="form-yigin" onChange={() => setKirli(true)} onSubmit={() => setKirli(false)}>
+      <HataOzeti durum={durum} siz alanlar={Object.fromEntries(['onayliIlanSayisi', 'enUzunSureGun', 'hatirlatmaGunleri', 'havuzRizaAy', 'basvuruAnonimlestirmeAy', 'islemKaydiAy', ...GUVENLIK_AYARLARI.map((a) => a.ad)].map((a) => [a, `a-${a}`]))} />
       {durum.tamam && (
         <p className="basari-kutu" role="status">
           {durum.tamam}
@@ -109,6 +110,27 @@ export function AyarlarFormu({ deger, yonetici }: { deger: Deger; yonetici: bool
           disabled={!yonetici}
         />
         <p className="kucuk ikincil">Bu süreler önerilen varsayılanlardır (12 ve 24 ay). Hukuk biriminin onayıyla kesinleşmelidir.</p>
+      </section>
+      <section className="panel panel-ic y-sutun">
+        <h2 className="b3">Giriş güvenliği</h2>
+        <p className="kucuk">
+          Firma ve Yönetici A.Ş. hesaplarında tanınmayan bir cihazdan girişte e-postaya 6 haneli bir kod gönderilir. Doğrulayıcı uygulama kuran kişiye e-posta
+          yerine uygulama kodu sorulur. Aşağıdaki değerler bu adımın sürelerini ve kötüye kullanıma karşı sınırlarını belirler. Her alan güvenli bir aralıkla
+          sınırlıdır; önerilen değerler parantez içindedir.
+        </p>
+        {GUVENLIK_AYARLARI.map((a) => (
+          <SayiAlani
+            key={a.ad}
+            ad={a.ad}
+            etiket={a.etiket}
+            ipucu={`${a.ipucu} En az ${a.en}, en fazla ${a.cok} (önerilen ${a.varsayilan}).`}
+            bilgi={a.bilgi}
+            durum={durum}
+            deger={String(deger.guvenlik[a.ad])}
+            birim={a.birim}
+            disabled={!yonetici}
+          />
+        ))}
       </section>
       {yonetici ? (
         <div className="dugme-grubu">
