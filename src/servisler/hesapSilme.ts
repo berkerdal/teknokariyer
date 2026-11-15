@@ -35,7 +35,7 @@ export function kopyadanKimligiCikar(p: unknown): Record<string, unknown> {
 }
 
 /** Sorgu sonucunu 80'lik parçalar hâlinde siler (D1 en fazla 100 parametre kabul eder). */
-async function hepsiniSil(payload: Payload, collection: 'havuz-goruntulemeleri' | 'rizalar' | 'test-postalar', where: Record<string, unknown>): Promise<number> {
+async function hepsiniSil(payload: Payload, collection: 'havuz-goruntulemeleri' | 'rizalar' | 'test-postalar' | 'kaydedilen-ilanlar', where: Record<string, unknown>): Promise<number> {
   let toplam = 0
   for (let i = 0; i < 1000; i++) {
     const { docs } = await payload.find({ collection, where: where as never, limit: PARCA, depth: 0, overrideAccess: true })
@@ -110,6 +110,7 @@ export async function adayHesabiniSil(payload: Payload, yapan: Kullanici, adayKu
 
   // 5. Onay kayıtları (kullanıcı bağlantısı zorunlu alan) ve test ortamındaki e-posta kopyaları
   const riza = await hepsiniSil(payload, 'rizalar', { kullanici: { equals: adayKullaniciId } })
+  await hepsiniSil(payload, 'kaydedilen-ilanlar', { kullanici: { equals: adayKullaniciId } })
   if (ortam() !== 'yayin') await hepsiniSil(payload, 'test-postalar', { kime: { equals: hedef.email } })
 
   // 6. Hesap

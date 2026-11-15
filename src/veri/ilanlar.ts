@@ -103,6 +103,38 @@ export const yayindakiIlanlar = cache(async (): Promise<IlanOzeti[]> => {
     })
 })
 
+/**
+ * Adayın kaydettiği ilanlar, kaydetme sırasına göre (en yeni önce). Kapanmış ilanlar da listelenir (`acik: false`);
+ * firması artık görünmeyen ilan listelenmez.
+ */
+export async function kaydedilenIlanlar(kullaniciId: number): Promise<Array<IlanOzeti & { acik: boolean; kaydedilme: string }>> {
+  const payload = await payloadAl()
+  const { docs: kayitlar } = await payload.find({ collection: 'kaydedilen-ilanlar', where: { kullanici: { equals: kullaniciId } }, sort: '-createdAt', limit: 200, pagination: false, depth: 0, overrideAccess: true })
+  if (!kayitlar.length) return []
+  const docs = await parcaliBul(kayitlar.map((k) => id(k.ilan)), (p) =>
+    payload.find({
+      collection: 'ilanlar',
+      where: { id: { in: p } },
+      depth: 1,
+      limit: p.length,
+      overrideAccess: true, // kayıt adayın kendisine ait; yalnızca herkese açık alanlar seçilir
+      select: {
+        pozisyonAdi: true, firma: true, tur: true, altTur: true, model: true, deneyim: true, aile: true, ucretliStaj: true, pauOncelik: true,
+        sonBasvuru: true, yayinTarihi: true, arama: true, durum: true,
+      },
+      populate: { taksonomiler: { ad: true } },
+    }),
+  )
+  const firmalar = await firmalariAl(docs.map((d) => id(d.firma)))
+  const simdi = new Date()
+  return kayitlar.flatMap((k) => {
+    const d = docs.find((x) => x.id === id(k.ilan))
+    const f = d && firmalar.get(id(d.firma))
+    if (!d || !f || !['yayinda', 'duraklatildi', 'suresi-doldu', 'kapandi'].includes(d.durum)) return []
+    return [{ ...ozet(d as Ilanlar, f), acik: d.durum === 'yayinda' && !suresiDolduMu(new Date(d.sonBasvuru), simdi), kaydedilme: k.createdAt }]
+  })
+}
+
 export interface IlanAyrintisi extends IlanOzeti {
   durum: Ilanlar['durum']
   kapanisNedeni?: Ilanlar['kapanisNedeni']

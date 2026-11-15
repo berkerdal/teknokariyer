@@ -315,6 +315,20 @@ export function profilHatirlatmaEpostasi(d: { ad?: string | null; firma: string;
   )
 }
 
+/** Kaydedilen ilanın son başvurusuna 2 gün kala, bir kez (talimatlar 5). Aday ilana başvurduysa gönderilmez. */
+export function kaydedilenIlanHatirlatmaEpostasi(d: { ad?: string | null; pozisyonAdi: string; firma: string; sonGun: string; kalan: number; adres: string }): Eposta {
+  return eposta(
+    `Kaydettiğin ilanın süresi doluyor: ${d.pozisyonAdi}`,
+    [
+      `Merhaba ${d.ad ?? ''},`.trim(),
+      `Kaydettiğin “${d.pozisyonAdi}” ilanının (${d.firma}) son başvuru tarihi ${d.sonGun}. ${d.kalan === 0 ? 'Bugün son gün.' : `${d.kalan} gün kaldı.`}`,
+      'Başvurmak istiyorsan bu tarihten önce ilanın sayfasından başvurabilirsin.',
+    ],
+    { metin: 'İlana git', adres: `${siteAdresi()}${d.adres}` },
+    ['Bu hatırlatma her kaydettiğin ilan için yalnızca bir kez gelir. İlanı kaydedilenlerden çıkarırsan hatırlatma gelmez.'],
+  )
+}
+
 export function kurumHesabiEpostasi(d: { ad: string; rolAdi: string; acan: string; anahtar: string; gun: number }): Eposta {
   return eposta(
     'TeknoKariyer yönetim hesabınız açıldı',

@@ -8,6 +8,7 @@ import { IlanSatiri } from '@/arayuz/IlanSatiri'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
 import { Ust } from '@/arayuz/Ust'
 import { yayindakiIlanlar } from '@/veri/ilanlar'
+import { kaydetmeBaglami } from '@/veri/kaydedilenler'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,7 @@ const sonYediGunde = (iso?: string | null) => Boolean(iso) && Date.now() - new D
 
 /** Ana sayfa: ilk ekranda arama, canlı sayılı hızlı filtreler ve gerçek son ilanlar. Dev slogan yok. */
 export default async function AnaSayfa() {
-  const ilanlar = await yayindakiIlanlar()
+  const [ilanlar, kaydet] = await Promise.all([yayindakiIlanlar(), kaydetmeBaglami()])
   const say = (fn: (i: (typeof ilanlar)[number]) => boolean) => ilanlar.filter(fn).length
   const son = sirala(ilanlar, 'yeni').slice(0, 8)
   const firmalar = [...ilanlar.reduce((m, i) => m.set(i.firma.id, { ...i.firma, n: (m.get(i.firma.id)?.n ?? 0) + 1 }), new Map<number, (typeof ilanlar)[number]['firma'] & { n: number }>()).values()]
@@ -113,7 +114,7 @@ export default async function AnaSayfa() {
               <>
                 <div className="ilan-listesi">
                   {son.map((i) => (
-                    <IlanSatiri key={i.id} ilan={i} />
+                    <IlanSatiri key={i.id} ilan={i} kaydet={kaydet(i.id, ilanAdresi(i))} />
                   ))}
                 </div>
                 <Link className="dugme dugme--ikincil dugme--genis tumu" href="/ilanlar">

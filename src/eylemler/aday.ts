@@ -12,6 +12,7 @@ import { SINIFLAR } from '@/alan/basvuru'
 import { profilFormunuOku } from '@/alan/profilFormu'
 import { adayMi } from '@/erisim'
 import { basvur, geriCek } from '@/servisler/basvuru'
+import { ilanKaydet, kaydiKaldir } from '@/servisler/kaydedilenler'
 import { FormHatasi } from '@/servisler/hesap'
 import { IslemHatasi, type Kullanici } from '@/servisler/ortak'
 import {
@@ -186,4 +187,20 @@ export async function havuzEylemi(_: FormDurumu, f: FormData): Promise<FormDurum
   } catch (e) {
     return hataDurumu(e)
   }
+}
+
+/** İlanı kaydeder veya kaydedilenlerden çıkarır. Kural hataları Türkçe mesajla döner (düğme eski durumuna geri döner). */
+export async function kaydetEylemi(ilanId: number, kaydet: boolean): Promise<{ hata?: string }> {
+  const k = await oturum()
+  try {
+    const p = await payloadAl()
+    if (kaydet) await ilanKaydet(p, k, ilanId)
+    else await kaydiKaldir(p, k, ilanId)
+  } catch (e) {
+    if (e instanceof IslemHatasi) return { hata: e.message }
+    console.error(e)
+    return { hata: 'İşlem tamamlanamadı. Sayfayı yenileyip yeniden dene.' }
+  }
+  revalidatePath('/hesabim/kaydedilenler')
+  return {}
 }

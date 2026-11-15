@@ -22,6 +22,8 @@ import { IlanSatiri } from '@/arayuz/IlanSatiri'
 import { IlanOnizleme } from '@/arayuz/IlanOnizleme'
 import { Ust } from '@/arayuz/Ust'
 import { yayindakiIlanlar } from '@/veri/ilanlar'
+import { kaydetmeBaglami } from '@/veri/kaydedilenler'
+import { ilanAdresi } from '@/arayuz/bicim'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +44,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 export default async function IlanlarSayfasi({ searchParams }: Props) {
   const p = await searchParams
   const f = filtreOku(p)
-  const tumu = await yayindakiIlanlar()
+  const [tumu, kaydet] = await Promise.all([yayindakiIlanlar(), kaydetmeBaglami()])
   const sonuc = sirala(filtrele(tumu, f), f.sira)
   const secili = Number(Array.isArray(p.secili) ? p.secili[0] : p.secili) || sonuc[0]?.id
   const aktif = aktifFiltreSayisi(f)
@@ -105,7 +107,7 @@ export default async function IlanlarSayfasi({ searchParams }: Props) {
             </div>
             <div className="ilan-listesi">
               {sonuc.map((i) => (
-                <IlanSatiri key={i.id} ilan={i} secili={i.id === secili} onizleme={`/ilanlar${filtreAdresi(f, { secili: String(i.id) })}`} />
+                <IlanSatiri key={i.id} ilan={i} secili={i.id === secili} onizleme={`/ilanlar${filtreAdresi(f, { secili: String(i.id) })}`} kaydet={kaydet(i.id, ilanAdresi(i))} />
               ))}
               {!sonuc.length && (
                 <div className="bos">

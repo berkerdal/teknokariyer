@@ -5,12 +5,13 @@ import { ilanAdresi, sonTarih, yayinGoreli } from './bicim'
 import { FirmaKaro } from './FirmaKaro'
 import { Ikon } from './Ikon'
 import { IlanBaglantisi } from './IlanBaglantisi'
+import { KaydetDugmesi, type KaydetBaglami } from './KaydetDugmesi'
 
 /**
  * Liste satırı (K36): firma karosu, koyu başlık, ikonlu kısa bilgiler, gerçek durum etiketleri, sağda son başvuru ve
  * yayın zamanı. Yoğun ve taranabilir; büyük kart yok.
  */
-export function IlanSatiri({ ilan, secili = false, onizleme }: { ilan: IlanOzeti; secili?: boolean; onizleme?: string }) {
+export function IlanSatiri({ ilan, secili = false, onizleme, kaydet }: { ilan: IlanOzeti; secili?: boolean; onizleme?: string; kaydet?: KaydetBaglami | null }) {
   const s = sonTarih(ilan.sonBasvuru)
   const yayin = yayinGoreli(ilan.yayinTarihi)
   return (
@@ -43,6 +44,7 @@ export function IlanSatiri({ ilan, secili = false, onizleme }: { ilan: IlanOzeti
         </span>
       </div>
       <span className="is-sag">
+        {kaydet && <KaydetDugmesi ilanId={ilan.id} baglam={kaydet} ad={ilan.pozisyonAdi} />}
         <span className={s.vurgu ? 'son-gun' : undefined}>
           {s.vurgu && <Ikon ad="saat" kucuk />}
           {s.metin}

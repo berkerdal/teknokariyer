@@ -5,6 +5,7 @@ import { Ikon, type IkonAdi } from '../Ikon'
 
 const OGELER: Array<{ href: string; ad: string; kisa: string; ikon: IkonAdi }> = [
   { href: '/hesabim', ad: 'Başvurularım', kisa: 'Başvurular', ikon: 'liste' },
+  { href: '/hesabim/kaydedilenler', ad: 'Kaydedilenler', kisa: 'Kaydedilen', ikon: 'yer-imi' },
   { href: '/hesabim/profil', ad: 'Profil ve CV’ler', kisa: 'Profil', ikon: 'kisi' },
   { href: '/hesabim/havuz', ad: 'CV havuzu', kisa: 'Havuz', ikon: 'ara' },
   { href: '/hesabim/hesap', ad: 'Hesap ve gizlilik', kisa: 'Hesap', ikon: 'ayar' },

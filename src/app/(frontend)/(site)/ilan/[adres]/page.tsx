@@ -17,6 +17,8 @@ import { ilanAdresi, tarihYaz } from '@/arayuz/bicim'
 import { eslesmeProfili, oturumdakiAday } from '@/veri/aday'
 import { ilanAyrintisi, yayindakiIlanlar, type IlanAyrintisi } from '@/veri/ilanlar'
 import { oturum } from '@/veri/payload'
+import { kaydetmeBaglami } from '@/veri/kaydedilenler'
+import { KaydetDugmesi } from '@/arayuz/KaydetDugmesi'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,7 +80,8 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
 
   if (!acikMi(ilan)) return <KapanmisIlan ilan={ilan} />
 
-  const [aday, k] = await Promise.all([oturumdakiAday(), oturum()])
+  const [aday, k, kaydetFn] = await Promise.all([oturumdakiAday(), oturum(), kaydetmeBaglami()])
+  const kaydet = kaydetFn(ilan.id, ilanAdresi(ilan))
   const profil = aday ? eslesmeProfili(aday) : null
   const sahip = profil ? new Set(profil.beceriler.map((b) => b.toLocaleLowerCase('tr'))) : undefined
   const f = ilan.firma
@@ -123,6 +126,7 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
               <Link className="dugme dugme--genis" href={basvur}>
                 Başvur
               </Link>
+              {kaydet && <KaydetDugmesi ilanId={ilan.id} baglam={kaydet} ad={ilan.pozisyonAdi} metinli />}
             </div>
             <IlanOzetListesi ilan={ilan} yan />
             <EslesmeKutusu ilan={ilan} profil={profil} girisli={Boolean(k)} />
@@ -228,6 +232,7 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
             {tarihYaz(ilan.sonBasvuru)} · {kalan === 0 ? 'son gün' : `${kalan} gün`}
           </strong>
         </p>
+        {kaydet && <KaydetDugmesi ilanId={ilan.id} baglam={kaydet} ad={ilan.pozisyonAdi} />}
         <Link className="dugme" href={basvur}>
           Başvur
         </Link>

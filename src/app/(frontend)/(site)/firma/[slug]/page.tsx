@@ -8,6 +8,8 @@ import { IlanSatiri } from '@/arayuz/IlanSatiri'
 import { Metin } from '@/arayuz/IlanParcalari'
 import { Ust } from '@/arayuz/Ust'
 import { firmaBul, yayindakiIlanlar } from '@/veri/ilanlar'
+import { kaydetmeBaglami } from '@/veri/kaydedilenler'
+import { ilanAdresi } from '@/arayuz/bicim'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,6 +30,7 @@ export default async function FirmaSayfasi({ params }: Props) {
   const f = await firmaBul((await params).slug)
   if (!f) notFound()
   const acik = sirala((await yayindakiIlanlar()).filter((i) => i.firma.id === f.id), 'yeni')
+  const kaydet = await kaydetmeBaglami()
   const web = f.web ? (/^https?:\/\//.test(f.web) ? f.web : `https://${f.web}`) : undefined
   return (
     <>
@@ -110,7 +113,7 @@ export default async function FirmaSayfasi({ params }: Props) {
             {acik.length ? (
               <div className="ilan-listesi">
                 {acik.map((i) => (
-                  <IlanSatiri key={i.id} ilan={i} />
+                  <IlanSatiri key={i.id} ilan={i} kaydet={kaydet(i.id, ilanAdresi(i))} />
                 ))}
               </div>
             ) : (

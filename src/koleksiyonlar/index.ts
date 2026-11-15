@@ -19,6 +19,8 @@ import { Talepler } from './Talepler'
 import { GunlukOzetler } from './GunlukOzetler'
 import { KvkkTalepleri } from './KvkkTalepleri'
 import { IstekSinirlari } from './IstekSinirlari'
+import { KaydedilenIlanlar } from './KaydedilenIlanlar'
+import { TrafikOlaylari, TrafikOzetleri } from './Trafik'
 import { Ayarlar } from '../globaller/Ayarlar'
 
 export const koleksiyonlar: CollectionConfig[] = [
@@ -38,6 +40,9 @@ export const koleksiyonlar: CollectionConfig[] = [
   GunlukOzetler,
   KvkkTalepleri,
   IstekSinirlari,
+  KaydedilenIlanlar,
+  TrafikOlaylari,
+  TrafikOzetleri,
 ]
 
 export const globaller: GlobalConfig[] = [Ayarlar]

@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { ilanAyrintisi } from '@/veri/ilanlar'
 import { eslesmeProfili, oturumdakiAday } from '@/veri/aday'
 import { oturum } from '@/veri/payload'
+import { kaydetmeBaglami } from '@/veri/kaydedilenler'
+import { KaydetDugmesi } from './KaydetDugmesi'
 import { FirmaKaro } from './FirmaKaro'
 import { BeceriListesi } from './IlanSatiri'
 import { EslesmeKutusu, IlanOlgulari, IlanOzetListesi, Metin } from './IlanParcalari'
@@ -9,7 +11,7 @@ import { ilanAdresi } from './bicim'
 
 /** Masaüstü sağ bölme: seçili ilanın özeti. */
 export async function IlanOnizleme({ id }: { id: number }) {
-  const [ilan, aday, k] = await Promise.all([ilanAyrintisi(id), oturumdakiAday(), oturum()])
+  const [ilan, aday, k, kaydetFn] = await Promise.all([ilanAyrintisi(id), oturumdakiAday(), oturum(), kaydetmeBaglami()])
   if (!ilan || ilan.durum !== 'yayinda') return <p className="ikincil">Bu ilan artık yayında değil.</p>
   const profil = aday ? eslesmeProfili(aday) : null
   const sahip = profil ? new Set(profil.beceriler.map((b) => b.toLocaleLowerCase('tr'))) : undefined
@@ -34,6 +36,7 @@ export async function IlanOnizleme({ id }: { id: number }) {
         <Link className="dugme dugme--ikincil" href={ilanAdresi(ilan)}>
           İlanın tamamı
         </Link>
+        {kaydetFn(ilan.id, ilanAdresi(ilan)) && <KaydetDugmesi key={ilan.id} ilanId={ilan.id} baglam={kaydetFn(ilan.id, ilanAdresi(ilan))!} ad={ilan.pozisyonAdi} metinli />}
       </div>
       <EslesmeKutusu ilan={ilan} profil={profil} girisli={Boolean(k)} />
       <h3 className="b3">Ne yapacaksın?</h3>

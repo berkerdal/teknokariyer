@@ -83,6 +83,9 @@ export interface Config {
     'gunluk-ozetler': GunlukOzetler;
     'kvkk-talepleri': KvkkTalepleri;
     'istek-sinirlari': IstekSinirlari;
+    'kaydedilen-ilanlar': KaydedilenIlanlar;
+    'trafik-olaylari': TrafikOlaylari;
+    'trafik-ozetleri': TrafikOzetleri;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -106,6 +109,9 @@ export interface Config {
     'gunluk-ozetler': GunlukOzetlerSelect<false> | GunlukOzetlerSelect<true>;
     'kvkk-talepleri': KvkkTalepleriSelect<false> | KvkkTalepleriSelect<true>;
     'istek-sinirlari': IstekSinirlariSelect<false> | IstekSinirlariSelect<true>;
+    'kaydedilen-ilanlar': KaydedilenIlanlarSelect<false> | KaydedilenIlanlarSelect<true>;
+    'trafik-olaylari': TrafikOlaylariSelect<false> | TrafikOlaylariSelect<true>;
+    'trafik-ozetleri': TrafikOzetleriSelect<false> | TrafikOzetleriSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -769,6 +775,54 @@ export interface IstekSinirlari {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kaydedilen-ilanlar".
+ */
+export interface KaydedilenIlanlar {
+  id: number;
+  kullanici: number | Kullanicilar;
+  ilan: number | Ilanlar;
+  /**
+   * Son başvuru hatırlatması gönderildiği an.
+   */
+  hatirlatildi?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Bugünün ham sayfa görüntülemeleri. Kişisel veri içermez; gece özetlenip silinir.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trafik-olaylari".
+ */
+export interface TrafikOlaylari {
+  id: number;
+  gun: string;
+  yol: string;
+  kaynak: string;
+  kaynakSite?: string | null;
+  cihaz: string;
+  giris?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Günlük site trafiği, boyut boyut (sayfa, kaynak, cihaz).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trafik-ozetleri".
+ */
+export interface TrafikOzetleri {
+  id: number;
+  gun: string;
+  boyut: string;
+  deger: string;
+  goruntuleme: number;
+  ziyaret: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -854,6 +908,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'istek-sinirlari';
         value: number | IstekSinirlari;
+      } | null)
+    | ({
+        relationTo: 'kaydedilen-ilanlar';
+        value: number | KaydedilenIlanlar;
+      } | null)
+    | ({
+        relationTo: 'trafik-olaylari';
+        value: number | TrafikOlaylari;
+      } | null)
+    | ({
+        relationTo: 'trafik-ozetleri';
+        value: number | TrafikOzetleri;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1365,6 +1431,44 @@ export interface IstekSinirlariSelect<T extends boolean = true> {
   anahtar?: T;
   sayi?: T;
   bitis?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kaydedilen-ilanlar_select".
+ */
+export interface KaydedilenIlanlarSelect<T extends boolean = true> {
+  kullanici?: T;
+  ilan?: T;
+  hatirlatildi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trafik-olaylari_select".
+ */
+export interface TrafikOlaylariSelect<T extends boolean = true> {
+  gun?: T;
+  yol?: T;
+  kaynak?: T;
+  kaynakSite?: T;
+  cihaz?: T;
+  giris?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trafik-ozetleri_select".
+ */
+export interface TrafikOzetleriSelect<T extends boolean = true> {
+  gun?: T;
+  boyut?: T;
+  deger?: T;
+  goruntuleme?: T;
+  ziyaret?: T;
   updatedAt?: T;
   createdAt?: T;
 }
