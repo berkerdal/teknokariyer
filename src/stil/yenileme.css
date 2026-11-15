@@ -648,3 +648,7 @@ div.cerez-tur { cursor: default; }
 .bvt-bas p { overflow-wrap: anywhere; }
 @media (max-width: 899px) { .bvt-dugmeler { display: grid; } .bvt-dugmeler .dugme { width: 100%; } }
 .bv .kontrol-dl { background: var(--yuzey-2); box-shadow: none; }
+
+/* Onay pencereleri (geri çekme, çerez tercihleri) ekranın ortasında açılır. Tailwind'in sıfırlaması (margin: 0) modal
+   pencereyi sol üste yapıştırıyordu (kullanıcı geri bildirimi, 15.11.2026). */
+dialog.pencere-dialog:modal { margin: auto; inset: 0; max-height: calc(100dvh - 32px); overflow: auto; }

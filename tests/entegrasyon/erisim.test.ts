@@ -95,6 +95,17 @@ describe('başvurular', () => {
     expect(basvuru.firma).toBe(firmaB.id)
     await expect(payload.create({ collection: 'basvurular', user: aday, overrideAccess: false, data: veri })).rejects.toThrow(/daha önce başvurdun/)
   })
+  it('geri çekilen başvurudan sonra bir kez daha başvurulur; ikinci geri çekmeden sonra başvurulamaz', async () => {
+    const veri = { ilan: ilanBYayinda.id, profilKopyasi: { ad: 'Aday iki' }, aydinlatmaSurumu: '1.0' } as any
+    const ilk = await payload.create({ collection: 'basvurular', user: adayIki, overrideAccess: false, data: veri })
+    await payload.update({ collection: 'basvurular', id: ilk.id, user: adayIki, overrideAccess: false, data: { durum: 'geri-cekti' } as any })
+    const ikinci = await payload.create({ collection: 'basvurular', user: adayIki, overrideAccess: false, data: veri })
+    expect(ikinci.durum).toBe('alindi')
+    expect(ikinci.id).not.toBe(ilk.id) // geri çekilen başvuru firmada iz olarak kalır
+    await expect(payload.create({ collection: 'basvurular', user: adayIki, overrideAccess: false, data: veri })).rejects.toThrow(/daha önce başvurdun/)
+    await payload.update({ collection: 'basvurular', id: ikinci.id, user: adayIki, overrideAccess: false, data: { durum: 'geri-cekti' } as any })
+    await expect(payload.create({ collection: 'basvurular', user: adayIki, overrideAccess: false, data: veri })).rejects.toThrow(/yeniden başvurulamaz/)
+  })
   it('taslak ilana başvurulamaz', async () => {
     await expect(
       payload.create({ collection: 'basvurular', user: adayIki, overrideAccess: false, data: { ilan: ilanBTaslak.id, profilKopyasi: {}, aydinlatmaSurumu: '1.0' } as any }),

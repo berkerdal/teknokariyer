@@ -12,11 +12,12 @@ import {
   moderasyonYapabilirMi,
 } from '../erisim'
 import { islemKaydet } from '../altyapi/islemKaydi'
+import { yenidenBasvuruDurumu } from '../alan/basvuru'
 
 /**
  * Başvurular (talimatlar 5, 6).
  * - Başvuru anında profilin kopyası dondurulur; aday profilini sonradan değiştirse de firma bu kopyayı görür.
- * - Aynı ilana iki kez başvurulamaz.
+ * - Aynı ilana iki kez başvurulamaz; geri çekilen başvurudan sonra bir kez daha başvurulabilir (yenidenBasvuruDurumu).
  * - Ekip notları ve puanı yalnızca firma ekibi ve kurum görür; aday göremez.
  * - Başvuru, adayın kendi uç noktasından (rıza kayıtlarıyla birlikte) oluşturulur (M4).
  */
@@ -63,13 +64,19 @@ export const Basvurular: CollectionConfig = {
         const ilan = await req.payload.findByID({ collection: 'ilanlar', id: ilanId, depth: 0, overrideAccess: true, req })
         if (ilan.durum !== 'yayinda') throw new APIError('Bu ilan şu an başvuru almıyor.', 400, undefined, true)
         data.firma = typeof ilan.firma === 'object' ? (ilan.firma as { id: number }).id : ilan.firma
-        const onceki = await req.payload.count({
+        const onceki = await req.payload.find({
           collection: 'basvurular',
           where: { and: [{ ilan: { equals: ilanId } }, { adayKullanici: { equals: k!.id } }] },
+          select: { durum: true },
+          depth: 0,
+          limit: 10,
           overrideAccess: true,
           req,
         })
-        if (onceki.totalDocs > 0) throw new APIError('Bu ilana daha önce başvurdun.', 400, undefined, true)
+        const yeniden = yenidenBasvuruDurumu(onceki.docs.map((d) => String(d.durum)))
+        if (yeniden === 'basvurdu') throw new APIError('Bu ilana daha önce başvurdun.', 400, undefined, true)
+        if (yeniden === 'hakki-bitti')
+          throw new APIError('Bu ilana iki kez başvurup geri çektin; aynı ilana yeniden başvurulamaz.', 400, undefined, true)
         data.durum = 'alindi'
         return data
       },

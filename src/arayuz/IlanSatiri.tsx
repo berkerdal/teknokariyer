@@ -1,6 +1,6 @@
 import type { IlanOzeti } from '@/alan/ilanFiltre'
 import { ALT_TUR_ADI } from '@/alan/ilanFiltre'
-import { DENEYIM_ADI, MODEL_ADI } from '@/alan/eslesme'
+import { DENEYIM_ETIKETI, MODEL_ADI } from '@/alan/eslesme'
 import { ilanAdresi, sonTarih, yayinGoreli } from './bicim'
 import { FirmaKaro } from './FirmaKaro'
 import { Ikon } from './Ikon'
@@ -34,9 +34,9 @@ export function IlanSatiri({ ilan, secili = false, onizleme, kaydet }: { ilan: I
             {MODEL_ADI[ilan.model]}
           </span>
           {ilan.tur === 'is' && (
-            <span>
+            <span title="Aranan deneyim">
               <Ikon ad="seviye" kucuk />
-              {DENEYIM_ADI[ilan.deneyim]}
+              {DENEYIM_ETIKETI[ilan.deneyim]}
             </span>
           )}
           {ilan.tur === 'staj' && ilan.ucretliStaj && <span className="rozet rozet--yesil">Ücretli</span>}

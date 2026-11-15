@@ -35,6 +35,8 @@ export interface BasvuruAkisiProps {
   aydinlatma: { surum: string; tarih: string }
   havuzMetni: { surum: string }
   havuzda: boolean
+  /** Aday bu ilana daha önce başvurup geri çekti; bu son hakkı */
+  yenidenBasvuru?: boolean
 }
 
 type Adim = 'eksik' | 'cv' | 'sorular' | 'onay'
@@ -167,6 +169,11 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
             <p className="ust-etiket bv-adim-etiket">
               Adım {no} / {adimlar.length} · {ADIM_ADI[adim]}
             </p>
+            {p.yenidenBasvuru && no === 1 && (
+              <p className="bilgi kucuk">
+                Bu ilana daha önce başvurup geri çekmiştin. Bir kez daha başvurabilirsin; bu başvuruyu da geri çekersen aynı ilana bir daha başvuramazsın.
+              </p>
+            )}
             <HataOzeti durum={hataOzeti} alanlar={{ okul: 'okul', bolum: 'bolum', deneyim: 'deneyim-0', sinif: 'sinif', mezuniyet: 'mezuniyetAy', aydinlatma: 'aydinlatma', cvDosya: 'cvDosya', cv: 'cv-0' }} />
 
             {p.eksikler.length > 0 && (

@@ -2,7 +2,7 @@
  * Başvuru akışının ve aday panelinin verisi (yalnızca oturumdaki adayın kendi kayıtları).
  */
 import type { Adaylar, Basvurular, Dosyalar, Ilanlar, Taksonomiler } from '@/payload-types'
-import { basvuruEksikleri, type EksikAlan } from '@/alan/basvuru'
+import { basvuruEksikleri, yenidenBasvuruDurumu, type EksikAlan, type YenidenBasvuru } from '@/alan/basvuru'
 import { basvuruIlani, basvuruProfili } from '@/servisler/basvuru'
 import { kimlik, type Kullanici } from '@/servisler/ortak'
 import { payloadAl } from './payload'
@@ -37,6 +37,8 @@ export interface BasvuruHazirligi {
   dilSartlari: Array<{ id: number; ad: string; seviye: string }>
   cvler: CvOzeti[]
   oncekiBasvuru: Basvurular | null
+  /** Önceki başvuruların durumuna göre yeniden başvuru hakkı (src/alan/basvuru.ts) */
+  yeniden: YenidenBasvuru
 }
 
 export async function basvuruHazirligi(kullanici: Kullanici, ilanId: number): Promise<BasvuruHazirligi | null> {
@@ -49,7 +51,8 @@ export async function basvuruHazirligi(kullanici: Kullanici, ilanId: number): Pr
   const onceki = await payload.find({
     collection: 'basvurular',
     where: { and: [{ ilan: { equals: ilanId } }, { adayKullanici: { equals: kullanici.id } }] },
-    limit: 1,
+    limit: 10,
+    sort: '-createdAt',
     depth: 0,
     overrideAccess: false,
     user: kullanici,
@@ -61,6 +64,7 @@ export async function basvuruHazirligi(kullanici: Kullanici, ilanId: number): Pr
     dilSartlari: (ilan.diller ?? []).map((d) => ({ id: kimlik(d.dil), ad: ad(d.dil), seviye: d.seviye })),
     cvler: cvOzetleri(aday),
     oncekiBasvuru: onceki.docs[0] ?? null,
+    yeniden: yenidenBasvuruDurumu(onceki.docs.map((d) => String(d.durum))),
   }
 }
 

@@ -72,3 +72,17 @@ export const BASVURU_KAYNAKLARI = ['linkedin', 'google', 'dogrudan'] as const
 export type BasvuruKaynagi = (typeof BASVURU_KAYNAKLARI)[number] | 'portal'
 export const basvuruKaynagi = (d?: string | null): (typeof BASVURU_KAYNAKLARI)[number] | undefined =>
   (BASVURU_KAYNAKLARI as readonly string[]).includes(d ?? '') ? (d as (typeof BASVURU_KAYNAKLARI)[number]) : undefined
+
+/**
+ * Aynı ilana yeniden başvuru (kullanıcı kararı, 15.11.2026): geri çekilen başvurudan sonra bir kez daha başvurulabilir.
+ * Önceki başvuruların durumlarına bakılır:
+ * - hiç yok → `ilk`; hepsi geri çekilmiş ve en fazla bir tane → `yeniden`;
+ * - geri çekilmemiş başvuru var → `basvurdu`; iki başvuru geri çekilmiş → `hakki-bitti`.
+ */
+export const EN_FAZLA_BASVURU = 2
+export type YenidenBasvuru = 'ilk' | 'yeniden' | 'basvurdu' | 'hakki-bitti'
+export function yenidenBasvuruDurumu(oncekiDurumlar: string[]): YenidenBasvuru {
+  if (!oncekiDurumlar.length) return 'ilk'
+  if (oncekiDurumlar.some((d) => d !== 'geri-cekti')) return 'basvurdu'
+  return oncekiDurumlar.length >= EN_FAZLA_BASVURU ? 'hakki-bitti' : 'yeniden'
+}

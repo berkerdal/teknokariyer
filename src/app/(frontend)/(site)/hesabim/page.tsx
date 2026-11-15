@@ -74,7 +74,7 @@ export default async function BasvurularimSayfasi() {
               </div>
               <p className="kucuk ikincil">Başvuru tarihi: {tarihYaz(b.tarih, true)}</p>
               {b.durum === 'olumsuz' && <p className="kucuk">Firma bu pozisyon için başka bir adayla devam etmeye karar verdi. İlgin için teşekkür ederiz.</p>}
-              {geriCekilebilirMi(b.durum) && <GeriCek basvuruId={b.id} pozisyon={b.ilan.pozisyonAdi} />}
+              {geriCekilebilirMi(b.durum) && <GeriCek basvuruId={b.id} pozisyon={b.ilan.pozisyonAdi} sonHak={liste.some((x) => x.id !== b.id && x.ilan.id === b.ilan.id)} />}
             </li>
           ))}
         </ul>

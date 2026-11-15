@@ -653,6 +653,17 @@ Claude tarafından yapılacak.
       çeviriyordu; yönerge `.sirali-adimlar` oldu.
     - **Firmalar:** sektör düğmeleri yerine ilan listesindeki gibi solda “Sektör” filtre grubu (çoklu seçim, mobilde alttan
       panel, `FiltrePaneli birim="firma"`) ve firma/sektör/pozisyon araması.
+  - **Kullanıcı geri bildirimi 7 (15.11.2026):**
+    - **Yeniden başvuru (kullanıcı kararı):** geri çekilen başvurudan sonra aynı ilana bir kez daha başvurulur
+      (`yenidenBasvuruDurumu`, `EN_FAZLA_BASVURU = 2`; Basvurular kancası ve başvuru sayfası aynı kuralı kullanır). Yeni
+      başvuru ayrı kayıttır; geri çekilen firmada iz olarak kalır. Firma başvuru ekranı öbür başvuruya bağlantı verir
+      (aynı `adayKodu` + ilan). Geri çekme penceresi ve başvuru akışı kalan hakkı yazar. Talimatlar 5'teki kural buna göre.
+    - Onay pencereleri (`dialog.pencere-dialog`) ortalanır: Tailwind sıfırlaması (`margin: 0`) modal pencereyi sol üste
+      yapıştırıyordu (çerez penceresi de etkileniyordu).
+    - İlan kartlarında deneyim `DENEYIM_ETIKETI` (“1–3 yıl deneyim”, “Öğrenciye uygun”); ilan sayfası “Aranan deneyim”.
+    - **Firma logoları:** Bu çalışma ortamının ağı firma sitelerine ve Teknokent rehberine (bot doğrulaması) erişemiyor;
+      çoğu firmanın resmî sitesi aramayla doğrulanamadı. Yanlış logo yüklenmemesi için yüklenmedi; kullanıcıdan site
+      adresi veya logo dosyası istendi.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

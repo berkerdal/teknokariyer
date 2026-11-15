@@ -20,7 +20,8 @@ export const dynamic = 'force-dynamic'
 
 type Props = { params: Promise<{ adres: string }>; searchParams?: Promise<{ kaynak?: string }> }
 
-const boyut = (b?: number) => (b ? `${(b / 1024 / 1024).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} MB` : '')
+const boyut = (b?: number) =>
+  !b ? '' : b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} MB`
 
 export default async function BasvuruSayfasi({ params, searchParams }: Props) {
   const { adres } = await params
@@ -42,11 +43,18 @@ export default async function BasvuruSayfasi({ params, searchParams }: Props) {
   const firma = (await firmalariAl([kimlik(ilan.firma)])).get(kimlik(ilan.firma))
   const adresi = ilanAdresi(ilan)
   if (ilan.durum !== 'yayinda' || suresiDolduMu(new Date(ilan.sonBasvuru), new Date())) redirect(adresi)
-  if (h.oncekiBasvuru)
+  if (h.yeniden === 'basvurdu' && h.oncekiBasvuru)
     return (
       <Bilgi baslik="Bu ilana başvurdun">
         {tarihYaz(h.oncekiBasvuru.createdAt, true)} tarihinde başvurdun. Durumunu “Başvurularım” sayfasından izleyebilirsin.{' '}
         <Link href="/hesabim">Başvurularıma git</Link>
+      </Bilgi>
+    )
+  if (h.yeniden === 'hakki-bitti')
+    return (
+      <Bilgi baslik="Bu ilana yeniden başvurulamaz">
+        Bu ilana iki kez başvurup ikisini de geri çektin. Geri çekilen başvurudan sonra aynı ilana yalnızca bir kez daha başvurulabilir.{' '}
+        <Link href="/ilanlar">Başka ilanlara bak</Link>
       </Bilgi>
     )
 
@@ -71,6 +79,7 @@ export default async function BasvuruSayfasi({ params, searchParams }: Props) {
       havuzMetni={{ surum: METINLER.havuz.surum }}
       havuzda={Boolean(aday.havuz?.rizaTarihi) && aday.havuz?.gorunurluk !== 'gizli'}
       kaynak={kaynak}
+      yenidenBasvuru={h.yeniden === 'yeniden'}
     />
   )
 }

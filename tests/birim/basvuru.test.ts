@@ -31,3 +31,14 @@ describe('başvuru durumu', () => {
     expect(['alindi', 'inceleniyor', 'gorusme', 'olumsuz'].map(geriCekilebilirMi)).toEqual([true, true, false, false])
   })
 })
+
+describe('yeniden başvuru (geri çekmeden sonra bir kez)', () => {
+  it('önceki başvuruların durumuna göre karar verir', async () => {
+    const { yenidenBasvuruDurumu } = await import('@/alan/basvuru')
+    expect(yenidenBasvuruDurumu([])).toBe('ilk')
+    expect(yenidenBasvuruDurumu(['geri-cekti'])).toBe('yeniden')
+    expect(yenidenBasvuruDurumu(['alindi'])).toBe('basvurdu')
+    expect(yenidenBasvuruDurumu(['geri-cekti', 'inceleniyor'])).toBe('basvurdu')
+    expect(yenidenBasvuruDurumu(['geri-cekti', 'geri-cekti'])).toBe('hakki-bitti')
+  })
+})

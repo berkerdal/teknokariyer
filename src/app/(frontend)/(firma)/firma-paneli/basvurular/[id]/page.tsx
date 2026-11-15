@@ -43,6 +43,19 @@ export default async function BasvuruAyrintisi({ params }: Props) {
     : new Map<number, string>()
   const [{ ilan }, { satirlar }] = await Promise.all([basvuruAyrintisi(b), firmaBasvurulari()])
   if (!ilan) notFound()
+  // Aynı adayın aynı ilana öbür başvurusu (geri çekilip yeniden yapılmış olabilir; kural src/alan/basvuru.ts).
+  const ikiz = b.adayKodu
+    ? (
+        await payload.find({
+          collection: 'basvurular',
+          where: { and: [{ ilan: { equals: ilan.id } }, { adayKodu: { equals: b.adayKodu } }, { id: { not_equals: b.id } }] },
+          select: { durum: true, createdAt: true },
+          depth: 0,
+          limit: 1,
+          overrideAccess: true,
+        })
+      ).docs[0]
+    : undefined
   const p = (b.profilKopyasi ?? {}) as ProfilKopyasi
   const silindi = !b.adayKullanici
   const eslesme = b.anonimlestirildi ? null : eslesmeHesapla(ilanKosullari(ilan), kopyaProfili(p), 'firma')
@@ -91,6 +104,14 @@ export default async function BasvuruAyrintisi({ params }: Props) {
             </p>
           )}
           {b.durum === 'geri-cekti' && <p className="uyari-kutu">Aday bu başvuruyu geri çekti. Durumu değiştirilemez.</p>}
+          {ikiz && (
+            <p className="bilgi kucuk">
+              {new Date(ikiz.createdAt) < new Date(b.createdAt)
+                ? `Aday bu ilana ${tarihYaz(ikiz.createdAt, true)} tarihinde de başvurmuş, o başvuruyu geri çekmişti. Bu, yeniden başvurusudur.`
+                : `Aday bu başvuruyu geri çektikten sonra ${tarihYaz(ikiz.createdAt, true)} tarihinde aynı ilana yeniden başvurdu.`}{' '}
+              <Link href={`/firma-paneli/basvurular/${ikiz.id}`}>Öbür başvuruyu aç</Link>
+            </p>
+          )}
           {b.eleyiciUyari && <p className="uyari-kutu">Aday, eleyici olarak işaretlediğiniz bir soruya beklediğinizden farklı cevap verdi. Cevapları aşağıda görebilirsiniz.</p>}
 
           {eslesme && (

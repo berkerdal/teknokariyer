@@ -19,6 +19,17 @@ export const DENEYIM_ADI: Record<Deneyim, string> = {
   '3-5': '3–5 yıl',
   '5+': '5+ yıl',
 }
+/**
+ * İlan kartlarındaki kısa etiket: başlıksız gösterildiği için ne anlattığı kendinden anlaşılmalı (kullanıcı geri
+ * bildirimi, 15.11.2026: “3–5 yıl” tek başına deneyim olduğu anlaşılmıyordu).
+ */
+export const DENEYIM_ETIKETI: Record<Deneyim, string> = {
+  ogrenci: 'Öğrenciye uygun',
+  'yeni-mezun': 'Yeni mezuna uygun',
+  '1-3': '1–3 yıl deneyim',
+  '3-5': '3–5 yıl deneyim',
+  '5+': '5 yıl ve üzeri deneyim',
+}
 export type CalismaModeli = 'ofiste' | 'hibrit' | 'uzaktan'
 export const MODEL_ADI: Record<CalismaModeli, string> = { ofiste: 'Ofiste', hibrit: 'Hibrit', uzaktan: 'Uzaktan' }
 

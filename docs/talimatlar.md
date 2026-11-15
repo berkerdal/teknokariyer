@@ -441,7 +441,7 @@ Firma profili eksikse yayına girmez. En az şunlar gerekir: logo, kısa tanıt�
 
 - **Hedef:** Profili tamam olan aday mobilde **en fazla 3 ekranda** başvurabilmeli.
 - **Başvuru anında profilin kopyası dondurulur.** Aday profilini sonradan değiştirse de firma, başvuru anındaki bilgiyi görür.
-- **Aynı ilana iki kez başvurulamaz.** Aday başvurusunu geri çekebilir.
+- **Aynı ilana iki kez başvurulamaz.** Aday başvurusunu geri çekebilir; geri çektiği ilana **bir kez daha** başvurabilir. İkinci başvuruyu da geri çekerse aynı ilana yeniden başvuramaz **[K]** (15.11.2026).
 
 **[E] Başvuru durumları:** Alındı → İnceleniyor → Görüşme → Teklif → Olumlu / Olumsuz / Aday geri çekti.
 
