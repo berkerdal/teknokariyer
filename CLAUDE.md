@@ -582,6 +582,25 @@ Claude tarafından yapılacak.
       yeni tablo ve sütun; test D1'ine koddan önce uygulandı.
     - Öğrenilen: Geliştirme kipinde React efektleri iki kez çalıştırır; ölçüm gibi yan etkili efektler modül düzeyinde
       son değerle tekrarı engellemeli.
+  - **Kullanıcı geri bildirimi 4 (15.11.2026):**
+    - Düzenleme penceresi içeriğe göre boyutlanır (flex sütun; pencere formdan uzun kalıyordu). Pencere içindeki öneri
+      listesi (`dialog .oneri-panel`) mutlak değil akışta durur ve görünür kalacak kadar kaydırılır.
+    - Geçiş göstergesinde Teknokent dikey renkli logo (120 px, kimlik alt sınırı) ve çevresinde halka.
+    - **Hesap menüsü** `src/arayuz/HesapMenusu.tsx`, içerik `src/alan/hesapMenusu.ts` (role göre); site üst çubuğu,
+      firma üst çubuğu, yönetim yan menüsü (yukarı açılır) ve mobil yönetim çubuğu. Çıkış menüde.
+    - **404** `src/arayuz/BulunamadiGovdesi.tsx` (site `not-found` ve `global-not-found`; Teknokent negatif logo).
+      Öğrenilen: `global-not-found.tsx` değişikliği geliştirme sunucusu yeniden başlatılınca görünür.
+    - **Sertifikalar (LinkedIn usulü):** alanlar ad, kurum (zorunlu, formda), ay/yıl veriliş, bitiş veya `suresiz`,
+      `kimlikNo`, `url`, `beceriler` (taksonomi), `dosya` (dosyalar `tur: sertifika`). Kural `sertifikaSatiri`
+      (`src/alan/profilFormu.ts`), servis `src/servisler/sertifika.ts` (yükleme: PDF etkisizleştirilir, görsel ilk
+      baytlardan; kayıtta sahiplik ve beceri denetimi; profilde ve başvuruda olmayan belge silinir), düzenleyici
+      `SertifikaDuzenleyici` (belge seçilince hemen yüklenir), görünüm `SertifikaListesi` (aday, firma başvurusu, havuz).
+      Başvuruda belge bağlantısı `basvurular.belgeler` (JSON içinde değil; saklama ve silme bulabilsin). Firma erişimi
+      `/firma-paneli/basvurular/[id]/belge/[dosya]` ve `/firma-paneli/havuz/[id]/belge/[dosya]` (PDF filigranlı, açılış
+      kayda geçer), aday `/hesabim/belge/[dosya]`. Hesap silmede kopyadan kimlik no, bağlantı ve belge düşer.
+      Göç `20261115_161035_sertifika_ayrintilari` (D1) ve PostgreSQL karşılığı: yalnızca ekleme (PG'de `ALTER TYPE … ADD VALUE`).
+    - Öğrenilen: Yeni sunucu eylemi eklendikten sonra Turbopack geliştirme sunucusu “reading 'apply'” hatası verebilir
+      (eski eylem kaydı); sunucu yeniden başlatılınca düzelir.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

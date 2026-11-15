@@ -56,7 +56,19 @@ export interface ProfilGuncellemesiHam {
     baslama: string | null
     ucretBeklentisi: number | null
   }
-  sertifikalar?: Array<{ ad: string; kurum?: string | null; yil?: number | null }>
+  sertifikalar?: Array<{
+    ad: string
+    kurum: string | null
+    ay: number | null
+    yil: number | null
+    bitisAy: number | null
+    bitisYil: number | null
+    suresiz: boolean
+    kimlikNo: string | null
+    url: string | null
+    beceriler: number[]
+    dosya: number | null
+  }>
   baglantilar?: Array<{ ad: string; adres: string }>
 }
 
@@ -177,11 +189,9 @@ export function profilFormunuOku(f: FormOkuyucu): ProfilFormuSonucu {
     jsonDizi(f, 'sertifikalarJson')
       .slice(0, 20)
       .forEach((s, n) => {
-        const ad = String(s.ad ?? '').trim().slice(0, 150)
-        if (!ad) return void (h[`sertifika-${n}`] = `${n + 1}. sertifikanın adını yaz.`)
-        const yil = Number(s.yil) || null
-        if (yil && (yil < 1950 || yil > BU_YIL)) h[`sertifika-${n}`] = `${n + 1}. sertifikanın yılı geçerli değil.`
-        g.sertifikalar!.push({ ad, kurum: String(s.kurum ?? '').trim().slice(0, 120) || null, yil })
+        const r = sertifikaSatiri(s, n)
+        if ('hata' in r) h[`sertifika-${n}`] = r.hata
+        else g.sertifikalar!.push(r.sertifika)
       })
   }
   if (bolumler.has('baglantilar')) {
@@ -198,4 +208,49 @@ export function profilFormunuOku(f: FormOkuyucu): ProfilFormuSonucu {
       })
   }
   return { guncelleme: g, hatalar: h }
+}
+
+type SertifikaGirdisi = NonNullable<ProfilGuncellemesiHam['sertifikalar']>[number]
+const sayiVeyaBos = (x: unknown) => (Number.isInteger(Number(x)) && Number(x) > 0 ? Number(x) : null)
+
+/**
+ * Sertifika satırı (LinkedIn'deki “Lisans ve sertifikalar” örnek alındı): ad ve veren kurum zorunlu; veriliş ve
+ * geçerlilik bitişi ay/yıl; “süresi dolmaz” işaretliyse bitiş tarihi yok sayılır; doğrulama bağlantısı https ile
+ * tamamlanır; en fazla 10 ilgili beceri; belge yüklenmiş dosyanın kimliği. Dosyanın adaya ait olduğu servis denetler.
+ */
+export function sertifikaSatiri(s: Record<string, unknown>, n: number): { sertifika: SertifikaGirdisi } | { hata: string } {
+  const sira = `${n + 1}. sertifika`
+  const ad = String(s.ad ?? '').trim().slice(0, 150)
+  const kurum = String(s.kurum ?? '').trim().slice(0, 120)
+  if (!ad || !kurum) return { hata: `${sira}: adını ve veren kurumu yaz.` }
+  const ay = sayiVeyaBos(s.ay)
+  const yil = sayiVeyaBos(s.yil)
+  const suresiz = Boolean(s.suresiz)
+  const bitisAy = suresiz ? null : sayiVeyaBos(s.bitisAy)
+  const bitisYil = suresiz ? null : sayiVeyaBos(s.bitisYil)
+  if ((ay && (ay < 1 || ay > 12)) || (bitisAy && (bitisAy < 1 || bitisAy > 12))) return { hata: `${sira}: ay geçerli değil.` }
+  if (ay && !yil) return { hata: `${sira}: veriliş tarihinin yılını da seç.` }
+  if (bitisAy && !bitisYil) return { hata: `${sira}: geçerlilik bitişinin yılını da seç.` }
+  if (yil && (yil < 1950 || yil > BU_YIL)) return { hata: `${sira}: veriliş yılı geçerli değil.` }
+  if (bitisYil && (bitisYil < 1950 || bitisYil > BU_YIL + 50)) return { hata: `${sira}: geçerlilik bitiş yılı geçerli değil.` }
+  if (yil && bitisYil && bitisYil * 12 + (bitisAy ?? 12) < yil * 12 + (ay ?? 1)) return { hata: `${sira}: geçerlilik bitişi veriliş tarihinden önce olamaz.` }
+  let url = String(s.url ?? '').trim()
+  if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`
+  if (url && !adresGecerliMi(url)) return { hata: `${sira}: doğrulama bağlantısı geçerli değil (örneğin www.credly.com/badges/…).` }
+  const beceriler = [...new Set((Array.isArray(s.beceriler) ? s.beceriler : []).map((x) => sayiVeyaBos(x)).filter((x): x is number => x !== null))].slice(0, 10)
+  return {
+    sertifika: {
+      ad,
+      kurum,
+      ay,
+      yil,
+      bitisAy,
+      bitisYil,
+      suresiz,
+      kimlikNo: String(s.kimlikNo ?? '').trim().slice(0, 80) || null,
+      url: url ? url.slice(0, 300) : null,
+      beceriler,
+      dosya: sayiVeyaBos(s.dosya),
+    },
+  }
 }

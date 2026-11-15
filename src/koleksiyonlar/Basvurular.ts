@@ -124,6 +124,16 @@ export const Basvurular: CollectionConfig = {
       access: { update: alanKimseYazamaz },
     },
     { name: 'cv', label: 'Gönderilen CV', type: 'upload', relationTo: 'dosyalar', access: { update: alanKimseYazamaz } },
+    {
+      // Başvuru anındaki sertifika belgeleri (profil kopyasındaki sertifikaların dosyaları). Firma yalnızca bunları açabilir;
+      // saklama süresi ve hesap silmede temizlenir.
+      name: 'belgeler',
+      label: 'Sertifika belgeleri',
+      type: 'relationship',
+      relationTo: 'dosyalar',
+      hasMany: true,
+      access: { update: alanKimseYazamaz },
+    },
     { name: 'onYazi', label: 'Ön yazı', type: 'textarea', maxLength: 1500, access: { update: alanKimseYazamaz } },
     { name: 'cevaplar', label: 'Ön eleme cevapları', type: 'json', access: { update: alanKimseYazamaz } },
     { name: 'eleyiciUyari', label: 'Eleyici soruya beklenmeyen cevap', type: 'checkbox', defaultValue: false, access: { update: alanKimseYazamaz } },

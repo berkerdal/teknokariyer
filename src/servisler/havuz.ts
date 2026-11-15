@@ -18,6 +18,7 @@ import { islemKaydet } from '@/altyapi/islemKaydi'
 import { dosyaIcerigi } from '@/altyapi/depolama'
 import { filigranMetni, pdfFiligranla } from '@/altyapi/filigran'
 import { IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
+import { belgeHazirla } from './sertifika'
 
 const HAVUZ_YETKISI = ['yonetici', 'ilan-sorumlusu'] as const
 
@@ -110,6 +111,7 @@ export async function havuzProfiliAc(payload: Payload, kullanici: Kullanici, ada
     cvler: (aday.cvler ?? []).map((c) => ({ ad: c.ad, dosya: kimlik(c.dosya) })),
     tanitim: aday.tanitim,
     deneyimler: aday.deneyimler ?? [],
+    sertifikalar: aday.sertifikalar ?? [],
   }
 }
 
@@ -159,4 +161,15 @@ export async function havuzCvsi(payload: Payload, kullanici: Kullanici, adayId: 
 /** Havuzdaki (görünür ve rızası geçerli) aday sayısı: firma sayfasının üstünde gösterilir. */
 export async function havuzAdaySayisi(payload: Payload, kullanici: Kullanici): Promise<number> {
   return (await havuzAra(payload, kullanici, {})).length
+}
+
+/** Havuzdaki adayın sertifika belgesi: aday görünür olmalı ve belge onun profilindeki bir sertifikaya bağlı olmalı. */
+export async function havuzBelgesi(payload: Payload, kullanici: Kullanici, adayId: number, dosyaId: number) {
+  havuzYetkisi(kullanici)
+  const aday = await payload.findByID({ collection: 'adaylar', id: adayId, depth: 0, overrideAccess: true }).catch((): null => null)
+  if (!aday) throw new IslemHatasi('Aday bulunamadı.', 404)
+  if (!firmaGorebilirMi(havuzAdayi(aday), String(firmaKimligi(kullanici)), new Date())) throw new IslemHatasi('Bu aday artık havuzda değil.', 404)
+  if (!(aday.sertifikalar ?? []).some((s) => s.dosya && kimlik(s.dosya) === dosyaId)) throw new IslemHatasi('Belge bulunamadı.', 404)
+  const firma = await payload.findByID({ collection: 'firmalar', id: Number(firmaKimligi(kullanici)), depth: 0, overrideAccess: true })
+  return belgeHazirla(payload, dosyaId, { k: kullanici, ad: firma.kisaAd, kayit: { kayitTuru: 'adaylar', kayitId: adayId } })
 }

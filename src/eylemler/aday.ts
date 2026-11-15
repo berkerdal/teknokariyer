@@ -13,6 +13,7 @@ import { profilFormunuOku } from '@/alan/profilFormu'
 import { adayMi } from '@/erisim'
 import { basvur, geriCek } from '@/servisler/basvuru'
 import { ilanKaydet, kaydiKaldir } from '@/servisler/kaydedilenler'
+import { sertifikaBelgesiYukle } from '@/servisler/sertifika'
 import { FormHatasi } from '@/servisler/hesap'
 import { IslemHatasi, type Kullanici } from '@/servisler/ortak'
 import {
@@ -203,4 +204,20 @@ export async function kaydetEylemi(ilanId: number, kaydet: boolean): Promise<{ h
   }
   revalidatePath('/hesabim/kaydedilenler')
   return {}
+}
+
+/** Sertifika belgesini hemen yükler; kimliği forma döner ve profil kaydedilince sertifikaya bağlanır. */
+export async function sertifikaBelgesiEylemi(f: FormData): Promise<{ id?: number; tur?: string; hata?: string }> {
+  try {
+    const k = await aday()
+    const dosya = f.get('belge')
+    if (!(dosya instanceof File) || !dosya.size) return { hata: 'Bir dosya seç.' }
+    const r = await sertifikaBelgesiYukle(await payloadAl(), k, { veri: new Uint8Array(await dosya.arrayBuffer()), boyut: dosya.size })
+    return { id: r.id, tur: r.tur }
+  } catch (e) {
+    if (e instanceof FormHatasi) return { hata: Object.values(e.alanlar)[0] ?? 'Belge yüklenemedi.' }
+    if (e instanceof IslemHatasi) return { hata: e.message }
+    console.error(e)
+    return { hata: 'Belge yüklenemedi. Biraz sonra yeniden dene.' }
+  }
 }

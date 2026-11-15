@@ -15,6 +15,7 @@ import { dosyaIcerigi } from '@/altyapi/depolama'
 import { filigranMetni, pdfFiligranla } from '@/altyapi/filigran'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { IslemHatasi, istekOlustur, kimlik, type Kullanici } from './ortak'
+import { belgeHazirla } from './sertifika'
 
 export const FIRMA_DURUMLARI = ['alindi', 'inceleniyor', 'gorusme', 'teklif', 'olumlu', 'olumsuz'] as const
 export type FirmaDurumu = (typeof FIRMA_DURUMLARI)[number]
@@ -105,4 +106,12 @@ export async function basvuruCvsi(payload: Payload, k: Kullanici, id: number, am
   await islemKaydet(req, { islem: amac === 'goruntule' ? 'Başvurudaki CV görüntülendi' : 'Başvurudaki CV indirildi', tur: 'kisisel-veri', kayitTuru: 'basvurular', kayitId: id, ayrinti: { firma: firma.kisaAd } })
   const ad = String((b.profilKopyasi as { ad?: string } | null)?.ad ?? 'aday')
   return { icerik, dosyaAdi: `CV - ${ad}.pdf` }
+}
+
+/** Başvurudaki sertifika belgesi: yalnızca başvuruya eklenmiş belgeler; PDF'e filigran, açılış kayda geçer. */
+export async function basvuruBelgesi(payload: Payload, k: Kullanici, id: number, dosyaId: number) {
+  const b = await firmaninBasvurusu(payload, k, id)
+  if (!(b.belgeler ?? []).map(kimlik).includes(dosyaId)) throw new IslemHatasi('Belge bulunamadı.', 404)
+  const firma = await payload.findByID({ collection: 'firmalar', id: kimlik(b.firma), depth: 0, overrideAccess: true })
+  return belgeHazirla(payload, dosyaId, { k, ad: firma.kisaAd, kayit: { kayitTuru: 'basvurular', kayitId: id } })
 }

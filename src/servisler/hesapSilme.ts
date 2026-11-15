@@ -30,6 +30,9 @@ export function kopyadanKimligiCikar(p: unknown): Record<string, unknown> {
   k.eposta = null
   k.telefon = null
   k.baglantilar = []
+  // Sertifikanın kimlik numarası, doğrulama bağlantısı ve belgesi kişiyi tanıtır; adı, kurumu ve tarihi kalır (K32).
+  if (Array.isArray(k.sertifikalar))
+    k.sertifikalar = (k.sertifikalar as Array<Record<string, unknown>>).map((s) => ({ ...s, kimlikNo: null as null, url: null as null, dosya: null as null }))
   k.hesapSilindi = true
   return k
 }
@@ -80,7 +83,7 @@ export async function adayHesabiniSil(payload: Payload, yapan: Kullanici, adayKu
       await payload.update({
         collection: 'basvurular',
         id: b.id,
-        data: { profilKopyasi: kopyadanKimligiCikar(b.profilKopyasi), cv: null, onYazi: null, adayKullanici: null } as never,
+        data: { profilKopyasi: kopyadanKimligiCikar(b.profilKopyasi), cv: null, belgeler: [], onYazi: null, adayKullanici: null } as never,
         overrideAccess: true,
         req,
       })

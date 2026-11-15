@@ -10,6 +10,7 @@ import * as migration_20261115_083416_yeni_cihaz from './20261115_083416_yeni_ci
 import * as migration_20261115_090859_guvenlik_ayarlari from './20261115_090859_guvenlik_ayarlari';
 import * as migration_20261115_092436_istek_sinirlari from './20261115_092436_istek_sinirlari';
 import * as migration_20261115_153138_kaydedilenler_trafik from './20261115_153138_kaydedilenler_trafik';
+import * as migration_20261115_161035_sertifika_ayrintilari from './20261115_161035_sertifika_ayrintilari';
 
 export const migrations = [
   {
@@ -70,6 +71,11 @@ export const migrations = [
   {
     up: migration_20261115_153138_kaydedilenler_trafik.up,
     down: migration_20261115_153138_kaydedilenler_trafik.down,
-    name: '20261115_153138_kaydedilenler_trafik'
+    name: '20261115_153138_kaydedilenler_trafik',
+  },
+  {
+    up: migration_20261115_161035_sertifika_ayrintilari.up,
+    down: migration_20261115_161035_sertifika_ayrintilari.down,
+    name: '20261115_161035_sertifika_ayrintilari'
   },
 ];

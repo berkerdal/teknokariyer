@@ -1,5 +1,6 @@
 import * as migration_20261115_131140_ilk_sema from './20261115_131140_ilk_sema';
 import * as migration_20261115_153210_kaydedilenler_trafik from './20261115_153210_kaydedilenler_trafik';
+import * as migration_20261115_161043_sertifika_ayrintilari from './20261115_161043_sertifika_ayrintilari';
 
 export const migrations = [
   {
@@ -10,6 +11,11 @@ export const migrations = [
   {
     up: migration_20261115_153210_kaydedilenler_trafik.up,
     down: migration_20261115_153210_kaydedilenler_trafik.down,
-    name: '20261115_153210_kaydedilenler_trafik'
+    name: '20261115_153210_kaydedilenler_trafik',
+  },
+  {
+    up: migration_20261115_161043_sertifika_ayrintilari.up,
+    down: migration_20261115_161043_sertifika_ayrintilari.down,
+    name: '20261115_161043_sertifika_ayrintilari'
   },
 ];

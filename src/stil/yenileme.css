@@ -372,6 +372,25 @@ dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
   .bn-arama { flex-direction: row; }
 }
 
+/* ---------- Sertifikalar (LinkedIn usulü) ---------- */
+.sf-liste { list-style: none; margin: 0; padding: 0; display: grid; }
+.sf-oge { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-top: 1px solid var(--cizgi); }
+.sf-oge:first-child { border-top: 0; padding-top: 0; }
+.sf-simge { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 4px; background: var(--lacivert-acik); color: var(--lacivert); }
+.sf-govde { display: grid; gap: 2px; min-width: 0; }
+.sf-govde p { margin: 0; }
+.sf-ad { font: 600 16px/1.3 var(--font-baslik); }
+.sf-kurum { font-size: 15px; }
+.sf-eylemler { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px !important; }
+.sf-kart { display: grid; gap: 14px; }
+.sf-sil { display: flex; justify-content: flex-end; border-top: 1px solid var(--cizgi); padding-top: 8px; }
+.sf-belge { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; background: var(--zemin); border-radius: var(--kose-kontrol); }
+.sf-beceriler { list-style: none; margin: 4px 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.sf-beceriler li { display: inline-flex; align-items: center; gap: 2px; min-height: 30px; padding: 0 4px 0 10px; border-radius: 4px; background: var(--lacivert-acik);
+  color: var(--lacivert-koyu); font-size: 14px; font-weight: 600; }
+.sf-beceriler button { display: inline-grid; place-items: center; width: 26px; height: 26px; border: 0; background: none; color: inherit; cursor: pointer; border-radius: 3px; }
+@media (hover: hover) and (pointer: fine) { .sf-beceriler button:hover { background: rgba(24, 63, 130, .1); } }
+
 /* ---------- Kaydet düğmesi ---------- */
 .kaydet { position: relative; z-index: 2; color: var(--metin-2); }
 .ikon-dugme.kaydet { width: 36px; height: 36px; margin: -6px -6px 0 0; }

@@ -21,7 +21,7 @@ export interface ProfilKopyasi {
   deneyimler?: Array<{ pozisyon?: string; kurum?: string; baslangic?: string | null; bitis?: string | null; aciklama?: string | null }>
   beceriler?: Array<{ ad?: string; seviye?: string }>
   diller?: Array<{ dil?: string; seviye?: string }>
-  sertifikalar?: Array<{ ad?: string; kurum?: string | null; yil?: number | null }>
+  sertifikalar?: Array<Record<string, unknown> & { ad?: string }>
   baglantilar?: Array<{ ad?: string; adres?: string }>
   tercihler?: { modeller?: string[]; turler?: string[]; sehir?: string; baslama?: string }
   kopyaTarihi?: string

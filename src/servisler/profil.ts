@@ -10,6 +10,7 @@ import { FormHatasi } from './hesap'
 import { IslemHatasi, istekOlustur, kimlik, type Kullanici } from './ortak'
 import { SifreliPdfHatasi, pdfTemizle, temizlikVarMi } from '@/altyapi/pdfTemizle'
 import { islemKaydet } from '@/altyapi/islemKaydi'
+import { sahipsizBelgeleriSil, sertifikalariDenetle } from './sertifika'
 
 export const EN_FAZLA_CV = 3
 export const CV_EN_BUYUK = 5 * 1024 * 1024
@@ -98,8 +99,12 @@ export type ProfilGuncellemesi = Partial<Pick<Adaylar, (typeof PROFIL_ALANLARI)[
 
 export async function profilGuncelle(payload: Payload, kullanici: Kullanici, veri: ProfilGuncellemesi): Promise<Adaylar> {
   const aday = await kendiAdayKaydi(payload, kullanici)
-  const temiz = Object.fromEntries(Object.entries(veri).filter(([k, v]) => (PROFIL_ALANLARI as readonly string[]).includes(k) && v !== undefined))
-  return payload.update({ collection: 'adaylar', id: aday.id, data: temiz, overrideAccess: true, req: await istekOlustur(payload, kullanici), depth: 1 })
+  const temiz: Record<string, unknown> = Object.fromEntries(Object.entries(veri).filter(([k, v]) => (PROFIL_ALANLARI as readonly string[]).includes(k) && v !== undefined))
+  // Sertifika belgesi adaya ait olmalı, beceriler listede bulunmalı (src/servisler/sertifika.ts)
+  if (Array.isArray(temiz.sertifikalar)) temiz.sertifikalar = await sertifikalariDenetle(payload, kullanici, temiz.sertifikalar as Array<{ dosya?: unknown; beceriler?: unknown }>)
+  const sonuc = await payload.update({ collection: 'adaylar', id: aday.id, data: temiz as ProfilGuncellemesi, overrideAccess: true, req: await istekOlustur(payload, kullanici), depth: 1 })
+  if (temiz.sertifikalar) await sahipsizBelgeleriSil(payload, Number(kullanici.id))
+  return sonuc
 }
 
 /* ---------- CV havuzu (K24) ---------- */

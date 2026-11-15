@@ -54,3 +54,17 @@ describe('profil formu (K28)', () => {
     expect(hatalar['baglanti-1']).toMatch(/geçerli değil/)
   })
 })
+
+describe('sertifika satırı (LinkedIn usulü)', () => {
+  it('ad ve kurum zorunlu; tarih, bağlantı ve beceriler denetlenir', async () => {
+    const { sertifikaSatiri } = await import('@/alan/profilFormu')
+    expect(sertifikaSatiri({ ad: 'AWS', kurum: '' }, 0)).toEqual({ hata: '1. sertifika: adını ve veren kurumu yaz.' })
+    expect(sertifikaSatiri({ ad: 'AWS', kurum: 'Amazon', ay: 3 }, 1)).toEqual({ hata: '2. sertifika: veriliş tarihinin yılını da seç.' })
+    expect(sertifikaSatiri({ ad: 'AWS', kurum: 'Amazon', yil: 2025, bitisYil: 2024 }, 0)).toMatchObject({ hata: expect.stringMatching(/önce olamaz/) })
+    expect(sertifikaSatiri({ ad: 'AWS', kurum: 'Amazon', url: 'kotu adres' }, 0)).toMatchObject({ hata: expect.stringMatching(/bağlantısı geçerli değil/) })
+    const r = sertifikaSatiri({ ad: ' AWS ', kurum: 'Amazon', ay: 3, yil: 2024, bitisAy: 3, bitisYil: 2027, suresiz: true, kimlikNo: 'ABC-1', url: 'www.credly.com/badges/x', beceriler: [5, '5', 7, 'x'], dosya: '12' }, 0)
+    expect(r).toEqual({
+      sertifika: { ad: 'AWS', kurum: 'Amazon', ay: 3, yil: 2024, bitisAy: null, bitisYil: null, suresiz: true, kimlikNo: 'ABC-1', url: 'https://www.credly.com/badges/x', beceriler: [5, 7], dosya: 12 },
+    })
+  })
+})

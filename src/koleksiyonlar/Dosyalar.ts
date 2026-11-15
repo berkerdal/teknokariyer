@@ -4,7 +4,7 @@ import { kullanici, kurumKullanicisiMi, yoneticiMi } from '../erisim'
 
 /**
  * Yüklenen dosyalar.
- * - CV ve şartnameler herkese açık değildir; yalnızca sahibi ve kurum doğrudan okur. Firmalar CV'ye başvuru veya havuz
+ * - CV, sertifika belgeleri ve şartnameler herkese açık değildir; yalnızca sahibi ve kurum doğrudan okur. Firmalar CV'ye başvuru veya havuz
  *   üzerinden, kısa süreli imzalı bağlantıyla ve filigranlı olarak erişir (K6; M4).
  * - Görsellerde alternatif metin zorunludur (CLAUDE.md 5).
  * - Her dosya virüs taraması tamamlanana kadar "bekliyor" durumundadır (docs/teknoloji-onerisi.md, 6).
@@ -62,6 +62,7 @@ export const Dosyalar: CollectionConfig = {
       index: true,
       options: [
         { label: 'CV', value: 'cv' },
+        { label: 'Sertifika belgesi', value: 'sertifika' },
         { label: 'Şartname', value: 'sartname' },
         { label: 'Logo', value: 'logo' },
         { label: 'Kapak görseli', value: 'kapak' },

@@ -320,7 +320,7 @@ export interface Taksonomiler {
  */
 export interface Dosyalar {
   id: number;
-  tur: 'cv' | 'sartname' | 'logo' | 'kapak' | 'galeri';
+  tur: 'cv' | 'sertifika' | 'sartname' | 'logo' | 'kapak' | 'galeri';
   /**
    * Görselde ne olduğunu anlatan kısa metin. Görsellerde zorunlu.
    */
@@ -448,6 +448,7 @@ export interface Basvurular {
     | boolean
     | null;
   cv?: (number | null) | Dosyalar;
+  belgeler?: (number | Dosyalar)[] | null;
   onYazi?: string | null;
   cevaplar?:
     | {
@@ -534,7 +535,15 @@ export interface Adaylar {
     | {
         ad: string;
         kurum?: string | null;
+        ay?: number | null;
         yil?: number | null;
+        bitisAy?: number | null;
+        bitisYil?: number | null;
+        suresiz?: boolean | null;
+        kimlikNo?: string | null;
+        url?: string | null;
+        beceriler?: (number | Taksonomiler)[] | null;
+        dosya?: (number | null) | Dosyalar;
         id?: string | null;
       }[]
     | null;
@@ -1132,6 +1141,7 @@ export interface BasvurularSelect<T extends boolean = true> {
   adayKodu?: T;
   profilKopyasi?: T;
   cv?: T;
+  belgeler?: T;
   onYazi?: T;
   cevaplar?: T;
   eleyiciUyari?: T;
@@ -1201,7 +1211,15 @@ export interface AdaylarSelect<T extends boolean = true> {
     | {
         ad?: T;
         kurum?: T;
+        ay?: T;
         yil?: T;
+        bitisAy?: T;
+        bitisYil?: T;
+        suresiz?: T;
+        kimlikNo?: T;
+        url?: T;
+        beceriler?: T;
+        dosya?: T;
         id?: T;
       };
   baglantilar?:

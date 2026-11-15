@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SertifikaListesi, sertifikaGorunumu } from '@/arayuz/SertifikaListesi'
 import { CvGoruntuleyici } from '@/arayuz/firma/CvGoruntuleyici'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -215,9 +216,13 @@ export default async function BasvuruAyrintisi({ params }: Props) {
                 </>
               )}
               {(p.sertifikalar ?? []).length > 0 && (
-                <p>
-                  <strong>Sertifikalar:</strong> {(p.sertifikalar ?? []).map((s) => [s.ad, s.kurum, s.yil].filter(Boolean).join(', ')).join(' · ')}
-                </p>
+                <>
+                  <h3 className="b4">Lisans ve sertifikalar</h3>
+                  <SertifikaListesi
+                    sertifikalar={(p.sertifikalar ?? []).map((s) => sertifikaGorunumu(s as unknown as Record<string, unknown>))}
+                    belgeAdresi={(d) => `/firma-paneli/basvurular/${id}/belge/${d}`}
+                  />
+                </>
               )}
               {(p.baglantilar ?? []).length > 0 && (
                 <ul className="madde">

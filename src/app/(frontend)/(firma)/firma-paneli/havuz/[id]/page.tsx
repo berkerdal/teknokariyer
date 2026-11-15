@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SertifikaListesi, sertifikaGorunumu } from '@/arayuz/SertifikaListesi'
 import { CvGoruntuleyici } from '@/arayuz/firma/CvGoruntuleyici'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -121,6 +122,15 @@ export default async function HavuzProfili({ params }: { params: Promise<{ id: s
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+        {p.sertifikalar.length > 0 && (
+          <section>
+            <h2 className="b3 kare-bas">Lisans ve sertifikalar</h2>
+            <SertifikaListesi
+              sertifikalar={p.sertifikalar.map((s) => sertifikaGorunumu(s as unknown as Record<string, unknown>))}
+              belgeAdresi={(d) => `/firma-paneli/havuz/${id}/belge/${d}`}
+            />
           </section>
         )}
       </div>

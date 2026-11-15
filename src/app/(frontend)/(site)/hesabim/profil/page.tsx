@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SertifikaListesi, sertifikaGorunumu } from '@/arayuz/SertifikaListesi'
 import Link from 'next/link'
 import type { Adaylar } from '@/payload-types'
 import { DENEYIM_ADI, MODEL_ADI, type CalismaModeli, type Deneyim } from '@/alan/eslesme'
@@ -266,22 +267,18 @@ export default async function ProfilSayfasi() {
 
       <Kart
         id="sertifikalar"
-        baslik="Sertifikalar"
+        baslik="Lisans ve sertifikalar"
         eylem={
-          <DuzenlemePenceresi baslik="Sertifikalar" bolumler={['sertifikalar']} dugme={a.sertifikalar?.length ? 'Düzenle' : 'Ekle'} tamamMetni="Sertifikaların kaydedildi.">
-            <SertifikaAlanlari aday={a} />
+          <DuzenlemePenceresi baslik="Lisans ve sertifikalar" bolumler={['sertifikalar']} dugme={a.sertifikalar?.length ? 'Düzenle' : 'Ekle'} tamamMetni="Sertifikaların kaydedildi.">
+            <SertifikaAlanlari aday={a} beceriler={beceriler} />
           </DuzenlemePenceresi>
         }
       >
         {(a.sertifikalar ?? []).length ? (
-          <ul className="profil-liste">
-            {(a.sertifikalar ?? []).map((s, n) => (
-              <li key={n} className="profil-oge">
-                <p className="profil-oge-bas">{s.ad}</p>
-                <p className="kucuk ikincil">{[s.kurum, s.yil].filter(Boolean).join(' · ')}</p>
-              </li>
-            ))}
-          </ul>
+          <SertifikaListesi
+            sertifikalar={(a.sertifikalar ?? []).map((s) => sertifikaGorunumu(s as unknown as Record<string, unknown>))}
+            belgeAdresi={(d) => `/hesabim/belge/${d}`}
+          />
         ) : (
           <Bos>Henüz sertifika eklemedin.</Bos>
         )}

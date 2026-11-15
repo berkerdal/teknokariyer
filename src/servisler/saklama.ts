@@ -34,7 +34,7 @@ export async function basvurulariAnonimlestir(payload: Payload, simdi: Date, ay:
       payload.find({
         collection: 'basvurular',
         where: { and: [{ ilan: { in: parca } }, { anonimlestirildi: { exists: false } }] },
-        select: { cv: true },
+        select: { cv: true, belgeler: true },
         limit: 500,
         depth: 0,
         overrideAccess: true,
@@ -45,10 +45,11 @@ export async function basvurulariAnonimlestir(payload: Payload, simdi: Date, ay:
   const dosyalar = new Set<number>()
   for (const b of docs) {
     if (b.cv) dosyalar.add(kimlik(b.cv))
+    for (const x of b.belgeler ?? []) dosyalar.add(kimlik(x))
     await payload.update({
       collection: 'basvurular',
       id: b.id,
-      data: { profilKopyasi: { anonim: true }, cv: null, onYazi: null, cevaplar: null, ekipNotlari: [], adayKullanici: null, anonimlestirildi: simdi.toISOString() } as never,
+      data: { profilKopyasi: { anonim: true }, cv: null, belgeler: [], onYazi: null, cevaplar: null, ekipNotlari: [], adayKullanici: null, anonimlestirildi: simdi.toISOString() } as never,
       overrideAccess: true,
       req,
     })
@@ -56,11 +57,11 @@ export async function basvurulariAnonimlestir(payload: Payload, simdi: Date, ay:
   let silinenDosya = 0
   for (const id of dosyalar) {
     const [profilde, basvuruda] = await Promise.all([
-      payload.count({ collection: 'adaylar', where: { 'cvler.dosya': { equals: id } }, overrideAccess: true }),
-      payload.count({ collection: 'basvurular', where: { cv: { equals: id } }, overrideAccess: true }),
+      payload.count({ collection: 'adaylar', where: { or: [{ 'cvler.dosya': { equals: id } }, { 'sertifikalar.dosya': { equals: id } }] }, overrideAccess: true }),
+      payload.count({ collection: 'basvurular', where: { or: [{ cv: { equals: id } }, { belgeler: { contains: id } }] }, overrideAccess: true }),
     ])
     if (profilde.totalDocs || basvuruda.totalDocs) continue
-    await payload.delete({ collection: 'dosyalar', id, overrideAccess: true, req }).catch((e: unknown) => console.error('CV silinemedi', id, e))
+    await payload.delete({ collection: 'dosyalar', id, overrideAccess: true, req }).catch((e: unknown) => console.error('Dosya silinemedi', id, e))
     silinenDosya++
   }
   if (docs.length)

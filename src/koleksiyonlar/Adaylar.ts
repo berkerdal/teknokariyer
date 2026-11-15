@@ -105,7 +105,25 @@ export const Adaylar: CollectionConfig = {
         { name: 'seviye', type: 'select', required: true, options: CEFR.map((c) => ({ label: c, value: c })) },
       ],
     },
-    { name: 'sertifikalar', label: 'Sertifikalar', type: 'array', fields: [{ name: 'ad', type: 'text', required: true }, { name: 'kurum', type: 'text' }, { name: 'yil', type: 'number' }] },
+    {
+      // LinkedIn'deki “Lisans ve sertifikalar” bölümü örnek alındı (kullanıcı isteği, 15.11.2026). `yil` veriliş yılıdır.
+      name: 'sertifikalar',
+      label: 'Sertifikalar',
+      type: 'array',
+      fields: [
+        { name: 'ad', type: 'text', required: true },
+        { name: 'kurum', type: 'text' },
+        { name: 'ay', type: 'number' },
+        { name: 'yil', type: 'number' },
+        { name: 'bitisAy', type: 'number' },
+        { name: 'bitisYil', type: 'number' },
+        { name: 'suresiz', type: 'checkbox' },
+        { name: 'kimlikNo', label: 'Sertifika kimlik numarası', type: 'text' },
+        { name: 'url', label: 'Doğrulama bağlantısı', type: 'text' },
+        { name: 'beceriler', type: 'relationship', relationTo: 'taksonomiler', hasMany: true, filterOptions: { tur: { equals: 'beceri' } } },
+        { name: 'dosya', label: 'Belge (PDF veya görsel)', type: 'relationship', relationTo: 'dosyalar' },
+      ],
+    },
     { name: 'baglantilar', label: 'Projeler ve bağlantılar', type: 'array', fields: [{ name: 'ad', type: 'text', required: true }, { name: 'adres', type: 'text', required: true }] },
     {
       type: 'group',

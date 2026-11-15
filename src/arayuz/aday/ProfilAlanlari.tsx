@@ -9,6 +9,7 @@ import { SINIFLAR } from '@/alan/basvuru'
 import { CINSIYET_ADI } from '@/alan/havuz'
 import { ListeDuzenleyici } from './ProfilFormlari'
 import { SatirListesi } from './SatirListesi'
+import { SertifikaDuzenleyici } from './SertifikaDuzenleyici'
 
 export type Secenek = { id: number; ad: string }
 export const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
@@ -239,21 +240,25 @@ export function TercihAlanlari({ aday }: { aday: Adaylar }) {
   )
 }
 
-export function SertifikaAlanlari({ aday }: { aday: Adaylar }) {
+export function SertifikaAlanlari({ aday, beceriler }: { aday: Adaylar; beceriler: Secenek[] }) {
+  const id = (x: unknown) => (x && typeof x === 'object' ? Number((x as { id: number }).id) : Number(x))
   return (
-    <SatirListesi
-      ad="sertifikalarJson"
-      hataOneki="sertifika"
-      satirAdi="sertifika"
-      ekleMetni="Sertifika ekle"
-      bosMetin="Henüz sertifika eklemedin. Kurslar, eğitim programları ve yarışma derecelerini de ekleyebilirsin."
-      enFazla={20}
-      alanlar={[
-        { ad: 'ad', etiket: 'Sertifikanın adı', tip: 'metin', zorunlu: true },
-        { ad: 'kurum', etiket: 'Veren kurum', tip: 'metin' },
-        { ad: 'yil', etiket: 'Yıl', tip: 'yil' },
-      ]}
-      baslangic={(aday.sertifikalar ?? []).map((s) => ({ ad: s.ad, kurum: s.kurum ?? '', yil: s.yil ?? '' }))}
+    <SertifikaDuzenleyici
+      beceriler={beceriler}
+      baslangic={(aday.sertifikalar ?? []).map((s) => ({
+        ad: s.ad,
+        kurum: s.kurum ?? '',
+        ay: s.ay ?? null,
+        yil: s.yil ?? null,
+        bitisAy: s.bitisAy ?? null,
+        bitisYil: s.bitisYil ?? null,
+        suresiz: Boolean(s.suresiz),
+        kimlikNo: s.kimlikNo ?? '',
+        url: s.url ?? '',
+        beceriler: (s.beceriler ?? []).map(id),
+        dosya: s.dosya ? id(s.dosya) : null,
+        dosyaTur: s.dosya && typeof s.dosya === 'object' ? (s.dosya.mimeType ?? null) : null,
+      }))}
     />
   )
 }
