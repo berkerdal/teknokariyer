@@ -2,8 +2,6 @@
  * Eğitim bilgileri (kullanıcı isteği, 15.11.2026: birden çok eğitim; LinkedIn'deki “Eğitim” bölümü örnek alındı).
  * Saf kurallar: satır denetimi, sıralama ve “ana eğitim”in seçimi.
  */
-import { SINIFLAR } from './basvuru'
-
 export const EGITIM_DUZEYLERI: Array<[string, string]> = [
   ['lise', 'Lise'],
   ['onlisans', 'Önlisans'],
@@ -12,6 +10,26 @@ export const EGITIM_DUZEYLERI: Array<[string, string]> = [
   ['doktora', 'Doktora'],
 ]
 export const EGITIM_DUZEYI_ADI: Record<string, string> = Object.fromEntries(EGITIM_DUZEYLERI)
+/** Listelerde düzeyin kısa simgesi (kullanıcı isteği, 15.11.2026). */
+export const EGITIM_DUZEYI_SIMGE: Record<string, string> = { lise: 'L', onlisans: 'ÖL', lisans: 'L', 'yuksek-lisans': 'YL', doktora: 'DR' }
+
+/**
+ * Düzeye göre sorulabilecek sınıflar. Yüksek lisans, doktora ve lisede sınıf sorulmaz; önlisans 2 yıl, lisans 4 yıl
+ * (tıp gibi uzun programlar “5. sınıf ve üzeri”). Değerler başvuru kurallarının kullandığı SINIFLAR listesindendir.
+ */
+export function sinifSecenekleri(duzey: string): string[] {
+  if (duzey === 'onlisans') return ['Hazırlık', '1. sınıf', '2. sınıf']
+  if (duzey === 'lisans') return ['Hazırlık', '1. sınıf', '2. sınıf', '3. sınıf', '4. sınıf', '5. sınıf ve üzeri']
+  return []
+}
+
+/** Devam eden eğitimde başvuru kurallarına giden sınıf: yüksek lisans ve doktorada düzeyin kendisi. */
+export function egitimSinifi(e: Pick<EgitimSatiri, 'duzey' | 'devam' | 'sinif'>): string | null {
+  if (!e.devam) return null
+  if (e.duzey === 'yuksek-lisans') return 'Yüksek lisans'
+  if (e.duzey === 'doktora') return 'Doktora'
+  return e.sinif && sinifSecenekleri(e.duzey).includes(e.sinif) ? e.sinif : null
+}
 const DUZEY_SIRASI = Object.fromEntries(EGITIM_DUZEYLERI.map(([k], i) => [k, i]))
 export const EN_FAZLA_EGITIM = 6
 
@@ -50,7 +68,7 @@ export function egitimSatiri(s: Record<string, unknown>, n: number, buYil = new 
   if (!devam && bitisYil && bitisYil > buYil) return { hata: `${sira}: mezuniyet yılı gelecekte; hâlâ okuyorsan “Hâlâ okuyorum” seçeneğini işaretle.` }
   if (baslangicYil && bitisYil && bitisYil < baslangicYil) return { hata: `${sira}: mezuniyet yılı başlangıç yılından önce olamaz.` }
   const sinifHam = String(s.sinif ?? '')
-  const sinif = devam && (SINIFLAR as readonly string[]).includes(sinifHam) ? sinifHam : null
+  const sinif = devam && sinifSecenekleri(duzey).includes(sinifHam) ? sinifHam : null
   const ganoHam = String(s.gano ?? '').replace(',', '.').trim()
   if (ganoHam && !(Number(ganoHam) >= 0 && Number(ganoHam) <= 4)) return { hata: `${sira}: not ortalaması 0 ile 4 arasında olmalı (örneğin 3,12).` }
   return { egitim: { duzey, okul, okulAdi: okul ? null : okulAdi, bolum, baslangicYil, bitisAy, bitisYil, devam, sinif, gano: ganoHam ? Number(ganoHam) : null } }
@@ -73,7 +91,7 @@ export function anaEgitimAlanlari(liste: EgitimSatiri[]): { okul: number | null;
   return {
     okul: a.okul,
     bolum: a.bolum,
-    sinif: a.devam ? a.sinif : null,
+    sinif: egitimSinifi(a),
     mezuniyet: a.bitisYil ? new Date(Date.UTC(a.bitisYil, (a.bitisAy ?? 6) - 1, 15)).toISOString() : null,
     gano: a.gano,
   }

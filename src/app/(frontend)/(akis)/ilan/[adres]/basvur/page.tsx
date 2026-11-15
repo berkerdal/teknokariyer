@@ -58,7 +58,7 @@ export default async function BasvuruSayfasi({ params, searchParams }: Props) {
   const firmaAd = firma?.ad ?? ''
   return (
     <BasvuruAkisi
-      ilan={{ id: ilan.id, pozisyonAdi: ilan.pozisyonAdi, firmaAd, firmaAdIlgi: `${firmaAd}${ilgiEki(firmaAd)}`, adres: adresi }}
+      ilan={{ id: ilan.id, pozisyonAdi: ilan.pozisyonAdi, firmaAd, firmaAdIlgi: `${firmaAd}${ilgiEki(firmaAd)}`, adres: adresi, konum: firma?.konum ?? '', logo: firma?.logo ?? null, sonBasvuru: tarihYaz(ilan.sonBasvuru, true) }}
       sorular={(ilan.onElemeSorulari ?? []).map((s, n) => ({ id: s.id ?? String(n), soru: s.soru, tip: s.tip, secenekler: (s.secenekler ?? []).map((x) => x.ad) }))}
       eksikler={h.eksikler}
       okullar={okullar}

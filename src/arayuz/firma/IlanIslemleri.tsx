@@ -376,7 +376,7 @@ function LinkedinPaylasimi({ paylasim, geri }: { paylasim: { metin: string; adre
   }
   return (
     <div className="form-yigin islem-form">
-      <ol className="adimlar">
+      <ol className="sirali-adimlar">
         <li>
           <strong>Paylaşım metnini kopyalayın.</strong> Metin, ilan formundaki “LinkedIn metni” alanından gelir; burada değiştirebilirsiniz. Sonunda ilanın
           bağlantısı vardır.

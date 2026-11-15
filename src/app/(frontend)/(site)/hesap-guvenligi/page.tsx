@@ -34,7 +34,7 @@ export default async function HesapGuvenligi({ searchParams }: Props) {
     <>
       <Ust />
       <main id="icerik" className="sayfa-dar">
-        <Link className="geri kucuk" href={rolAnaSayfasi(String(k.rol))}>
+        <Link className="geri kucuk" href={k.rol === 'aday' ? '/hesabim/hesap' : rolAnaSayfasi(String(k.rol))}>
           {k.rol === 'aday' ? 'Hesabım' : k.rol === 'firma' ? 'Firma paneli' : 'Yönetim paneli'}
         </Link>
         <h1 className="b1">Hesap güvenliği</h1>

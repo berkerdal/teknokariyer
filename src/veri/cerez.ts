@@ -29,7 +29,8 @@ export function guvenliDonus(donus: unknown, varsayilan: string): string {
   return d.startsWith('/') && !d.startsWith('//') && !d.startsWith('/\\') ? d : varsayilan
 }
 
-export const rolAnaSayfasi = (rol: string) => (rol === 'aday' ? '/hesabim' : rol === 'firma' ? '/firma-paneli' : '/yonetim')
+/** Girişten sonra gidilecek yer (kullanıcı isteği, 15.11.2026): aday portalın ana sayfasına, firma ve kurum kendi paneline. */
+export const rolAnaSayfasi = (rol: string) => (rol === 'aday' ? '/' : rol === 'firma' ? '/firma-paneli' : '/yonetim')
 
 /* İki aşamalı doğrulama: şifreli, kısa ömürlü çerezler (içerik src/servisler/ikiAdim.ts ile şifrelenir). */
 const BEKLEYEN = 'tk-ikinci-adim'

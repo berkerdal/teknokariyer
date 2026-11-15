@@ -12,6 +12,7 @@ import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { basvurEylemi, type BasvuruDurumu } from '@/eylemler/aday'
 import { CEFR, DENEYIM_ADI, DENEYIM_SIRASI } from '@/alan/eslesme'
 import { SINIFLAR } from '@/alan/basvuru'
+import { FirmaKaro } from '../FirmaKaro'
 import { Ikon } from '../Ikon'
 import { DosyaSecici, GonderDugmesi, HataOzeti } from '../form'
 
@@ -20,7 +21,7 @@ const EKSIK_ADI: Record<string, string> = { okul: 'okul', bolum: 'bölüm', dene
 
 type Secenek = { id: number; ad: string }
 export interface BasvuruAkisiProps {
-  ilan: { id: number; pozisyonAdi: string; firmaAd: string; firmaAdIlgi: string; adres: string }
+  ilan: { id: number; pozisyonAdi: string; firmaAd: string; firmaAdIlgi: string; adres: string; konum: string; logo?: string | null; sonBasvuru: string }
   /** Paylaşım bağlantısından gelindiyse (ör. linkedin) */
   kaynak?: string
   sorular: Array<{ id: string; soru: string; tip: string; secenekler: string[] }>
@@ -37,7 +38,13 @@ export interface BasvuruAkisiProps {
 }
 
 type Adim = 'eksik' | 'cv' | 'sorular' | 'onay'
-const ADIM_ADI: Record<Adim, string> = { eksik: 'Eksik bilgiler', cv: 'CV ve ön yazı', sorular: 'Sorular', onay: 'Onay' }
+const ADIM_ADI: Record<Adim, string> = { eksik: 'Eksik bilgiler', cv: 'CV ve ön yazı', sorular: 'Firmanın soruları', onay: 'Kontrol ve onay' }
+const ADIM_ACIKLAMA: Record<Adim, string> = {
+  eksik: 'Bu ilanın istediği bilgiler',
+  cv: 'Gönderilecek CV ve isteğe bağlı ön yazı',
+  sorular: 'Kısa ön eleme soruları',
+  onay: 'Son kontrol ve gönderim',
+}
 
 export function BasvuruAkisi(p: BasvuruAkisiProps) {
   const adimlar = useMemo<Adim[]>(() => [...(p.eksikler.length ? ['eksik' as const] : []), 'cv', ...(p.sorular.length ? ['sorular' as const] : []), 'onay'], [p.eksikler.length, p.sorular.length])
@@ -113,14 +120,6 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
       <div className="cubuk-ilerleme" role="progressbar" aria-valuemin={1} aria-valuemax={adimlar.length} aria-valuenow={no} aria-label={`Başvuru adımı ${no}/${adimlar.length}`}>
         <span style={{ width: `${(no / adimlar.length) * 100}%` }} />
       </div>
-      <ol className="adimlar bv-adimlar">
-        {adimlar.map((a, n) => (
-          <li key={a} className={n + 1 < no ? 'tamam' : undefined} aria-current={a === adim ? 'step' : undefined}>
-            <span className="no">{n + 1}</span>
-            <span className={a === adim ? undefined : 'adim-ad'}>{ADIM_ADI[a]}</span>
-          </li>
-        ))}
-      </ol>
       <form
         ref={form}
         action={eylem}
@@ -136,7 +135,38 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
         {p.kaynak && <input type="hidden" name="kaynak" value={p.kaynak} />}
         <input type="hidden" name="eksikler" value={p.eksikler.join(',')} />
         <main id="icerik" className="bv">
-          <div className="bv-govde">
+          <div className="bv-cerceve">
+            <aside className="bv-yan" aria-label="Başvuru">
+              <div className="bv-ilan-kart">
+                <FirmaKaro konum={p.ilan.konum} logo={p.ilan.logo} ad={p.ilan.firmaAd} boy={44} />
+                <div>
+                  <p className="bv-ilan-ad">{p.ilan.pozisyonAdi}</p>
+                  <p className="kucuk ikincil">{p.ilan.firmaAd}</p>
+                  <p className="kucuk ikincil">Son başvuru: {p.ilan.sonBasvuru}</p>
+                </div>
+              </div>
+              <ol className="bv-adimlar">
+                {adimlar.map((a, n) => (
+                  <li key={a} data-durum={n + 1 < no ? 'tamam' : a === adim ? 'simdi' : 'sonra'} aria-current={a === adim ? 'step' : undefined}>
+                    <span className="bv-adim-no">{n + 1 < no ? <Ikon ad="tik" kucuk /> : n + 1}</span>
+                    <span className="bv-adim-metin">
+                      <strong>{ADIM_ADI[a]}</strong>
+                      <span>{n + 1 < no ? 'Tamamlandı' : ADIM_ACIKLAMA[a]}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <p className="bv-guven kucuk">
+                <Ikon ad="kilit" kucuk /> Başvurunu gönderene kadar hiçbir bilgin firmaya iletilmez.
+              </p>
+            </aside>
+          <div className="bv-govde bv-kart-alan">
+            <p className="bv-mobil-ilan kucuk">
+              <strong>{p.ilan.pozisyonAdi}</strong> · {p.ilan.firmaAd}
+            </p>
+            <p className="ust-etiket bv-adim-etiket">
+              Adım {no} / {adimlar.length} · {ADIM_ADI[adim]}
+            </p>
             <HataOzeti durum={hataOzeti} alanlar={{ okul: 'okul', bolum: 'bolum', deneyim: 'deneyim-0', sinif: 'sinif', mezuniyet: 'mezuniyetAy', aydinlatma: 'aydinlatma', cvDosya: 'cvDosya', cv: 'cv-0' }} />
 
             {p.eksikler.length > 0 && (
@@ -183,7 +213,7 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
                       <legend>{d.ad} seviyen</legend>
                       <span className="ipucu">Avrupa Ortak Dil Çerçevesi (CEFR). Bu ilan en az {d.seviye} istiyor. Emin değilsen kendini değerlendirdiğin seviyeyi seç.</span>
                       {hatalar[`dil-${d.id}`] && <p className="hata-metni">{hatalar[`dil-${d.id}`]}</p>}
-                      <div className="yan-yana">
+                      <div className="yan-yana yan-yana--dar">
                         {CEFR.map((s, n) => (
                           <label key={s} className="secenek secenek-kutu">
                             <input id={n === 0 ? `dil-${d.id}` : undefined} type="radio" name={`dil-${d.id}`} value={s} /> <span>
@@ -217,33 +247,39 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
                 {p.cvler.map((cv, n) => (
                   <label key={cv.id} className="secenek secenek-kutu">
                     <input id={`cv-${n}`} type="radio" name="cv" value={cv.id} checked={cvSecim === String(cv.id)} onChange={() => setCvSecim(String(cv.id))} />
-                    <span>
-                      <Ikon ad="dosya" kucuk /> <strong>{cv.ad}</strong>
-                      <span className="ipucu">{cv.bilgi}</span>
+                    <span className="cv-sec">
+                      <Ikon ad="dosya" />
+                      <span>
+                        <strong>{cv.ad}</strong>
+                        <span className="ipucu">{cv.bilgi}</span>
+                      </span>
                     </span>
                   </label>
                 ))}
                 {p.cvler.length < p.enFazlaCv && (
                   <label className="secenek secenek-kutu">
                     <input type="radio" name="cv" value="" checked={cvSecim === 'yeni'} onChange={() => setCvSecim('yeni')} />
-                    <span>
-                      <Ikon ad="arti" kucuk /> <strong>Yeni CV yükle</strong>
-                      <span className="ipucu">Yalnızca PDF dosyası yükleyebilirsin; dosya en fazla 5 MB olabilir. Yüklediğin CV profiline de eklenir.</span>
+                    <span className="cv-sec">
+                      <Ikon ad="yukle" />
+                      <span>
+                        <strong>Yeni CV yükle</strong>
+                        <span className="ipucu">Yalnızca PDF dosyası yükleyebilirsin; dosya en fazla 5 MB olabilir. Yüklediğin CV profiline de eklenir.</span>
+                      </span>
                     </span>
                   </label>
                 )}
-                {cvSecim === 'yeni' && (
-                  <div className="dosya">
-                    <DosyaSecici id="cvDosya" ad="cvDosya" />
-                    <div className="alan">
-                      <label htmlFor="cvAd">
-                        CV’ye bir ad ver <span className="istege-bagli">(isteğe bağlı)</span>
-                      </label>
-                      <input id="cvAd" name="cvAd" className="girdi" placeholder="Ör. CV – Türkçe" maxLength={60} />
-                    </div>
-                  </div>
-                )}
               </fieldset>
+              {cvSecim === 'yeni' && (
+                <div className={hatalar.cvDosya ? 'dosya dosya--hata' : 'dosya'}>
+                  <DosyaSecici id="cvDosya" ad="cvDosya" />
+                  <div className="alan">
+                    <label htmlFor="cvAd">
+                      CV’ye bir ad ver <span className="istege-bagli">(isteğe bağlı)</span>
+                    </label>
+                    <input id="cvAd" name="cvAd" className="girdi" placeholder="Örneğin CV – Türkçe" maxLength={60} />
+                  </div>
+                </div>
+              )}
               <div className="alan">
                 <label htmlFor="onYazi">
                   Ön yazı <span className="istege-bagli">(isteğe bağlı)</span>
@@ -326,9 +362,7 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
                 </div>
               )}
             </section>
-          </div>
-        </main>
-        <div className="yapiskan-alt bv-ayak">
+        <div className="bv-ayak">
           {no > 1 && (
             <button type="button" className="dugme dugme--ikincil" onClick={geri}>
               Geri
@@ -342,6 +376,9 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
             <GonderDugmesi bekleme="Gönderiliyor…">Başvurunu gönder</GonderDugmesi>
           )}
         </div>
+          </div>
+          </div>
+        </main>
       </form>
     </>
   )
@@ -350,14 +387,17 @@ export function BasvuruAkisi(p: BasvuruAkisiProps) {
 function Ust({ ilan }: BasvuruAkisiProps) {
   return (
     <header className="bv-ust">
-      <Link className="geri" href={ilan.adres}>
-        <Ikon ad="kapat" kucuk />
-        <span>Vazgeç</span>
-      </Link>
-      <span className="bv-ilan">
-        <strong>{ilan.pozisyonAdi}</strong>
-        <span className="kucuk ikincil">{ilan.firmaAd}</span>
-      </span>
+      <div className="bv-ust-ic">
+        <img className="ust-logo" src="/logo/logo-kompakt-renkli.svg" alt="TeknoKariyer, Pamukkale Teknokent" width={150} height={26} />
+        <span className="bv-ust-baslik">
+          <strong>Başvuru</strong>
+          <span className="kucuk ikincil">{ilan.pozisyonAdi}</span>
+        </span>
+        <Link className="geri bv-vazgec" href={ilan.adres}>
+          <Ikon ad="kapat" kucuk />
+          <span>Vazgeç</span>
+        </Link>
+      </div>
     </header>
   )
 }

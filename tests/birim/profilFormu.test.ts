@@ -18,7 +18,7 @@ describe('profil formu (K28)', () => {
     // Ana eğitim devam eden yüksek lisans; üst alanlar ondan türetilir
     expect(guncelleme.okul).toBe(4)
     expect(guncelleme.bolum).toBe(13) // okulun bölümü, profil bölümüyle karışmaz
-    expect(guncelleme.sinif).toBe('2. sınıf')
+    expect(guncelleme.sinif).toBe('Yüksek lisans') // yüksek lisansta sınıf sorulmaz; başvuru kuralına düzey gider
     expect(guncelleme.mezuniyet).toBe('2027-06-15T00:00:00.000Z')
     expect(guncelleme.egitimler?.map((e) => e.duzey)).toEqual(['yuksek-lisans', 'lisans'])
     expect(guncelleme.egitimler?.[1]?.gano).toBe(3.1)

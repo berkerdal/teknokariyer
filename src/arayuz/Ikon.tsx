@@ -38,9 +38,10 @@ const SEMBOLLER = `
   <symbol id="i-kilit" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
   <symbol id="i-cikis" viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></symbol>
   <symbol id="i-goz" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><rect x="10" y="10" width="4" height="4"/></symbol>
+  <symbol id="i-kalkan" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></symbol>
 `
 
-export type IkonAdi = "ara" | "filtre" | "konum" | "takvim" | "ofis" | "ev" | "yer-imi" | "dosya" | "indir" | "yukle" | "kapat" | "geri" | "ileri" | "menu" | "tik" | "kisi" | "zil" | "arti" | "kopya" | "duraklat" | "paylas" | "liste" | "mesaj" | "kalem" | "grafik" | "ayar" | "bilgi" | "cop" | "gonder" | "goz" | "canta" | "seviye" | "saat" | "kilit" | "cikis"
+export type IkonAdi = "ara" | "filtre" | "konum" | "takvim" | "ofis" | "ev" | "yer-imi" | "dosya" | "indir" | "yukle" | "kapat" | "geri" | "ileri" | "menu" | "tik" | "kisi" | "zil" | "arti" | "kopya" | "duraklat" | "paylas" | "liste" | "mesaj" | "kalem" | "grafik" | "ayar" | "bilgi" | "cop" | "gonder" | "goz" | "canta" | "seviye" | "saat" | "kilit" | "cikis" | "kalkan"
 
 export function IkonSeti() {
   return <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true" dangerouslySetInnerHTML={{ __html: SEMBOLLER }} />

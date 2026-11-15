@@ -14,11 +14,11 @@ import { adayHesabiniSil } from '@/servisler/hesapSilme'
 import { yayinaGonder } from '@/servisler/ilanIslemleri'
 import { ilanKaydet } from '@/servisler/ilanFormu'
 import { cvYukle, profilGuncelle } from '@/servisler/profil'
-import { sertifikaBelgesiYukle } from '@/servisler/sertifika'
+import { adayBelgesi, sertifikaBelgesiYukle } from '@/servisler/sertifika'
 
 let payload: Payload
 const ek = `sf${Date.now().toString(36)}`
-let firmaK: any, digerFirmaK: any, aday: any, baskaAday: any, ilan: any, beceri: any, pdf: Uint8Array
+let firmaK: any, digerFirmaK: any, moderator: any, aday: any, baskaAday: any, ilan: any, beceri: any, pdf: Uint8Array
 const PNG = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0))
 const satir = (v: Record<string, unknown>): Record<string, unknown> => ({ ad: 'AWS Cloud Practitioner', kurum: 'Amazon', ay: 3, yil: 2025, bitisAy: null, bitisYil: null, suresiz: true, kimlikNo: 'KIM-1', url: 'https://ornek.test/dogrula', beceriler: [], dosya: null, ...v })
 const varMi = async (id: number) => Boolean(await payload.findByID({ collection: 'dosyalar', id, overrideAccess: true, disableErrors: true }))
@@ -34,6 +34,7 @@ beforeAll(async () => {
     payload.create({ collection: 'kullanicilar', overrideAccess: true, data: { email: `${e}-${ek}@ornek.com`, password: 'Deneme-12345', ad: `Kişi ${e}`, _verified: true, ...v } as any })
   firmaK = await k('sff', { rol: 'firma', firma: f1.id, firmaYetkisi: 'yonetici' })
   digerFirmaK = await k('sfd', { rol: 'firma', firma: f2.id, firmaYetkisi: 'yonetici' })
+  moderator = await k('sfm', { rol: 'moderator' })
   aday = await k('sfa', { rol: 'aday' })
   baskaAday = await k('sfb', { rol: 'aday' })
   for (const a of [aday, baskaAday]) {
@@ -71,6 +72,29 @@ describe('yükleme ve profil', () => {
     expect((a.sertifikalar?.[1]?.dosya as any)?.id ?? a.sertifikalar?.[1]?.dosya).toBe(benim.id)
     expect(await varMi(vazgecilen.id)).toBe(false) // profilde ve başvuruda yok: silindi
     expect(await varMi(baskasinin.id)).toBe(true) // başkasının belgesine dokunulmaz
+  })
+})
+
+describe('adresteki numarayı değiştirerek erişim', () => {
+  it('aday yalnızca kendi belgesini açar; başkasınınki, CV ve olmayan numara “bulunamadı” döner', async () => {
+    const benim = await sertifikaBelgesiYukle(payload, aday, { veri: pdf, boyut: pdf.length })
+    const onunki = await sertifikaBelgesiYukle(payload, baskaAday, { veri: pdf, boyut: pdf.length })
+    const cv = await cvYukle(payload, baskaAday, { ad: 'CV', dosya: { veri: pdf, boyut: pdf.length } })
+    expect((await adayBelgesi(payload, aday, benim.id)).tur).toBe('application/pdf')
+    for (const id of [onunki.id, cv.id, 99999999, NaN]) await expect(adayBelgesi(payload, aday, id)).rejects.toMatchObject({ durumKodu: 404 })
+    await expect(adayBelgesi(payload, null, benim.id)).rejects.toMatchObject({ durumKodu: 403 })
+    await expect(adayBelgesi(payload, firmaK, benim.id)).rejects.toMatchObject({ durumKodu: 403 })
+  })
+
+  it("Payload API'si üzerinden de başkasının CV'si ve belgesi okunamaz (aday, firma, moderatör)", async () => {
+    const belge = await sertifikaBelgesiYukle(payload, baskaAday, { veri: pdf, boyut: pdf.length })
+    const cv = await cvYukle(payload, baskaAday, { ad: 'CV', dosya: { veri: pdf, boyut: pdf.length } })
+    for (const kim of [aday, firmaK, moderator]) {
+      const { docs } = await payload.find({ collection: 'dosyalar', user: kim, overrideAccess: false, depth: 0, where: { id: { in: [belge.id, cv.id] } } })
+      expect(docs).toEqual([])
+    }
+    const sahibi = await payload.find({ collection: 'dosyalar', user: baskaAday, overrideAccess: false, depth: 0, where: { id: { in: [belge.id, cv.id] } } })
+    expect(sahibi.docs).toHaveLength(2)
   })
 })
 

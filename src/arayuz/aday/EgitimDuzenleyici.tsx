@@ -5,8 +5,7 @@
  * gönderilir; denetim ve “ana eğitim” seçimi sunucuda (src/alan/egitim.ts).
  */
 import { useState } from 'react'
-import { EGITIM_DUZEYLERI, EN_FAZLA_EGITIM } from '@/alan/egitim'
-import { SINIFLAR } from '@/alan/basvuru'
+import { EGITIM_DUZEYLERI, EN_FAZLA_EGITIM, sinifSecenekleri } from '@/alan/egitim'
 import { Ikon } from '../Ikon'
 import { TekSecimGirdisi } from '../TekSecimGirdisi'
 
@@ -47,12 +46,13 @@ export function EgitimDuzenleyici(p: {
       </p>
       {satirlar.map((s, n) => {
         const lise = s.duzey === 'lise'
+        const siniflar = sinifSecenekleri(s.duzey)
         return (
           <fieldset key={n} className="satir-kart sf-kart" id={`egitim-${n}`}>
             <legend className="gizli">{n + 1}. eğitim</legend>
             <div className="alan">
               <label htmlFor={`egitim-${n}-duzey`}>Eğitim düzeyi</label>
-              <select id={`egitim-${n}-duzey`} className="secim" value={s.duzey} onChange={(e) => degis(n, { duzey: e.target.value })}>
+              <select id={`egitim-${n}-duzey`} className="secim" value={s.duzey} onChange={(e) => degis(n, { duzey: e.target.value, sinif: sinifSecenekleri(e.target.value).includes(s.sinif) ? s.sinif : '' })}>
                 {EGITIM_DUZEYLERI.map(([k, ad]) => (
                   <option key={k} value={k}>
                     {ad}
@@ -102,14 +102,14 @@ export function EgitimDuzenleyici(p: {
                   ))}
                 </select>
               </div>
-              {s.devam && !lise && (
+              {s.devam && siniflar.length > 0 && (
                 <div className="alan">
                   <label htmlFor={`egitim-${n}-sinif`}>
                     Sınıf <span className="istege-bagli">(isteğe bağlı)</span>
                   </label>
                   <select id={`egitim-${n}-sinif`} className="secim" value={s.sinif} onChange={(e) => degis(n, { sinif: e.target.value })}>
                     <option value="">Seç</option>
-                    {SINIFLAR.map((x) => (
+                    {siniflar.map((x) => (
                       <option key={x} value={x}>
                         {x}
                       </option>

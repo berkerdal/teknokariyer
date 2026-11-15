@@ -2,7 +2,7 @@
  * Eğitim bilgilerinin okunur görünümü (LinkedIn usulü): okul, düzey ve bölüm, yıllar, sınıf ve not ortalaması.
  * Aday profili, firmanın başvuru ekranı ve havuz profili aynı bileşeni kullanır.
  */
-import { EGITIM_DUZEYI_ADI, egitimleriSirala } from '@/alan/egitim'
+import { EGITIM_DUZEYI_ADI, EGITIM_DUZEYI_SIMGE, egitimleriSirala, sinifSecenekleri } from '@/alan/egitim'
 
 const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
 
@@ -41,19 +41,21 @@ export function EgitimListesi({ egitimler }: { egitimler: EgitimGorunumu[] }) {
       {egitimleriSirala(egitimler).map((e, n) => {
         const bitis = e.bitisYil ? `${e.bitisAy ? `${AYLAR[e.bitisAy - 1]} ` : ''}${e.bitisYil}` : ''
         const yillar = e.devam
-          ? [e.baslangicYil ? `${e.baslangicYil}’den beri` : 'Devam ediyor', bitis && `beklenen mezuniyet ${bitis}`].filter(Boolean).join(' · ')
+          ? [e.baslangicYil ? `${e.baslangicYil}’den beri` : 'Devam ediyor', bitis && `Beklenen mezuniyet: ${bitis}`].filter(Boolean).join(' · ')
           : [e.baslangicYil, bitis].filter(Boolean).join(' – ')
+        // Eski kayıtlarda yüksek lisans/doktora için “Doktora” gibi sınıf değeri durabilir; düzeye uymayan sınıf gösterilmez.
+        const sinif = e.devam && e.sinif && sinifSecenekleri(e.duzey).includes(e.sinif) ? e.sinif : null
         return (
           <li key={n} className="sf-oge">
             <span className="sf-simge eg-simge" aria-hidden="true">
-              {(EGITIM_DUZEYI_ADI[e.duzey] ?? '?').charAt(0)}
+              {EGITIM_DUZEYI_SIMGE[e.duzey] ?? '?'}
             </span>
             <div className="sf-govde">
               <p className="sf-ad">{e.okul ?? 'Okul belirtilmedi'}</p>
               <p className="sf-kurum">{[EGITIM_DUZEYI_ADI[e.duzey], e.bolum].filter(Boolean).join(' · ')}</p>
-              {(yillar || e.sinif || e.gano != null) && (
+              {(yillar || sinif || e.gano != null) && (
                 <p className="kucuk ikincil">
-                  {[yillar, e.devam && e.sinif, e.gano != null && `Not ortalaması: ${String(e.gano).replace('.', ',')}`].filter(Boolean).join(' · ')}
+                  {[yillar, sinif, e.gano != null && `Not ortalaması: ${String(e.gano).replace('.', ',')}`].filter(Boolean).join(' · ')}
                 </p>
               )}
             </div>

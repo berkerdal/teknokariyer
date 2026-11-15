@@ -1,10 +1,10 @@
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
-import { kullanici, kurumKullanicisiMi, yoneticiMi } from '../erisim'
+import { kullanici, yoneticiMi } from '../erisim'
 
 /**
  * Yüklenen dosyalar.
- * - CV, sertifika belgeleri ve şartnameler herkese açık değildir; yalnızca sahibi ve kurum doğrudan okur. Firmalar CV'ye başvuru veya havuz
+ * - CV, sertifika belgeleri ve şartnameler herkese açık değildir; yalnızca sahibi ve tam yetkili kurum kullanıcısı doğrudan okur. Firmalar CV'ye başvuru veya havuz
  *   üzerinden, kısa süreli imzalı bağlantıyla ve filigranlı olarak erişir (K6; M4).
  * - Görsellerde alternatif metin zorunludur (CLAUDE.md 5).
  * - Her dosya virüs taraması tamamlanana kadar "bekliyor" durumundadır (docs/teknoloji-onerisi.md, 6).
@@ -19,7 +19,8 @@ export const Dosyalar: CollectionConfig = {
   access: {
     read: ({ req }) => {
       const k = kullanici(req)
-      if (kurumKullanicisiMi(k)) return true
+      // Kişisel veri (CV, sertifika) yalnızca tam yetkili kuruma açık (K32); moderatör ve raporlayıcı yalnızca herkese açık türleri görür.
+      if (yoneticiMi(k)) return true
       const acik = { tur: { in: HERKESE_ACIK_TURLER } }
       return k ? { or: [acik, { sahip: { equals: k.id } }] } : acik
     },

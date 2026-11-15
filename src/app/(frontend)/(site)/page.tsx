@@ -9,6 +9,9 @@ import { FirmaKaro } from '@/arayuz/FirmaKaro'
 import { Ust } from '@/arayuz/Ust'
 import { yayindakiIlanlar } from '@/veri/ilanlar'
 import { kaydetmeBaglami } from '@/veri/kaydedilenler'
+import { oturumdakiAday } from '@/veri/aday'
+import { cvOzetleri } from '@/veri/basvuru'
+import { profilEksikleri } from '@/veri/profil'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +22,9 @@ const sonYediGunde = (iso?: string | null) => Boolean(iso) && Date.now() - new D
 
 /** Ana sayfa: ilk ekranda arama, canlı sayılı hızlı filtreler ve gerçek son ilanlar. Dev slogan yok. */
 export default async function AnaSayfa() {
-  const [ilanlar, kaydet] = await Promise.all([yayindakiIlanlar(), kaydetmeBaglami()])
+  const [ilanlar, kaydet, aday] = await Promise.all([yayindakiIlanlar(), kaydetmeBaglami(), oturumdakiAday()])
+  // Aday girişten sonra buraya gelir; profili eksikse sihirbaza giden ince bir şerit gösterilir.
+  const eksikler = aday ? profilEksikleri(aday, cvOzetleri(aday).length) : []
   const say = (fn: (i: (typeof ilanlar)[number]) => boolean) => ilanlar.filter(fn).length
   const son = sirala(ilanlar, 'yeni').slice(0, 8)
   const firmalar = [...ilanlar.reduce((m, i) => m.set(i.firma.id, { ...i.firma, n: (m.get(i.firma.id)?.n ?? 0) + 1 }), new Map<number, (typeof ilanlar)[number]['firma'] & { n: number }>()).values()]
@@ -39,6 +44,16 @@ export default async function AnaSayfa() {
     <>
       <Ust />
       <main id="icerik" className="as">
+        {eksikler.length > 0 && (
+          <div className="as-gorev">
+            <p>
+              <strong>Profilini tamamla.</strong> {eksikler.length} temel bilgin eksik; tamamlarsan ilanlarla eşleşmen hesaplanır ve tek adımda başvurabilirsin.
+            </p>
+            <Link className="dugme dugme--kucuk" href={`/hesabim/profil/sihirbaz?adim=${eksikler[0]!.adim}`}>
+              Adım adım tamamla
+            </Link>
+          </div>
+        )}
         <section className="as-giris">
           <div className="as-giris-ic">
             <h1 className="b1">Pamukkale Teknokent firmalarında iş ve staj ilanları</h1>

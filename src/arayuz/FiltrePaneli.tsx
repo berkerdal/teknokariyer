@@ -1,6 +1,6 @@
 'use client'
 /**
- * İlan filtreleri.
+ * Filtre paneli (ilanlar ve firmalar).
  * - Masaüstünde solda sabit sütun; mobilde alttan açılan panel (“12 ilanı göster”).
  * - Bir seçim değişince form kendiliğinden gönderilir (adres güncellenir, sayfa yeniden yüklenmez).
  * - JavaScript yoksa “Uygula” düğmesiyle çalışır.
@@ -8,7 +8,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Ikon } from './Ikon'
 
-export function FiltrePaneli(props: { formId: string; aktifSayi: number; sonucSayisi: number; temizleHref: string; children: React.ReactNode }) {
+const BIRIM = { ilan: ['ilanı', 'ilan'], firma: ['firmayı', 'firma'] } as const
+
+export function FiltrePaneli(props: { formId: string; aktifSayi: number; sonucSayisi: number; temizleHref: string; birim?: keyof typeof BIRIM; children: React.ReactNode }) {
+  const [belirtme, yalin] = BIRIM[props.birim ?? 'ilan']
   const [acik, setAcik] = useState(false)
   const panel = useRef<HTMLElement>(null)
   const acan = useRef<HTMLButtonElement>(null)
@@ -74,7 +77,7 @@ export function FiltrePaneli(props: { formId: string; aktifSayi: number; sonucSa
             </button>
           </noscript>
           <button type="button" className="dugme dugme--genis" data-mobil onClick={kapat} disabled={props.sonucSayisi === 0}>
-            {props.sonucSayisi ? `${props.sonucSayisi} ilanı göster` : 'Uyan ilan bulunmuyor'}
+            {props.sonucSayisi ? `${props.sonucSayisi} ${belirtme} göster` : `Uyan ${yalin} bulunmuyor`}
           </button>
         </div>
       </aside>

@@ -93,6 +93,17 @@ export async function sahipsizBelgeleriSil(payload: Payload, kullaniciId: number
 /**
  * Belgenin içeriği. Firma için PDF'e firma adı ve tarih filigranı eklenir (K6 ile aynı kural) ve açılış kayda geçer.
  */
+/**
+ * Adayın kendi belgesi. Adresteki numara değiştirilerek başkasının belgesi açılamaz: belge yalnızca sahibine verilir;
+ * başkasınınki “bulunamadı” döner (var olduğu da belli edilmez).
+ */
+export async function adayBelgesi(payload: Payload, k: Kullanici | null, dosyaId: number) {
+  if (!k || !adayMi(k)) throw new IslemHatasi('Belgeyi görmek için aday hesabınla giriş yap.', 403)
+  const d = Number.isSafeInteger(dosyaId) ? await payload.findByID({ collection: 'dosyalar', id: dosyaId, depth: 0, overrideAccess: true, disableErrors: true }) : null
+  if (!d || d.tur !== 'sertifika' || kimlik(d.sahip) !== Number(k.id)) throw new IslemHatasi('Belge bulunamadı.', 404)
+  return belgeHazirla(payload, dosyaId, null)
+}
+
 export async function belgeHazirla(
   payload: Payload,
   dosyaId: number,

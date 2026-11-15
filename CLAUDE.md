@@ -632,6 +632,27 @@ Claude tarafından yapılacak.
       Trafik panosunda “Tekil ziyaretçiler” şeridi yalnızca izin verenleri sayar (izin oranı da gösterilir).
     - Çerezsiz sayım (sayfa görüntüleme, ziyaret) izinden bağımsız sürer; kişisel veri ve tanımlayıcı içermez.
     - Göç `20261115_200410_istatistik_izni` (D1) ve `20261115_200413_istatistik_izni` (PG): yalnızca ADD.
+  - **Kullanıcı geri bildirimi 6 (15.11.2026):**
+    - **Turnstile:** Kayıtlı şifreyle hemen gönderilen form anahtar gelmeden sunucuya gidip “Güvenlik doğrulaması
+      tamamlanmadı” alıyordu. `InsanDogrulama` artık gönderimi yakalama aşamasında bekletir (`preventDefault` +
+      `stopPropagation`; React'in form eylemi kökte kabarcıklanmada çalışır), anahtar gelince `requestSubmit(düğme)` ile
+      kendisi gönderir (en fazla 20 sn). Korumanın durumu formda görünür (“yapılıyor / tamamlandı / kutuyu işaretle”).
+    - **Girişten sonra:** aday ana sayfaya (`rolAnaSayfasi` → `/`), firma ve kurum kendi paneline. Profili eksik adaya
+      ana sayfada ince “Profilini tamamla” şeridi (`.as-gorev`). Hesap güvenliğindeki geri bağlantısı adayda `/hesabim/hesap`.
+    - **Eğitim:** sınıf yalnızca önlisans (Hazırlık–2) ve lisansta (Hazırlık–5+) sorulur (`sinifSecenekleri`); yüksek
+      lisans ve doktorada başvuru kurallarına düzeyin adı gider (`egitimSinifi`). Simgeler `EGITIM_DUZEYI_SIMGE`
+      (DR, YL, ÖL, L). Eski kayıtlarda düzeye uymayan sınıf gösterilmez. Birim testi `tests/birim/egitim.test.ts`.
+    - **Belge erişimi (IDOR):** `/hesabim/belge/[dosya]` → `adayBelgesi` (yalnızca sahibine; başkasınınki 404, var olduğu
+      belli edilmez). Firma uçları başvuru/havuz kaydından denetliyordu. **Dosyalar koleksiyonunun okuma kuralı daraltıldı:**
+      CV ve sertifikayı kurumdan yalnızca rol `yonetici` okur (önceden moderatör ve raporlayıcı da Payload API'sinden
+      okuyabiliyordu). Testler `sertifika.test.ts` → “adresteki numarayı değiştirerek erişim”.
+    - **Başvuru akışı görünümü:** masaüstünde solda ilan kartı (karo, son başvuru) + bağlantılı adım listesi + güven notu,
+      sağda beyaz form kartı (düğmeler kartın içinde); mobilde ilerleme çubuğu, “Adım 2 / 3” etiketi, yapışık düğmeler.
+      Başvuru sonrası sayfası: başarı işareti, ilan kartı, süreç (ilk adım tamam), aynı alandaki başka açık ilanlar.
+      Öğrenilen: `uygulama.css`'te genel `.adimlar` kuralı (LinkedIn yönergesi için) başvuru adımlarını dikey listeye
+      çeviriyordu; yönerge `.sirali-adimlar` oldu.
+    - **Firmalar:** sektör düğmeleri yerine ilan listesindeki gibi solda “Sektör” filtre grubu (çoklu seçim, mobilde alttan
+      panel, `FiltrePaneli birim="firma"`) ve firma/sektör/pozisyon araması.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
