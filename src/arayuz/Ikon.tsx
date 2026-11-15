@@ -35,10 +35,12 @@ const SEMBOLLER = `
   <symbol id="i-canta" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13"/><path d="M9 7V4h6v3M3 12h18"/></symbol>
   <symbol id="i-seviye" viewBox="0 0 24 24"><path d="M5 20v-5M12 20V10M19 20V4"/></symbol>
   <symbol id="i-saat" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/><path d="M12 8v5h4"/></symbol>
+  <symbol id="i-kilit" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-cikis" viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></symbol>
   <symbol id="i-goz" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><rect x="10" y="10" width="4" height="4"/></symbol>
 `
 
-export type IkonAdi = "ara" | "filtre" | "konum" | "takvim" | "ofis" | "ev" | "yer-imi" | "dosya" | "indir" | "yukle" | "kapat" | "geri" | "ileri" | "menu" | "tik" | "kisi" | "zil" | "arti" | "kopya" | "duraklat" | "paylas" | "liste" | "mesaj" | "kalem" | "grafik" | "ayar" | "bilgi" | "cop" | "gonder" | "goz" | "canta" | "seviye" | "saat"
+export type IkonAdi = "ara" | "filtre" | "konum" | "takvim" | "ofis" | "ev" | "yer-imi" | "dosya" | "indir" | "yukle" | "kapat" | "geri" | "ileri" | "menu" | "tik" | "kisi" | "zil" | "arti" | "kopya" | "duraklat" | "paylas" | "liste" | "mesaj" | "kalem" | "grafik" | "ayar" | "bilgi" | "cop" | "gonder" | "goz" | "canta" | "seviye" | "saat" | "kilit" | "cikis"
 
 export function IkonSeti() {
   return <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true" dangerouslySetInnerHTML={{ __html: SEMBOLLER }} />

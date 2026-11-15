@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { kurumKullanicisiMi, teknikSorumluMu, yoneticiMi } from '@/erisim'
 import { Alt } from '@/arayuz/Alt'
 import { YonetimMenusu } from '@/arayuz/yonetim/YonetimMenusu'
-import { cikisEylemi } from '@/eylemler/hesap'
+import { hesapMenusuOgeleri } from '@/alan/hesapMenusu'
+import { HesapMenusu } from '@/arayuz/HesapMenusu'
 import { rolAnaSayfasi } from '@/veri/cerez'
 import { oturum } from '@/veri/payload'
 import { kullaniciSayilari } from '@/veri/yonetim'
@@ -26,7 +27,8 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
   const yonetici = yoneticiMi(k)
   const sayilar = await kullaniciSayilari(yonetici)
   const testPosta = yonetici && ortam() !== 'yayin'
-  const kisi = `${k.ad ?? k.email} · ${ROL_ADI[String(k.rol)] ?? k.rol}`
+  const rolAdi = `Yönetici A.Ş. · ${ROL_ADI[String(k.rol)] ?? k.rol}`
+  const menu = hesapMenusuOgeleri('kurum', { yonetici })
   return (
     <>
       <header className="y-ust">
@@ -34,11 +36,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
           <img className="ust-logo" src="/logo/logo-kompakt-negatif.svg" alt="TeknoKariyer" width={140} height={24} />
         </Link>
         <span className="y-rol">Yönetici A.Ş.</span>
-        <form action={cikisEylemi}>
-          <button type="submit" className="dugme dugme--sade dugme--kucuk y-cikis">
-            Çıkış
-          </button>
-        </form>
+        <HesapMenusu ad={k.ad ?? k.email} altBilgi={rolAdi} ogeler={menu} tema="koyu" />
       </header>
       <YonetimMenusu yer="sekme" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} testPosta={testPosta} />
       <div className="y-masa">
@@ -51,15 +49,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
           </div>
           <YonetimMenusu yer="yan" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} testPosta={testPosta} />
           <div className="y-kisi">
-            <p>{kisi}</p>
-            <Link className="kucuk" href="/hesap-guvenligi">
-              Hesap güvenliği
-            </Link>
-            <form action={cikisEylemi}>
-              <button type="submit" className="dugme dugme--sade dugme--kucuk y-cikis">
-                Çıkış yap
-              </button>
-            </form>
+            <HesapMenusu ad={k.ad ?? k.email} altBilgi={rolAdi} ogeler={menu} adiGoster yon="yukari" tema="koyu" />
           </div>
         </nav>
         <main id="icerik" className="y-icerik">

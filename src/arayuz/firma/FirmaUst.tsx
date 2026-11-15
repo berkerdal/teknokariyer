@@ -1,13 +1,9 @@
 import Link from 'next/link'
-import { cikisEylemi } from '@/eylemler/hesap'
+import { hesapMenusuOgeleri } from '@/alan/hesapMenusu'
+import { HesapMenusu } from '../HesapMenusu'
 import { FirmaKaro } from '../FirmaKaro'
-import { Ikon } from '../Ikon'
 
-const YETKI_ADI: Record<string, string> = {
-  yonetici: 'Tam yetkili (ilanlar, başvurular, ekip ve firma profili)',
-  'ilan-sorumlusu': 'İlan sorumlusu (ilanlar ve başvurular)',
-  degerlendirici: 'Değerlendirici (başvuruları görür, not yazar)',
-}
+const YETKI_KISA: Record<string, string> = { yonetici: 'Tam yetkili', 'ilan-sorumlusu': 'İlan sorumlusu', degerlendirici: 'Değerlendirici' }
 
 /** Firma paneli üst çubuğu: alt marka logosu, firma, kişi ve hesap menüsü (açılır liste, dokunmatikte de çalışır). */
 export function FirmaUst({ firma, kisi, unvan, yetki }: { firma: { kisaAd: string; konum: string; logo?: string | null }; kisi: string; unvan?: string | null; yetki: string }) {
@@ -24,36 +20,9 @@ export function FirmaUst({ firma, kisi, unvan, yetki }: { firma: { kisaAd: strin
             <span className="kucuk ikincil f-firma-konum">{firma.konum}</span>
           </span>
         </span>
-        <details className="f-hesap">
-          <summary>
-            <span className="f-hesap-ad">
-              {kisi}
-              {unvan && <span className="f-hesap-unvan">{unvan}</span>}
-            </span>
-            <span className="gizli">: hesap menüsü</span>
-            <Ikon ad="menu" />
-          </summary>
-          <div className="f-hesap-menu">
-            <p className="kucuk">
-              <strong>{kisi}</strong>
-              {unvan && (
-                <>
-                  <br />
-                  {unvan}
-                </>
-              )}
-              <br />
-              <span className="ikincil">Yetki: {YETKI_ADI[yetki] ?? yetki}</span>
-            </p>
-            <Link href="/firma-paneli/profil">Firma profili</Link>
-            <Link href="/firma-paneli/ekip">Ekip</Link>
-            <Link href="/firma-paneli/rapor">Rapor</Link>
-            <Link href="/">Portalın ana sayfası</Link>
-            <form action={cikisEylemi}>
-              <button type="submit">Çıkış yap</button>
-            </form>
-          </div>
-        </details>
+        <div className="f-hesap">
+          <HesapMenusu ad={kisi} altBilgi={unvan || (YETKI_KISA[yetki] ?? null)} ogeler={hesapMenusuOgeleri('firma')} adiGoster />
+        </div>
       </div>
     </header>
   )

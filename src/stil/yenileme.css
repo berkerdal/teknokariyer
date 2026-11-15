@@ -289,6 +289,64 @@
 .ozet-sekmeler a[aria-current="page"] { background: var(--lacivert); color: #FFFFFF; }
 @media (hover: hover) and (pointer: fine) { .ozet-sekmeler a:not([aria-current="page"]):hover { background: var(--yuzey-2); color: var(--metin); } }
 
+/* ---------- Düzenleme penceresi: içeriğe göre yükseklik; uzun içerikte yalnızca gövde kayar ---------- */
+dialog.duzen-pencere[open] { display: flex; flex-direction: column; }
+dialog.duzen-pencere > form { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+dialog.duzen-pencere .duzen-pencere-govde { flex: 1 1 auto; min-height: 0; }
+@media (min-width: 900px) {
+  dialog.duzen-pencere { overflow: hidden; }
+  dialog.duzen-pencere > form { flex: 0 1 auto; max-height: min(85dvh, 760px); }
+}
+/* Pencere içindeki öneri listesi kaydırma alanında kesilmesin: alanın altında yer kaplar */
+dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
+
+/* ---------- Hesap menüsü (aday, firma, Yönetici A.Ş.) ---------- */
+.hm { position: relative; }
+.hm-dugme { display: inline-flex; align-items: center; gap: 10px; min-height: var(--dokunma); padding: 4px 8px 4px 4px; border: 0; background: none; color: inherit;
+  border-radius: var(--kose-panel); cursor: pointer; font: inherit; text-align: left; transition: background-color var(--sure) ease; }
+.hm-dugme:active { transform: scale(.98); }
+.hm-simge { display: inline-grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 4px; background: var(--lacivert); color: #FFFFFF;
+  font: 600 13px/1 var(--font-baslik); letter-spacing: .02em; }
+.hm-simge--buyuk { width: 44px; height: 44px; font-size: 15px; }
+.hm-ad { display: none; line-height: 1.25; min-width: 0; }
+.hm-ad > span:first-child { display: block; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.hm-alt { display: block; font-size: 13px; color: var(--metin-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.hm-ok { display: inline-flex; color: var(--metin-3); transform: rotate(90deg); transition: transform var(--sure) var(--egri); }
+.hm-dugme[aria-expanded="true"] .hm-ok { transform: rotate(-90deg); }
+@media (min-width: 900px) { .hm-ad { display: block; } }
+@media (hover: hover) and (pointer: fine) { .hm--acik .hm-dugme:hover { background: var(--yuzey-2); } .hm--koyu .hm-dugme:hover { background: rgba(255, 255, 255, .07); } }
+.hm-panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; width: 272px; max-width: calc(100vw - 24px); background: var(--yuzey); color: var(--metin);
+  border-radius: var(--kose-panel); box-shadow: var(--golge-katman); padding: 6px; transform-origin: top right; animation: hm-ac 180ms var(--egri) both; }
+.hm--yukari .hm-panel { top: auto; bottom: calc(100% + 6px); left: 0; right: auto; transform-origin: bottom left; }
+@keyframes hm-ac { from { opacity: 0; transform: scale(.96) translateY(-4px); } }
+.hm-kim { display: flex; gap: 12px; align-items: center; padding: 10px 10px 12px; border-bottom: 1px solid var(--cizgi); margin-bottom: 4px; }
+.hm-kim > span:last-child { display: grid; min-width: 0; }
+.hm-kim strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-panel ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.hm-panel a, .hm-cikis button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 10px; border: 0; background: none;
+  border-radius: var(--kose-kontrol); color: var(--metin); text-decoration: none; font: 600 15px/1.2 var(--font-govde); cursor: pointer; text-align: left;
+  transition: background-color var(--sure-kisa) ease; }
+.hm-panel a .ikon, .hm-cikis .ikon { color: var(--metin-3); }
+.hm-panel a[aria-current="page"] { background: var(--lacivert-acik); color: var(--lacivert-koyu); }
+.hm-panel a[aria-current="page"] .ikon { color: var(--lacivert); }
+.hm-ayrac { height: 1px; background: var(--cizgi); margin: 4px 0; }
+.hm-cikis { border-top: 1px solid var(--cizgi); margin-top: 4px; padding-top: 4px; }
+.hm-cikis button { color: var(--hata); }
+.hm-cikis button .ikon { color: var(--hata); }
+@media (hover: hover) and (pointer: fine) { .hm-panel a:not([aria-current="page"]):hover, .hm-cikis button:hover { background: var(--yuzey-2); } }
+/* Koyu zemin (yönetim yan menüsü ve mobil üst çubuk) */
+.hm--koyu .hm-dugme { color: #FFFFFF; }
+.hm--koyu .hm-simge { background: #FFFFFF; color: var(--gece); }
+.hm--koyu .hm-alt { color: var(--gece-metin-2); }
+.hm--koyu .hm-ok { color: var(--gece-metin-2); }
+.y-kisi .hm { width: 100%; }
+.y-kisi .hm-dugme { width: 100%; }
+.y-kisi .hm-ad { display: block; flex: 1; }
+.y-kisi .hm-ok { transform: rotate(-90deg); }
+.y-kisi .hm-dugme[aria-expanded="true"] .hm-ok { transform: rotate(90deg); }
+.y-ust .hm { margin-left: auto; }
+.f-hesap > .hm .hm-dugme { padding-right: 4px; }
+
 /* ---------- Kaydet düğmesi ---------- */
 .kaydet { position: relative; z-index: 2; color: var(--metin-2); }
 .ikon-dugme.kaydet { width: 36px; height: 36px; margin: -6px -6px 0 0; }
@@ -381,12 +439,12 @@
 .gezinme-ortu { position: fixed; inset: 0; z-index: 199; display: grid; place-items: center; background: rgba(243, 241, 236, .62);
   animation: gezinme-belir 220ms var(--egri) both; cursor: progress; }
 @keyframes gezinme-belir { from { opacity: 0; } }
-.gezinme-isaret { position: relative; width: 84px; height: 84px; display: grid; place-items: center; background: #FFFFFF; border-radius: 50%;
+.gezinme-isaret { position: relative; width: 172px; height: 172px; display: grid; place-items: center; background: #FFFFFF; border-radius: 50%;
   box-shadow: var(--golge-panel); animation: gezinme-buyu 260ms var(--egri) both; }
 @keyframes gezinme-buyu { from { transform: scale(.92); opacity: 0; } }
-.gezinme-isaret img { width: 42px; height: 42px; border-radius: 6px; }
+.gezinme-isaret img { width: 120px; height: auto; }
 .gezinme-halka { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); animation: gezinme-don 900ms linear infinite; }
-.gezinme-halka circle { fill: none; stroke: var(--lacivert-acik); stroke-width: 3; }
+.gezinme-halka circle { fill: none; stroke: var(--lacivert-acik); stroke-width: 1.6; }
 .gezinme-halka .yay { stroke: var(--lacivert); stroke-linecap: round; stroke-dasharray: 26 74; }
 @keyframes gezinme-don { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {

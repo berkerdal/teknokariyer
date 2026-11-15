@@ -79,7 +79,14 @@ export function OneriliGirdi<T extends OneriSecenegi>(p: {
         }}
       />
       {goster && (
-        <div className="oneri-panel">
+        <div
+          className="oneri-panel"
+          // Kaydırılan bir pencerenin içindeyse liste alanın altında yer kaplar ve görünür kalacak kadar kaydırılır
+          // (mutlak konumlu liste pencerenin kaydırma alanında kesiliyordu).
+          ref={(el) => {
+            if (el?.closest('dialog')) el.scrollIntoView({ block: 'nearest' })
+          }}
+        >
           {liste.length > 0 ? (
             <ul id={listeId} role="listbox" aria-label={`${p.etiket}: öneriler`}>
               {liste.map((s, n) => (

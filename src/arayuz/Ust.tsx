@@ -1,11 +1,11 @@
 import Link from 'next/link'
-import { adayMi, firmaKullanicisiMi, kurumKullanicisiMi } from '@/erisim'
+import { adayMi, firmaKullanicisiMi, kurumKullanicisiMi, yoneticiMi } from '@/erisim'
+import { hesapMenusuOgeleri } from '@/alan/hesapMenusu'
+import { HesapMenusu } from './HesapMenusu'
 import { oturum } from '@/veri/payload'
 
 export type UstMenu = 'ilanlar' | 'staj' | 'firmalar' | ''
 
-const basHarfler = (ad = '') =>
-  ad.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toLocaleUpperCase('tr')).join('')
 
 /** Aday ve ziyaretçi üst çubuğu. Mobilde logo ve hesap; masaüstünde menü de görünür. */
 export async function Ust({ aktif = '' }: { aktif?: UstMenu }) {
@@ -18,11 +18,11 @@ export async function Ust({ aktif = '' }: { aktif?: UstMenu }) {
   const hesap = !k
     ? null
     : adayMi(k)
-      ? { href: '/hesabim', ad: k.ad ?? 'Hesabım' }
+      ? { rol: 'aday', ad: k.ad ?? k.email, alt: 'Aday hesabı' }
       : firmaKullanicisiMi(k)
-        ? { href: '/firma-paneli', ad: k.ad ?? 'Firma paneli' }
+        ? { rol: 'firma', ad: k.ad ?? k.email, alt: k.unvan || 'Firma hesabı' }
         : kurumKullanicisiMi(k)
-          ? { href: '/yonetim', ad: k.ad ?? 'Yönetim' }
+          ? { rol: 'kurum', ad: k.ad ?? k.email, alt: 'Yönetici A.Ş.' }
           : null
   return (
     <header className="a-ust">
@@ -42,12 +42,7 @@ export async function Ust({ aktif = '' }: { aktif?: UstMenu }) {
             </Link>
           )}
           {hesap ? (
-            <>
-              <Link className="a-ust-kisi" href={hesap.href} aria-label={`Hesabım: ${hesap.ad}`}>
-                {basHarfler(hesap.ad)}
-              </Link>
-              <span className="kucuk a-ust-ad">{hesap.ad}</span>
-            </>
+            <HesapMenusu ad={hesap.ad} altBilgi={hesap.alt} ogeler={hesapMenusuOgeleri(hesap.rol, { yonetici: yoneticiMi(k) })} adiGoster />
           ) : (
             <Link className="dugme dugme--ikincil dugme--kucuk" href="/giris">
               Giriş yap

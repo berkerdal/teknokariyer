@@ -2,8 +2,8 @@
 
 /**
  * Sayfa geçiş göstergesi (kullanıcı isteği, 15.11.2026): bir bağlantıya tıklandığında veya arama formu gönderildiğinde
- * hemen üstte ince bir ilerleme çubuğu belirir; geçiş 450 ms'den uzun sürerse ekran hafifçe soluklaşır ve TeknoKariyer
- * işaretinin (ana logodaki “t” ve kiremit kare) çevresinde bir halka döner. Yeni sayfa açılınca kendiliğinden kaybolur.
+ * hemen üstte ince bir ilerleme çubuğu belirir; geçiş 450 ms'den uzun sürerse ekran hafifçe soluklaşır ve Pamukkale
+ * Teknokent logosunun çevresinde bir halka döner (kullanıcı isteği; logo en az 120 px genişlikte, kimlik kuralı). Yeni sayfa açılınca kendiliğinden kaybolur.
  *
  * - Next'in `Link` bileşeni tıklamada `preventDefault` çağırdığı için olay yakalama (capture) aşamasında dinlenir.
  * - Yeni sekme, değiştirici tuşlar, `download`, başka site, yalnızca `#` değişikliği ve aynı adres göstergeyi açmaz.
@@ -94,7 +94,7 @@ export function GezinmeGostergesi() {
               <circle cx="40" cy="40" r="36" />
               <circle cx="40" cy="40" r="36" className="yay" pathLength="100" />
             </svg>
-            <img src="/logo/favicon.svg" alt="" width={44} height={44} />
+            <img src="/logo/kurum/teknokent-dikey-renkli.svg" alt="Pamukkale Teknokent" width={120} height={63} />
           </span>
         </span>
       )}
