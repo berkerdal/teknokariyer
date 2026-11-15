@@ -49,6 +49,7 @@ olursa bu bölüm geçerlidir.
 | K35 | İngilizce sürüm ve adresler | İngilizce arayüz bekleyebilir; pilot ve ilk yayın yalnızca Türkçe. Türkçe adresler ön eksiz kalır (`/ilanlar`); İngilizce eklendiğinde `/en/...` altında olur. hreflang ve site haritası buna göre kuruldu (15 Kasım 2026). |
 | K36 | Görsel yenileme | Prototip (“TeknoKariyer Görsel Yenileme” tuvali) beğenildi ve bütün uygulamaya (herkese açık sayfalar, aday, firma ve Yönetici A.Ş. panelleri) uygulanır. **Alt bilgi (footer) bugünkü hâliyle kalır.** Firma karosu bloğun rengini taşır (B lacivert, C petrol, D kiremit); logo varsa logo gösterilir. 15. bölümdeki hareket, rozet ve kiremit dozu kuralları buna göre güncellendi (15 Kasım 2026). |
 | K37 | Firma logosu | Yönetici A.Ş. firma kaydına logo yükleyebilir (firmanın kendisi de profilinden yükler). Depoda dosya firma kimliğiyle adlandırılır. Herkese açık logolar uzun süre önbelleklenen bir adresten sunulur (15 Kasım 2026). |
+| K38 | Çerez politikası | Politikayı Claude oluşturur; kullanıcıya sorulur. Zorunlu çerezler izinsiz; tercih ve istatistik çerezleri yalnızca açık izinle. Reddet ve kabul eşit; ayrıntılı seçimde kutular işaretsiz; izin alt bilgiden her zaman değiştirilebilir. Reklam, takip ve üçüncü taraf analiz çerezi yok (15 Kasım 2026). |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 

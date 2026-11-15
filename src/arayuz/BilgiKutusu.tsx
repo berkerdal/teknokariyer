@@ -3,12 +3,14 @@
  * Panellerdeki açıklamalar (K30): “Kullanım kabus olursa kendilerini kaybederler.”
  *
  * - `ModulBilgisi`: sayfanın en üstünde, bu modülün ne işe yaradığını ve neler yapılabileceğini anlatan kutu.
- *   Kullanıcı “Anladım, gizle” derse küçük bir “Bu sayfa hakkında” düğmesine dönüşür; tercih bu tarayıcıda hatırlanır.
+ *   Kullanıcı “Anladım, gizle” derse küçük bir “Bu sayfa hakkında” düğmesine dönüşür. Tercih çerezine izin verildiyse
+ *   tercih bu tarayıcıda hatırlanır, verilmediyse yalnızca oturum boyunca (src/alan/cerez.ts).
  * - `AlanBilgisi`: alan etiketinin yanındaki “?” düğmesi. Basınca açıklama etiketin altında açılır (dokunmatik
  *   ekranda da çalışır; üzerine gelince açılan ipucu kullanılmaz).
  */
 import { useEffect, useId, useState } from 'react'
 import { Ikon } from './Ikon'
+import { tercihDeposu } from './cerezIstemci'
 
 const anahtar = (k: string) => `tk-bilgi-gizli:${k}`
 
@@ -18,14 +20,14 @@ export function ModulBilgisi({ kimlik, baslik, children }: { kimlik: string; bas
   useEffect(() => {
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- tarayıcı deposu yalnızca istemcide okunur (sunucu çizimiyle uyum)
-      if (localStorage.getItem(anahtar(kimlik)) === '1') setAcik(false)
+      if (tercihDeposu()?.getItem(anahtar(kimlik)) === '1') setAcik(false)
     } catch {}
   }, [kimlik])
   const degistir = (yeni: boolean) => {
     setAcik(yeni)
     try {
-      if (yeni) localStorage.removeItem(anahtar(kimlik))
-      else localStorage.setItem(anahtar(kimlik), '1')
+      if (yeni) tercihDeposu()?.removeItem(anahtar(kimlik))
+      else tercihDeposu()?.setItem(anahtar(kimlik), '1')
     } catch {}
   }
   if (!acik)

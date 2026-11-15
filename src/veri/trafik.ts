@@ -27,15 +27,49 @@ export async function trafikVerisi(d: Donem) {
     overrideAccess: true,
   })
   const tum: GunSatiri[] = [
-    ...docs.map((x) => ({ gun: x.gun, boyut: x.boyut as OzetSatiri['boyut'], deger: x.deger, goruntuleme: x.goruntuleme, ziyaret: x.ziyaret })),
+    ...docs.map((x) => ({
+      gun: x.gun,
+      boyut: x.boyut as OzetSatiri['boyut'],
+      deger: x.deger,
+      goruntuleme: x.goruntuleme,
+      ziyaret: x.ziyaret,
+      tekilGun: x.tekilGun ?? 0,
+      tekilAy: x.tekilAy ?? 0,
+      yeni: x.yeni ?? 0,
+      izinli: x.izinli ?? 0,
+    })),
     ...(await bugununOzeti(payload, simdi)).map((x) => ({ ...x, gun: bugun })),
   ]
   const basGun = trGunMetni(d.bas)
   const donemde = satirlariTopla(tum.filter((x) => x.gun >= basGun))
   const once = satirlariTopla(tum.filter((x) => x.gun < basGun))
-  const t = topla(donemde, 'toplam')[0] ?? { goruntuleme: 0, ziyaret: 0 }
+  const t: OzetSatiri = topla(donemde, 'toplam')[0] ?? { boyut: 'toplam', deger: '-', goruntuleme: 0, ziyaret: 0, tekilGun: 0, tekilAy: 0, yeni: 0, izinli: 0 }
   const o = topla(once, 'toplam')[0] ?? { goruntuleme: 0, ziyaret: 0 }
   const cihazlar = topla(donemde, 'cihaz')
+
+  // İstatistik çerezine izin verenlerden (kimliksiz işaretler): günlük ve bu ayın tekil ziyaretçisi, geri dönenler
+  const gunSayisi = Math.max(1, Math.round((Math.min(d.bit.getTime(), simdi.getTime()) - d.bas.getTime()) / 86_400_000))
+  const ayBasi = `${bugun.slice(0, 7)}-01`
+  const buAy = tum.filter((x) => x.boyut === 'toplam' && x.gun >= ayBasi)
+  const ayIcinGerekli = ayBasi < trGunMetni(d.oncekiBas)
+  const ayEk = ayIcinGerekli
+    ? (
+        await payload.find({
+          collection: 'trafik-ozetleri',
+          where: { and: [{ boyut: { equals: 'toplam' } }, { gun: { greater_than_equal: ayBasi } }, { gun: { less_than: trGunMetni(d.oncekiBas) } }] },
+          limit: 40,
+          pagination: false,
+          depth: 0,
+          overrideAccess: true,
+        })
+      ).docs.map((x) => ({ tekilAy: x.tekilAy ?? 0 }))
+    : []
+  const izinli = {
+    gunlukTekil: Math.round(t.tekilGun / gunSayisi),
+    buAyTekil: [...buAy, ...ayEk].reduce((a, x) => a + (x.tekilAy ?? 0), 0),
+    geriDonenOran: t.tekilGun ? Math.round(((t.tekilGun - t.yeni) / t.tekilGun) * 100) : null,
+    izinOrani: t.ziyaret ? Math.round((t.izinli / t.ziyaret) * 100) : null,
+  }
   const mobil = cihazlar.find((c) => c.deger === 'mobil')?.ziyaret ?? 0
 
   // Sayfa adları: ilan ve firma kimliklerinden
@@ -60,6 +94,7 @@ export async function trafikVerisi(d: Donem) {
   const bagli = (yol: string) => (yol.startsWith('/') && !yol.endsWith('/basvur') ? yol : null)
 
   return {
+    izinli,
     ziyaret: t.ziyaret,
     goruntuleme: t.goruntuleme,
     ziyaretDegisim: degisim(t.ziyaret, o.ziyaret),

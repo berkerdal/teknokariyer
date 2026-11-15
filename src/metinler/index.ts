@@ -3,13 +3,14 @@
  *
  * - Her metnin bir sürümü vardır. Kullanıcının verdiği her onay bu sürümle kaydedilir (rizalar koleksiyonu).
  * - Metin değişince sürüm artırılır; eski onaylar eski sürümle kayıtlı kalır.
- * - DURUM: Bu metinler TASLAKTIR. Kurumun KVKK sorumlusu ve hukuk birimi onaylayana kadar `onayli: false` kalır ve
+ * - Çerez politikası kullanıcının kararıyla yürürlüktedir (15.11.2026: “Politikayı sen oluştur”); `onayli: true`.
+ * - DURUM: Diğer metinler TASLAKTIR. Kurumun KVKK sorumlusu ve hukuk birimi onaylayana kadar `onayli: false` kalır ve
  *   sayfada “taslak” uyarısı görünür. Yurt dışına aktarım bölümü veri yeri kararına bağlıdır (CLAUDE.md 7).
  */
 
 import { KURUM } from '@/altyapi/kurum'
 
-export type MetinKimligi = 'aday-aydinlatma' | 'basvuru-aydinlatma' | 'havuz' | 'ticari-ileti' | 'firma-kullanici-aydinlatma'
+export type MetinKimligi = 'aday-aydinlatma' | 'basvuru-aydinlatma' | 'havuz' | 'ticari-ileti' | 'firma-kullanici-aydinlatma' | 'cerez-politikasi'
 
 export interface Metin {
   baslik: string
@@ -101,6 +102,53 @@ Yaptığınız işlemler (ilan değişiklikleri, başvuru durum değişiklikleri
 Hesabınız firmanızın ekibinden çıkarıldığında giriş yapamazsınız; işlem kayıtları yasal saklama süresi boyunca tutulur.
 
 Kişisel verilerinizle ilgili haklarınızı (KVKK madde 11) ${KURUM.kvkkEposta} adresine yazarak kullanabilirsiniz.`,
+  },
+  'cerez-politikasi': {
+    baslik: 'Çerez politikası',
+    surum: '1.0',
+    tarih: '2026-11-15',
+    onayli: true,
+    govde: `Bu politika, TeknoKariyer’in (Pamukkale Teknokent kariyer portalı) hangi çerezleri ve tarayıcı depolama alanlarını neden kullandığını ve tercihini nasıl yönetebileceğini açıklar. Veri sorumlusu: ${SORUMLU}.
+
+Çerez, ziyaret ettiğin sitenin tarayıcına kaydettiği küçük bir metin dosyasıdır. Benzer amaçla tarayıcının yerel depolama alanı da kullanılabilir; bu politikada ikisine birlikte “çerez” diyoruz.
+
+Çerezleri üç gruba ayırıyoruz. Zorunlu çerezler her zaman çalışır. Tercih ve istatistik çerezlerini yalnızca izin verirsen kullanırız. İzin vermemen siteyi kullanmanı engellemez.
+
+1. Zorunlu çerezler
+
+Bu çerezler olmadan giriş yapamaz, başvuru gönderemez ve hesabını güvenle kullanamazsın. Hukuki sebep: üyelik sözleşmesinin kurulması ve ifası (KVKK m. 5/2-c) ve hizmetin güvenliğine ilişkin meşru menfaat (m. 5/2-f).
+
+- payload-token: Giriş yaptığında oturumunu açık tutar. Süre: 8 saat veya çıkış yapana kadar.
+- tk-ikinci-adim: Firma ve Yönetici A.Ş. hesaplarında giriş sürerken doğrulama kodu adımını bekletir. Süre: 10 dakika.
+- tk-kurtarma-kodlari: Doğrulayıcı uygulamayı kurduğunda kurtarma kodlarını bir kez göstermek için kullanılır. Süre: birkaç dakika.
+- tk-cihaz: “Bu cihazı hatırla” seçildiğinde tarayıcıyı tanınan cihaz olarak işaretler; hesapta yalnızca bu değerin geri döndürülemez özeti tutulur. Süre: en fazla 400 gün; cihaz, hesap güvenliği ayarındaki süre dolunca tanınmaz olur.
+- tk-cerez: Bu sayfadaki çerez tercihini hatırlar. Süre: 12 ay.
+- Cloudflare güvenlik çerezleri (__cf_bm, cf_clearance): Siteyi ve formları otomatik saldırılara karşı korumak için altyapı sağlayıcımız Cloudflare tarafından, yalnızca gerektiğinde konur. Süre: genellikle 30 dakika.
+
+2. Tercih çerezleri (izne bağlı)
+
+- tk-bilgi-gizli: Panellerde kapattığın bilgi kutularını hatırlar (tarayıcı deposu). Süre: sen silene veya iznini geri alana kadar. İzin vermezsen bu bilgi yalnızca açık oturum boyunca tutulur.
+
+3. İstatistik çerezi (izne bağlı)
+
+- tk-ist: Siteyi kaç farklı kişinin kullandığını saymamıza yardım eder. Yalnızca ilk ziyaret ayını ve son ziyaret gününü tutar (örneğin “2026-11.2026-11-15”). Seni tanıtan bir değer, kimlik numarası veya IP adresi içermez; sunucuya yalnızca “ilk ziyaret mi”, “bugünün ilk açılışı mı” ve “bu ayın ilk açılışı mı” bilgileri gider. Süre: 12 ay.
+
+Çerezsiz sayım
+
+Hangi sayfaların kaç kez açıldığını ve ziyaretçilerin hangi siteden geldiğini herkes için sayarız. Bu sayım çerez kullanmaz ve kişisel veri tutmaz: IP adresi, tarayıcı kimliği ve tam yönlendiren adres saklanmaz; yalnızca sayfa adresi, kaynak sitenin adı ve cihaz türü (telefon, tablet, bilgisayar) kaydedilir. Tarayıcında “takip etme” tercihi açıksa sayım da yapılmaz.
+
+Kullanmadığımız çerezler
+
+Reklam, pazarlama ve takip çerezi kullanmıyoruz. Google Analytics, sosyal medya pikselleri veya benzeri üçüncü taraf ölçüm araçları sitede yer almaz. Çerezlerle elde edilen bilgiler satılmaz ve başka kişilerle paylaşılmaz.
+
+Tercihini nasıl yönetirsin?
+
+- Siteye ilk girişte çıkan banttan “Kabul et”, “Reddet” veya “Ayrıntılı seç” seçeneklerinden birini seçebilirsin.
+- Seçimini istediğin zaman alt bilgideki “Çerez tercihleri” bağlantısından değiştirebilir veya geri alabilirsin. İznini geri aldığında ilgili çerezler hemen silinir.
+- Tarayıcının ayarlarından bütün çerezleri silebilir veya engelleyebilirsin. Zorunlu çerezleri engellersen giriş yapamazsın.
+- İznin 12 ay geçerlidir. Süre dolunca veya bu politika değişince tercihini yeniden sorarız.
+
+Haklarını, KVKK’nın 11. maddesi kapsamında ${KURUM.kvkkEposta} adresine yazarak veya alt bilgideki “KVKK başvurusu” sayfasından kullanabilirsin.`,
   },
 }
 

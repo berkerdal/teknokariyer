@@ -82,3 +82,17 @@ describe('dönem ve sayfa adları', () => {
     expect(sayfaTuru('/firma/kodpit')).toEqual({ tur: 'firma', slug: 'kodpit' })
   })
 })
+
+describe('izinli istatistik', () => {
+  it('tekil ziyaretçi, yeni ve izin yalnızca işaretli olaylardan sayılır', async () => {
+    const { olaylariOzetle, satirlariTopla } = await import('@/alan/trafik')
+    const o = olaylariOzetle([
+      { yol: '/', kaynak: 'arama', cihaz: 'mobil', giris: true, istatistik: { yeni: true, gununIlki: true, ayinIlki: true } },
+      { yol: '/ilanlar', kaynak: 'ic', cihaz: 'mobil', giris: false, istatistik: { yeni: false, gununIlki: false, ayinIlki: false } },
+      { yol: '/', kaynak: 'dogrudan', cihaz: 'masaustu', giris: true, istatistik: { yeni: false, gununIlki: true, ayinIlki: false } },
+      { yol: '/', kaynak: 'dogrudan', cihaz: 'masaustu', giris: true, istatistik: null },
+    ])
+    expect(o.find((s) => s.boyut === 'toplam')).toMatchObject({ goruntuleme: 4, ziyaret: 3, tekilGun: 2, tekilAy: 1, yeni: 1, izinli: 2 })
+    expect(satirlariTopla([...o, ...o]).find((s) => s.boyut === 'toplam')).toMatchObject({ tekilGun: 4, izinli: 4 })
+  })
+})

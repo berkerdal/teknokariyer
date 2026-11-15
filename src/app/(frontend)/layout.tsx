@@ -3,6 +3,9 @@ import type { Metadata, Viewport } from 'next'
 import { IkonSeti } from '@/arayuz/Ikon'
 import { OrtamSeridi } from '@/arayuz/OrtamSeridi'
 import { GezinmeGostergesi } from '@/arayuz/GezinmeGostergesi'
+import { CerezBandi } from '@/arayuz/CerezBandi'
+import { IZIN_CEREZI, izinGecerliMi, izinOku } from '@/alan/cerez'
+import { cookies } from 'next/headers'
 import { siteAdresi } from '@/altyapi/epostaSablonlari'
 import './styles.css'
 
@@ -19,7 +22,9 @@ export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = { themeColor: '#FFFFFF', width: 'device-width', initialScale: 1 }
 
-export default function KokDuzen({ children }: { children: React.ReactNode }) {
+export default async function KokDuzen({ children }: { children: React.ReactNode }) {
+  // Çerez izni sunucuda okunur: izin geçerliyse bant hiç çizilmez (yanıp sönme olmaz).
+  const izinVar = izinGecerliMi(izinOku((await cookies()).get(IZIN_CEREZI)?.value), new Date())
   return (
     <html lang="tr">
       <body className="tk">
@@ -32,6 +37,7 @@ export default function KokDuzen({ children }: { children: React.ReactNode }) {
           <GezinmeGostergesi />
         </Suspense>
         {children}
+        <CerezBandi baslangicGecerli={izinVar} />
       </body>
     </html>
   )

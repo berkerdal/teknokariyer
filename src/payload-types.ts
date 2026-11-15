@@ -826,6 +826,10 @@ export interface TrafikOlaylari {
   kaynakSite?: string | null;
   cihaz: string;
   giris?: boolean | null;
+  izinli?: boolean | null;
+  yeniZiyaretci?: boolean | null;
+  gununIlki?: boolean | null;
+  ayinIlki?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -842,6 +846,10 @@ export interface TrafikOzetleri {
   deger: string;
   goruntuleme: number;
   ziyaret: number;
+  tekilGun?: number | null;
+  tekilAy?: number | null;
+  yeni?: number | null;
+  izinli?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1504,6 +1512,10 @@ export interface TrafikOlaylariSelect<T extends boolean = true> {
   kaynakSite?: T;
   cihaz?: T;
   giris?: T;
+  izinli?: T;
+  yeniZiyaretci?: T;
+  gununIlki?: T;
+  ayinIlki?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1517,6 +1529,10 @@ export interface TrafikOzetleriSelect<T extends boolean = true> {
   deger?: T;
   goruntuleme?: T;
   ziyaret?: T;
+  tekilGun?: T;
+  tekilAy?: T;
+  yeni?: T;
+  izinli?: T;
   updatedAt?: T;
   createdAt?: T;
 }

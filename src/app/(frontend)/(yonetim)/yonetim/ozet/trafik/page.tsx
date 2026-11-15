@@ -37,8 +37,8 @@ function Degisim({ d }: { d: { fark: number; yuzde: number | null } }) {
 }
 
 /**
- * Site trafiği (kullanıcı isteği, 15.11.2026). Kendi çerezsiz ölçümümüz: Google Analytics gibi bir dış hizmet ve çerez
- * izni penceresi gerekmez, veri kurumda kalır ve Türkiye'deki sunucuya taşınır (talimatlar 9, K2).
+ * Site trafiği (kullanıcı isteği, 15.11.2026). Kendi ölçümümüz: dış hizmet yok, veri kurumda kalır ve Türkiye'deki
+ * sunucuya taşınır (talimatlar 9, K2). Tekil ziyaretçi yalnızca istatistik çerezine izin verenlerde (src/alan/cerez.ts).
  */
 export default async function SiteTrafigi({ searchParams }: Props) {
   await yonetimOturumu('/yonetim/ozet/trafik')
@@ -69,7 +69,7 @@ export default async function SiteTrafigi({ searchParams }: Props) {
       <ModulBilgisi kimlik="yonetim-trafik" baslik="Site trafiği nasıl ölçülüyor?">
         <p>
           Bu sayfa portalın herkese açık sayfalarının (ana sayfa, ilanlar, ilan ve firma sayfaları, başvuru formu) kaç kez açıldığını ve ziyaretçilerin
-          nereden geldiğini gösterir. Ölçümü portal kendisi yapar; dış bir analiz hizmeti ve çerez kullanılmaz, bu yüzden çerez izni penceresi de gerekmez.
+          nereden geldiğini gösterir. Ölçümü portal kendisi yapar; dış bir analiz hizmeti (Google Analytics gibi) ve reklam çerezi kullanılmaz.
         </p>
         <ul>
           <li>
@@ -80,8 +80,11 @@ export default async function SiteTrafigi({ searchParams }: Props) {
             <strong>Sayfa görüntüleme:</strong> Bir sayfanın her açılışıdır. Filtre değiştirmek yeni görüntüleme sayılmaz.
           </li>
           <li>
-            Kişiyi tanıyacak hiçbir bilgi (IP adresi, çerez, tarayıcı kimliği) tutulmadığı için aynı kişinin tekrar gelişi ayırt edilemez; “tekil ziyaretçi”
-            sayısı bu yüzden yoktur.
+            Ziyaret ve sayfa görüntüleme herkes için, kişiyi tanıyacak hiçbir bilgi (IP adresi, tarayıcı kimliği) tutulmadan sayılır.
+          </li>
+          <li>
+            <strong>Tekil ziyaretçi</strong> yalnızca istatistik çerezine izin verenler için sayılır. Bu çerez kişiyi tanıtmaz; yalnızca ilk ziyaret ayını ve
+            son ziyaret gününü tutar. Gerçek sayı, izin oranına göre bundan biraz yüksektir.
           </li>
           <li>Arama motoru botları, firma ve Yönetici A.Ş. kullanıcılarının gezinmesi ve tarayıcısında “takip etme” tercihi açık olanlar sayılmaz.</li>
           <li>Bugünün sayıları canlıdır; geçmiş günler her gece özetlenir.</li>
@@ -110,6 +113,34 @@ export default async function SiteTrafigi({ searchParams }: Props) {
           <p className="ozet-ad">Telefondan gelen</p>
           <p className="ozet-deger">{v.mobilOran === null ? '—' : `%${v.mobilOran}`}</p>
           <p className="ozet-tanim">Ziyaretlerin telefondan yapılan bölümü</p>
+        </div>
+      </section>
+
+      <section className="ozet-bolum" aria-labelledby="tr-izinli">
+        <h2 id="tr-izinli" className="b4">
+          Tekil ziyaretçiler <span className="kucuk ikincil">(istatistik çerezine izin verenler)</span>
+        </h2>
+        <div className="ozet-serit">
+          <div className="ozet-kutu">
+            <p className="ozet-ad">Günlük tekil ziyaretçi</p>
+            <p className="ozet-deger">{sayi(v.izinli.gunlukTekil)}</p>
+            <p className="ozet-tanim">Dönemde bir günde siteye giren farklı kişi sayısının ortalaması</p>
+          </div>
+          <div className="ozet-kutu">
+            <p className="ozet-ad">Bu ay tekil ziyaretçi</p>
+            <p className="ozet-deger">{sayi(v.izinli.buAyTekil)}</p>
+            <p className="ozet-tanim">Bu takvim ayında siteye giren farklı kişi sayısı</p>
+          </div>
+          <div className="ozet-kutu">
+            <p className="ozet-ad">Geri dönen ziyaretçi</p>
+            <p className="ozet-deger">{v.izinli.geriDonenOran === null ? '—' : `%${v.izinli.geriDonenOran}`}</p>
+            <p className="ozet-tanim">Daha önce de gelmiş olan ziyaretçilerin payı</p>
+          </div>
+          <div className="ozet-kutu">
+            <p className="ozet-ad">İzin oranı</p>
+            <p className="ozet-deger">{v.izinli.izinOrani === null ? '—' : `%${v.izinli.izinOrani}`}</p>
+            <p className="ozet-tanim">Ziyaretlerin istatistik çerezine izin verilen bölümü; tekil sayılar yalnızca bunları kapsar</p>
+          </div>
         </div>
       </section>
 

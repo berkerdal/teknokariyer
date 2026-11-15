@@ -190,6 +190,10 @@ Claude tarafından yapılacak.
   uygulandı (kurulmadı); taste-skill ve magicui/reactbits türü efekt kitaplıkları uygun görülmedi.
 - **K37 — Firma logosu (15.11.2026):** Yönetici A.Ş. firma kaydına logo yükleyebilir; depoda firma kimliğiyle adlandırılır;
   herkese açık logolar uzun süre önbelleklenen adresten sunulur.
+- **K38 — Çerez politikası (15.11.2026):** Kullanıcı politikayı Claude'un oluşturmasını istedi (“Hukuk birimine soralım
+  deme”). Üç tür: zorunlu (oturum, ikinci adım, izin kaydı, Cloudflare bot çerezleri), tercih (`tk-bilgi-gizli` yerel
+  depolama), istatistik (`tk-ist`). İzin olmadan yalnızca zorunlular; reddet ve kabul aynı görünür; kutular işaretsiz;
+  izin 365 gün, alt bilgideki “Çerez tercihleri”yle geri alınır. Metin `src/metinler` → `cerez-politikasi` (onaylı).
 
 - **K34 — CV güvenliği (15.11.2026):** Ayrı virüs tarayıcı (ClamAV) ve dış hizmet yok. Yüklenen PDF etkisizleştirilir;
   firmalar CV'yi portal içindeki betik çalıştırmayan görüntüleyicide (pdf.js, kendi dosyalarımızdan) açar, indirme ve
@@ -619,6 +623,15 @@ Claude tarafından yapılacak.
       `adayKodu`'nda da kullanılmamış olmalı. Eski kural (aday sayısı + 1000) hesap silindikten sonra var olan kodu
       üretiyordu: yeni adayın profili açılamıyordu ve silinen adayın başvurularda kalan kodu yeni adaya geçebilirdi.
       Entegrasyon testleri birlikte koşunca yakalandı.
+  - **Çerez izni ve izinli istatistik (15.11.2026, K38):** Kurallar `src/alan/cerez.ts` (izin çerezi `tk-cerez` =
+    `sürüm.t0|1.i0|1.YYYY-MM-DD`; politika sürümü değişince izin yeniden sorulur), istemci `src/arayuz/cerezIstemci.ts`
+    (`izinKaydet` izin geri alınınca `tk-ist`'i ve `tk-` yerel depolama anahtarlarını siler; `tercihDeposu` izin yoksa
+    `sessionStorage`), bant ve pencere `src/arayuz/CerezBandi.tsx` (kök düzen sunucuda çerezi okur, bant ilk çizimde doğru).
+    - `tk-ist` yalnızca `ilk ziyaret ayı.son ziyaret günü` tutar (kimlik yok). Ölçüm isteği bundan günün/ayın ilk ziyareti
+      ve yeni ziyaretçi işaretlerini gönderir; özetler `tekilGun`, `tekilAy`, `yeni`, `izinli` sayılarını tutar.
+      Trafik panosunda “Tekil ziyaretçiler” şeridi yalnızca izin verenleri sayar (izin oranı da gösterilir).
+    - Çerezsiz sayım (sayfa görüntüleme, ziyaret) izinden bağımsız sürer; kişisel veri ve tanımlayıcı içermez.
+    - Göç `20261115_200410_istatistik_izni` (D1) ve `20261115_200413_istatistik_izni` (PG): yalnızca ADD.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

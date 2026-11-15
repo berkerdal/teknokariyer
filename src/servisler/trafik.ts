@@ -4,7 +4,7 @@
  */
 import type { Payload } from 'payload'
 import { trGunMetni } from '@/alan/tarih'
-import { cihazSiniflandir, kaynakSiniflandir, olaylariOzetle, yolNormallestir, type Kaynak, type OzetSatiri, type TrafikOlayi } from '@/alan/trafik'
+import { cihazSiniflandir, kaynakSiniflandir, olaylariOzetle, satirlariTopla, yolNormallestir, type Kaynak, type OzetSatiri, type TrafikOlayi } from '@/alan/trafik'
 
 /** Günde yol ve giriş sayfası başına en fazla bu kadar satır; gerisi “(diğer sayfalar)” olarak toplanır. */
 const EN_COK_YOL = 300
@@ -15,6 +15,8 @@ export interface OlayGirdisi {
   isaret?: string | null
   ua: string | null
   kendiSite: string
+  /** İstatistik çerezine izin verenlerde kimliksiz işaretler */
+  istatistik?: { yeni: boolean; gununIlki: boolean; ayinIlki: boolean } | null
 }
 
 /** Olayı yazar; ölçülmeyen yol veya bot ise false. */
@@ -25,18 +27,40 @@ export async function olayKaydet(payload: Payload, g: OlayGirdisi, simdi = new D
   const { kaynak, site } = kaynakSiniflandir(g.yonlendiren, g.kendiSite, g.isaret)
   await payload.create({
     collection: 'trafik-olaylari',
-    data: { gun: trGunMetni(simdi), yol, kaynak, kaynakSite: site, cihaz, giris: kaynak !== 'ic' },
+    data: {
+      gun: trGunMetni(simdi),
+      yol,
+      kaynak,
+      kaynakSite: site,
+      cihaz,
+      giris: kaynak !== 'ic',
+      izinli: Boolean(g.istatistik),
+      yeniZiyaretci: Boolean(g.istatistik?.yeni),
+      gununIlki: Boolean(g.istatistik?.gununIlki),
+      ayinIlki: Boolean(g.istatistik?.ayinIlki),
+    },
     overrideAccess: true,
   })
   return true
 }
 
-const olayaCevir = (d: { yol: string; kaynak: string; kaynakSite?: string | null; cihaz: string; giris?: boolean | null }): TrafikOlayi => ({
+const olayaCevir = (d: {
+  yol: string
+  kaynak: string
+  kaynakSite?: string | null
+  cihaz: string
+  giris?: boolean | null
+  izinli?: boolean | null
+  yeniZiyaretci?: boolean | null
+  gununIlki?: boolean | null
+  ayinIlki?: boolean | null
+}): TrafikOlayi => ({
   yol: d.yol,
   kaynak: d.kaynak as Kaynak,
   kaynakSite: d.kaynakSite,
   cihaz: d.cihaz as TrafikOlayi['cihaz'],
   giris: Boolean(d.giris),
+  istatistik: d.izinli ? { yeni: Boolean(d.yeniZiyaretci), gununIlki: Boolean(d.gununIlki), ayinIlki: Boolean(d.ayinIlki) } : null,
 })
 
 /** Çok sayıda farklı sayfa olduğunda küçük olanları tek satırda toplar. */
@@ -46,8 +70,7 @@ function kirp(satirlar: OzetSatiri[]): OzetSatiri[] {
     const grup = satirlar.filter((s) => s.boyut === boyut).sort((a, b) => b.goruntuleme - a.goruntuleme)
     sonuc.push(...grup.slice(0, EN_COK_YOL))
     const kalan = grup.slice(EN_COK_YOL)
-    if (kalan.length)
-      sonuc.push({ boyut, deger: '(diğer)', goruntuleme: kalan.reduce((t, s) => t + s.goruntuleme, 0), ziyaret: kalan.reduce((t, s) => t + s.ziyaret, 0) })
+    if (kalan.length) sonuc.push(...satirlariTopla(kalan.map((s) => ({ ...s, deger: '(diğer)' }))))
   }
   return [...satirlar.filter((s) => !['yol', 'giris-yolu', 'site'].includes(s.boyut)), ...sonuc]
 }
@@ -74,7 +97,20 @@ export async function trafikOzetle(payload: Payload, simdi = new Date()): Promis
     const { docs: mevcut } = await payload.find({ collection: 'trafik-ozetleri', where: { gun: { equals: gun } }, limit: 10000, pagination: false, depth: 0, overrideAccess: true })
     for (const s of satirlar) {
       const m = mevcut.find((x) => x.boyut === s.boyut && x.deger === s.deger)
-      if (m) await payload.update({ collection: 'trafik-ozetleri', id: m.id, data: { goruntuleme: m.goruntuleme + s.goruntuleme, ziyaret: m.ziyaret + s.ziyaret }, overrideAccess: true })
+      if (m)
+        await payload.update({
+          collection: 'trafik-ozetleri',
+          id: m.id,
+          data: {
+            goruntuleme: m.goruntuleme + s.goruntuleme,
+            ziyaret: m.ziyaret + s.ziyaret,
+            tekilGun: (m.tekilGun ?? 0) + s.tekilGun,
+            tekilAy: (m.tekilAy ?? 0) + s.tekilAy,
+            yeni: (m.yeni ?? 0) + s.yeni,
+            izinli: (m.izinli ?? 0) + s.izinli,
+          },
+          overrideAccess: true,
+        })
       else await payload.create({ collection: 'trafik-ozetleri', data: { gun, ...s }, overrideAccess: true })
     }
     // Tek sorguyla (kancasız): binlerce olay tek tek silinmez.

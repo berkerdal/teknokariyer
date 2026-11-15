@@ -19,7 +19,8 @@ export async function POST(istek: Request) {
     if (kaynakSite && kaynakSite !== 'same-origin') return bos()
     const govde = await istek.text()
     if (govde.length > 2048) return bos()
-    const v = JSON.parse(govde) as { yol?: unknown; onceki?: unknown; isaret?: unknown }
+    const v = JSON.parse(govde) as { yol?: unknown; onceki?: unknown; isaret?: unknown; istatistik?: unknown }
+    const ist = v.istatistik && typeof v.istatistik === 'object' ? (v.istatistik as Record<string, unknown>) : null
     if (typeof v.yol !== 'string') return bos()
     if ((await cookies()).has('payload-token')) {
       const k = await oturum()
@@ -31,6 +32,7 @@ export async function POST(istek: Request) {
       isaret: typeof v.isaret === 'string' ? v.isaret.slice(0, 40) : null,
       ua: istek.headers.get('user-agent'),
       kendiSite: new URL(istek.url).origin,
+      istatistik: ist ? { yeni: ist.yeni === true, gununIlki: ist.gununIlki === true, ayinIlki: ist.ayinIlki === true } : null,
     })
   } catch {
     // Bozuk gövde veya geçici veritabanı hatası: sessizce geç (ölçüm, sayfanın çalışmasını etkilemez).

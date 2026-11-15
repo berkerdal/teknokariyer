@@ -20,6 +20,11 @@ export const TrafikOlaylari: CollectionConfig = {
     { name: 'kaynakSite', type: 'text' },
     { name: 'cihaz', type: 'text', required: true },
     { name: 'giris', type: 'checkbox', defaultValue: false },
+    // İstatistik çerezine izin verenlerde kimliksiz işaretler (src/alan/cerez.ts)
+    { name: 'izinli', type: 'checkbox', defaultValue: false },
+    { name: 'yeniZiyaretci', type: 'checkbox', defaultValue: false },
+    { name: 'gununIlki', type: 'checkbox', defaultValue: false },
+    { name: 'ayinIlki', type: 'checkbox', defaultValue: false },
   ],
 }
 
@@ -35,5 +40,9 @@ export const TrafikOzetleri: CollectionConfig = {
     { name: 'deger', type: 'text', required: true },
     { name: 'goruntuleme', type: 'number', required: true, defaultValue: 0 },
     { name: 'ziyaret', type: 'number', required: true, defaultValue: 0 },
+    { name: 'tekilGun', type: 'number', defaultValue: 0 },
+    { name: 'tekilAy', type: 'number', defaultValue: 0 },
+    { name: 'yeni', type: 'number', defaultValue: 0 },
+    { name: 'izinli', type: 'number', defaultValue: 0 },
   ],
 }

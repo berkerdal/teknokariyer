@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { CerezTercihleriDugmesi } from './CerezBandi'
 import { KURUM } from '@/altyapi/kurum'
 
 /**
@@ -43,6 +44,7 @@ const SUTUNLAR: Array<{ baslik: string; baglantilar: Baglanti[] }> = [
       { ad: 'Aday aydınlatma metni', href: '/metin/aday-aydinlatma' },
       { ad: 'Başvuru aydınlatma metni', href: '/metin/basvuru-aydinlatma' },
       { ad: 'CV havuzu açık rıza metni', href: '/metin/havuz' },
+      { ad: 'Çerez politikası', href: '/metin/cerez-politikasi' },
       { ad: 'KVKK başvurusu', href: '/kvkk-basvurusu' },
     ],
   },
@@ -104,6 +106,11 @@ export function Alt({ sade = false }: { sade?: boolean }) {
                     <Bag b={b} />
                   </li>
                 ))}
+                {s.baslik === 'Kişisel veriler' && (
+                  <li>
+                    <CerezTercihleriDugmesi />
+                  </li>
+                )}
               </ul>
             </div>
           ))}

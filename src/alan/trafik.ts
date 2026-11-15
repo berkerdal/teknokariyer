@@ -5,6 +5,10 @@
  * saklanmaz. Bu yüzden “tekil ziyaretçi” sayılamaz; onun yerine **ziyaret** sayılır: siteye dışarıdan (başka siteden,
  * arama motorundan veya doğrudan adres yazarak) gelinen her sayfa açılışı bir ziyarettir. Site içi gezinme yalnızca
  * sayfa görüntüleme olarak sayılır.
+ *
+ * İstatistik çerezine izin veren ziyaretçide (src/alan/cerez.ts) tarayıcı yalnızca üç işaret gönderir: ilk kez mi
+ * geliyor, bugünün ilk açılışı mı, bu ayın ilk açılışı mı. Bunlardan günlük ve aylık tekil ziyaretçi ile yeni ziyaretçi
+ * sayılır (yalnızca izin verenler için; izin oranı da tutulur). Kimlik yine yoktur.
  */
 
 export type Kaynak = 'dogrudan' | 'arama' | 'linkedin' | 'sosyal' | 'kurum' | 'diger' | 'ic'
@@ -88,6 +92,8 @@ export interface TrafikOlayi {
   kaynakSite?: string | null
   cihaz: Cihaz
   giris: boolean
+  /** İstatistik çerezine izin verenlerde: ilk geliş, günün ve ayın ilk açılışı */
+  istatistik?: { yeni: boolean; gununIlki: boolean; ayinIlki: boolean } | null
 }
 
 export type Boyut = 'toplam' | 'yol' | 'kaynak' | 'site' | 'cihaz' | 'giris-yolu'
@@ -96,7 +102,17 @@ export interface OzetSatiri {
   deger: string
   goruntuleme: number
   ziyaret: number
+  /** İzinli ziyaretçilerde günün ilk açılışı (= günlük tekil ziyaretçi) */
+  tekilGun: number
+  /** İzinli ziyaretçilerde ayın ilk açılışı (= aylık tekil ziyaretçi) */
+  tekilAy: number
+  /** İzinli ziyaretçilerde ilk kez gelen */
+  yeni: number
+  /** İstatistik iznine sahip ziyaret (izin oranı için) */
+  izinli: number
 }
+
+const bosSatir = (boyut: Boyut, deger: string): OzetSatiri => ({ boyut, deger, goruntuleme: 0, ziyaret: 0, tekilGun: 0, tekilAy: 0, yeni: 0, izinli: 0 })
 
 /**
  * Ham olayları boyut boyut toplar. Ziyaret, dışarıdan gelinen (giriş) görüntülemedir. Kaynak, site ve cihaz
@@ -104,34 +120,44 @@ export interface OzetSatiri {
  */
 export function olaylariOzetle(olaylar: TrafikOlayi[]): OzetSatiri[] {
   const m = new Map<string, OzetSatiri>()
-  const ekle = (boyut: Boyut, deger: string, giris: boolean, goruntuleme = 1) => {
-    const a = `${boyut}\u0000${deger}`
-    const s = m.get(a) ?? { boyut, deger, goruntuleme: 0, ziyaret: 0 }
-    s.goruntuleme += goruntuleme
-    if (giris) s.ziyaret++
-    m.set(a, s)
-  }
   for (const o of olaylar) {
-    ekle('toplam', '-', o.giris)
-    ekle('yol', o.yol, o.giris)
-    ekle('cihaz', o.cihaz, o.giris)
+    const ekle = (boyut: Boyut, deger: string) => {
+      const a = `${boyut}\u0000${deger}`
+      const s = m.get(a) ?? bosSatir(boyut, deger)
+      s.goruntuleme++
+      if (o.giris) s.ziyaret++
+      if (o.istatistik) {
+        if (o.istatistik.gununIlki) s.tekilGun++
+        if (o.istatistik.ayinIlki) s.tekilAy++
+        if (o.istatistik.yeni) s.yeni++
+        if (o.giris) s.izinli++
+      }
+      m.set(a, s)
+    }
+    ekle('toplam', '-')
+    ekle('yol', o.yol)
+    ekle('cihaz', o.cihaz)
     if (o.giris) {
-      ekle('kaynak', o.kaynak, true)
-      if (o.kaynakSite) ekle('site', o.kaynakSite, true)
-      ekle('giris-yolu', o.yol, true)
+      ekle('kaynak', o.kaynak)
+      if (o.kaynakSite) ekle('site', o.kaynakSite)
+      ekle('giris-yolu', o.yol)
     }
   }
   return [...m.values()]
 }
 
 /** Aynı boyut ve değerdeki satırları toplar (birden çok günü birleştirmek için). */
-export function satirlariTopla(satirlar: Array<Pick<OzetSatiri, 'boyut' | 'deger' | 'goruntuleme' | 'ziyaret'>>): OzetSatiri[] {
+export function satirlariTopla(satirlar: Array<Pick<OzetSatiri, 'boyut' | 'deger' | 'goruntuleme' | 'ziyaret'> & Partial<OzetSatiri>>): OzetSatiri[] {
   const m = new Map<string, OzetSatiri>()
   for (const s of satirlar) {
     const a = `${s.boyut}\u0000${s.deger}`
-    const t = m.get(a) ?? { boyut: s.boyut as Boyut, deger: s.deger, goruntuleme: 0, ziyaret: 0 }
+    const t = m.get(a) ?? bosSatir(s.boyut as Boyut, s.deger)
     t.goruntuleme += s.goruntuleme
     t.ziyaret += s.ziyaret
+    t.tekilGun += s.tekilGun ?? 0
+    t.tekilAy += s.tekilAy ?? 0
+    t.yeni += s.yeni ?? 0
+    t.izinli += s.izinli ?? 0
     m.set(a, t)
   }
   return [...m.values()]
