@@ -16,6 +16,7 @@ import {
   BOS_FILTRE,
 } from '@/alan/ilanFiltre'
 import { FiltrePaneli } from '@/arayuz/FiltrePaneli'
+import { FiltreGrubu } from '@/arayuz/FiltreGrubu'
 import { Ikon } from '@/arayuz/Ikon'
 import { IlanSatiri } from '@/arayuz/IlanSatiri'
 import { IlanOnizleme } from '@/arayuz/IlanOnizleme'
@@ -64,31 +65,9 @@ export default async function IlanlarSayfasi({ searchParams }: Props) {
         <h1 className="gizli">İş ve staj ilanları</h1>
         <Form action="/ilanlar" id={formId} scroll={false} replace className="contents" role="search">
           <FiltrePaneli formId={formId} aktifSayi={aktif} sonucSayisi={sonuc.length} temizleHref={`/ilanlar${f.ara ? filtreAdresi({ ...BOS_FILTRE, ara: f.ara }) : ''}`}>
-            {fasetler(tumu, f).map((g) =>
-              g.secenekler.length ? (
-                <fieldset key={g.k} className="f-grup">
-                  <legend>{g.ad}</legend>
-                  <div className="f-haplar">
-                    {g.secenekler.map((s) => (
-                      <label key={s.deger} className="hap">
-                        <input className="gizli" type="checkbox" name={g.k} value={s.deger} defaultChecked={s.secili} disabled={!s.sayi && !s.secili} />
-                        {s.ad} <span className="sayi">{s.sayi}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              ) : null,
-            )}
+            {fasetler(tumu, f).map((g) => (g.secenekler.length ? <FiltreGrubu key={g.k} g={g} /> : null))}
             {(ucretli > 0 || f.ucretli) && (
-              <fieldset className="f-grup">
-                <legend>Staj</legend>
-                <label className="secenek">
-                  <input type="checkbox" name="ucretli" value="1" defaultChecked={f.ucretli} />
-                  <span>
-                    Yalnızca ücretli staj <span className="ikincil">({ucretli})</span>
-                  </span>
-                </label>
-              </fieldset>
+              <FiltreGrubu g={{ k: 'ucretli', ad: 'Staj ücreti', secenekler: [{ deger: '1', ad: 'Yalnızca ücretli staj', sayi: ucretli, secili: f.ucretli }] }} />
             )}
           </FiltrePaneli>
 

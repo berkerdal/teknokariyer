@@ -282,6 +282,41 @@
 .toplu-cubuk { background: var(--gece); }
 .bildirim { background: var(--gece); border-radius: var(--kose-panel); box-shadow: var(--golge-katman); }
 
+/* ---------- İlan filtreleri (açılır gruplar, onay kutulu satırlar) ---------- */
+.fg { border-bottom: 1px solid var(--cizgi); }
+.fg > summary { display: flex; align-items: center; gap: 8px; min-height: 48px; cursor: pointer; list-style: none; font: 600 15px/1.2 var(--font-baslik); }
+.fg > summary::-webkit-details-marker { display: none; }
+.fg-baslik { flex: 1; }
+.fg-secili { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 3px; background: var(--lacivert);
+  color: #FFFFFF; font: 700 12px/1 var(--font-govde); }
+.fg-ok { display: inline-flex; color: var(--metin-3); transform: rotate(90deg); transition: transform var(--sure) var(--egri); }
+.fg[open] > summary .fg-ok { transform: rotate(-90deg); }
+.fg-govde { border: 0; margin: 0; padding: 0 0 12px; display: grid; gap: 0; }
+.fg-satir { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 40px; padding: 0 8px; margin: 0 -8px;
+  border-radius: var(--kose-kontrol); cursor: pointer; font-size: 15px; transition: background-color var(--sure-kisa) ease; }
+.fg-satir input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.fg-kutu { grid-column: 1; grid-row: 1; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 4px; background: var(--yuzey);
+  box-shadow: inset 0 0 0 1.5px var(--cizgi-kontrol); color: transparent; transition: background-color var(--sure-kisa) ease, box-shadow var(--sure-kisa) ease; }
+.fg-kutu .ikon { width: 14px; height: 14px; stroke-width: 3; transform: scale(.6); transition: transform var(--sure) var(--egri); }
+.fg-satir:has(input:checked) .fg-kutu { background: var(--lacivert); box-shadow: none; color: #FFFFFF; }
+.fg-satir:has(input:checked) .fg-kutu .ikon { transform: scale(1); }
+.fg-satir:has(input:checked) .fg-ad { font-weight: 600; }
+.fg-satir:has(input:focus-visible) { outline: 3px solid var(--lacivert); outline-offset: -1px; }
+.fg-sayi { color: var(--metin-3); font-size: 14px; font-variant-numeric: tabular-nums; }
+.fg-satir[data-pasif] { cursor: default; color: var(--metin-3); }
+.fg-daha > summary { list-style: none; cursor: pointer; display: inline-flex; min-height: 40px; align-items: center; color: var(--baglanti);
+  font-weight: 600; font-size: 14px; }
+.fg-daha > summary::-webkit-details-marker { display: none; }
+.fg-daha[open] > summary { order: 2; }
+.fg-daha[open] { display: flex; flex-direction: column; }
+.fg-daha .fg-daha-kapat, .fg-daha[open] .fg-daha-ac { display: none; }
+.fg-daha[open] .fg-daha-kapat { display: inline; }
+@media (hover: hover) and (pointer: fine) {
+  .fg-satir:not([data-pasif]):hover { background: var(--yuzey-2); }
+  .fg > summary:hover .fg-baslik { color: var(--lacivert); }
+}
+@media (max-width: 899px) { .fg-satir { min-height: 44px; } }
+
 /* ---------- Firmalar (kompakt kart ızgarası) ---------- */
 .fl { width: 100%; max-width: 1200px; margin: 0 auto; padding: var(--b5) 16px var(--b6); display: grid; gap: var(--b5); }
 .fl-bas { display: grid; gap: 12px; }
