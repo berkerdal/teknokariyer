@@ -23,8 +23,7 @@ export default async function AnaSayfa() {
   const say = (fn: (i: (typeof ilanlar)[number]) => boolean) => ilanlar.filter(fn).length
   const son = sirala(ilanlar, 'yeni').slice(0, 8)
   const firmalar = [...ilanlar.reduce((m, i) => m.set(i.firma.id, { ...i.firma, n: (m.get(i.firma.id)?.n ?? 0) + 1 }), new Map<number, (typeof ilanlar)[number]['firma'] & { n: number }>()).values()]
-    .sort((a, b) => b.n - a.n || a.ad.localeCompare(b.ad, 'tr'))
-    .slice(0, 8)
+    .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
   // “Bu hafta yayına girenler”: son 7 takvim günü; yoksa en son yayına girenler (sahte tazelik yok, başlık değişir).
   const buHafta = sirala(ilanlar.filter((i) => sonYediGunde(i.yayinTarihi)), 'yeni')
   const vitrin = (buHafta.length ? buHafta : son).slice(0, 4)
@@ -134,19 +133,8 @@ export default async function AnaSayfa() {
                 <h2 id="as-firma" className="b3">
                   İlan veren firmalar
                 </h2>
-                <p className="blok-aciklama" aria-label="Karo rengi firmanın bloğunu gösterir">
-                  <span>
-                    <i style={{ background: 'var(--lacivert)' }} />B Blok
-                  </span>
-                  <span>
-                    <i style={{ background: 'var(--petrol)' }} />C Blok
-                  </span>
-                  <span>
-                    <i style={{ background: 'var(--kiremit)' }} />D Blok
-                  </span>
-                </p>
                 <ul className="firma-liste">
-                  {firmalar.map((f) => (
+                  {firmalar.slice(0, 8).map((f) => (
                     <li key={f.id}>
                       <Link href={`/firma/${f.slug}`}>
                         <FirmaKaro konum={f.konum} logo={f.logo} ad={f.ad} boy={40} />
@@ -160,6 +148,11 @@ export default async function AnaSayfa() {
                     </li>
                   ))}
                 </ul>
+                {firmalar.length > 8 && (
+                  <Link className="kucuk" href="/firmalar">
+                    Bütün firmaları gör ({firmalar.length})
+                  </Link>
+                )}
               </section>
             )}
             <p className="firma-satir">

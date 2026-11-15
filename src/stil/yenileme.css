@@ -184,9 +184,6 @@
 .bu-hafta .bh-not { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--cizgi); font-size: 14px; color: var(--metin-2); }
 /* Telefonda “Son yayınlanan ilanlar” aynı ilanları hemen altında gösterdiği için bu panel gizlenir */
 @media (max-width: 899px) { .bu-hafta { display: none; } }
-.as-yan .blok-aciklama { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--metin-2); margin: -4px 0 8px; }
-.as-yan .blok-aciklama span { display: inline-flex; align-items: center; gap: 6px; }
-.as-yan .blok-aciklama i { width: 10px; height: 10px; border-radius: 2px; }
 .as-yan .yan-kutu { background: var(--yuzey); border-radius: var(--kose-panel); box-shadow: var(--golge-panel); padding: 20px 22px; }
 .as-yan .firma-satir { border-top: 0; background: var(--lacivert-acik); border-radius: var(--kose-panel); padding: 18px 20px; }
 .firma-liste a { padding: 9px 0; border-top: 1px solid var(--cizgi); transition: color var(--sure) ease; }
@@ -297,6 +294,11 @@ dialog.duzen-pencere .duzen-pencere-govde { flex: 1 1 auto; min-height: 0; }
   dialog.duzen-pencere { overflow: hidden; }
   dialog.duzen-pencere > form { flex: 0 1 auto; max-height: min(85dvh, 760px); }
 }
+/* Modal pencereler içerik kadar uzar. Tarayıcının varsayılanı `fit-content`; `height: auto` üstte ve altta 0'a sabitlenmiş
+   pencereyi en yüksek boya kadar germişti (kısa formlarda yarısı boş pencere). Telefonda düzenleme penceresi bilerek tam ekran. */
+@media (min-width: 900px) { dialog:modal { height: fit-content; } }
+dialog.pencere-dialog:modal, dialog.islem-pencere:modal { height: fit-content; }
+
 /* Pencere içindeki öneri listesi kaydırma alanında kesilmesin: alanın altında yer kaplar */
 dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
 
@@ -450,8 +452,7 @@ dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
 .fl { width: 100%; max-width: 1200px; margin: 0 auto; padding: var(--b5) 16px var(--b6); display: grid; gap: var(--b5); }
 .fl-bas { display: grid; gap: 12px; }
 .fl-bas .hap { gap: 6px; }
-.blok-isaret { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
-.blok-isaret--b { background: var(--lacivert); } .blok-isaret--c { background: var(--petrol); } .blok-isaret--d { background: var(--kiremit); }
+@media (min-width: 900px) { .fl-sektor { flex-wrap: wrap; overflow: visible; } }
 .fl-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
 .fl-kart { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: start; padding: 16px;
   background: var(--yuzey); border-radius: var(--kose-panel); box-shadow: var(--golge-panel); transition: box-shadow var(--sure) ease; }
@@ -473,7 +474,6 @@ dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
 }
 @media (min-width: 900px) {
   .fl { padding: var(--b6) 32px var(--b7); }
-  .fl-bas { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
 }
 
 /* ---------- Sayfa geçiş göstergesi ---------- */

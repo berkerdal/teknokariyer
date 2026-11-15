@@ -6,13 +6,14 @@ import { normallestir } from './metin'
 export const TALEP_EN_FAZLA_OGE = 10
 export const TALEP_EN_FAZLA_BEKLEYEN = 20
 
-export const TALEP_TUR_ADI: Record<string, { tekil: string; cogul: string }> = {
-  beceri: { tekil: 'beceri', cogul: 'beceriler' },
-  'pozisyon-ailesi': { tekil: 'pozisyon ailesi', cogul: 'pozisyon aileleri' },
-  bolum: { tekil: 'bölüm', cogul: 'bölümler' },
-  dil: { tekil: 'dil', cogul: 'diller' },
-  universite: { tekil: 'üniversite', cogul: 'üniversiteler' },
-  sektor: { tekil: 'sektör', cogul: 'sektörler' },
+/** Liste türünün adı ve talep formunda gösterilen, o türe uygun yazım örnekleri. */
+export const TALEP_TUR_ADI: Record<string, { tekil: string; cogul: string; ornek: string }> = {
+  beceri: { tekil: 'beceri', cogul: 'beceriler', ornek: '“Gömülü Linux”, “Kubernetes”' },
+  'pozisyon-ailesi': { tekil: 'pozisyon ailesi', cogul: 'pozisyon aileleri', ornek: '“Veri bilimi”, “Siber güvenlik”' },
+  bolum: { tekil: 'bölüm', cogul: 'bölümler', ornek: '“Yapay Zekâ Mühendisliği”, “Biyomedikal Mühendisliği”' },
+  dil: { tekil: 'dil', cogul: 'diller', ornek: '“Japonca”, “Portekizce”' },
+  universite: { tekil: 'üniversite', cogul: 'üniversiteler', ornek: '“Kapadokya Üniversitesi”, “Ankara Bilim Üniversitesi”' },
+  sektor: { tekil: 'sektör', cogul: 'sektörler', ornek: '“Savunma sanayii”, “Tarım teknolojileri”' },
 }
 
 /** Her satıra (veya virgülle ayrılmış) bir öğe; boşlar ve tekrarlar atılır, en fazla 10 öğe. */

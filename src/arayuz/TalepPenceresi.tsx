@@ -48,8 +48,8 @@ export function TalepPenceresi(p: {
       : `Aradığın ${ad.tekil} listede yoksa Yönetici A.Ş.’den eklenmesini isteyebilirsin. Adın ve e-posta adresin talebe otomatik eklenir.`,
     alan: `Eklenmesini ${siz ? 'istediğiniz' : 'istediğin'} ${ad.cogul}`,
     ipucu: siz
-      ? `Tek talepte en fazla ${TALEP_EN_FAZLA_OGE} ${ad.tekil} isteyebilirsiniz; her satıra bir tane yazın. Yazımı resmî ve açık olsun: “Gömülü Linux”, “Yapay Zekâ Mühendisliği”. Yönetici A.Ş. her birini ayrı değerlendirir.`
-      : `Tek talepte en fazla ${TALEP_EN_FAZLA_OGE} ${ad.tekil} isteyebilirsin; her satıra bir tane yaz. Yazımı resmî ve açık olsun: “Gömülü Linux”, “Yapay Zekâ Mühendisliği”. Yönetici A.Ş. her birini ayrı değerlendirir.`,
+      ? `Tek talepte en fazla ${TALEP_EN_FAZLA_OGE} ${ad.tekil} isteyebilirsiniz; her satıra bir tane yazın. Yazımı resmî ve açık olsun; örneğin ${ad.ornek}. Yönetici A.Ş. her birini ayrı değerlendirir.`
+      : `Tek talepte en fazla ${TALEP_EN_FAZLA_OGE} ${ad.tekil} isteyebilirsin; her satıra bir tane yaz. Yazımı resmî ve açık olsun; örneğin ${ad.ornek}. Yönetici A.Ş. her birini ayrı değerlendirir.`,
   }
 
   return (
@@ -107,6 +107,7 @@ function TalepFormu(
   },
 ) {
   const { siz, metin, baslikId, kapat } = p
+  const ad = TALEP_TUR_ADI[p.tur]!
   const [durum, eylem] = useActionState<FormDurumu, FormData>(talepEylemi, {})
   const tamam = Boolean(durum.tamam && durum.surum)
   return (
@@ -157,7 +158,7 @@ function TalepFormu(
                       rows={2}
                       maxLength={500}
                       defaultValue={durum.degerler?.aciklama ?? ''}
-                      placeholder={siz ? 'Örnek: İlanımızdaki pozisyon bu beceriyi gerektiriyor.' : 'Örnek: Bu beceriyi stajımda kullandım.'}
+                      placeholder={p.tur === 'beceri' ? (siz ? 'Örnek: İlanımızdaki pozisyon bu beceriyi gerektiriyor.' : 'Örnek: Bu beceriyi stajımda kullandım.') : `Örnek: Bu ${ad.tekil} listede bulunmuyor; resmî adı yukarıdaki gibidir.`}
                     />
                   </div>
                   <div className="dugme-grubu">

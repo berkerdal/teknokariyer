@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
 import { ilanAdresi } from '@/arayuz/bicim'
 import { sirala } from '@/alan/ilanFiltre'
-import { konumAyristir } from '@/alan/firmaKonumu'
 import { Ust } from '@/arayuz/Ust'
 import { yayindakiIlanlar } from '@/veri/ilanlar'
 
@@ -16,20 +15,16 @@ export const metadata: Metadata = {
   alternates: dilAdresleri('/firmalar'),
 }
 
-type Props = { searchParams: Promise<{ blok?: string }> }
-
-const BLOKLAR = [
-  { kod: 'B', renk: 'b' },
-  { kod: 'C', renk: 'c' },
-  { kod: 'D', renk: 'd' },
-] as const
+type Props = { searchParams: Promise<{ sektor?: string }> }
 
 /**
  * İlanı olan firmalar. Firma rehberinin tamamı değil: aday için anlamlı olan, açık ilanı olan firmalar.
- * Kompakt kart ızgarası (kullanıcı isteği, 15.11.2026): karo veya logo, ad, sektör, açık ilanların ilk ikisi. Blok süzgeci.
+ * Kompakt kart ızgarası (kullanıcı isteği, 15.11.2026): karo veya logo, ad, sektör, açık ilanların ilk ikisi (fazlası
+ * “ve N ilan daha” bağlantısıyla firma sayfasında; kart uzamaz). Alfabetik. İki veya daha çok sektör varsa sektör süzgeci;
+ * bloklar tek binanın koridorları olduğu için blok süzgeci yok.
  */
 export default async function FirmalarSayfasi({ searchParams }: Props) {
-  const { blok } = await searchParams
+  const { sektor } = await searchParams
   const ilanlar = sirala(await yayindakiIlanlar(), 'yeni')
   type F = (typeof ilanlar)[number]['firma'] & { ilanlar: { ad: string; adres: string }[] }
   const tumu = [
@@ -41,9 +36,11 @@ export default async function FirmalarSayfasi({ searchParams }: Props) {
       }, new Map<number, F>())
       .values(),
   ].sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
-  const blokSay = (k: string) => tumu.filter((f) => konumAyristir(f.konum).blok === k).length
-  const secili = BLOKLAR.some((b) => b.kod === blok) ? blok : undefined
-  const firmalar = secili ? tumu.filter((f) => konumAyristir(f.konum).blok === secili) : tumu
+  const sektorler = [...tumu.reduce((m, f) => (f.sektor ? m.set(f.sektor, (m.get(f.sektor) ?? 0) + 1) : m), new Map<string, number>())].sort((a, b) =>
+    a[0].localeCompare(b[0], 'tr'),
+  )
+  const secili = sektorler.some(([ad]) => ad === sektor) ? sektor : undefined
+  const firmalar = secili ? tumu.filter((f) => f.sektor === secili) : tumu
   return (
     <>
       <Ust aktif="firmalar" />
@@ -53,15 +50,14 @@ export default async function FirmalarSayfasi({ searchParams }: Props) {
             <h1 className="b1">İlan veren firmalar</h1>
             <p className="ikincil">Pamukkale Teknokent’te şu anda açık ilanı bulunan {tumu.length} firma.</p>
           </div>
-          {tumu.length > 0 && (
-            <nav className="hizli-filtre" aria-label="Bloğa göre süz">
-              <Link className="hap" href="/firmalar" aria-pressed={!secili}>
+          {sektorler.length > 1 && (
+            <nav className="hizli-filtre fl-sektor" aria-label="Sektöre göre süz">
+              <Link className="hap" href="/firmalar" aria-pressed={!secili} scroll={false}>
                 Tümü <span className="sayi">{tumu.length}</span>
               </Link>
-              {BLOKLAR.filter((b) => blokSay(b.kod) > 0).map((b) => (
-                <Link key={b.kod} className="hap" href={`/firmalar?blok=${b.kod}`} aria-pressed={secili === b.kod}>
-                  <i className={`blok-isaret blok-isaret--${b.renk}`} aria-hidden="true" />
-                  {b.kod} Blok <span className="sayi">{blokSay(b.kod)}</span>
+              {sektorler.map(([ad, n]) => (
+                <Link key={ad} className="hap" href={`/firmalar?sektor=${encodeURIComponent(ad)}`} aria-pressed={secili === ad} scroll={false}>
+                  {ad} <span className="sayi">{n}</span>
                 </Link>
               ))}
             </nav>

@@ -36,11 +36,6 @@ export async function Ust({ aktif = '' }: { aktif?: UstMenu }) {
           {m('firmalar', '/firmalar', 'Firmalar')}
         </nav>
         <div className="a-ust-sag">
-          {!hesap && (
-            <Link href="/giris?firma=1" className="a-firma-giris">
-              Firma girişi
-            </Link>
-          )}
           {hesap ? (
             <HesapMenusu ad={hesap.ad} altBilgi={hesap.alt} ogeler={hesapMenusuOgeleri(hesap.rol, { yonetici: yoneticiMi(k) })} adiGoster />
           ) : (
