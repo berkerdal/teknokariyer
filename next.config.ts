@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['jose', 'pg-cloudflare'],
 
   // Your Next.js config here
-  webpack: (webpackConfig, { isServer, dev }) => {
+  webpack: (webpackConfig, { isServer, dev, webpack }) => {
     // Tarayıcıya giden JS dosyalarının adında rota adları geçmesin: `(frontend)`, `[adres]` gibi karakterler bazı
     // sunucularda (Cloudflare statik katmanı) kodlama farkı yüzünden yönlendirme döngüsüne yol açıyor.
     // Bu parçalar yalnızca içerik özetinden oluşan bir ad alır; dosya listesi Next'in derleme kaydından okunduğu için
@@ -53,6 +53,14 @@ const nextConfig: NextConfig = {
       }
     }
     webpackConfig.resolve.alias = { ...webpackConfig.resolve.alias, '@payload-config': payloadYapilandirmasi }
+    // Next'in tsconfig yol eklentisi `@payload-config`i tsconfig'deki yola (Cloudflare yapılandırması) takma addan önce
+    // çözüyor: SAGLAYICI=node üretim derlemesi sessizce Cloudflare yapılandırmasıyla çıkıyordu (Docker provasında bulundu).
+    // İstek, çözümden önce seçilen yapılandırmanın mutlak yoluyla değiştirilir.
+    webpackConfig.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(/^@payload-config$/, (istek: { request: string }) => {
+        istek.request = payloadYapilandirmasi
+      }),
+    )
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
