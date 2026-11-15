@@ -27,13 +27,13 @@ const TEMEL_UNIVERSITELER = [
   'Pamukkale Üniversitesi', 'Ege Üniversitesi', 'Dokuz Eylül Üniversitesi', 'İzmir Yüksek Teknoloji Enstitüsü',
   'Muğla Sıtkı Koçman Üniversitesi', 'Afyon Kocatepe Üniversitesi', 'Uşak Üniversitesi', 'Süleyman Demirel Üniversitesi',
   'Orta Doğu Teknik Üniversitesi', 'İstanbul Teknik Üniversitesi', 'Hacettepe Üniversitesi', 'Boğaziçi Üniversitesi',
-  'Bilkent Üniversitesi', 'Yıldız Teknik Üniversitesi', 'Anadolu Üniversitesi (Açıköğretim)',
+  'İhsan Doğramacı Bilkent Üniversitesi', 'Yıldız Teknik Üniversitesi', 'Anadolu Üniversitesi (Açıköğretim)',
 ]
 const TEMEL_BOLUMLER = [
   'Bilgisayar Mühendisliği', 'Yazılım Mühendisliği', 'Elektrik-Elektronik Mühendisliği', 'Makine Mühendisliği',
   'Endüstri Mühendisliği', 'Biyomedikal Mühendisliği', 'Mekatronik Mühendisliği', 'İnşaat Mühendisliği',
   'Tekstil Mühendisliği', 'Kimya Mühendisliği', 'Yönetim Bilişim Sistemleri', 'İstatistik', 'Matematik', 'Fizik',
-  'İşletme', 'İktisat', 'Bilgisayar Programcılığı', 'Elektronik Teknolojisi', 'Grafik Tasarım', 'Endüstriyel Tasarım',
+  'İşletme', 'İktisat', 'Bilgisayar Programcılığı', 'Elektronik Teknolojisi', 'Grafik Tasarımı', 'Endüstriyel Tasarım',
 ]
 
 interface OrnekIlan {

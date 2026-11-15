@@ -16,7 +16,7 @@ import { FormHatasi } from '@/servisler/ortak'
 
 let payload: Payload
 const ek = `ya${Date.now().toString(36)}`
-let yonetici: any, moderator: any
+let yonetici: any, moderator: any, yoneticiTeknikDegil: any
 
 beforeAll(async () => {
   payload = await getPayload({ config })
@@ -24,6 +24,7 @@ beforeAll(async () => {
     payload.create({ collection: 'kullanicilar', overrideAccess: true, data: { email: `${e}-${ek}@ornek.com`, password: 'Deneme-12345', ad: e, _verified: true, ...v } as any })
   yonetici = await k('yay', { rol: 'yonetici', teknikSorumlu: true })
   moderator = await k('yam', { rol: 'moderator' })
+  yoneticiTeknikDegil = await k('yat', { rol: 'yonetici' })
 })
 
 describe('listeler', () => {
@@ -53,6 +54,8 @@ describe('listeler', () => {
     const adlar = aktarmaAdlari(satirlar, 0, 'universite')
     expect(adlar).toHaveLength(2)
     await expect(aktarmaOnizle(payload, moderator, 'universite', adlar)).rejects.toMatchObject({ durumKodu: 403 })
+    // Toplu aktarma gelişmiş ekranda: teknik sorumlu olmayan tam yetkili de yapamaz
+    await expect(listeyeTopluEkle(payload, yoneticiTeknikDegil, 'universite', adlar, 'x')).rejects.toMatchObject({ durumKodu: 403 })
     const o = await aktarmaOnizle(payload, yonetici, 'universite', adlar)
     expect(o.yeni).toHaveLength(2)
     const r = await listeyeTopluEkle(payload, yonetici, 'universite', o.yeni, 'deneme.xlsx')
@@ -64,7 +67,7 @@ describe('listeler', () => {
     expect(ikinci.zatenVar).toBe(2)
     // Parça sınırı
     await expect(listeyeTopluEkle(payload, yonetici, 'universite', Array.from({ length: 201 }, (_, i) => `Ad ${i} ${ek}`), 'x')).rejects.toBeTruthy()
-    const kayit = await payload.find({ collection: 'islem-kayitlari', where: { islem: { contains: 'dosyadan aktarıldı' } }, sort: '-createdAt', limit: 1, overrideAccess: true })
+    const kayit = await payload.find({ collection: 'islem-kayitlari', where: { islem: { contains: 'toplu aktarıldı' } }, sort: '-createdAt', limit: 1, overrideAccess: true })
     expect((kayit.docs[0]?.ayrinti as { adet?: number })?.adet).toBe(2)
   })
 })

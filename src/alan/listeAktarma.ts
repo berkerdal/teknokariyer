@@ -9,6 +9,7 @@
  */
 import { unzipSync, strFromU8 } from 'fflate'
 import { normallestir } from './metin'
+import { benzerAdlar, mevcutlariAyir } from './talep'
 
 export const AKTARMA_PARCA = 200
 export const AKTARMA_EN_FAZLA = 5000
@@ -98,10 +99,15 @@ export function basHarfleriDuzelt(ad: string): string {
 
 const bosluk = (s: string) => s.replace(/\s+/g, ' ').trim()
 
+/** Kurala uymayan resmî yazımlar (büyük harfli kaynaktan çıkarılamaz). Anahtar: normalleştirilmiş ham ad. */
+const OZEL_YAZIMLAR: Record<string, string> = {
+  [normallestir('BEZM-İ ÂLEM VAKIF ÜNİVERSİTESİ')]: 'Bezmiâlem Vakıf Üniversitesi',
+}
+
 /** “PAMUKKALE ÜNİVERSİTESİ (DENİZLİ)” → “Pamukkale Üniversitesi”. Şehir veya kampüs eki parantezde ise atılır. */
 export function universiteAdi(ham: string): string {
   const ad = bosluk(ham.replace(/\s*\([^)]*\)\s*$/, ''))
-  return basHarfleriDuzelt(ad)
+  return OZEL_YAZIMLAR[normallestir(ad)] ?? basHarfleriDuzelt(ad)
 }
 
 /** “Bilgisayar Mühendisliği (İngilizce) (Burslu)” → “Bilgisayar Mühendisliği”. Parantez içi bütün ekler atılır. */
@@ -135,4 +141,31 @@ export function aktarmaAdlari(satirlar: string[][], sutun: number, tur: AktarmaT
 export function sutunOner(baslik: string[], tur: AktarmaTuru): number {
   const ara = tur === 'universite' ? /üniversite|universite|kurum/i : tur === 'bolum' ? /program|bölüm|bolum/i : /ad/i
   return baslik.findIndex((b) => ara.test(b) && !/kod/i.test(b))
+}
+
+/* ---------- Listeyle karşılaştırma ---------- */
+
+export interface AktarmaSiniflamasi {
+  /** Eklenecek adlar */
+  yeni: string[]
+  /** Listede (ad veya eş anlamlı olarak) zaten bulunan ad sayısı */
+  zatenVar: number
+  /** Listede aynı kökte başka bir yazımla bulunduğu için eklenmeyenler */
+  benzer: Array<{ ad: string; listede: string }>
+}
+
+/** Adları mevcut listeyle karşılaştırır. Sunucu da betik de (scripts/liste-yukle.ts) aynı kuralı kullanır. */
+export function aktarmaSiniflandir(adlar: string[], mevcut: Array<{ ad: string; esAnlamlilar?: Array<{ ad: string }> | null }>): AktarmaSiniflamasi {
+  const tumAdlar = mevcut.flatMap((m) => [m.ad, ...(m.esAnlamlilar ?? []).map((e) => e.ad)])
+  const { yeni, zatenVar } = mevcutlariAyir(adlar, tumAdlar)
+  const listedeki = mevcut.map((m) => m.ad)
+  const benzer: AktarmaSiniflamasi['benzer'] = []
+  // Dosyanın kendi içindeki aynı kökteki yazımlar da bir kez alınır
+  const eklenecek: string[] = []
+  for (const o of yeni) {
+    const b = benzerAdlar(o, [...listedeki, ...eklenecek]).find((x) => x.ayni)
+    if (b) benzer.push({ ad: o, listede: b.ad })
+    else eklenecek.push(o)
+  }
+  return { yeni: eklenecek, zatenVar: zatenVar.length, benzer }
 }

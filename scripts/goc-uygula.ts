@@ -10,26 +10,10 @@
  * Veritabanı kimliği wrangler.jsonc'deki D1 bağlantısından okunur.
  * Göçler yalnızca `db.run(sql...)` ve `db.all(sql...)` kullanmalı ve parametre içermemelidir (Drizzle'ın ürettiği hâl).
  */
-import { readFileSync } from 'node:fs'
 import { migrations } from '../src/migrations'
+import { d1Sorgu as sorgu } from './d1'
 
-const hesap = process.env.CF_HESAP
-if (!hesap) throw new Error('CF_HESAP (Cloudflare hesap kimliği) verilmeli.')
-const wrangler = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')
-const vt = /"binding":\s*"D1"[\s\S]*?"database_id":\s*"([0-9a-f-]+)"/.exec(wrangler)?.[1]
-if (!vt) throw new Error('wrangler.jsonc içinde D1 veritabanı kimliği bulunamadı.')
 const uygula = process.argv.includes('--uygula')
-
-async function sorgu(metin: string, params: unknown[] = []): Promise<Record<string, unknown>[]> {
-  const yanit = await fetch(`https://api.cloudflare.com/client/v4/accounts/${hesap}/d1/database/${vt}/query`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN ?? 'vekil-ekler'}` },
-    body: JSON.stringify({ sql: metin, params }),
-  })
-  const j = (await yanit.json()) as { success: boolean; errors?: Array<{ message: string }>; result?: Array<{ results: Record<string, unknown>[] }> }
-  if (!j.success) throw new Error(`D1 hatası: ${j.errors?.map((e) => e.message).join('; ')}\nSorgu: ${metin.slice(0, 300)}`)
-  return j.result?.[0]?.results ?? []
-}
 
 /** Drizzle `sql` nesnesini metne çevirir. Parametre varsa durur (göçlerde beklenmez). */
 function metne(s: unknown): string {

@@ -4,10 +4,10 @@
  * bağlantılar bozulmasın). Aynı şeyin ikinci yazımı eklenmez; eş anlamlı olarak tanımlanır.
  */
 import type { Payload } from 'payload'
-import { yoneticiMi } from '@/erisim'
+import { teknikSorumluMu, yoneticiMi } from '@/erisim'
 import { benzerAdlar, mevcutlariAyir, talepOgeleri, TALEP_TUR_ADI } from '@/alan/talep'
 import { normallestir } from '@/alan/metin'
-import { AKTARMA_EN_FAZLA, AKTARMA_PARCA } from '@/alan/listeAktarma'
+import { AKTARMA_EN_FAZLA, AKTARMA_PARCA, aktarmaSiniflandir, type AktarmaSiniflamasi } from '@/alan/listeAktarma'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { FormHatasi, IslemHatasi, istekOlustur, type Kullanici } from './ortak'
 
@@ -91,12 +91,7 @@ export async function listeOgesiniGuncelle(payload: Payload, k: Kullanici, id: n
 
 /* ---------- Dosyadan toplu aktarma (YÖK/ÖSYM listeleri) ---------- */
 
-export interface AktarmaSiniflamasi {
-  yeni: string[]
-  zatenVar: number
-  /** Listede aynı kökte bir yazım olduğu için eklenmeyecekler */
-  benzer: Array<{ ad: string; listede: string }>
-}
+export type { AktarmaSiniflamasi }
 
 function adlariDenetle(adlar: string[], enFazla: number): string[] {
   if (!Array.isArray(adlar) || !adlar.length) throw new IslemHatasi('Aktarılacak ad yok.')
@@ -106,35 +101,30 @@ function adlariDenetle(adlar: string[], enFazla: number): string[] {
   return temiz
 }
 
+/** Dosyadan ve resmî kaynaktan aktarma gelişmiş yönetim ekranındadır (kullanıcı kararı, 15.11.2026). */
+function aktarmaYetkisi(k: Kullanici) {
+  if (!teknikSorumluMu(k)) throw new IslemHatasi('Listelere toplu aktarmayı yalnızca teknik sorumlu yapabilir (Gelişmiş yönetim ekranı).', 403)
+}
+
 async function siniflandir(payload: Payload, tur: ListeTuru, adlar: string[]): Promise<AktarmaSiniflamasi> {
-  const mevcut = await turAdlari(payload, tur)
-  const tumAdlar = mevcut.flatMap((m) => [m.ad, ...(m.esAnlamlilar ?? []).map((e) => e.ad)])
-  const { yeni, zatenVar } = mevcutlariAyir(adlar, tumAdlar)
-  const listedeki = mevcut.map((m) => m.ad)
-  const benzer: AktarmaSiniflamasi['benzer'] = []
-  const kalan = yeni.filter((o) => {
-    const b = benzerAdlar(o, listedeki).find((x) => x.ayni)
-    if (b) benzer.push({ ad: o, listede: b.ad })
-    return !b
-  })
-  return { yeni: kalan, zatenVar: zatenVar.length, benzer }
+  return aktarmaSiniflandir(adlar, await turAdlari(payload, tur))
 }
 
 /** Önizleme: hiçbir şey yazmadan hangi adların ekleneceğini söyler. */
 export async function aktarmaOnizle(payload: Payload, k: Kullanici, tur: ListeTuru, adlar: string[]): Promise<AktarmaSiniflamasi> {
-  yetki(k)
+  aktarmaYetkisi(k)
   if (!LISTE_TURLERI.includes(tur)) throw new IslemHatasi('Liste türü anlaşılamadı.')
   return siniflandir(payload, tur, adlariDenetle(adlar, AKTARMA_EN_FAZLA))
 }
 
 /** Bir parça (en fazla 200 ad) ekler; sunucu her adı yeniden denetler, zaten olan ve aynı kökteki yazım eklenmez. */
 export async function listeyeTopluEkle(payload: Payload, k: Kullanici, tur: ListeTuru, adlar: string[], kaynak: string): Promise<{ eklenen: number; atlanan: number }> {
-  yetki(k)
+  aktarmaYetkisi(k)
   if (!LISTE_TURLERI.includes(tur)) throw new IslemHatasi('Liste türü anlaşılamadı.')
   const { yeni } = await siniflandir(payload, tur, adlariDenetle(adlar, AKTARMA_PARCA))
   const req = await istekOlustur(payload, k)
   for (const ad of yeni) await payload.create({ collection: 'taksonomiler', data: { tur, ad, aktif: true } as never, overrideAccess: true, req })
   if (yeni.length)
-    await islemKaydet(req, { islem: `Listeye dosyadan aktarıldı (${TALEP_TUR_ADI[tur]?.tekil ?? tur})`, tur: 'ayarlar', kayitTuru: 'taksonomiler', ayrinti: { adet: yeni.length, kaynak: kaynak.slice(0, 120) } })
+    await islemKaydet(req, { islem: `Listeye toplu aktarıldı (${TALEP_TUR_ADI[tur]?.tekil ?? tur})`, tur: 'ayarlar', kayitTuru: 'taksonomiler', ayrinti: { adet: yeni.length, kaynak: kaynak.slice(0, 120) } })
   return { eklenen: yeni.length, atlanan: adlar.length - yeni.length }
 }

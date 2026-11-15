@@ -1,0 +1,27 @@
+/* Gelişmiş yönetim ekranı (Payload) için özel görünümler. Payload'un tema değişkenleri kullanılır (açık/koyu). */
+.gelismis { max-width: 960px; padding-bottom: 48px; }
+.gelismis h1 { margin: 24px 0 8px; }
+.gelismis h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.gelismis-giris { max-width: 72ch; color: var(--theme-elevation-800); }
+.gelismis-kart { border: 1px solid var(--theme-elevation-150); border-radius: 6px; padding: 20px; margin-top: 20px; background: var(--theme-elevation-0); }
+.la { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.la-adim { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.la-kaynaklar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.la-kucuk { font-size: 0.875rem; color: var(--theme-elevation-700); margin: 0; }
+.la-gizli { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.la-dugme { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 4px; border: 1px solid var(--theme-elevation-400);
+  background: var(--theme-elevation-0); color: var(--theme-text); font: inherit; font-weight: 600; cursor: pointer; }
+.la-dugme:hover { background: var(--theme-elevation-50); }
+.la-dugme--ana { background: var(--theme-elevation-1000); border-color: var(--theme-elevation-1000); color: var(--theme-elevation-0); }
+.la-dugme--ana:hover { background: var(--theme-elevation-800); }
+.la-dugme:disabled { opacity: 0.55; cursor: not-allowed; }
+.la-gizli:focus-visible + .la-dugme, .la-dugme:focus-visible { outline: 2px solid var(--theme-success-500, #2155ad); outline-offset: 2px; }
+.la-tablo-kap { max-width: 100%; overflow-x: auto; }
+.la-tablo { border-collapse: collapse; font-size: 0.875rem; }
+.la-tablo th, .la-tablo td { border: 1px solid var(--theme-elevation-150); padding: 6px 10px; text-align: left; white-space: nowrap; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+.la-tablo th { background: var(--theme-elevation-50); font-weight: 600; }
+.la-tablo td.la-secili { background: var(--theme-success-50, #e6f5fc); font-weight: 600; }
+.la-adlar { max-height: 240px; overflow: auto; font-size: 0.875rem; margin: 8px 0 0; }
+.la-hata { color: var(--theme-error-650, #b00020); font-weight: 600; margin: 0; }
+.la-basari { color: var(--theme-success-750, #155724); font-weight: 600; margin: 0; }
+.gelismis details summary { cursor: pointer; font-size: 0.875rem; }

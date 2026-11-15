@@ -35,6 +35,13 @@ export function ortakYapilandirma({
       meta: { titleSuffix: ' · TeknoKariyer yönetim' },
       // Profil resmi dış servisten (Gravatar) çekilmez: kişisel e-posta özeti dışarı gitmez, kırık görsel olmaz.
       avatar: 'default',
+      components: {
+        // Teknik sorumluya özel araçlar (kullanıcı kararı, 15.11.2026: uzun aralıklı işler Yönetici A.Ş. panelinde yer tutmaz)
+        afterNavLinks: ['/arayuz/gelismis/GelismisBaglantilar#GelismisBaglantilar'],
+        views: {
+          listeAktar: { Component: '/arayuz/gelismis/ListeAktarmaGorunumu#ListeAktarmaGorunumu', path: '/liste-aktar' },
+        },
+      },
     },
     collections: koleksiyonlar,
     globals: globaller,

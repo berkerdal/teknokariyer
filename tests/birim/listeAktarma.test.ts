@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { aktarmaAdlari, basHarfleriDuzelt, bolumAdi, sutunOner, universiteAdi, xlsxOku } from '@/alan/listeAktarma'
+import { aktarmaAdlari, aktarmaSiniflandir, basHarfleriDuzelt, bolumAdi, sutunOner, universiteAdi, xlsxOku } from '@/alan/listeAktarma'
+import { resmiListeAdlari } from '@/alan/resmiListeler'
 import { excelOlustur } from '@/altyapi/excel'
 
 describe('ad düzeltme', () => {
@@ -42,5 +43,33 @@ describe('aktarma', () => {
     expect(satir[1]).toEqual(['PAMUKKALE ÜNİVERSİTESİ (DENİZLİ)', 'Yazılım & Veri <Bilimi>'])
     expect(satir[2]).toEqual(['', 'Tek'])
     expect(satir[3]).toEqual(['12', 'Sayı'])
+  })
+})
+
+describe('listeyle karşılaştırma ve resmî liste', () => {
+  it('zaten olanı, eş anlamlıyı ve aynı kökteki yazımı ayırır; dosya içindeki benzerleri bir kez alır', () => {
+    const s = aktarmaSiniflandir(['Pamukkale Üniversitesi', 'ODTÜ', 'React.js', 'Yeni Ad', 'Yeni Ad.'], [
+      { ad: 'Pamukkale Üniversitesi' },
+      { ad: 'Orta Doğu Teknik Üniversitesi', esAnlamlilar: [{ ad: 'ODTÜ' }] },
+      { ad: 'React' },
+    ])
+    expect(s.zatenVar).toBe(2)
+    expect(s.benzer).toEqual([
+      { ad: 'React.js', listede: 'React' },
+      { ad: 'Yeni Ad.', listede: 'Yeni Ad' },
+    ])
+    expect(s.yeni).toEqual(['Yeni Ad'])
+  })
+  it('paketteki YÖK listesi temiz ve tekil gelir; özel yazımlar uygulanır', () => {
+    const u = resmiListeAdlari('universite')
+    const b = resmiListeAdlari('bolum')
+    expect(u.length).toBeGreaterThan(200)
+    expect(b.length).toBeGreaterThan(500)
+    expect(u).toContain('Pamukkale Üniversitesi')
+    expect(u).toContain('Bezmiâlem Vakıf Üniversitesi')
+    expect(u).toContain('TOBB Ekonomi ve Teknoloji Üniversitesi')
+    expect(u.some((a) => /\(|[A-ZÇĞİÖŞÜ]{6,}/.test(a))).toBe(false)
+    expect(b).toContain('Bilgisayar Mühendisliği')
+    expect(new Set(b).size).toBe(b.length)
   })
 })

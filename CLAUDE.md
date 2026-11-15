@@ -472,19 +472,29 @@ Claude tarafından yapılacak.
     - Öğrenilen: Bir cihazda e-posta kodu kullanıldıktan hemen sonra başka cihazdan girişte 60 saniyelik bekleme girişi
       engelliyordu. Girişte bekleme uygulanmaz (yalnızca “Yeni kod gönder”); geçerli kod varsa o kullanılır (`girisSirasinda`).
       Test ortamında açık kod `epostaKodu.test` alanında tutulur (yalnızca yayın dışı) ki ekranda yeniden gösterilebilsin.
-  - **Listeye dosyadan aktarma (15.11.2026):** `/yonetim/listeler` → “Dosyadan toplu aktar” (yalnızca rol `yonetici`).
-    Excel (.xlsx, kitaplıksız: `xlsxOku`) veya CSV tarayıcıda okunur; başlığa göre sütun önerilir, ilk satırlar gösterilir.
-    Ad temizliği `src/alan/listeAktarma.ts`: tamamı büyük harfli adlar Türkçe kurallarla düzeltilir (TOBB, MEF gibi
-    kısaltmalar korunur), üniversitede sondaki “(ŞEHİR)”, bölümde parantez içi ekler (İngilizce, Burslu, İÖ) atılır.
-    Önizleme (yeni / zaten var / başka yazımla var) → 200'erli parçalarla `listeyeTopluEkle`; sunucu her parçayı yeniden
-    denetler, en fazla 5000 ad, hiçbir şey silinmez, işlem kaydına dosya adıyla geçer.
-    - **ÖSYM/YÖK verisini bu çalışma ortamından indirmek izin sisteminde reddedildi.** Liste, kurum personelinin ÖSYM tercih
-      kılavuzu tablolarını (Excel) bu araçla yüklemesiyle doldurulacak.
+  - **Üniversite ve bölüm listeleri (15.11.2026, kullanıcı kararı):** Toplu aktarma Yönetici A.Ş. panelinde yer tutmaz
+    (güncelleme aralığı uzun); gelişmiş yönetim ekranında `/admin/liste-aktar` (menüde “Liste aktarma (YÖK)”), yalnızca
+    teknik sorumlu (`aktarmaYetkisi` → `teknikSorumluMu`). Payload özel görünümü: `src/arayuz/gelismis/` (Payload tema
+    değişkenleriyle `gelismis.css`), `admin.components.views` + `afterNavLinks` (`src/payload.ortak.ts`; değişince
+    `pnpm payload generate:importmap`).
+    - **Kaynak:** YÖK Atlas tercih kılavuzu API'si (`https://yokatlas.yok.gov.tr/api/tercih-kilavuz/universiteler` ve
+      `/universite-programlar`; site tek sayfalık uygulama, uçlar betik dosyasından bulundu). Ham adlar
+      `src/kaynakVeri/yokAtlas.json` (228 kurum KKTC dahil, 596 program adı lisans + önlisans; alınma 15.11.2026).
+      Kullanıcı indirmeye açıkça izin verdi. ÖSYM tercih kılavuzu tabloları PDF; dokuman.osym.gov.tr 403 veriyor.
+    - Temizlik `src/alan/listeAktarma.ts` (büyük harf düzeltme, kısaltmalar TOBB/MEF/KTO/OSTİM/SANKO/TED, “(ŞEHİR)” ve
+      program ekleri, `OZEL_YAZIMLAR`: Bezmiâlem). Karşılaştırma `aktarmaSiniflandir` (zaten var / eş anlamlı / aynı kök).
+      Paketteki liste `src/alan/resmiListeler.ts`. Ekranda: paketteki listeyle karşılaştır veya Excel/CSV seç → önizleme →
+      200'erli parçalarla ekle. Hiçbir şey silinmez; işlem kaydına kaynağıyla geçer.
+    - **Betik:** `scripts/liste-yukle.ts` (aynı kural, D1 API; kuru çalıştırma, sonra `--uygula`). D1 API yardımcısı
+      `scripts/d1.ts` (göç betiği de kullanır). Test ortamına 15.11.2026'da yüklendi: 229 üniversite, 596 bölüm.
+      Önce örnek verideki “Bilkent Üniversitesi” ve “Grafik Tasarım” resmî adlarına çevrildi, eski yazım eş anlamlı oldu.
+    - Öğrenilen: kısa ad resmî adın sonu olabilir (“Bilkent” ⊂ “İhsan Doğramacı Bilkent”), ama sondan eşleme kuralı
+      yanlış birleştirir (“Akdeniz” ⊂ “Doğu Akdeniz”). Kaynakta karşılığı olmayan mevcut adlar yüklemeden önce elle bakılır.
   - **Sırada:** site haritası (sitemap) ve hreflang, `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
-  - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayından önce (Listeler → Dosyadan toplu aktar) YÖK üniversite ve
-    bölüm listesinin içe aktarılması gerekiyor (aksi hâlde aday okulunu bulamaz).
+  - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayın veritabanına YÖK listesi `scripts/liste-yukle.ts` veya
+    gelişmiş ekrandaki “Liste aktarma” ile yüklenir (aksi hâlde aday okulunu bulamaz).
   - **Test ortamı yayında (14.11.2026):** https://teknokariyer-test.teknokariyer.workers.dev
     - Dağıtım Cloudflare **Workers Builds** ile: `claude/funny-cerf-r7h64q` dalına her gönderim derleyip yayınlar.
       Derleme `pnpm exec opennextjs-cloudflare build`, dağıtım `pnpm exec opennextjs-cloudflare deploy`; ön izleme kapalı.
