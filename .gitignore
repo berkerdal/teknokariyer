@@ -20,4 +20,6 @@ next-env.d.ts
 .env
 .env*.local
 .dev.vars
+# Sunucu ortam dosyası (gizli değerler; örneği sunucu.env.ornek)
+sunucu.env
 /media

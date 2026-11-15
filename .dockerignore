@@ -1,0 +1,13 @@
+node_modules
+.next
+.open-next
+.wrangler
+.git
+coverage
+test-results
+playwright-report
+.env
+.env.*
+sunucu.env
+.dev.vars
+docs/*.pdf

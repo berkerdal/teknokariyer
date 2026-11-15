@@ -16,7 +16,7 @@ importers:
         version: 1.20.17(next@16.4.6(@babel/core@7.29.13)(@playwright/test@1.65.0)(@types/node@22.19.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(wrangler@4.161.0(@types/node@22.19.9))
       '@payloadcms/db-d1-sqlite':
         specifier: 3.93.0
-        version: 3.93.0(@types/pg@8.20.0)(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))(pg@8.20.0)
+        version: 3.93.0(@types/pg@8.23.1)(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))(pg@8.20.0)
       '@payloadcms/db-postgres':
         specifier: 3.93.0
         version: 3.93.0(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))
@@ -84,6 +84,9 @@ importers:
       '@types/node':
         specifier: 22.19.9
         version: 22.19.9
+      '@types/pg':
+        specifier: ^8.23.1
+        version: 8.23.1
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -102,6 +105,9 @@ importers:
       jsdom:
         specifier: 28.0.0
         version: 28.0.0
+      pg:
+        specifier: 8.20.0
+        version: 8.20.0
       prettier:
         specifier: ^3.4.2
         version: 3.10.1
@@ -2370,6 +2376,9 @@ packages:
 
   '@types/pg@8.20.0':
     resolution: {integrity: sha512-bEPFOaMAHTEP1EzpvHTbmwR8UsFyHSKsRisLIHVMXnpNefSbGA1bD6CVy+qKjGSqmZqNqBDV2azOBo8TgkcVow==}
+
+  '@types/pg@8.23.1':
+    resolution: {integrity: sha512-fKVHpikPdg4GKks3JuLEhvwSyvwzF23hnabPy6DD8ljVbC7+6J5dQzdv4arV6jqq57djnMgs1HKBxX4P8aBI3A==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -7399,12 +7408,12 @@ snapshots:
       - encoding
       - supports-color
 
-  '@payloadcms/db-d1-sqlite@3.93.0(@types/pg@8.20.0)(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))(pg@8.20.0)':
+  '@payloadcms/db-d1-sqlite@3.93.0(@types/pg@8.23.1)(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))(pg@8.20.0)':
     dependencies:
-      '@payloadcms/drizzle': 3.93.0(@types/pg@8.20.0)(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))(pg@8.20.0)
+      '@payloadcms/drizzle': 3.93.0(@types/pg@8.23.1)(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))(pg@8.20.0)
       console-table-printer: 2.12.1
       drizzle-kit: 0.31.7
-      drizzle-orm: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)
+      drizzle-orm: 0.45.2(@types/pg@8.23.1)(pg@8.20.0)
       payload: 3.93.0(graphql@16.15.0)(typescript@5.7.3)
       prompts: 2.4.2
       to-snake-case: 1.0.0
@@ -7489,6 +7498,46 @@ snapshots:
       console-table-printer: 2.12.1
       dequal: 2.0.3
       drizzle-orm: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)
+      payload: 3.93.0(graphql@16.15.0)(typescript@5.7.3)
+      prompts: 2.4.2
+      to-snake-case: 1.0.0
+      uuid: 13.0.2
+    transitivePeerDependencies:
+      - '@aws-sdk/client-rds-data'
+      - '@cloudflare/workers-types'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@libsql/client-wasm'
+      - '@neondatabase/serverless'
+      - '@op-engineering/op-sqlite'
+      - '@opentelemetry/api'
+      - '@planetscale/database'
+      - '@prisma/client'
+      - '@tidbcloud/serverless'
+      - '@types/better-sqlite3'
+      - '@types/pg'
+      - '@types/sql.js'
+      - '@upstash/redis'
+      - '@vercel/postgres'
+      - '@xata.io/client'
+      - better-sqlite3
+      - bun-types
+      - expo-sqlite
+      - gel
+      - knex
+      - kysely
+      - mysql2
+      - pg
+      - postgres
+      - prisma
+      - sql.js
+      - sqlite3
+
+  '@payloadcms/drizzle@3.93.0(@types/pg@8.23.1)(payload@3.93.0(graphql@16.15.0)(typescript@5.7.3))(pg@8.20.0)':
+    dependencies:
+      console-table-printer: 2.12.1
+      dequal: 2.0.3
+      drizzle-orm: 0.45.2(@types/pg@8.23.1)(pg@8.20.0)
       payload: 3.93.0(graphql@16.15.0)(typescript@5.7.3)
       prompts: 2.4.2
       to-snake-case: 1.0.0
@@ -8193,6 +8242,12 @@ snapshots:
   '@types/parse-json@4.0.2': {}
 
   '@types/pg@8.20.0':
+    dependencies:
+      '@types/node': 22.19.9
+      pg-protocol: 1.16.1
+      pg-types: 2.2.0
+
+  '@types/pg@8.23.1':
     dependencies:
       '@types/node': 22.19.9
       pg-protocol: 1.16.1
@@ -8925,6 +8980,11 @@ snapshots:
   drizzle-orm@0.45.2(@types/pg@8.20.0)(pg@8.20.0):
     optionalDependencies:
       '@types/pg': 8.20.0
+      pg: 8.20.0
+
+  drizzle-orm@0.45.2(@types/pg@8.23.1)(pg@8.20.0):
+    optionalDependencies:
+      '@types/pg': 8.23.1
       pg: 8.20.0
 
   dunder-proto@1.0.1:

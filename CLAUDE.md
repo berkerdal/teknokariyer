@@ -500,7 +500,24 @@ Claude tarafından yapılacak.
     - `metadataBase` artık `siteAdresi()` (SITE_ADRESI): site haritası, sayfa başlıkları ve e-postalar aynı kökü kullanır.
     - **Açık soru (kullanıcıya soruldu):** Talimatlar 14 İngilizce arayüz ve `/tr/`, `/en/` adresleri istiyor; portal yalnızca
       Türkçe. İngilizce eklenince `DILLER`e `{ kod: 'en', onEk: '/en' }` girer.
-  - **Sırada:** `docs/goc-rehberi.md` ve test senaryoları belgesi.
+  - **Türkiye'deki sunucuya göç (15.11.2026, K2):** Rehber `docs/goc-rehberi.md` (hedef mimari, kaynaklar, adımlar,
+    yedekleme, geri dönüş, denetim listesi, prova sonucu).
+    - **PostgreSQL göçleri ayrı:** `src/migrations-pg` (node yapılandırması `migrationDir` + `prodMigrations`). **Şema
+      değişince iki göç üretilir:** D1 için `pnpm payload migrate:create ad`, PostgreSQL için
+      `PAYLOAD_CONFIG_PATH=src/payload.config.node.ts DATABASE_URL=… pnpm payload migrate:create ad`.
+    - Göç betikleri `scripts/goc/`: `dokumu-ac.ts` (wrangler d1 export → SQLite; Node yerleşik `node:sqlite`),
+      `sqlite-postgres.ts` (tablo tablo, tek işlem, 0/1 → boolean, satır sayısı ve yabancı anahtar denetimi, sayaçlar),
+      `r2-s3.ts` (Cloudflare API'siyle okur, `cf-r2-jurisdiction: eu`; boyut ve dosya kaydı denetimi).
+    - Docker: `Dockerfile`, `compose.yaml` (uygulama, zamanlayici, PostgreSQL 16, SeaweedFS 4.53), `sunucu.env.ornek`.
+      MinIO topluluk imajı artık yok; SeaweedFS seçildi. Node'da zamanlanmış işler `scripts/zamanlayici.ts` (saatler
+      `src/alan/zamanlama.ts`; wrangler.jsonc ile aynı olduğunu birim testi denetler). Boş kurulumda dosya kovası açılışta
+      oluşturulur (`onInit`).
+    - Prova (yerel PostgreSQL + SeaweedFS, test ortamı verisi): 1.603 satır, 102 yabancı anahtar, 6 dosya; node kipinde
+      giriş, e-posta kodu, CV görüntüleme ve filigranlı indirme, zamanlayıcı çalıştı.
+    - Öğrenilen: `payload run` betiklerinde `@payload-config` Cloudflare yapılandırmasına çözülür (tsconfig). PostgreSQL'e
+      yazacak betik `../src/payload.config.node.js` içe aktarır (`.node` soneki yüzünden uzantı `.js` yazılır). Düz `tsx`
+      `.env` okumaz.
+  - **Sırada:** Docker imajının compose ile denenmesi (rehber 10. bölüm), test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayın veritabanına YÖK listesi `scripts/liste-yukle.ts` veya

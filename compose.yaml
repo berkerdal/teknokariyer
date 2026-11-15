@@ -1,0 +1,72 @@
+# TeknoKariyer — Türkiye'de tek sunucuda kurulum (K2). Ayrıntı ve göç adımları: docs/goc-rehberi.md.
+#
+#   cp sunucu.env.ornek sunucu.env   # değerleri doldurun; bu dosya depoya girmez
+#   docker compose --env-file sunucu.env up -d --build
+#
+# Hizmetler: uygulama (Next.js + Payload), zamanlayici (gece işleri ve hatırlatmalar), veritabani (PostgreSQL 16),
+# depo (SeaweedFS, S3 uyumlu dosya deposu). Dışarıya yalnızca uygulama açılır; o da yalnızca bu sunucudaki ters vekile
+# (Caddy veya Nginx; HTTPS orada) 127.0.0.1 üzerinden. Veritabanı ve depo sunucu dışına açılmaz.
+
+x-uygulama-ortami: &uygulama-ortami
+  ORTAM: ${ORTAM:?ORTAM verilmeli (test veya yayin)}
+  SITE_ADRESI: ${SITE_ADRESI:?SITE_ADRESI verilmeli}
+  PAYLOAD_SECRET: ${PAYLOAD_SECRET:?PAYLOAD_SECRET verilmeli}
+  DATABASE_URL: postgres://${POSTGRES_USER:-teknokariyer}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD verilmeli}@veritabani:5432/${POSTGRES_DB:-teknokariyer}
+  S3_ENDPOINT: http://depo:8333
+  S3_BUCKET: ${S3_BUCKET:-teknokariyer-dosyalar}
+  S3_REGION: us-east-1
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?S3_ACCESS_KEY_ID verilmeli}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY verilmeli}
+  TURNSTILE_SITE_ANAHTARI: ${TURNSTILE_SITE_ANAHTARI:-}
+  TURNSTILE_GIZLI_ANAHTAR: ${TURNSTILE_GIZLI_ANAHTAR:-}
+  EPOSTA_GONDEREN: ${EPOSTA_GONDEREN:-kariyer@pauteknokent.com.tr}
+  TZ: UTC
+
+services:
+  uygulama:
+    build: .
+    image: teknokariyer:yerel
+    restart: unless-stopped
+    environment: *uygulama-ortami
+    ports:
+      - "127.0.0.1:${UYGULAMA_PORTU:-3000}:3000"
+    depends_on:
+      veritabani: { condition: service_healthy }
+      depo: { condition: service_started }
+
+  zamanlayici:
+    image: teknokariyer:yerel
+    restart: unless-stopped
+    environment: *uygulama-ortami
+    command: ["pnpm", "exec", "tsx", "scripts/zamanlayici.ts"]
+    depends_on:
+      uygulama: { condition: service_started }
+
+  veritabani:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-teknokariyer}
+      POSTGRES_USER: ${POSTGRES_USER:-teknokariyer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD verilmeli}
+    volumes:
+      - veritabani:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  depo:
+    image: chrislusf/seaweedfs:4.53
+    restart: unless-stopped
+    command: ["server", "-s3", "-dir=/data"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?S3_ACCESS_KEY_ID verilmeli}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY verilmeli}
+    volumes:
+      - depo:/data
+
+volumes:
+  veritabani:
+  depo:
