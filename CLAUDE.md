@@ -545,6 +545,20 @@ Claude tarafından yapılacak.
     aday kaydı, başvuru, havuz, hesap güvenliği, liste talepleri, KVKK ve hesap silme, raporlar, mobil; geri bildirim
     şablonu). Ekran ve düğme adları yerelde tarayıcıyla adım adım uygulanarak alındı (S1, S3'ün başı, S4 doğrulandı).
     Geri bildirim kanalı kurumca belirlenmedi: belge “test koordinatörüne” diyor.
+  - **Görsel yenileme uygulandı (15.11.2026, K36/K37):** Katman `src/stil/yenileme.css` (öteki stil dosyalarından sonra
+    yüklenir, yalnızca token kullanır). Kenarlık yerine gölge, açık tonlu bilgi kutuları (sol şerit yok), basınca 0,97,
+    rozet (`.rozet--yesil/--lacivert/--kiremit/--notr`), olgu kutuları (`IlanOlgulari`), başvuru süreci (`BasvuruSureci`),
+    blok renkli `FirmaKaro` (`src/alan/firmaKonumu.ts`). Ana sayfa gece bandı + “Bu hafta yayına girenler” (telefonda gizli,
+    altındaki liste aynı ilanları gösterir). İlan sayfasında bölümler açılır kutu değil, düz başlıklı; telefonda alt çubukta
+    son başvuru + Başvur. Alt bilgi değişmedi. Bütün panellerde telefonda yatay taşma denetlendi (`ozet-dl` uzun değerleri kırar).
+    - **Firma logosu (K37):** `firmaLogosuYukle(payload, k, dosya, hedefFirmaId?)`; hedef verilirse yalnızca kurum rolü
+      `yonetici`. Ad `firma-<id>-logo-YYYYMMDD-HHMMSS.<uzantı>` (`src/alan/firmaLogosu.ts`), eski logo başka firmada yoksa
+      silinir. Herkese açık adres `/firma-logosu/<dosyaId>` (yalnızca `tur: logo` ve PNG/JPEG/WebP; `Cache-Control: public,
+      max-age=31536000, immutable`, nosniff). Adres her yüklemede değiştiği için uzun önbellek güvenli; Cloudflare kenar
+      sunucuları CDN işlevi görür, ayrı `cdn.` alt alanı gerekmez. CV'ler bu adresten asla sunulmaz.
+    - Öğrenilen: Yerelde Turnstile test anahtarlarıyla tarayıcı denemesi için geliştirme sunucusu
+      `TURNSTILE_DOGRULAMA_ADRESI=http://localhost:4010/` ile ve sahte doğrulama sunucusuyla açılmalı; çok sayıda girişte
+      yerel istek sınırı (10/15 dk) dolar, `istek-sinirlari` koleksiyonu temizlenir.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
