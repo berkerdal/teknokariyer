@@ -346,6 +346,9 @@ dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
 .y-kisi .hm-ad { display: block; flex: 1; }
 .y-kisi .hm-ok { transform: rotate(-90deg); }
 .y-kisi .hm-dugme[aria-expanded="true"] .hm-ok { transform: rotate(90deg); }
+/* Yan sütun dikeyde kaydırılabilir (overflow) olduğu için dışına taşan panel kesilir: panel sütunun genişliğinde açılır */
+.y-kisi .hm-panel { left: 0; right: 0; width: auto; max-width: none; }
+.hm--koyu .hm-panel .hm-simge { background: var(--lacivert); color: #FFFFFF; }
 .y-ust .hm { margin-left: auto; }
 .f-hesap > .hm .hm-dugme { padding-right: 4px; }
 
