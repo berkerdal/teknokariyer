@@ -8,6 +8,7 @@ import type { Firmalar } from '@/payload-types'
 import { firmaKimligi, firmaYetkisiVarMi, yoneticiMi } from '@/erisim'
 import { logoDosyaAdi } from '@/alan/firmaLogosu'
 import { islemKaydet } from '@/altyapi/islemKaydi'
+import { logoyuKirp } from '@/altyapi/logoKirp'
 import { FormHatasi, IslemHatasi, istekOlustur, type Kullanici } from './ortak'
 
 export const CALISAN_ARALIKLARI = ['1–9', '10–49', '50–99', '100–249', '250+'] as const
@@ -91,6 +92,7 @@ export function gorselTuru(b: Uint8Array): 'image/png' | 'image/jpeg' | 'image/w
  * Firma logosu (K37). Firmanın tam yetkilisi kendi firmasına, Yönetici A.Ş. tam yetkilisi herhangi bir firmaya yükler.
  * Depodaki ad firma kimliğini taşır (`firma-12-logo-…png`); eski logo dosyası silinir. Herkese açık adres dosya
  * kimliğidir (`/firma-logosu/<id>`), her yüklemede değiştiği için uzun süre önbelleklenebilir.
+ * Çevredeki boşluk yüklemede kırpılır (`logoyuKirp`); PNG ve JPEG kırpılınca PNG olarak saklanır, WebP olduğu gibi kalır.
  */
 export async function firmaLogosuYukle(payload: Payload, k: Kullanici, dosya: { veri: Uint8Array; boyut: number }, hedefFirmaId?: number) {
   let firmaId: number
@@ -100,8 +102,11 @@ export async function firmaLogosuYukle(payload: Payload, k: Kullanici, dosya: { 
   } else firmaId = yetki(k)
   if (!dosya.boyut) throw new FormHatasi({ logo: 'Bir logo dosyası seçin.' })
   if (dosya.boyut > LOGO_EN_BUYUK) throw new FormHatasi({ logo: 'Logo dosyası 1 MB’tan büyük olamaz.' })
-  const tur = gorselTuru(dosya.veri)
-  if (!tur) throw new FormHatasi({ logo: 'Logo PNG, JPEG veya WebP biçiminde olmalı. SVG güvenlik nedeniyle kabul edilmiyor.' })
+  const gelenTur = gorselTuru(dosya.veri)
+  if (!gelenTur) throw new FormHatasi({ logo: 'Logo PNG, JPEG veya WebP biçiminde olmalı. SVG güvenlik nedeniyle kabul edilmiyor.' })
+  // Çevredeki beyaz veya saydam boşluk kırpılır; logo kutuda büyük görünür (src/alan/logoKirpma.ts).
+  const kirpma = logoyuKirp(dosya.veri, gelenTur, LOGO_EN_BUYUK)
+  const tur = kirpma.tur
   const firma = await payload.findByID({ collection: 'firmalar', id: firmaId, depth: 0, overrideAccess: true, disableErrors: true })
   if (!firma) throw new IslemHatasi('Firma bulunamadı.', 404)
   const req = await istekOlustur(payload, k)
@@ -110,7 +115,7 @@ export async function firmaLogosuYukle(payload: Payload, k: Kullanici, dosya: { 
   const yeni = await payload.create({
     collection: 'dosyalar',
     data: { tur: 'logo', alt: `${firma.kisaAd} logosu`, sahip: k.id } as never,
-    file: { data: Buffer.from(dosya.veri), mimetype: tur, name: logoDosyaAdi(firmaId, tur), size: dosya.boyut },
+    file: { data: Buffer.from(kirpma.veri), mimetype: tur, name: logoDosyaAdi(firmaId, tur), size: kirpma.veri.byteLength },
     overrideAccess: true,
     req,
   })
@@ -121,6 +126,12 @@ export async function firmaLogosuYukle(payload: Payload, k: Kullanici, dosya: { 
     if (!baska.totalDocs)
       await payload.delete({ collection: 'dosyalar', id: eski, overrideAccess: true, req }).catch((): null => null)
   }
-  await islemKaydet(req, { islem: 'Firma logosu değişti', tur: 'kurulum', kayitTuru: 'firmalar', kayitId: firmaId })
+  await islemKaydet(req, {
+    islem: 'Firma logosu değişti',
+    tur: 'kurulum',
+    kayitTuru: 'firmalar',
+    kayitId: firmaId,
+    ...(kirpma.kirpildi ? { ayrinti: { kirpildi: `${kirpma.once!.w}×${kirpma.once!.h} → ${kirpma.sonra!.w}×${kirpma.sonra!.h}` } } : {}),
+  })
   return yeni
 }

@@ -6,6 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { getPayload, type Payload } from 'payload'
 import config from '@/payload.config'
 import { davetGonder, davetiBul, davetiIptalEt, davetiKabulEt, ekibeGeriAl, ekiptenCikar, yetkiDegistir } from '@/servisler/ekip'
+import UPNG from '@pdf-lib/upng'
 import { firmaLogosuYukle, firmaProfiliGuncelle, webAdresi } from '@/servisler/firmaProfili'
 import { girisYap } from '@/servisler/hesap'
 import { FormHatasi, IslemHatasi } from '@/servisler/ortak'
@@ -124,5 +125,18 @@ describe('firma profili', () => {
     const sonra = await payload.findByID({ collection: 'firmalar', id: firma.id, overrideAccess: true, depth: 0 })
     expect(sonra.logo).toBe(yeni.id)
     expect(await payload.findByID({ collection: 'dosyalar', id: eskiId, overrideAccess: true, disableErrors: true })).toBeNull()
+  })
+
+  it('logonun çevresindeki beyaz boşluk yüklemede kırpılır; kırpılan PNG olarak saklanır ve kayda geçer', async () => {
+    // 300×300 beyaz zeminde 240×40 lacivert şerit (geniş logo, kare dosya)
+    const w = 300
+    const p = new Uint8Array(w * w * 4).fill(255)
+    for (let y = 130; y < 170; y++) for (let x = 30; x < 270; x++) p.set([33, 85, 173, 255], (y * w + x) * 4)
+    const dosya = new Uint8Array(UPNG.encode([p.buffer as ArrayBuffer], w, w, 0))
+    const yeni = await firmaLogosuYukle(payload, sorumlu, { veri: dosya, boyut: dosya.length })
+    expect(yeni.mimeType).toBe('image/png')
+    expect([yeni.width, yeni.height]).toEqual([260, 60]) // şerit 240×40 + her yanda %4 (10 px) pay
+    const { docs } = await payload.find({ collection: 'islem-kayitlari', where: { and: [{ islem: { equals: 'Firma logosu değişti' } }, { kayitId: { equals: String(firma.id) } }] }, sort: '-createdAt', limit: 1, overrideAccess: true })
+    expect((docs[0]?.ayrinti as any)?.kirpildi).toBe("300×300 → 260×60")
   })
 })

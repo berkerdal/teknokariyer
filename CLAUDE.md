@@ -664,6 +664,15 @@ Claude tarafından yapılacak.
     - **Firma logoları:** Bu çalışma ortamının ağı firma sitelerine ve Teknokent rehberine (bot doğrulaması) erişemiyor;
       çoğu firmanın resmî sitesi aramayla doğrulanamadı. Yanlış logo yüklenmemesi için yüklenmedi; kullanıcıdan site
       adresi veya logo dosyası istendi.
+  - **Logo kırpma (15.11.2026, kullanıcı kararı):** Logo seçenekleri tasarım sayfasında gösterildi
+    (https://claude.ai/artifact/HMdJHLc4ZHeWDiRBh3zxJj); kullanıcı yalnızca “boşluğu kırpılmış logo”yu seçti, geniş plaka,
+    marka rengi ışığı ve logo yansıması istenmedi. Kural `src/alan/logoKirpma.ts` (beyaz/saydam zemin; kenarların ≥ %90'ı
+    boş değilse kırpılmaz: renkli plakalı logolar korunur; %4 nefes payı), çözme `src/altyapi/logoKirp.ts`
+    (`@pdf-lib/upng` + `jpeg-js`, saf JS: Worker ve Node aynı; PNG/JPEG → PNG, WebP olduğu gibi), `firmaLogosuYukle`
+    yüklemede uygular ve işlem kaydına boyutları yazar. Mevcut logolar için `scripts/logo-kirp.ts` (kuru çalıştırma,
+    `--uygula`; yeni dosya kaydı + firma bağlantısı, eski kayıt ve nesne silinir; adres bir yıl önbellekli olduğu için
+    aynı kimlik değiştirilmez). Test ortamında 6 logo kırpıldı (Time Travel yer imi öncesinde alındı).
+    - Öğrenilen: `@pdf-lib/upng` CommonJS'te (tsx betikleri) iki kat `default` içinde gelir; `decode` taşıyan nesne aranır.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
