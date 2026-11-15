@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
+import { logoAdresi } from '@/alan/firmaLogosu'
 import { FirmaProfiliFormu, LogoFormu } from '@/arayuz/firma/FirmaProfiliFormu'
 import { KURUM } from '@/altyapi/kurum'
 import { firmaYetkisiVarMi } from '@/erisim'
@@ -20,7 +21,7 @@ export default async function FirmaProfili() {
   const payload = await payloadAl()
   const { docs: sektorler } = await payload.find({ collection: 'taksonomiler', where: { tur: { equals: 'sektor' } }, select: { ad: true }, limit: 500, pagination: false, depth: 0, overrideAccess: true })
   const duzenler = firmaYetkisiVarMi(k, ['yonetici'])
-  const logo = nesne<{ url?: string }>(firma.logo)?.url ?? null
+  const logo = logoAdresi(firma.logo)
   const eksikler = [!firma.logo && 'logo', !firma.kisaTanitim?.trim() && 'kısa tanıtım', !firma.sektor && 'sektör'].filter(Boolean) as string[]
   const secenek = (x: unknown) => nesne<{ id: number; ad: string }>(x)
 
@@ -60,7 +61,7 @@ export default async function FirmaProfili() {
       <section className="panel f-blok">
         <h2 className="b3 kare-bas">Kayıt bilgileri</h2>
         <div className="firma-kimlik">
-          <FirmaKaro konum={firma.konum} boy={48} />
+          <FirmaKaro konum={firma.konum} logo={logo} ad={firma.kisaAd} boy={56} />
           <dl className="ozet-dl">
             <div>
               <dt>Unvan</dt>

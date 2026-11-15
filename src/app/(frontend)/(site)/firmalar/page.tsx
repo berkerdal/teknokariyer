@@ -31,7 +31,7 @@ export default async function FirmalarSayfasi() {
             {firmalar.map((f) => (
               <li key={f.id}>
                 <Link href={`/firma/${f.slug}`}>
-                  <FirmaKaro konum={f.konum} boy={40} />
+                  <FirmaKaro konum={f.konum} logo={f.logo} ad={f.ad} boy={44} />
                   <span>
                     <strong>{f.ad}</strong>
                     <span className="kucuk ikincil">{[f.sektor, f.konum, `${f.n} açık ilan`].filter(Boolean).join(' · ')}</span>

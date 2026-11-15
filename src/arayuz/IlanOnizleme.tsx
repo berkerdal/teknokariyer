@@ -4,7 +4,7 @@ import { eslesmeProfili, oturumdakiAday } from '@/veri/aday'
 import { oturum } from '@/veri/payload'
 import { FirmaKaro } from './FirmaKaro'
 import { BeceriListesi } from './IlanSatiri'
-import { EslesmeKutusu, IlanEtiketleri, IlanOzetListesi, Metin } from './IlanParcalari'
+import { EslesmeKutusu, IlanOlgulari, IlanOzetListesi, Metin } from './IlanParcalari'
 import { ilanAdresi } from './bicim'
 
 /** Masaüstü sağ bölme: seçili ilanın özeti. */
@@ -16,7 +16,7 @@ export async function IlanOnizleme({ id }: { id: number }) {
   return (
     <div className="onz">
       <div className="onz-firma">
-        <FirmaKaro konum={ilan.firma.konum} boy={44} />
+        <FirmaKaro konum={ilan.firma.konum} logo={ilan.firma.logo} ad={ilan.firma.ad} boy={48} />
         <div>
           <Link href={`/firma/${ilan.firma.slug}`}>
             <strong>{ilan.firma.ad}</strong>
@@ -25,7 +25,7 @@ export async function IlanOnizleme({ id }: { id: number }) {
         </div>
       </div>
       <h2 className="b2">{ilan.pozisyonAdi}</h2>
-      <IlanEtiketleri ilan={ilan} />
+      <IlanOlgulari ilan={ilan} dort={false} />
       <IlanOzetListesi ilan={ilan} kisa />
       <div className="dugme-grubu">
         <Link className="dugme" href={`${ilanAdresi(ilan)}/basvur`}>

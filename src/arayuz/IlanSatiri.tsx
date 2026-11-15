@@ -1,29 +1,53 @@
 import type { IlanOzeti } from '@/alan/ilanFiltre'
 import { ALT_TUR_ADI } from '@/alan/ilanFiltre'
 import { DENEYIM_ADI, MODEL_ADI } from '@/alan/eslesme'
-import { ilanAdresi, sonTarih } from './bicim'
+import { ilanAdresi, sonTarih, yayinGoreli } from './bicim'
+import { FirmaKaro } from './FirmaKaro'
+import { Ikon } from './Ikon'
 import { IlanBaglantisi } from './IlanBaglantisi'
 
-/** Liste satırı: yoğun ve taranabilir; büyük kart yok. */
+/**
+ * Liste satırı (K36): firma karosu, koyu başlık, ikonlu kısa bilgiler, gerçek durum etiketleri, sağda son başvuru ve
+ * yayın zamanı. Yoğun ve taranabilir; büyük kart yok.
+ */
 export function IlanSatiri({ ilan, secili = false, onizleme }: { ilan: IlanOzeti; secili?: boolean; onizleme?: string }) {
-  const ek = [
-    MODEL_ADI[ilan.model],
-    ilan.tur === 'is' ? DENEYIM_ADI[ilan.deneyim] : null,
-    ilan.tur === 'staj' && ilan.ucretliStaj ? 'Ücretli' : null,
-    ilan.pauOncelik ? 'PAÜ öncelikli' : null,
-  ].filter(Boolean)
   const s = sonTarih(ilan.sonBasvuru)
+  const yayin = yayinGoreli(ilan.yayinTarihi)
   return (
     <div className="ilan-satiri" aria-current={secili ? 'true' : undefined}>
-      <IlanBaglantisi className="poz" href={ilanAdresi(ilan)} onizleme={onizleme}>
-        {ilan.pozisyonAdi}
-      </IlanBaglantisi>
-      <span className="firma">
-        {ilan.firma.ad} <span className="konum">· {ilan.firma.konum}</span>
-      </span>
-      <span className="alt">
-        <span>{[ALT_TUR_ADI[ilan.altTur] ?? ilan.altTur, ...ek].join(' · ')}</span>
-        <span className={s.vurgu ? 'son-gun' : undefined}>{s.metin}</span>
+      <FirmaKaro konum={ilan.firma.konum} logo={ilan.firma.logo} ad={ilan.firma.ad} boy={48} />
+      <div className="is-govde">
+        <IlanBaglantisi className="poz" href={ilanAdresi(ilan)} onizleme={onizleme}>
+          {ilan.pozisyonAdi}
+        </IlanBaglantisi>
+        <span className="firma">
+          <strong>{ilan.firma.ad}</strong> <span className="konum">· {ilan.firma.konum}</span>
+        </span>
+        <span className="is-meta">
+          <span>
+            <Ikon ad="canta" kucuk />
+            {ALT_TUR_ADI[ilan.altTur] ?? ilan.altTur}
+          </span>
+          <span>
+            <Ikon ad="konum" kucuk />
+            {MODEL_ADI[ilan.model]}
+          </span>
+          {ilan.tur === 'is' && (
+            <span>
+              <Ikon ad="seviye" kucuk />
+              {DENEYIM_ADI[ilan.deneyim]}
+            </span>
+          )}
+          {ilan.tur === 'staj' && ilan.ucretliStaj && <span className="rozet rozet--yesil">Ücretli</span>}
+          {ilan.pauOncelik && <span className="rozet rozet--lacivert">PAÜ öncelikli</span>}
+        </span>
+      </div>
+      <span className="is-sag">
+        <span className={s.vurgu ? 'son-gun' : undefined}>
+          {s.vurgu && <Ikon ad="saat" kucuk />}
+          {s.metin}
+        </span>
+        {yayin && <span className="yayin">{yayin}</span>}
       </span>
     </div>
   )

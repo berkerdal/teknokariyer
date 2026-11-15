@@ -6,6 +6,8 @@ import { DURUM_ADI, type IlanDurumu } from '@/alan/ilan'
 import { HUNI_ADI } from '@/alan/kurulum'
 import { ModulBilgisi } from '@/arayuz/BilgiKutusu'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
+import { LogoFormu } from '@/arayuz/firma/FirmaProfiliFormu'
+import { logoAdresi } from '@/alan/firmaLogosu'
 import { Ikon } from '@/arayuz/Ikon'
 import { tarihYaz } from '@/arayuz/bicim'
 import { DavetIslemi, FirmaKaydiFormu, PasiflikFormu, TakipNotuFormu, YetkiliDavetFormu } from '@/arayuz/yonetim/Firmalar'
@@ -51,7 +53,7 @@ export default async function FirmaAyrintisi({ params, searchParams }: Props) {
             <Ikon ad="geri" kucuk /> Firmalar
           </Link>
           <div className="y-firma-baslik">
-            <FirmaKaro konum={firma.konum} boy={44} />
+            <FirmaKaro konum={firma.konum} logo={logoAdresi(firma.logo)} ad={firma.kisaAd} boy={56} />
             <div>
               <h1 className="b1">{firma.kisaAd}</h1>
               <p className="ikincil">
@@ -85,7 +87,8 @@ export default async function FirmaAyrintisi({ params, searchParams }: Props) {
       )}
       <ModulBilgisi kimlik="yonetim-firma" baslik="Bu sayfada neler yapabilirsiniz?">
         <ul>
-          <li>Firmanın Yönetici A.Ş.’ye ait bilgilerini (unvan, yer, yetkili kişi) düzeltebilirsiniz. Tanıtım, logo ve yan hakları firma kendisi doldurur.</li>
+          <li>Firmanın Yönetici A.Ş.’ye ait bilgilerini (unvan, yer, yetkili kişi) düzeltebilirsiniz. Tanıtım ve yan hakları firma kendisi doldurur.</li>
+          <li>Firmanın logosunu yükleyebilirsiniz. Firma da kendi panelinden değiştirebilir; yeni logo eskisinin yerine geçer.</li>
           <li>Yetkiliye davet gönderebilir, süresi dolan daveti yeniden gönderebilir veya iptal edebilirsiniz.</li>
           <li>Firmayla yaptığınız görüşmeleri takip notu olarak yazabilirsiniz. Notları yalnızca Yönetici A.Ş. görür.</li>
           <li>Teknokent’ten ayrılan firmayı pasif yapabilirsiniz.</li>
@@ -169,6 +172,17 @@ export default async function FirmaAyrintisi({ params, searchParams }: Props) {
               {etkinTamYetkili && <p className="kucuk ikincil">Firmanın tam yetkili kullanıcısı var. Yeni ekip üyelerini firma kendi panelinden davet eder.</p>}
             </div>
           </section>
+
+          {yonetici && (
+            <section className="panel">
+              <header className="panel-ic y-panel-bas">
+                <h2 className="b3">Logo</h2>
+              </header>
+              <div className="panel-ic">
+                <LogoFormu logo={logoAdresi(firma.logo)} firmaAd={firma.kisaAd} firmaId={firma.id} />
+              </div>
+            </section>
+          )}
 
           <section className="panel">
             <header className="panel-ic y-panel-bas">

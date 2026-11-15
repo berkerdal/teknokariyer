@@ -5,12 +5,12 @@ import { basvuruKaynagi } from '@/alan/basvuru'
 import { DENEYIM_ADI } from '@/alan/eslesme'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { sirala } from '@/alan/ilanFiltre'
-import { suresiDolduMu } from '@/alan/ilan'
+import { kalanGun, suresiDolduMu } from '@/alan/ilan'
 import { ilgiEki } from '@/alan/metin'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
 import { Ikon } from '@/arayuz/Ikon'
 import { BeceriListesi, IlanSatiri } from '@/arayuz/IlanSatiri'
-import { EslesmeKutusu, IlanOzetListesi, Metin } from '@/arayuz/IlanParcalari'
+import { BasvuruSureci, EslesmeKutusu, IlanOlgulari, IlanOzetListesi, Metin } from '@/arayuz/IlanParcalari'
 import { BaglantiyiKopyala } from '@/arayuz/BaglantiyiKopyala'
 import { Ust } from '@/arayuz/Ust'
 import { ilanAdresi, tarihYaz } from '@/arayuz/bicim'
@@ -85,6 +85,8 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
   // Paylaşım bağlantısıyla gelen adayın kaynağı (ör. ?kaynak=linkedin) başvuruya taşınır; istatistikte ayrı görünür.
   const basvur = `${ilanAdresi(ilan)}/basvur${kaynak ? `?kaynak=${kaynak}` : ''}`
 
+  const kalan = kalanGun(new Date(ilan.sonBasvuru), new Date())
+
   return (
     <>
       <Ust aktif="ilanlar" />
@@ -95,17 +97,24 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
             <Ikon ad="geri" kucuk /> İlanlara dön
           </Link>
           <div className="il-bas">
-            <FirmaKaro konum={f.konum} boy={48} />
+            <FirmaKaro konum={f.konum} logo={f.logo} ad={f.ad} boy={56} />
             <div>
               <p>
                 <Link href={`/firma/${f.slug}`}>
                   <strong>{f.ad}</strong>
                 </Link>
               </p>
-              <p className="kucuk ikincil">{[f.sektor, f.konum].filter(Boolean).join(' · ')}</p>
+              <p className="kucuk ikincil">{[f.sektor, `${f.konum} · Pamukkale Teknokent`].filter(Boolean).join(' · ')}</p>
             </div>
           </div>
           <h1 className="b1">{ilan.pozisyonAdi}</h1>
+          <IlanOlgulari ilan={ilan} />
+          {(ilan.pauOncelik || ilan.staj?.ucretli) && (
+            <p className="etiketler">
+              {ilan.staj?.ucretli && <span className="rozet rozet--yesil">Ücretli staj</span>}
+              {ilan.pauOncelik && <span className="rozet rozet--lacivert">PAÜ öğrencilerine öncelik</span>}
+            </p>
+          )}
         </div>
 
         <aside className="id-yan" aria-label="İlan özeti">
@@ -115,7 +124,7 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
                 Başvur
               </Link>
             </div>
-            <IlanOzetListesi ilan={ilan} />
+            <IlanOzetListesi ilan={ilan} yan />
             <EslesmeKutusu ilan={ilan} profil={profil} girisli={Boolean(k)} />
             <div className="id-yan-kopya">
               <BaglantiyiKopyala />
@@ -124,107 +133,102 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
         </aside>
 
         <div className="id-ana">
-          <div className="id-bolumler">
-            <details className="acilir" open>
-              <summary>Ne yapacaksın?</summary>
-              <div className="icerik">
-                <Metin metin={ilan.isTanimi} />
+          <section className="id-bolum" aria-labelledby="id-tanim">
+            <h2 id="id-tanim">Ne yapacaksın?</h2>
+            <Metin metin={ilan.isTanimi} />
+          </section>
+          <section className="id-bolum" aria-labelledby="id-nitelik">
+            <h2 id="id-nitelik">Aranan nitelikler</h2>
+            <Metin metin={ilan.nitelikler} />
+            <dl className="ozet-dl">
+              <div>
+                <dt>Deneyim</dt>
+                <dd>{DENEYIM_ADI[ilan.deneyim]}</dd>
               </div>
-            </details>
-            <details className="acilir" open>
-              <summary>Aranan nitelikler</summary>
-              <div className="icerik">
-                <Metin metin={ilan.nitelikler} />
-                <p>
-                  <strong>Deneyim:</strong> {DENEYIM_ADI[ilan.deneyim]}
-                </p>
-                <p>
-                  <strong>Eğitim:</strong> {EGITIM_ADI[ilan.egitim] ?? ilan.egitim}
+              <div>
+                <dt>Eğitim</dt>
+                <dd>
+                  {EGITIM_ADI[ilan.egitim] ?? ilan.egitim}
                   {ilan.bolumler.length ? ` · ${ilan.bolumler.join(', ')}` : ''}
-                </p>
-                {ilan.diller.length > 0 && (
-                  <p>
-                    <strong>Dil:</strong> {ilan.diller.map((d) => `${d.dil} ${d.seviye}`).join(', ')}
-                  </p>
+                </dd>
+              </div>
+              {ilan.diller.length > 0 && (
+                <div>
+                  <dt>Dil</dt>
+                  <dd>{ilan.diller.map((d) => `${d.dil} ${d.seviye}`).join(', ')}</dd>
+                </div>
+              )}
+            </dl>
+          </section>
+          {(ilan.zorunluBeceriler.length > 0 || ilan.tercihBeceriler.length > 0) && (
+            <section className="id-bolum" aria-labelledby="id-beceri">
+              <h2 id="id-beceri">Beceriler</h2>
+              <BeceriListesi zorunlu={ilan.zorunluBeceriler} tercih={ilan.tercihBeceriler} sahip={sahip} />
+            </section>
+          )}
+          {ilan.staj && (
+            <section className="id-bolum" aria-labelledby="id-staj">
+              <h2 id="id-staj">Staj bilgileri</h2>
+              <dl className="ozet-dl">
+                {ilan.staj.donem && (
+                  <div>
+                    <dt>Dönem</dt>
+                    <dd>{ilan.staj.donem}</dd>
+                  </div>
                 )}
-              </div>
-            </details>
-            {(ilan.zorunluBeceriler.length > 0 || ilan.tercihBeceriler.length > 0) && (
-              <details className="acilir" open>
-                <summary>Beceriler</summary>
-                <div className="icerik">
-                  <BeceriListesi zorunlu={ilan.zorunluBeceriler} tercih={ilan.tercihBeceriler} sahip={sahip} />
+                <div>
+                  <dt>Ücret</dt>
+                  <dd>{ilan.staj.ucretli ? 'Ücretli' : 'Ücretsiz (gönüllü staj)'}</dd>
                 </div>
-              </details>
-            )}
-            {ilan.staj && (
-              <details className="acilir" open>
-                <summary>Staj bilgileri</summary>
-                <div className="icerik">
-                  <dl className="ozet-dl">
-                    {ilan.staj.donem && (
-                      <div>
-                        <dt>Dönem</dt>
-                        <dd>{ilan.staj.donem}</dd>
-                      </div>
-                    )}
-                    <div>
-                      <dt>Ücret</dt>
-                      <dd>{ilan.staj.ucretli ? 'Ücretli' : 'Ücretsiz (gönüllü staj)'}</dd>
-                    </div>
-                    {ilan.staj.sgk && (
-                      <div>
-                        <dt>SGK</dt>
-                        <dd>{SGK_ADI[ilan.staj.sgk] ?? ilan.staj.sgk}</dd>
-                      </div>
-                    )}
-                    <div>
-                      <dt>Zorunlu staj belgesi</dt>
-                      <dd>{ilan.staj.belge ? 'İmzalanıyor' : 'İmzalanmıyor'}</dd>
-                    </div>
-                    {ilan.staj.pauOncelik && (
-                      <div>
-                        <dt>Öncelik</dt>
-                        <dd>PAÜ öğrencilerine öncelik veriliyor</dd>
-                      </div>
-                    )}
-                  </dl>
+                {ilan.staj.sgk && (
+                  <div>
+                    <dt>SGK</dt>
+                    <dd>{SGK_ADI[ilan.staj.sgk] ?? ilan.staj.sgk}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt>Zorunlu staj belgesi</dt>
+                  <dd>{ilan.staj.belge ? 'İmzalanıyor' : 'İmzalanmıyor'}</dd>
                 </div>
-              </details>
-            )}
-            {ilan.yanHaklar.length > 0 && (
-              <details className="acilir">
-                <summary>Yan haklar</summary>
-                <div className="icerik">
-                  <ul className="madde">
-                    {ilan.yanHaklar.map((y) => (
-                      <li key={y}>{y}</li>
-                    ))}
-                  </ul>
-                </div>
-              </details>
-            )}
-            <details className="acilir">
-              <summary>Başvuru nasıl ilerler?</summary>
-              <div className="icerik">
-                <p>
-                  Profilin ve seçtiğin CV gönderilir{ilan.soruSayisi ? `, ${ilan.soruSayisi} kısa soruyu cevaplarsın` : ''}. Başvurunun durumunu
-                  “Başvurularım” sayfasından izlersin; firma karar verdiğinde sonuç sana mutlaka bildirilir.
-                </p>
-              </div>
-            </details>
-            <details className="acilir">
-              <summary>{f.ad} hakkında</summary>
-              <div className="icerik">
-                <p>{[ilan.firmaBilgi.unvan, f.sektor, f.konum].filter(Boolean).join(' · ')}</p>
-                <Link href={`/firma/${f.slug}`}>Firma sayfasına git</Link>
-              </div>
-            </details>
-          </div>
+              </dl>
+            </section>
+          )}
+          {ilan.yanHaklar.length > 0 && (
+            <section className="id-bolum" aria-labelledby="id-yan-hak">
+              <h2 id="id-yan-hak">Yan haklar</h2>
+              <ul className="madde">
+                {ilan.yanHaklar.map((y) => (
+                  <li key={y}>{y}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <section className="id-bolum" aria-labelledby="id-surec">
+            <h2 id="id-surec">Başvuru nasıl ilerler?</h2>
+            <BasvuruSureci soruSayisi={ilan.soruSayisi} />
+          </section>
+          <section className="id-firma-kutu" aria-labelledby="id-firma">
+            <FirmaKaro konum={f.konum} logo={f.logo} ad={f.ad} boy={48} />
+            <div>
+              <h2 id="id-firma" className="b3">
+                {f.ad} hakkında
+              </h2>
+              <p className="kucuk ikincil">{[ilan.firmaBilgi.unvan, f.sektor, f.konum].filter(Boolean).join(' · ')}</p>
+            </div>
+            <Link className="dugme dugme--ikincil" href={`/firma/${f.slug}`}>
+              Firma sayfası
+            </Link>
+          </section>
         </div>
       </main>
-      <div className="yapiskan-alt id-mobil-eylem">
-        <Link className="dugme dugme--genis" href={basvur}>
+      <div className="mobil-basvur id-mobil-eylem">
+        <p>
+          <small>Son başvuru</small>
+          <strong>
+            {tarihYaz(ilan.sonBasvuru)} · {kalan === 0 ? 'son gün' : `${kalan} gün`}
+          </strong>
+        </p>
+        <Link className="dugme" href={basvur}>
           Başvur
         </Link>
       </div>
@@ -248,7 +252,7 @@ async function KapanmisIlan({ ilan }: { ilan: IlanAyrintisi }) {
       <Ust aktif="ilanlar" />
       <main id="icerik" className="sayfa-dar">
         <div className="il-bas">
-          <FirmaKaro konum={ilan.firma.konum} boy={48} />
+          <FirmaKaro konum={ilan.firma.konum} logo={ilan.firma.logo} ad={ilan.firma.ad} boy={56} />
           <div>
             <p>
               <Link href={`/firma/${ilan.firma.slug}`}>

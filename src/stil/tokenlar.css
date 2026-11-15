@@ -3,10 +3,10 @@
    Kural: bileşenler renk değerini doğrudan yazmaz, buradaki değişkenleri kullanır. */
 :root {
   /* Zemin ve yüzey: hafif sıcak kırık beyaz, krem değil */
-  --zemin: #F7F6F3;
+  --zemin: #F3F1EC;            /* K36: biraz daha sıcak; beyaz yüzeyler gölgeyle ayrışır */
   --yuzey: #FFFFFF;
   --yuzey-2: #F0EFEB;          /* üzerine gelme, ikincil bant */
-  --cizgi: #E4E1DA;            /* ayırıcı çizgi (süs) */
+  --cizgi: #E7E4DD;            /* ayırıcı çizgi (süs) */
   --cizgi-kontrol: #8D8B85;    /* form kenarı: beyaz üzerinde 3,4:1 */
 
   /* Metin: nötr, mavimsi değil */
@@ -21,7 +21,10 @@
   --baglanti: #1A3F85;         /* uzun metin içindeki bağlantı ve ilan adı */
   --camgobegi: #05A1E6;        /* çizgi, grafik; metin değil */
   --camgobegi-acik: #E6F5FC;   /* bilgi kutusu zemini */
-  --kiremit: #B04E26;          /* alt marka vurgusu: sayfa başına bir öğe; uyarı anlamı yok */
+  --kiremit: #B04E26;          /* alt marka vurgusu; D blok karosu; son başvuru aciliyeti (K36) */
+  --kiremit-koyu: #963F1C;
+  --kiremit-acik: #FBEDE6;
+  --petrol: #0E6F7A;           /* C blok karosu (termal su); beyaz metin 5,5:1 */
   --kiremit-koyu-zemin: #F7A27C;
   --gece: #13284F;             /* yönetim paneli çerçevesi */
   --gece-2: #1C3666;
@@ -52,16 +55,22 @@
   --kose-panel: 6px;
   --kose-gorsel: 2px;
 
-  /* Hareket: yalnızca durum değişimi için */
+  /* Hareket (K36): durum ve geri bildirim. Güçlü ease-out; ease-in kullanılmaz. */
   --sure: 160ms;
-  --egri: cubic-bezier(.2, 0, 0, 1);
+  --sure-kisa: 120ms;
+  --sure-panel: 280ms;
+  --egri: cubic-bezier(.23, 1, .32, 1);
+  --egri-panel: cubic-bezier(.32, .72, 0, 1);
 
-  /* Gölge: yalnızca üstte açılan katmanlar (alt panel, açılır menü) */
+  /* Gölge (K36): yüzeyler kenarlık yerine yumuşak gölgeyle ayrışır */
+  --golge-panel: 0 1px 2px rgba(30, 30, 28, .06), 0 6px 20px rgba(30, 30, 28, .06);
+  --golge-hafif: 0 1px 2px rgba(30, 30, 28, .06);
+  /* Üstte açılan katmanlar (alt panel, açılır menü) */
   --golge-katman: 0 -2px 0 rgba(19, 40, 79, .04), 0 12px 32px rgba(19, 40, 79, .18);
 
   --dokunma: 44px;             /* en küçük dokunma alanı */
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root { --sure: 0ms; }
+  :root { --sure: 0ms; --sure-kisa: 0ms; --sure-panel: 0ms; }
 }

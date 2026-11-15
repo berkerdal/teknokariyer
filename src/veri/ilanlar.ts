@@ -14,6 +14,8 @@ import { payloadAl } from './payload'
 const ad = (x: unknown): string | undefined => (x && typeof x === 'object' ? ((x as Taksonomiler).ad ?? undefined) : undefined)
 const id = (x: unknown): number => Number(x && typeof x === 'object' ? (x as { id: number }).id : x)
 
+import { logoAdresi } from '@/alan/firmaLogosu'
+
 export interface FirmaOzeti {
   id: number
   ad: string
@@ -21,6 +23,8 @@ export interface FirmaOzeti {
   slug: string
   konum: string
   sektor?: string
+  /** Herkese açık logo adresi (K37); yoksa karo gösterilir */
+  logo?: string
 }
 
 /** Firma herkese gösterilebilir mi? Pasif firma gösterilmez; test firmaları yalnızca yayın dışı ortamlarda görünür. */
@@ -36,6 +40,7 @@ export const firmaOzeti = (f: Firmalar): FirmaOzeti => ({
   slug: f.slug,
   konum: f.konum,
   sektor: ad(f.sektor),
+  logo: logoAdresi(f.logo) ?? undefined,
 })
 
 /** Firmaların herkese açık özetleri (kimlik → özet). Görünmeyen (pasif) firma dönmez. */
@@ -49,7 +54,7 @@ export async function firmalariAl(idler: number[]): Promise<Map<number, FirmaOze
       depth: 1,
       limit: parca.length,
       overrideAccess: true, // herkese açık alanlar aşağıda seçilir; yetkili kişi bilgisi dışarı çıkmaz
-      select: { kisaAd: true, unvan: true, slug: true, konum: true, sektor: true, asama: true, testFirmasi: true },
+      select: { kisaAd: true, unvan: true, slug: true, konum: true, sektor: true, asama: true, testFirmasi: true, logo: true },
     }),
   )
   return new Map(docs.filter(firmaGorunurMu).map((f) => [f.id, firmaOzeti(f as Firmalar)]))
@@ -59,7 +64,7 @@ function ozet(i: Ilanlar, firma: FirmaOzeti): IlanOzeti {
   return {
     id: i.id,
     pozisyonAdi: i.pozisyonAdi,
-    firma: { id: firma.id, ad: firma.ad, slug: firma.slug, konum: firma.konum, sektor: firma.sektor },
+    firma: { id: firma.id, ad: firma.ad, slug: firma.slug, konum: firma.konum, sektor: firma.sektor, logo: firma.logo },
     tur: i.tur as IlanTuru,
     altTur: i.altTur,
     model: i.model as CalismaModeli,
@@ -177,7 +182,7 @@ export const firmaBul = cache(async (slug: string) => {
     select: {
       kisaAd: true, unvan: true, slug: true, konum: true, sektor: true, web: true, kisaTanitim: true, uzunTanitim: true,
       teknolojiler: true, calismaModelleri: true, yanHaklar: true, kurulusYili: true, calisanAraligi: true, asama: true,
-      testFirmasi: true, yayinaHazir: true,
+      testFirmasi: true, yayinaHazir: true, logo: true,
     },
   })
   const f = docs[0] as Firmalar | undefined

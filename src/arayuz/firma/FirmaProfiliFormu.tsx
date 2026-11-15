@@ -5,6 +5,7 @@
  */
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { firmaProfiliEylemi, logoEylemi } from '@/eylemler/firma'
+import { yonetimLogoEylemi } from '@/eylemler/firmaYonetimi'
 import { AlanBilgisi } from '../BilgiKutusu'
 import { DosyaSecici, GonderDugmesi, HataOzeti, type FormDurumu } from '../form'
 import { Ikon } from '../Ikon'
@@ -44,19 +45,22 @@ function useKayitBildirimi(durum: FormDurumu) {
   return { metin, anahtar }
 }
 
-export function LogoFormu({ logo, firmaAd }: { logo: string | null; firmaAd: string }) {
-  const [durum, eylem] = useActionState<FormDurumu, FormData>(logoEylemi, {})
+/** Logo yükleme. `firmaId` verilirse Yönetici A.Ş. adına o firmaya yükler (K37). */
+export function LogoFormu({ logo, firmaAd, firmaId }: { logo: string | null; firmaAd: string; firmaId?: number }) {
+  const [durum, eylem] = useActionState<FormDurumu, FormData>(firmaId ? yonetimLogoEylemi : logoEylemi, {})
   const { metin, anahtar } = useKayitBildirimi(durum)
   return (
     <form action={eylem} key={anahtar} className="logo-formu">
+      {firmaId && <input type="hidden" name="firma" value={firmaId} />}
       <div className="logo-onizleme">{logo ? <img src={logo} alt={`${firmaAd} logosu`} /> : <span className="kucuk ikincil">Logo yok</span>}</div>
       <div className="form-yigin">
         <div className={durum.hatalar?.logo || durum.genel ? 'alan alan--hata' : 'alan'}>
           <span className="alan-ad">
             Logo
             <AlanBilgisi etiket="Logo">
-              İlanlarda, firma listesinde ve firma sayfanızda görünür. Kare veya yatay, şeffaf zeminli bir PNG en iyi sonucu verir. Logo yüklenene kadar
-              firmanız blok ve oda koduyla gösterilir.
+              {firmaId
+                ? 'İlanlarda, firma listesinde ve firma sayfasında görünür. Firma kendi panelinden de değiştirebilir. Kare veya yatay, şeffaf zeminli bir PNG en iyi sonucu verir. Logo yüklenene kadar firma, bloğunun renginde blok ve oda koduyla gösterilir.'
+                : 'İlanlarda, firma listesinde ve firma sayfanızda görünür. Kare veya yatay, şeffaf zeminli bir PNG en iyi sonucu verir. Logo yüklenene kadar firmanız, bloğunun renginde blok ve oda koduyla gösterilir.'}
             </AlanBilgisi>
           </span>
           <span className="ipucu">PNG, JPEG veya WebP; en fazla 1 MB.</span>

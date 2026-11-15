@@ -1,23 +1,11 @@
 import Link from 'next/link'
-import { ALT_TUR_ADI, TUR_ADI } from '@/alan/ilanFiltre'
+import { ALT_TUR_ADI } from '@/alan/ilanFiltre'
 import { DENEYIM_ADI, MODEL_ADI, eslesmeHesapla, type EslesmeProfili } from '@/alan/eslesme'
 import { basvuruAraligi } from '@/alan/havuz'
 import { kalanGun } from '@/alan/ilan'
 import type { IlanAyrintisi } from '@/veri/ilanlar'
 import { tarihYaz, ucretYaz } from './bicim'
-
-export function IlanEtiketleri({ ilan, uzun = false }: { ilan: IlanAyrintisi; uzun?: boolean }) {
-  const alt = ALT_TUR_ADI[ilan.altTur] ?? ilan.altTur
-  return (
-    <p className="etiketler">
-      <span className="etiket etiket--guclu">{uzun ? `${TUR_ADI[ilan.tur]} · ${alt}` : alt}</span>
-      <span className="etiket">{MODEL_ADI[ilan.model]}</span>
-      <span className="etiket">{DENEYIM_ADI[ilan.deneyim]}</span>
-      {ilan.staj?.ucretli && <span className="etiket">{uzun ? 'Ücretli staj' : 'Ücretli'}</span>}
-      {ilan.pauOncelik && <span className="etiket">PAÜ öğrencisine öncelik</span>}
-    </p>
-  )
-}
+import { Ikon } from './Ikon'
 
 const MODEL_ACIKLAMA: Record<string, string> = {
   ofiste: 'Ofiste (Teknokent’te)',
@@ -31,8 +19,65 @@ export function ilanTuruMetni(ilan: Pick<IlanAyrintisi, 'tur' | 'altTur'>): stri
   return ilan.tur === 'staj' ? alt : `${alt} iş`
 }
 
-/** İlanın özet bilgileri. Başvuru sayısı aralıkla gösterilir (K23); görüntülenme herkese açık sayfada yok. */
-export function IlanOzetListesi({ ilan, kisa = false }: { ilan: IlanAyrintisi; kisa?: boolean }) {
+/**
+ * Olgu kutuları (K36): ilanın dört temel bilgisi ikonla, adıyla ve değeriyle. Başvuru sayısı aralıkla (K23).
+ * Staj ilanında deneyim yerine ücret durumu gösterilir.
+ */
+export function IlanOlgulari({ ilan, dort = true }: { ilan: IlanAyrintisi; dort?: boolean }) {
+  const olgular: { ikon: 'canta' | 'konum' | 'seviye' | 'kisi'; ad: string; deger: string }[] = [
+    { ikon: 'canta', ad: 'İlan türü', deger: ilanTuruMetni(ilan) },
+    { ikon: 'konum', ad: 'Çalışma modeli', deger: MODEL_ADI[ilan.model] },
+    ilan.tur === 'staj'
+      ? { ikon: 'seviye', ad: 'Ücret', deger: ilan.staj?.ucretli ? 'Ücretli staj' : 'Ücretsiz (gönüllü)' }
+      : { ikon: 'seviye', ad: 'Aranan deneyim', deger: DENEYIM_ADI[ilan.deneyim] },
+    { ikon: 'kisi', ad: 'Başvuru', deger: basvuruAraligi(ilan.basvuruSayisi) },
+  ]
+  return (
+    <dl className={`olgular${dort ? ' olgular--dort' : ''}`}>
+      {olgular.map((o) => (
+        <div key={o.ad} className="olgu">
+          <Ikon ad={o.ikon} kucuk />
+          <dt>{o.ad}</dt>
+          <dd>{o.deger}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+/** Başvurunun gerçek sırası (firma kararı adaya mutlaka bildirilir). */
+export function BasvuruSureci({ soruSayisi }: { soruSayisi: number }) {
+  return (
+    <ol className="surec">
+      <li>
+        <b>1</b>
+        <strong>Başvurun iletilir</strong>
+        <span>Profilin ve seçtiğin CV firmaya gider{soruSayisi ? `; ${soruSayisi} kısa soruyu cevaplarsın` : ''}.</span>
+      </li>
+      <li>
+        <b>2</b>
+        <strong>Firma inceler</strong>
+        <span>Başvurunun durumunu “Başvurularım” sayfasından izlersin.</span>
+      </li>
+      <li>
+        <b>3</b>
+        <strong>Görüşme</strong>
+        <span>Firma seni görüşmeye çağırırsa e-postayla haber verilir.</span>
+      </li>
+      <li>
+        <b>4</b>
+        <strong>Sonuç</strong>
+        <span>Firma karar verdiğinde sonuç sana mutlaka bildirilir.</span>
+      </li>
+    </ol>
+  )
+}
+
+/**
+ * İlanın özet bilgileri. Başvuru sayısı aralıkla gösterilir (K23); görüntülenme herkese açık sayfada yok.
+ * `yan`: olgu kutularıyla birlikte kullanılır; tür, model, deneyim ve başvuru tekrarlanmaz.
+ */
+export function IlanOzetListesi({ ilan, kisa = false, yan = false }: { ilan: IlanAyrintisi; kisa?: boolean; yan?: boolean }) {
   const k = kalanGun(new Date(ilan.sonBasvuru), new Date())
   const ucret = ucretYaz(ilan.ucret)
   return (
@@ -50,7 +95,7 @@ export function IlanOzetListesi({ ilan, kisa = false }: { ilan: IlanAyrintisi; k
           <dd>{tarihYaz(ilan.yayinTarihi, !kisa)}</dd>
         </div>
       )}
-      {!kisa && (
+      {!kisa && !yan && (
         <>
           <div>
             <dt>İlan türü</dt>
@@ -70,6 +115,10 @@ export function IlanOzetListesi({ ilan, kisa = false }: { ilan: IlanAyrintisi; k
               <dd>Pamukkale Üniversitesi öğrencilerine öncelik veriliyor</dd>
             </div>
           )}
+        </>
+      )}
+      {!kisa && (
+        <>
           <div>
             <dt>Konum</dt>
             <dd>Pamukkale Teknokent, {ilan.firma.konum}</dd>
@@ -86,7 +135,7 @@ export function IlanOzetListesi({ ilan, kisa = false }: { ilan: IlanAyrintisi; k
           <dd>{ucret}</dd>
         </div>
       )}
-      {!kisa && (
+      {!kisa && !yan && (
         <div>
           <dt>Başvuru</dt>
           <dd>{basvuruAraligi(ilan.basvuruSayisi)}</dd>

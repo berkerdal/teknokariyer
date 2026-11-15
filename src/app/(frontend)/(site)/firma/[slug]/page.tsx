@@ -35,7 +35,7 @@ export default async function FirmaSayfasi({ params }: Props) {
       <main id="icerik" className="fv">
         <header className="fv-bas">
           <div className="fv-bas-ic">
-            <FirmaKaro konum={f.konum} boy={72} />
+            <FirmaKaro konum={f.konum} logo={f.logo} ad={f.ad} boy={80} />
             <div>
               {f.sektor && <p className="ust-etiket">{f.sektor}</p>}
               <h1 className="b1 fv-ad">{f.ad}</h1>

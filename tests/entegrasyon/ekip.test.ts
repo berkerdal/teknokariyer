@@ -102,4 +102,27 @@ describe('firma profili', () => {
     expect((f.logo as any).alt).toBe('Ekip logosu')
     expect(f.yayinaHazir).toBe(true)
   })
+
+  it('Yönetici A.Ş. başka firmaya logo yükler; dosya adı firma kimliğini taşır, eski logo silinir (K37)', async () => {
+    const kurum = await payload.create({
+      collection: 'kullanicilar',
+      overrideAccess: true,
+      data: { email: `ky-${ek}@ornek.com`, password: 'Deneme-12345', ad: 'Kurum Yönetici', rol: 'yonetici', _verified: true } as any,
+    })
+    const moderator = await payload.create({
+      collection: 'kullanicilar',
+      overrideAccess: true,
+      data: { email: `km-${ek}@ornek.com`, password: 'Deneme-12345', ad: 'Kurum Moderatör', rol: 'moderator', _verified: true } as any,
+    })
+    const once = await payload.findByID({ collection: 'firmalar', id: firma.id, overrideAccess: true, depth: 0 })
+    const eskiId = once.logo as number
+    // Firma kullanıcısı ve moderatör başka firmayı hedefleyemez
+    await expect(firmaLogosuYukle(payload, digerYonetici, { veri: PNG, boyut: PNG.length }, firma.id)).rejects.toMatchObject({ durumKodu: 403 })
+    await expect(firmaLogosuYukle(payload, moderator, { veri: PNG, boyut: PNG.length }, firma.id)).rejects.toMatchObject({ durumKodu: 403 })
+    const yeni = await firmaLogosuYukle(payload, kurum, { veri: PNG, boyut: PNG.length }, firma.id)
+    expect(yeni.filename).toMatch(new RegExp(`^firma-${firma.id}-logo-\\d{8}-\\d{6}(-\\d+)?\\.png$`))
+    const sonra = await payload.findByID({ collection: 'firmalar', id: firma.id, overrideAccess: true, depth: 0 })
+    expect(sonra.logo).toBe(yeni.id)
+    expect(await payload.findByID({ collection: 'dosyalar', id: eskiId, overrideAccess: true, disableErrors: true })).toBeNull()
+  })
 })

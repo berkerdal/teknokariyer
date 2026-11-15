@@ -18,7 +18,7 @@ export function FirmaUst({ firma, kisi, unvan, yetki }: { firma: { kisaAd: strin
           <img className="ust-logo" src="/logo/logo-kompakt-renkli.svg" alt="TeknoKariyer" width={150} height={26} />
         </Link>
         <span className="f-firma">
-          {firma.logo ? <img src={firma.logo} alt="" width={28} height={28} className="f-firma-logo" /> : <FirmaKaro konum={firma.konum} boy={28} />}
+          <FirmaKaro konum={firma.konum} logo={firma.logo} boy={30} />
           <span>
             <strong>{firma.kisaAd}</strong>
             <span className="kucuk ikincil f-firma-konum">{firma.konum}</span>

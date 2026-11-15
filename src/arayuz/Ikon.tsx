@@ -32,10 +32,13 @@ const SEMBOLLER = `
   <symbol id="i-bilgi" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/><path d="M12 11v6"/><rect x="11" y="7" width="2" height="2" fill="currentColor"/></symbol>
   <symbol id="i-cop" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
   <symbol id="i-gonder" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-3-7z"/></symbol>
+  <symbol id="i-canta" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13"/><path d="M9 7V4h6v3M3 12h18"/></symbol>
+  <symbol id="i-seviye" viewBox="0 0 24 24"><path d="M5 20v-5M12 20V10M19 20V4"/></symbol>
+  <symbol id="i-saat" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/><path d="M12 8v5h4"/></symbol>
   <symbol id="i-goz" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><rect x="10" y="10" width="4" height="4"/></symbol>
 `
 
-export type IkonAdi = "ara" | "filtre" | "konum" | "takvim" | "ofis" | "ev" | "yer-imi" | "dosya" | "indir" | "yukle" | "kapat" | "geri" | "ileri" | "menu" | "tik" | "kisi" | "zil" | "arti" | "kopya" | "duraklat" | "paylas" | "liste" | "mesaj" | "kalem" | "grafik" | "ayar" | "bilgi" | "cop" | "gonder" | "goz"
+export type IkonAdi = "ara" | "filtre" | "konum" | "takvim" | "ofis" | "ev" | "yer-imi" | "dosya" | "indir" | "yukle" | "kapat" | "geri" | "ileri" | "menu" | "tik" | "kisi" | "zil" | "arti" | "kopya" | "duraklat" | "paylas" | "liste" | "mesaj" | "kalem" | "grafik" | "ayar" | "bilgi" | "cop" | "gonder" | "goz" | "canta" | "seviye" | "saat"
 
 export function IkonSeti() {
   return <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true" dangerouslySetInnerHTML={{ __html: SEMBOLLER }} />

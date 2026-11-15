@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { dilAdresleri } from '@/alan/dil'
 import Link from 'next/link'
-import { sirala } from '@/alan/ilanFiltre'
+import { ALT_TUR_ADI, sirala } from '@/alan/ilanFiltre'
+import { ilanAdresi, yayinGoreli } from '@/arayuz/bicim'
 import { Ikon } from '@/arayuz/Ikon'
 import { IlanSatiri } from '@/arayuz/IlanSatiri'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
@@ -13,6 +14,8 @@ export const dynamic = 'force-dynamic'
 /** Başlık ve açıklama kök düzenden gelir; burada kanonik adres ve dil karşılıkları (hreflang). */
 export const metadata: Metadata = { alternates: dilAdresleri('/') }
 
+const sonYediGunde = (iso?: string | null) => Boolean(iso) && Date.now() - new Date(iso!).getTime() < 7 * 86_400_000
+
 /** Ana sayfa: ilk ekranda arama, canlı sayılı hızlı filtreler ve gerçek son ilanlar. Dev slogan yok. */
 export default async function AnaSayfa() {
   const ilanlar = await yayindakiIlanlar()
@@ -21,6 +24,9 @@ export default async function AnaSayfa() {
   const firmalar = [...ilanlar.reduce((m, i) => m.set(i.firma.id, { ...i.firma, n: (m.get(i.firma.id)?.n ?? 0) + 1 }), new Map<number, (typeof ilanlar)[number]['firma'] & { n: number }>()).values()]
     .sort((a, b) => b.n - a.n || a.ad.localeCompare(b.ad, 'tr'))
     .slice(0, 8)
+  // “Bu hafta yayına girenler”: son 7 takvim günü; yoksa en son yayına girenler (sahte tazelik yok, başlık değişir).
+  const buHafta = sirala(ilanlar.filter((i) => sonYediGunde(i.yayinTarihi)), 'yeni')
+  const vitrin = (buHafta.length ? buHafta : son).slice(0, 4)
   const firmaSayisi = new Set(ilanlar.map((i) => i.firma.id)).size
   const hizli = [
     { href: '/ilanlar?tur=staj', ad: 'Staj', n: say((i) => i.tur === 'staj') },
@@ -54,8 +60,8 @@ export default async function AnaSayfa() {
                 <Ikon ad="ara" />
                 <input id="as-ara" name="ara" className="girdi" type="search" placeholder="Pozisyon, beceri veya firma" autoComplete="off" enterKeyHint="search" />
               </span>
-              <button className="dugme" type="submit">
-                Ara
+              <button className="dugme dugme--kiremit" type="submit">
+                İlan ara
               </button>
             </form>
             {hizli.length > 0 && (
@@ -67,12 +73,34 @@ export default async function AnaSayfa() {
                 ))}
               </div>
             )}
+            {vitrin.length > 0 && (
+              <section className="bu-hafta" aria-labelledby="as-hafta">
+                <div className="bu-hafta-bas">
+                  <h2 id="as-hafta" className="b3">
+                    {buHafta.length ? 'Bu hafta yayına girenler' : 'Son yayına girenler'}
+                  </h2>
+                  {buHafta.length > 0 && <span className="kucuk ikincil">{buHafta.length} ilan</span>}
+                </div>
+                {vitrin.map((i) => (
+                  <Link key={i.id} className="bh-satir" href={ilanAdresi(i)}>
+                    <FirmaKaro konum={i.firma.konum} logo={i.firma.logo} ad={i.firma.ad} boy={36} />
+                    <span>
+                      <strong>{i.pozisyonAdi}</strong>
+                      <span>
+                        {i.firma.ad} · {yayinGoreli(i.yayinTarihi) ?? ALT_TUR_ADI[i.altTur]}
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+                <p className="bh-not">Bütün ilanları yalnızca Pamukkale Teknokent firmaları verir.</p>
+              </section>
+            )}
           </div>
         </section>
         <div className="as-govde">
           <section className="as-ilanlar" aria-labelledby="as-son">
             <div className="bolum-bas">
-              <h2 id="as-son" className="b2 kare-bas">
+              <h2 id="as-son" className="b2">
                 Son yayınlanan ilanlar
               </h2>
               {ilanlar.length > 0 && (
@@ -101,15 +129,26 @@ export default async function AnaSayfa() {
           </section>
           <aside className="as-yan">
             {firmalar.length > 0 && (
-              <section aria-labelledby="as-firma">
-                <h2 id="as-firma" className="b3 kare-bas">
+              <section className="yan-kutu" aria-labelledby="as-firma">
+                <h2 id="as-firma" className="b3">
                   İlan veren firmalar
                 </h2>
+                <p className="blok-aciklama" aria-label="Karo rengi firmanın bloğunu gösterir">
+                  <span>
+                    <i style={{ background: 'var(--lacivert)' }} />B Blok
+                  </span>
+                  <span>
+                    <i style={{ background: 'var(--petrol)' }} />C Blok
+                  </span>
+                  <span>
+                    <i style={{ background: 'var(--kiremit)' }} />D Blok
+                  </span>
+                </p>
                 <ul className="firma-liste">
                   {firmalar.map((f) => (
                     <li key={f.id}>
                       <Link href={`/firma/${f.slug}`}>
-                        <FirmaKaro konum={f.konum} boy={40} />
+                        <FirmaKaro konum={f.konum} logo={f.logo} ad={f.ad} boy={40} />
                         <span>
                           <strong>{f.ad}</strong>
                           <span className="kucuk ikincil">

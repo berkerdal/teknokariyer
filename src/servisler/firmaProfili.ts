@@ -5,7 +5,8 @@
  */
 import type { Payload } from 'payload'
 import type { Firmalar } from '@/payload-types'
-import { firmaKimligi, firmaYetkisiVarMi } from '@/erisim'
+import { firmaKimligi, firmaYetkisiVarMi, yoneticiMi } from '@/erisim'
+import { logoDosyaAdi } from '@/alan/firmaLogosu'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { FormHatasi, IslemHatasi, istekOlustur, type Kullanici } from './ortak'
 
@@ -86,23 +87,40 @@ export function gorselTuru(b: Uint8Array): 'image/png' | 'image/jpeg' | 'image/w
   return null
 }
 
-export async function firmaLogosuYukle(payload: Payload, k: Kullanici, dosya: { veri: Uint8Array; boyut: number }) {
-  const firmaId = yetki(k)
+/**
+ * Firma logosu (K37). Firmanın tam yetkilisi kendi firmasına, Yönetici A.Ş. tam yetkilisi herhangi bir firmaya yükler.
+ * Depodaki ad firma kimliğini taşır (`firma-12-logo-…png`); eski logo dosyası silinir. Herkese açık adres dosya
+ * kimliğidir (`/firma-logosu/<id>`), her yüklemede değiştiği için uzun süre önbelleklenebilir.
+ */
+export async function firmaLogosuYukle(payload: Payload, k: Kullanici, dosya: { veri: Uint8Array; boyut: number }, hedefFirmaId?: number) {
+  let firmaId: number
+  if (hedefFirmaId !== undefined) {
+    if (!yoneticiMi(k)) throw new IslemHatasi('Firma logosunu yalnızca tam yetkili Yönetici A.Ş. kullanıcıları değiştirebilir.', 403)
+    firmaId = hedefFirmaId
+  } else firmaId = yetki(k)
   if (!dosya.boyut) throw new FormHatasi({ logo: 'Bir logo dosyası seçin.' })
   if (dosya.boyut > LOGO_EN_BUYUK) throw new FormHatasi({ logo: 'Logo dosyası 1 MB’tan büyük olamaz.' })
   const tur = gorselTuru(dosya.veri)
   if (!tur) throw new FormHatasi({ logo: 'Logo PNG, JPEG veya WebP biçiminde olmalı. SVG güvenlik nedeniyle kabul edilmiyor.' })
-  const firma = await payload.findByID({ collection: 'firmalar', id: firmaId, depth: 0, overrideAccess: true })
+  const firma = await payload.findByID({ collection: 'firmalar', id: firmaId, depth: 0, overrideAccess: true, disableErrors: true })
+  if (!firma) throw new IslemHatasi('Firma bulunamadı.', 404)
   const req = await istekOlustur(payload, k)
-  const uzanti = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[tur]
+  const l = firma.logo
+  const eski: number | null = l == null ? null : typeof l === 'number' ? l : l.id
   const yeni = await payload.create({
     collection: 'dosyalar',
     data: { tur: 'logo', alt: `${firma.kisaAd} logosu`, sahip: k.id } as never,
-    file: { data: Buffer.from(dosya.veri), mimetype: tur, name: `logo-${firma.slug}-${Date.now()}.${uzanti}`, size: dosya.boyut },
+    file: { data: Buffer.from(dosya.veri), mimetype: tur, name: logoDosyaAdi(firmaId, tur), size: dosya.boyut },
     overrideAccess: true,
     req,
   })
   await payload.update({ collection: 'firmalar', id: firmaId, data: { logo: yeni.id }, overrideAccess: true, req })
+  if (eski) {
+    // Eski logo başka bir firmada kullanılmıyorsa silinir (depoda sahipsiz dosya kalmasın).
+    const baska = await payload.count({ collection: 'firmalar', where: { logo: { equals: eski } }, overrideAccess: true, req })
+    if (!baska.totalDocs)
+      await payload.delete({ collection: 'dosyalar', id: eski, overrideAccess: true, req }).catch((): null => null)
+  }
   await islemKaydet(req, { islem: 'Firma logosu değişti', tur: 'kurulum', kayitTuru: 'firmalar', kayitId: firmaId })
   return yeni
 }

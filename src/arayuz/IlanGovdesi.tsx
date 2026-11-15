@@ -11,7 +11,7 @@ export function IlanGovdesi({ a, f, sorular }: { a: IlanAyrintisi; f: FirmaOzeti
   return (
     <>
       <div className="il-bas">
-        <FirmaKaro konum={f.konum} boy={40} />
+        <FirmaKaro konum={f.konum} logo={f.logo} ad={f.ad} boy={48} />
         <div>
           <p>
             <strong>{f.ad}</strong>

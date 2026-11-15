@@ -7,6 +7,7 @@ import { hatirlatmaGunleri } from '@/alan/hatirlatma'
 import { ASAMA_ADI, huniBasamagi, huniSayilari, yetkiliDurumu, type KurulumAsamasi, type YetkiliDurumu } from '@/alan/kurulum'
 import { normallestir } from '@/alan/metin'
 import { payloadAl } from './payload'
+import { logoAdresi } from '@/alan/firmaLogosu'
 
 const kimlik = (x: unknown) => Number(x && typeof x === 'object' ? (x as { id: number }).id : x)
 const gunOnce = (iso: string, simdi: Date) => Math.floor((simdi.getTime() - new Date(iso).getTime()) / 86_400_000)
@@ -16,6 +17,8 @@ export interface FirmaSatiri {
   kisaAd: string
   unvan: string
   konum: string
+  /** Herkese açık logo adresi (K37) */
+  logo: string | null
   asama: KurulumAsamasi
   asamaAdi: string
   huni: number
@@ -82,6 +85,7 @@ export const firmaSatirlari = cache(async (): Promise<FirmaSatiri[]> => {
       kisaAd: f.kisaAd,
       unvan: f.unvan,
       konum: f.konum,
+      logo: logoAdresi(f.logo),
       asama,
       asamaAdi: ASAMA_ADI[asama],
       huni: huniBasamagi({ asama, ilkIlan }),

@@ -47,6 +47,8 @@ olursa bu bölüm geçerlidir.
 | K33 | İki aşamalı doğrulama | Doğrulayıcı uygulama zorunlu değil, “önerilen” seçenek olarak Hesap güvenliği sayfasında sunulur. Firma ve Yönetici A.Ş. hesaplarında tanınmayan bir cihazdan girişte e-postayla 6 haneli kod zorunludur; cihaz 90 gün hatırlanabilir (15 Kasım 2026). |
 | K34 | CV güvenliği | Ayrı virüs tarama hizmeti (ClamAV vb.) kullanılmaz; dış hizmet istenmiyor. Yüklenen PDF etkisizleştirilir (betik, açılış komutu, gömülü ek, program açma komutu çıkarılır; şifreli PDF reddedilir). Firmalar CV'yi portal içindeki, betik çalıştırmayan görüntüleyicide açar; indirme ve yazdırma oradan yapılır (15 Kasım 2026). |
 | K35 | İngilizce sürüm ve adresler | İngilizce arayüz bekleyebilir; pilot ve ilk yayın yalnızca Türkçe. Türkçe adresler ön eksiz kalır (`/ilanlar`); İngilizce eklendiğinde `/en/...` altında olur. hreflang ve site haritası buna göre kuruldu (15 Kasım 2026). |
+| K36 | Görsel yenileme | Prototip (“TeknoKariyer Görsel Yenileme” tuvali) beğenildi ve bütün uygulamaya (herkese açık sayfalar, aday, firma ve Yönetici A.Ş. panelleri) uygulanır. **Alt bilgi (footer) bugünkü hâliyle kalır.** Firma karosu bloğun rengini taşır (B lacivert, C petrol, D kiremit); logo varsa logo gösterilir. 15. bölümdeki hareket, rozet ve kiremit dozu kuralları buna göre güncellendi (15 Kasım 2026). |
+| K37 | Firma logosu | Yönetici A.Ş. firma kaydına logo yükleyebilir (firmanın kendisi de profilinden yükler). Depoda dosya firma kimliğiyle adlandırılır. Herkese açık logolar uzun süre önbelleklenen bir adresten sunulur (15 Kasım 2026). |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 
@@ -792,7 +794,7 @@ Kurumun ilettiği listeye eleştirel yaklaşıldı. Liste çoğunlukla doğru te
 - **Rozetler ve göstergeler:**
   - Anlamsız rozetler: "Yeni ✨", "🔥 Popüler", "AI destekli", "Beta", "Sistem aktif", "Canlı" yeşil nokta gibi süs durum göstergeleri.
   - Rozet yalnızca gerçek ve faydalı bir durumu ifade ediyorsa kullanılır: "Ücretli staj", "Uzaktan", "PAÜ öğrencisine öncelik", "Son 2 gün".
-  - **Nasıl olacağı:** Rozetler düz metin etiketi gibi tasarlanır; hap şeklinde parlak zeminler kullanılmaz.
+  - **Nasıl olacağı:** Rozetler küçük, köşesi 3 px, açık tonlu zeminli etiketlerdir (“Ücretli” yeşil, “PAÜ öncelikli” lacivert); hap şeklinde parlak veya renk geçişli zeminler kullanılmaz. Son başvuru aciliyeti kiremit metinle gösterilir (K36).
 - **İkonlar:**
   - Her başlığın veya kartın üstünde yuvarlak zemin içinde bir ikon kullanılmaz.
   - İkon yalnızca taramayı hızlandırdığı yerde kullanılır: konum, çalışma modeli, dosya türü, tarih.
@@ -807,7 +809,7 @@ Kurumun ilettiği listeye eleştirel yaklaşıldı. Liste çoğunlukla doğru te
   - Genel buton metinleri kullanılmaz: "Daha fazla bilgi", "Keşfet", "Hemen başla". Butonlar ne yapacağını söyler: "Başvur", "İlanı yayına gönder", "12 ilanı göster", "CV'yi indir".
 - **Hareket ve animasyon:**
   - Scroll'da beliren kartlar, kayan metinler ve paralaks kullanılmaz.
-  - Hareket yalnızca bir durum değişikliğini anlatmak için kullanılır: panelin açılması, kaydedildi onayı, sıralama değişimi. Süre 120–200 ms olur ve `prefers-reduced-motion` desteklenir.
+  - Hareket bir durumu veya geri bildirimi anlatır: düğmeye basınca hafif küçülme (0,97), satır ve filtre üzerine gelince yumuşak renk geçişi, panelin açılması, kaydedildi onayı, sıralama değişimi. Süre çoğunlukla 120–250 ms, alt panel ve pencerelerde 300 ms'ye kadar; giriş için güçlü “ease-out” eğrisi (`cubic-bezier(.23,1,.32,1)`), `ease-in` kullanılmaz. Üzerine gelme efektleri yalnızca fareli cihazlarda; `prefers-reduced-motion` desteklenir (K36; Emil Kowalski'nin hareket ilkeleri).
   - **[E] Bu nedenle GSAP ve Canvas animasyonu yığından çıkarılması önerilir;** CSS geçişleri yeterlidir.
 - **Bileşenler:**
   - Her şeyin büyük köşe yarıçapıyla yuvarlatılması yerine tek bir sistem kullanılır: kontroller 4 px, paneller 6 px, görseller 2 px. Hap şeklindeki butonlar yalnızca filtre seçimlerinde kullanılır.

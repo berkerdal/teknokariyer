@@ -191,7 +191,7 @@ export default async function Firmalar({ searchParams }: Props) {
             {liste.map((f) => (
               <li key={f.id}>
                 <Link href={`/yonetim/firmalar/${f.id}`}>
-                  <FirmaKaro konum={f.konum} boy={32} />
+                  <FirmaKaro konum={f.konum} logo={f.logo} ad={f.kisaAd} boy={36} />
                   <span className="y-firma-ad">
                     <strong>{f.kisaAd}</strong>
                     <span className="kucuk ikincil">

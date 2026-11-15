@@ -19,6 +19,16 @@ export function sonTarih(iso: string, simdi = new Date()): { metin: string; vurg
   return { metin: `${t}${yonelmeEki(t)} kadar`, vurgu: false, doldu: false }
 }
 
+/** Yayın zamanı: “Bugün”, “Dün”, “3 gün önce”; bir haftadan eskiyse tarih (“2 Kasım”). Türkiye takvim gününe göre. */
+export function yayinGoreli(iso: string | null | undefined, simdi = new Date()): string | null {
+  if (!iso) return null
+  const gun = -kalanGun(new Date(iso), simdi)
+  if (gun <= 0) return 'Bugün'
+  if (gun === 1) return 'Dün'
+  if (gun < 7) return `${gun} gün önce`
+  return tarihYaz(iso)
+}
+
 export function ucretYaz(u?: { enAz?: number; enCok?: number }): string | undefined {
   if (!u) return undefined
   if (u.enAz && u.enCok) return `${PARA.format(u.enAz)}–${PARA.format(u.enCok)} ₺ (net, aylık)`

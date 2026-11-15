@@ -6,6 +6,7 @@
 @import '../../stil/bilesenler.css';
 @import '../../stil/ekranlar.css';
 @import '../../stil/uygulama.css';
+@import '../../stil/yenileme.css';
 
 @theme inline {
   --color-zemin: var(--zemin);
@@ -23,6 +24,7 @@
   --color-camgobegi: var(--camgobegi);
   --color-camgobegi-acik: var(--camgobegi-acik);
   --color-kiremit: var(--kiremit);
+  --color-petrol: var(--petrol);
   --color-gece: var(--gece);
   --color-basari: var(--basari);
   --color-uyari: var(--uyari);

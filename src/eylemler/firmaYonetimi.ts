@@ -6,6 +6,7 @@ import type { FormDurumu } from '@/arayuz/form'
 import { davetGonder, davetiIptalEt, davetiYenidenGonder } from '@/servisler/ekip'
 import { firmaKaydiniGuncelle, firmaPasifligi, firmalariIceAktar, iskeletFirmaOlustur, takipNotuEkle, topluDavet, type AktarmaSonucu, type KurumAlanlari } from '@/servisler/firmaYonetimi'
 import { FormHatasi, IslemHatasi } from '@/servisler/ortak'
+import { firmaLogosuYukle } from '@/servisler/firmaProfili'
 import { payloadAl } from '@/veri/payload'
 import { yonetimOturumu } from '@/veri/yonetim'
 
@@ -51,6 +52,21 @@ export async function firmaKaydiEylemi(_: FormDurumu, f: FormData): Promise<Form
   }
   revalidatePath('/yonetim', 'layout')
   redirect(hedef)
+}
+
+/** Yönetici A.Ş. firma logosu yükler (K37). Yetki servis içinde denetlenir (tam yetkili). */
+export async function yonetimLogoEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await yonetimOturumu()
+  const id = Number(metin(f, 'firma'))
+  const dosya = f.get('logo')
+  if (!(dosya instanceof File) || !dosya.size) return { hatalar: { logo: 'Bir logo dosyası seçin.' } }
+  try {
+    await firmaLogosuYukle(await payloadAl(), k, { veri: new Uint8Array(await dosya.arrayBuffer()), boyut: dosya.size }, id)
+  } catch (e) {
+    return hata(e)
+  }
+  revalidatePath('/', 'layout')
+  return { tamam: 'Logo yüklendi.', surum: Date.now() }
 }
 
 export async function pasiflikEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {

@@ -183,6 +183,14 @@ Claude tarafından yapılacak.
 - **K35 — İngilizce (15.11.2026):** İngilizce sürüm bekleyebilir; pilot ve ilk yayın yalnızca Türkçe. Türkçe adresler
   ön eksiz kalır; İngilizce eklendiğinde `/en/...` olur (`src/alan/dil.ts` → `DILLER`).
 
+- **K36 — Görsel yenileme (15.11.2026):** “TeknoKariyer Görsel Yenileme” tuvali (https://claude.ai/artifact/Ao1EwZ9itiV4inSUa1BjVv)
+  onaylandı ve bütün uygulamaya uygulanır. **Alt bilgi bugünkü hâliyle kalır.** Firma karosu blok rengini taşır (B lacivert,
+  C petrol, D kiremit); logo varsa logo. Talimatlar 15'teki hareket ve rozet kuralları güncellendi (basınca 0,97, güçlü
+  ease-out, açık tonlu küçük etiketler). Kaynaklar: Emil Kowalski'nin skill'leri ve Impeccable'ın kuralları okunup
+  uygulandı (kurulmadı); taste-skill ve magicui/reactbits türü efekt kitaplıkları uygun görülmedi.
+- **K37 — Firma logosu (15.11.2026):** Yönetici A.Ş. firma kaydına logo yükleyebilir; depoda firma kimliğiyle adlandırılır;
+  herkese açık logolar uzun süre önbelleklenen adresten sunulur.
+
 - **K34 — CV güvenliği (15.11.2026):** Ayrı virüs tarayıcı (ClamAV) ve dış hizmet yok. Yüklenen PDF etkisizleştirilir;
   firmalar CV'yi portal içindeki betik çalıştırmayan görüntüleyicide (pdf.js, kendi dosyalarımızdan) açar, indirme ve
   yazdırma oradan.

@@ -25,7 +25,7 @@ export const ALT_TUR_ADI: Record<string, string> = {
 export interface IlanOzeti {
   id: number
   pozisyonAdi: string
-  firma: { id: number; ad: string; slug: string; konum: string; sektor?: string }
+  firma: { id: number; ad: string; slug: string; konum: string; sektor?: string; logo?: string }
   tur: IlanTuru
   altTur: string
   model: CalismaModeli
