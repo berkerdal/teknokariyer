@@ -203,7 +203,7 @@ Uygulama `SAGLAYICI=node` ile bu veriler üzerinde çalıştırıldı.
 | Firma girişi | E-posta koduyla ikinci adım çalıştı; başvuru açıldı (işlem kaydı yazıldı) |
 | CV | Portal içindeki görüntüleyicide açıldı; filigranlı PDF S3'ten okunup indirildi |
 | Zamanlayıcı | Elle çalıştırma tamamlandı, işlem kaydına yazıldı |
-| Docker imajı | Bölüm 10'a bakınız |
+| Docker imajı ve compose | Boş kurulum, göç ve uygulama denemesi geçti (bölüm 10) |
 
 Provada öğrenilenler:
 
@@ -214,9 +214,33 @@ Provada öğrenilenler:
   PostgreSQL'e yazacak betikler `src/payload.config.node.js` dosyasını doğrudan içe aktarır (uzantı `.js` yazılır;
   `.node` soneki Node'da yerel eklenti sanılır).
 
-## 10. Docker imajının derlenmesi
+## 10. Docker kurulumunun provası (15 Kasım 2026)
 
-Bu bölüm imaj bu çalışma ortamında derlenip denendiğinde güncellenir.
+İmaj bu çalışma ortamında derlendi ve `compose.yaml` ile dört hizmet birlikte çalıştırıldı:
+
+1. **Boş kurulum:** `docker compose up -d`. Uygulama ilk açılışta PostgreSQL göçünü uyguladı ve dosya kovasını
+   oluşturdu. Herkese açık sayfalar 200, bilinmeyen adres 404 döndü; zamanlayıcı başladı.
+2. **Göç:** Bölüm 5'teki 4.–6. adımlar bu kuruluma `--bosalt` olmadan, gerçek göçteki gibi uygulandı: 1.603 satır ve
+   6 dosya aktarıldı, bütün denetimler geçti.
+3. **Uygulama:** Yeniden başlatıldıktan sonra site haritası 38 adres verdi. Firma girişi (e-posta kodu), başvuru, portal
+   içinde CV görüntüleme ve filigranlı indirme çalıştı; tarayıcıda hata olmadı, dışarıya istek gitmedi.
+4. **Zamanlayıcı:** `docker compose exec -e ZAMANLAYICI_SIMDI=1 zamanlayici node_modules/.bin/tsx scripts/zamanlayici.ts`
+   işleri çalıştırdı ve işlem kaydına yazdı.
+
+İmaj boyutu yaklaşık 2,5 GB'tır (geliştirme bağımlılıkları dahil; zamanlayıcı ve göç betikleri aynı imajdan çalışır).
+
+Provada bulunup düzeltilen hatalar:
+
+- **Yanlış yapılandırma:** Next'in tsconfig yol eklentisi `@payload-config`i takma addan önce çözdüğü için `SAGLAYICI=node`
+  derlemesi Cloudflare yapılandırmasıyla çıkıyor ve açılışta `.wrangler` klasörü açmaya çalışıp 500 veriyordu.
+  `next.config.ts` artık isteği seçilen yapılandırmanın yoluyla değiştirir. Geliştirme sunucusu (Turbopack) doğru
+  çözdüğü için yalnızca üretim derlemesinde görünüyordu.
+- **Açılışta internet:** `pnpm start` corepack üzerinden pnpm'i her açılışta internetten indirmeye çalışıyordu. Kapsayıcılar
+  artık `next` ve `tsx` dosyalarını doğrudan çalıştırır.
+
+**Önemli:** Üretimde oturum çerezi “Secure” işaretlidir; tarayıcı onu yalnızca HTTPS üzerinden gönderir. Sunucu HTTPS
+olmadan (`http://sunucu-ip:3000`) denenirse giriş yapılamaz. Deneme, ters vekil üzerinden HTTPS ile veya sunucunun
+kendisinde `localhost` ile yapılır.
 
 ## 11. Geliştiriciler için: şemayı iki tarafta aynı tutmak
 

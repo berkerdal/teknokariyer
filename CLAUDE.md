@@ -517,7 +517,13 @@ Claude tarafından yapılacak.
     - Öğrenilen: `payload run` betiklerinde `@payload-config` Cloudflare yapılandırmasına çözülür (tsconfig). PostgreSQL'e
       yazacak betik `../src/payload.config.node.js` içe aktarır (`.node` soneki yüzünden uzantı `.js` yazılır). Düz `tsx`
       `.env` okumaz.
-  - **Sırada:** Docker imajının compose ile denenmesi (rehber 10. bölüm), test senaryoları belgesi.
+    - **Docker provası geçti** (rehber 10. bölüm): boş kurulum, göç, giriş, CV, zamanlayıcı. Bulunan iki hata düzeltildi:
+      webpack üretim derlemesinde tsconfig yolu `@payload-config` takma adından önce çözülüyordu (node derlemesi Cloudflare
+      yapılandırmasıyla çıkıyordu; `next.config.ts` → `NormalModuleReplacementPlugin`); `pnpm start` açılışta corepack ile
+      pnpm indirmeye çalışıyordu (kapsayıcılar `node_modules/.bin/next` ve `tsx` çalıştırır).
+    - Üretimde oturum çerezi Secure: HTTPS'siz (`http://ip:3000`) giriş yapılamaz; Playwright'ın `request` aracı da http
+      üzerinden göndermez (tarayıcı `fetch` ile denenir).
+  - **Sırada:** test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayın veritabanına YÖK listesi `scripts/liste-yukle.ts` veya
