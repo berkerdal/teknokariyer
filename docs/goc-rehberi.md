@@ -114,7 +114,7 @@ Komutlar depo kökünde çalıştırılır. Cloudflare erişimi için `CLOUDFLAR
    ```
 
    Veritabanı Docker'daysa kapı geçici olarak açılabilir ya da betik uygulama kapsayıcısında çalıştırılabilir
-   (`docker compose exec uygulama pnpm exec tsx …`; döküm dosyası kapsayıcıya kopyalanır).
+   (`docker compose exec uygulama node_modules/.bin/tsx …`; döküm dosyası kapsayıcıya kopyalanır).
 
 6. **Dosyaları aktarın.** Betik yarıda kalırsa yeniden çalıştırılabilir; aynı boyuttaki nesneleri atlar:
 
@@ -134,7 +134,7 @@ Komutlar depo kökünde çalıştırılır. Cloudflare erişimi için `CLOUDFLAR
 9. **Alan adını yönlendirin.** DNS kaydı yeni sunucunun IP adresine çevrilir. TTL 300 saniye olduğu için birkaç dakikada
    yayılır.
 10. **Zamanlanmış işleri denetleyin.** `docker compose logs zamanlayici` çıktısında “başladı” satırı görünmelidir. Elle bir
-    kez çalıştırmak için: `docker compose exec -e ZAMANLAYICI_SIMDI=1 zamanlayici pnpm exec tsx scripts/zamanlayici.ts`.
+    kez çalıştırmak için: `docker compose exec -e ZAMANLAYICI_SIMDI=1 zamanlayici node_modules/.bin/tsx scripts/zamanlayici.ts`.
     Her çalışma Yönetici A.Ş. panelinde “Bugün” sayfasında ve işlem kayıtlarında görünür.
 
 ## 6. Yedekleme (sunucuda)

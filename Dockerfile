@@ -16,12 +16,14 @@ RUN --mount=type=secret,id=kok_sertifika,required=false \
 FROM bagimliliklar AS derleme
 COPY . .
 ENV SAGLAYICI=node
-RUN pnpm run build
+# Derleme önbelleği imaja girmez
+RUN pnpm run build && rm -r .next/cache
 
 FROM derleme AS calisma
-ENV NODE_ENV=production SAGLAYICI=node PORT=3000 HOSTNAME=0.0.0.0
+ENV NODE_ENV=production SAGLAYICI=node PORT=3000 HOSTNAME=0.0.0.0 NODE_OPTIONS=--no-deprecation
 # Uygulama root olmayan kullanıcıyla çalışır (Next önbelleği .next altına yazar)
 RUN chown -R node:node /uygulama/.next
 USER node
 EXPOSE 3000
-CMD ["pnpm", "start"]
+# Çalışırken pnpm kullanılmaz: corepack açılışta pnpm'i internetten indirmeye çalışırdı
+CMD ["node_modules/.bin/next", "start"]

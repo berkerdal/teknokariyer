@@ -38,7 +38,7 @@ services:
     image: teknokariyer:yerel
     restart: unless-stopped
     environment: *uygulama-ortami
-    command: ["pnpm", "exec", "tsx", "scripts/zamanlayici.ts"]
+    command: ["node_modules/.bin/tsx", "scripts/zamanlayici.ts"]
     depends_on:
       uygulama: { condition: service_started }
 
