@@ -7,7 +7,7 @@ import { renderSVG } from 'uqr'
 import { gruplu } from '@/alan/ikiAdim'
 import { KurulumFormu } from './IkiAdimFormlari'
 
-export function KurulumAdimlari({ gizli, adres, siz, yer }: { gizli: string; adres: string; siz: boolean; yer: 'giris' | 'hesap' }) {
+export function KurulumAdimlari({ gizli, adres, siz }: { gizli: string; adres: string; siz: boolean }) {
   const svg = renderSVG(adres, { border: 2, pixelSize: 6 })
   return (
     <ol className="kurulum-adimlari">
@@ -37,7 +37,7 @@ export function KurulumAdimlari({ gizli, adres, siz, yer }: { gizli: string; adr
       </li>
       <li>
         <h2 className="b4">{siz ? 'Uygulamadaki kodu yazın' : 'Uygulamadaki kodu yaz'}</h2>
-        <KurulumFormu siz={siz} yer={yer} />
+        <KurulumFormu siz={siz} />
       </li>
     </ol>
   )

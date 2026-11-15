@@ -22,7 +22,7 @@ export async function Ust({ aktif = '' }: { aktif?: UstMenu }) {
       : firmaKullanicisiMi(k)
         ? { href: '/firma-paneli', ad: k.ad ?? 'Firma paneli' }
         : kurumKullanicisiMi(k)
-          ? { href: '/admin', ad: k.ad ?? 'Yönetim' }
+          ? { href: '/yonetim', ad: k.ad ?? 'Yönetim' }
           : null
   return (
     <header className="a-ust">

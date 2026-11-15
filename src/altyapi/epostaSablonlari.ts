@@ -379,11 +379,33 @@ export function ikiAdimSifirlandiEpostasi(d: { ad: string; hitap: EpostaHitabi; 
     [
       `Merhaba ${d.ad},`.replace(' ,', ','),
       sen
-        ? `TeknoKariyer hesabındaki iki aşamalı doğrulama ${d.sifirlayan} tarafından sıfırlandı. Bir sonraki girişinde doğrulayıcı uygulamayı yeniden kurman istenecek.`
-        : `TeknoKariyer hesabınızdaki iki aşamalı doğrulama ${d.sifirlayan} tarafından sıfırlandı. Bir sonraki girişinizde doğrulayıcı uygulamayı yeniden kurmanız istenecek.`,
+        ? `TeknoKariyer hesabındaki iki aşamalı doğrulama ${d.sifirlayan} tarafından sıfırlandı. Doğrulayıcı uygulama kaldırıldı ve tanınan cihazların unutuldu. İstersen uygulamayı Hesap güvenliği sayfasından yeniden kurabilirsin.`
+        : `TeknoKariyer hesabınızdaki iki aşamalı doğrulama ${d.sifirlayan} tarafından sıfırlandı. Doğrulayıcı uygulama kaldırıldı ve tanınan cihazlarınız unutuldu; bir sonraki girişinizde e-postanıza bir kod gönderilecek. Uygulamayı Hesap güvenliği sayfasından yeniden kurabilirsiniz.`,
     ],
     { metin: 'Giriş yap', adres: `${siteAdresi()}/giris` },
     [sen ? `Bu işlemi sen istemediysen hemen ${KURUM.eposta} adresine yaz.` : `Bu işlemi siz istemediyseniz hemen ${KURUM.eposta} adresine yazın.`],
+    d.hitap,
+  )
+}
+
+/** Yeni cihazdan giriş kodu. Konu kodu içermez (bildirim önizlemesinde görünmesin). */
+export function girisKoduEpostasi(d: { ad: string; kod: string; dakika: number; hitap: EpostaHitabi }): Eposta {
+  const sen = d.hitap === 'sen'
+  const kod = `${d.kod.slice(0, 3)} ${d.kod.slice(3)}`
+  return eposta(
+    'TeknoKariyer giriş kodu',
+    [
+      `Merhaba ${d.ad},`.replace(' ,', ','),
+      sen ? 'Tanımadığımız bir cihazdan hesabına giriş yapılıyor. Girişi tamamlamak için şu kodu yaz:' : 'Tanımadığımız bir cihazdan hesabınıza giriş yapılıyor. Girişi tamamlamak için şu kodu yazın:',
+      kod,
+      `Kod ${d.dakika} dakika geçerlidir ve bir kez kullanılır.`,
+    ],
+    undefined,
+    [
+      sen
+        ? 'Giriş yapan sen değilsen bu kodu kimseyle paylaşma ve şifreni değiştir. Şifren doğru girildiği için bu e-postayı aldın.'
+        : 'Giriş yapan siz değilseniz bu kodu kimseyle paylaşmayın ve şifrenizi değiştirin. Şifreniz doğru girildiği için bu e-postayı aldınız.',
+    ],
     d.hitap,
   )
 }

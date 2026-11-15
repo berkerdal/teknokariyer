@@ -176,6 +176,10 @@ Claude tarafından yapılacak.
   eğitim/beceri/cevaplar saklama süresine kadar firmada kalır; KVKK başvuruları ve işlem kayıtları yalnızca tam yetkiliye
   açık. Hukuk birimi görüşü yine alınacak.
 
+- **K33 — İki aşamalı doğrulama (15.11.2026):** Doğrulayıcı uygulama zorunlu değil; “Önerilen” olarak Hesap güvenliği
+  sayfasında. Firma ve kurum hesaplarında tanınmayan cihazdan girişte e-posta kodu zorunlu; cihaz 90 gün hatırlanır.
+  Kullanıcının gerekçesi: zorunlu harici uygulama insanları yıldırır.
+
 **Kullanıcının ilk test geri bildirimi (14.11.2026; talimatlar K28–K30):**
 
 - **K28 — Profil:** Okunur özet + bölüm bazında “Düzenle” → açılır pencere (mobilde tam boy alt panel). Kaydedince kapanır,
@@ -407,25 +411,28 @@ Claude tarafından yapılacak.
       ile yeniden kurulur. Next’in sayfa duyurucusu da `role=alert` taşır; testlerde hata kutusu kapsamla seçilmeli.
     - Öğrenilen: Hesap silmede veri değişiklikleri sistem isteğiyle yapılır (aday rolüne özgü kanca kuralları uygulanmasın);
       kişi kendini sildiyse işlem kaydının `kim` alanı silinen hesaba bağlanamaz (yabancı anahtar), sistem adına yazılır.
-  - **İki aşamalı doğrulama (15.11.2026):** Göç `20261115_081840_iki_adim` (yalnızca ADD COLUMN). Firma ve bütün kurum
-    rollerinde zorunlu, adayda isteğe bağlı (`ikiAdimZorunluMu`). Doğrulayıcı uygulama (TOTP, RFC 6238; `src/alan/ikiAdim.ts`,
-    RFC test değerleriyle birim testli) + 10 tek kullanımlık kurtarma kodu (yalnızca SHA-256 özeti saklanır).
-    - Gizli anahtar AES-GCM ile şifreli saklanır; anahtar `PAYLOAD_SECRET`'tan HKDF ile türetilir (`src/altyapi/sifreleme.ts`).
-      **PAYLOAD_SECRET değişirse herkes ikinci adımı yeniden kurar** (göç rehberine yazılacak). Alanlar API'den okunamaz.
-    - Giriş akışı (`src/eylemler/hesap.ts` → `girisiSurdur`): şifre doğruysa ve ikinci adım gerekiyorsa oturum çerezi
-      yazılmaz; oturum anahtarı şifreli, 10 dakikalık `tk-ikinci-adim` çerezinde bekler. `/giris/ikinci-adim` (kod veya
-      kurtarma kodu) ya da kurulu değilse `/giris/iki-adim-kurulum` (karekod `uqr` ile sunucuda SVG, telefondan açana
-      `otpauth://` bağlantısı, elle anahtar). Kurulumdan sonra kodlar `/giris/kurtarma-kodlari` sayfasında bir kez gösterilir.
-      Şifre yenileme ve davet kabulü de aynı yoldan geçer.
-    - Aynı kod iki kez geçmez (`totpSonAdim`), 5 hatada 15 dakika kilit. Kurtarma koduyla girişte `/hesap-guvenligi`
-      kalan kodu gösterir.
+  - **İki aşamalı doğrulama (15.11.2026, K33):** Göçler `20261115_081840_iki_adim`, `20261115_083416_yeni_cihaz`
+    (yalnızca ADD COLUMN). Kurallar `src/alan/ikiAdim.ts`, servis `src/servisler/ikiAdim.ts`, eylemler `src/eylemler/ikiAdim.ts`.
+    - **Yöntem seçimi** (`girisDogrulamaYontemi`): tanınan cihaz → sorulmaz (90 gün, her girişte uzar; en fazla 10 cihaz);
+      doğrulayıcı uygulama kuruluysa (her rol) → uygulama kodu veya kurtarma kodu; firma ve kurum rolünde → e-posta kodu
+      (6 hane, 10 dakika, 60 saniyede bir ve saatte en fazla 5); aday → sorulmaz.
+    - Cihaz: tarayıcıya özgü rastgele `tk-cihaz` çerezi (400 gün); hesapta yalnızca SHA-256 özeti, cihaz adı (“Chrome ·
+      Windows”) ve tarihleri (`taninanCihazlar`). “Bu cihazı hatırla” varsayılan işaretli. Şifre yenilenince ve sıfırlamada
+      cihazlar unutulur.
+    - Giriş akışı (`src/eylemler/hesap.ts` → `girisiSurdur`): ikinci adım gerekiyorsa oturum çerezi yazılmaz; oturum anahtarı
+      şifreli, 10 dakikalık `tk-ikinci-adim` çerezinde bekler; `/giris/ikinci-adim`. Davet kabulü ve şifre yenileme de aynı yol.
+    - **Test ortamında e-posta kodu ekranda gösterilir** (yalnızca `ortam() !== 'yayin'`; kod şifreli pakette taşınır).
+    - Doğrulayıcı uygulama (TOTP, RFC 6238, birim testli) `/hesap-guvenligi/kur`; kurulumdan sonra kurtarma kodları
+      `/giris/kurtarma-kodlari`'nda bir kez. Gizli anahtar AES-GCM (`src/altyapi/sifreleme.ts`, PAYLOAD_SECRET'tan HKDF).
+      **PAYLOAD_SECRET değişirse uygulama kuranlar yeniden kurar** (göç rehberine yazılacak). Aynı kod iki kez geçmez,
+      5 hatada 15 dakika kilit (e-posta kodu için de).
     - **REST/GraphQL üzerinden giriş, şifre sıfırlama ve kilit açma kapalı** (Kullanicilar `beforeOperation`; yalnızca yerel
       API). Payload ekranının giriş sayfası `/giris?donus=/admin`'e yönlenir (`src/app/(payload)/admin/login/page.tsx`).
-    - `/hesap-guvenligi`: durum, kurtarma kodlarını yenileme, aday için aç/kapat. Bağlantılar: aday hesap sayfası, firma
-      ekip sayfası (Bilgilerim), yönetim yan menüsü.
-    - Sıfırlama (telefon kaybı): tam yetkili kurum her kişiyi, firmanın tam yetkilisi kendi ekibini; kimse kendini
-      sıfırlayamaz; kişiye bilgi e-postası gider. Düğmeler `/yonetim/kullanicilar`, `/yonetim/firmalar/[id]`,
-      `/firma-paneli/ekip` listelerinde; listeler kurulu olup olmadığını gösterir.
+    - `/hesap-guvenligi`: önerilen uygulama, tanınan cihazlar (tek tek veya hepsini unutma), şifre. Bağlantılar: aday hesap
+      sayfası, firma ekip sayfası (Bilgilerim), yönetim yan menüsü.
+    - Sıfırlama (uygulamayı kaldırır, cihazları unutur): tam yetkili kurum herkesi, firmanın tam yetkilisi kendi ekibini;
+      kimse kendini sıfırlayamaz; kişiye bilgi e-postası. Düğmeler kullanıcı listelerinde.
+  - **Üst bilgideki kişi bağlantısı** kurum kullanıcısında `/yonetim`'e gider (önceden `/admin`'e gidiyordu).
   - **Sırada:** Turnstile ve istek sınırlama, virüs taraması, YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
     `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

@@ -18,8 +18,8 @@ export const metadata: Metadata = { title: 'Firma · Yönetim' }
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ sonuc?: string; kapanan?: string }> }
 
 const SONUC: Record<string, string> = {
-  'iki-adim-sifirlandi': 'İki aşamalı doğrulama sıfırlandı. Kişi bir sonraki girişinde doğrulayıcı uygulamayı yeniden kuracak; kendisine bilgi e-postası gönderildi.',
-  'iki-adim-sifirlandi-epostasiz': 'İki aşamalı doğrulama sıfırlandı, ancak bilgi e-postası gönderilemedi. Kişiye ayrıca haber verin.',
+  'iki-adim-sifirlandi': 'Doğrulama sıfırlandı. Kişinin doğrulayıcı uygulaması kaldırıldı ve tanınan cihazları unutuldu; bir sonraki girişinde e-postasına kod gidecek. Kendisine bilgi e-postası gönderildi.',
+  'iki-adim-sifirlandi-epostasiz': 'Doğrulama sıfırlandı, ancak bilgi e-postası gönderilemedi. Kişiye ayrıca haber verin.',
   olusturuldu: 'Firma kaydı oluşturuldu. Yetkili bilgisi tamamsa aşağıdan davet gönderebilirsiniz.',
   kaydedildi: 'Değişiklikler kaydedildi.',
   davet: 'Davet gönderildi. Firma “Davet gönderildi” aşamasına geçti; kabul edilince “Devralındı” olur.',
@@ -115,9 +115,9 @@ export default async function FirmaAyrintisi({ params, searchParams }: Props) {
                       <span className="y-davet-durum">
                         <span className="kucuk">
                           {u.pasif ? 'Ekipten çıkarıldı' : YETKI_ADI[u.firmaYetkisi ?? ''] ?? ''}
-                          {!u.pasif && (u.ikiAsamaliAcik ? ' · iki aşamalı doğrulama açık' : ' · iki aşamalı doğrulama henüz kurulmadı')}
+                          {!u.pasif && (u.ikiAsamaliAcik ? ' · doğrulayıcı uygulama kurulu' : ' · yeni cihazda e-postayla doğrulama')}
                         </span>
-                        {yonetici && !u.pasif && u.ikiAsamaliAcik && <IkiAdimSifirlaDugmesi kullaniciId={u.id} ad={u.ad} geri={`/yonetim/firmalar/${firma.id}`} />}
+                        {yonetici && !u.pasif && <IkiAdimSifirlaDugmesi kullaniciId={u.id} ad={u.ad} geri={`/yonetim/firmalar/${firma.id}`} />}
                       </span>
                     </li>
                   ))}

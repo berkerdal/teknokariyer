@@ -582,3 +582,9 @@ p.y-oge-satir { padding: 10px 14px; }
 .kurtarma-kodlari { list-style: none; margin: 16px 0; padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; border: 1px dashed var(--cizgi-kontrol); font-size: 18px; }
 .iki-adim-sifirla { flex-wrap: wrap; gap: 8px; }
 @media print { .a-ust { display: none !important; } .kurtarma-kodlari { border-color: #000; } }
+.etiket--oneri { background: var(--basari-zemin); color: var(--basari); border-color: transparent; font-family: var(--font-govde); font-size: 13px; vertical-align: middle; margin-left: 6px; }
+.test-kodu { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 20px; letter-spacing: 0.12em; }
+.kod-yeniden { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.cihaz-listesi .etiket { margin-left: 8px; }
+.guvenlik-kaldir { margin-top: 20px; }
+.guvenlik-kaldir > summary { cursor: pointer; color: var(--metin-2); }

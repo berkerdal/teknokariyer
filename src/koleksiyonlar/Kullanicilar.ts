@@ -7,8 +7,8 @@ import { dogrulamaEpostasi, sifreSifirlamaEpostasi } from '../altyapi/epostaSabl
  * Kullanıcılar: aday, firma kullanıcısı ve Yönetici A.Ş. personeli tek koleksiyonda, role göre ayrılır.
  * - Rol ve firma ataması yalnızca yönetici tarafından değiştirilir (kişi kendini yükseltemez).
  * - Giriş denemeleri sınırlanır (talimatlar 12).
- * - İki aşamalı doğrulama (TOTP) firma ve kurum hesaplarında zorunlu (src/servisler/ikiAdim.ts). Gizli alanlar API'den
- *   okunamaz ve yazılamaz; yalnızca sunucu servisleri yerel API ile değiştirir.
+ * - İki aşamalı doğrulama (src/servisler/ikiAdim.ts): firma ve kurum hesaplarında yeni cihazda e-posta kodu zorunlu,
+ *   doğrulayıcı uygulama önerilen (K33). Gizli alanlar API'den okunamaz ve yazılamaz; yalnızca sunucu servisleri değiştirir.
  * - Giriş, şifre sıfırlama ve kilit açma yalnızca portalın kendi akışıyla (yerel API) yapılır. REST ve GraphQL üzerinden
  *   bu işlemler kapalıdır; aksi hâlde ikinci adım atlanabilirdi (Payload ekranının giriş sayfası /giris'e yönlenir).
  */
@@ -143,6 +143,9 @@ export const Kullanicilar: CollectionConfig = {
     { name: 'kurtarmaKodlari', type: 'json', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
     { name: 'ikiAdimHata', type: 'number', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
     { name: 'ikiAdimKilit', type: 'date', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
+    // Yeni cihaz doğrulaması: tanınan cihazların özetleri (90 gün) ve bekleyen e-posta kodunun özeti
+    { name: 'taninanCihazlar', type: 'json', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
+    { name: 'epostaKodu', type: 'json', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
     {
       name: 'teknikSorumlu',
       label: 'Teknik sorumlu',

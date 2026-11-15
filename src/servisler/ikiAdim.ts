@@ -1,18 +1,28 @@
 /**
- * İki aşamalı doğrulama akışları (talimatlar 12). Kurallar `src/alan/ikiAdim.ts`, şifreleme `src/altyapi/sifreleme.ts`.
+ * İki aşamalı doğrulama akışları (talimatlar 12; K33). Kurallar `src/alan/ikiAdim.ts`, şifreleme `src/altyapi/sifreleme.ts`.
  *
- * Giriş: şifre doğrulanınca oturum çerezi hemen yazılmaz. Oturum anahtarı şifreli ve 10 dakikalık “bekleyen giriş”
- * paketine konur. Kişi doğrulayıcı uygulamadaki kodu (veya kurtarma kodunu) girince oturum açılır. İkinci adımı henüz
- * kurmamış firma veya kurum kullanıcısı önce kurar; kurulmadan oturum açılmaz.
+ * Giriş: şifre doğrulanınca, ikinci adım gerekiyorsa oturum çerezi hemen yazılmaz. Oturum anahtarı şifreli ve 10 dakikalık
+ * “bekleyen giriş” paketine konur; kişi kodu girince oturum açılır. İkinci adım şu durumlarda sorulur:
+ * - Tanınan cihazdan (90 gün içinde doğrulanmış) girişte sorulmaz.
+ * - Doğrulayıcı uygulamayı kurmuş kişiye (her rol) yeni cihazda uygulama kodu veya kurtarma kodu sorulur.
+ * - Uygulamayı kurmamış firma ve Yönetici A.Ş. kullanıcısına yeni cihazda e-postayla 6 haneli kod gönderilir (zorunlu).
+ * - Uygulamayı kurmamış adaya sorulmaz.
  *
- * Gizli anahtar veritabanında şifreli durur. Aynı kod ikinci kez kullanılamaz. 5 hatalı denemede 15 dakika kilit.
- * Kurtarma kodları yalnızca SHA-256 özetiyle saklanır ve tek kullanımlıktır.
+ * Gizli anahtar şifreli; e-posta kodu, kurtarma kodları ve cihaz anahtarları yalnızca SHA-256 özetiyle saklanır. Aynı
+ * uygulama kodu iki kez geçmez. 5 hatalı denemede 15 dakika kilit. Şifre yenilenince tanınan cihazlar unutulur.
  */
 import type { Payload } from 'payload'
-import { yoneticiMi, firmaKimligi, firmaYetkisiVarMi, adayMi } from '@/erisim'
+import { yoneticiMi, firmaKimligi, firmaYetkisiVarMi } from '@/erisim'
 import {
   EN_FAZLA_HATA,
+  EPOSTA_KODU_DAKIKA,
   KILIT_DAKIKA,
+  SAATTE_EN_FAZLA_KOD,
+  YENIDEN_GONDER_SANIYE,
+  cihazAdi,
+  cihazEkle,
+  epostaKoduUret,
+  gecerliCihazlar,
   gizliAnahtarUret,
   ikiAdimZorunluMu,
   kurtarmaKoduNormal,
@@ -20,16 +30,25 @@ import {
   otpauthAdresi,
   ozet,
   totpDogrula,
+  type TaninanCihaz,
 } from '@/alan/ikiAdim'
 import { coz, sifrele } from '@/altyapi/sifreleme'
 import { islemKaydet } from '@/altyapi/islemKaydi'
-import { ikiAdimSifirlandiEpostasi } from '@/altyapi/epostaSablonlari'
+import { girisKoduEpostasi, ikiAdimSifirlandiEpostasi } from '@/altyapi/epostaSablonlari'
 import { FormHatasi, IslemHatasi, istekOlustur, kimlik, type Kullanici } from './ortak'
 
 const AMAC_GIZLI = 'iki-adim-gizli'
 const AMAC_BEKLEYEN = 'bekleyen-giris'
 /** Bekleyen girişin ömrü */
 export const BEKLEYEN_DAKIKA = 10
+
+export type DogrulamaYontemi = 'yok' | 'uygulama' | 'eposta'
+
+interface EpostaKodu {
+  ozet: string
+  son: string
+  gonderimler: string[]
+}
 
 interface IkiAdimKaydi {
   id: number
@@ -45,17 +64,21 @@ interface IkiAdimKaydi {
   kurtarmaKodlari?: unknown
   ikiAdimHata?: number | null
   ikiAdimKilit?: string | null
+  taninanCihazlar?: unknown
+  epostaKodu?: EpostaKodu | null
 }
 
 async function kayit(payload: Payload, id: number): Promise<IkiAdimKaydi> {
   const k = await payload.findByID({ collection: 'kullanicilar', id, depth: 0, overrideAccess: true, showHiddenFields: true }).catch((): null => null)
-  if (!k) throw new IslemHatasi('Hesap bulunamadı. Yeniden giriş yap.', 404)
+  if (!k) throw new IslemHatasi('Hesap bulunamadı. Yeniden giriş yapın.', 404)
   return k as unknown as IkiAdimKaydi
 }
 
 async function guncelle(payload: Payload, id: number, data: Record<string, unknown>) {
   await payload.update({ collection: 'kullanicilar', id, data: data as never, overrideAccess: true, context: { ikiAdim: true } })
 }
+
+const uygulamaKurulu = (k: IkiAdimKaydi) => Boolean(k.ikiAsamaliAcik && k.totpGizli)
 
 /* ---------- Bekleyen giriş paketi ---------- */
 
@@ -65,6 +88,11 @@ export interface BekleyenGiris {
   bitis: string
   rol: string
   donus: string
+  yontem: Exclude<DogrulamaYontemi, 'yok'>
+  /** Kodun gittiği adres, maskeli (yalnızca e-posta yönteminde) */
+  adres?: string
+  /** Yalnızca yayın dışı ortamda: e-postalar dışarı çıkmadığı için kod ekranda gösterilir */
+  testKodu?: string
   son: number
 }
 
@@ -81,30 +109,83 @@ export async function bekleyenGirisAc(paket: string | undefined, simdi = new Dat
   return g.son > simdi.getTime() ? g : null
 }
 
-/* ---------- Durum ---------- */
+/* ---------- Cihaz ---------- */
 
-export interface IkiAdimDurumu {
-  /** Bu hesapta ikinci adım sorulacak mı (zorunlu rol veya aday açmış) */
-  gerekli: boolean
-  kurulu: boolean
-  zorunlu: boolean
-  kurulumTarihi: string | null
-  kalanKurtarma: number
-}
-
-export async function ikiAdimDurumu(payload: Payload, kullaniciId: number): Promise<IkiAdimDurumu> {
+/** Bu cihazdan girişte hangi doğrulama sorulacak? Tanınan cihazın son kullanımı güncellenir (90 gün yeniden başlar). */
+export async function girisDogrulamaYontemi(payload: Payload, kullaniciId: number, cihazAnahtari: string | undefined, simdi = new Date()): Promise<DogrulamaYontemi> {
   const k = await kayit(payload, kullaniciId)
-  const zorunlu = ikiAdimZorunluMu(k.rol)
-  const kurulu = Boolean(k.ikiAsamaliAcik && k.totpGizli)
-  return { gerekli: zorunlu || kurulu, kurulu, zorunlu, kurulumTarihi: k.ikiAsamaliTarih ?? null, kalanKurtarma: Array.isArray(k.kurtarmaKodlari) ? k.kurtarmaKodlari.length : 0 }
+  const uygulama = uygulamaKurulu(k)
+  if (!uygulama && !ikiAdimZorunluMu(k.rol)) return 'yok'
+  if (cihazAnahtari) {
+    const o = await ozet(cihazAnahtari)
+    const c = gecerliCihazlar(k.taninanCihazlar, simdi).find((x) => x.ozet === o)
+    if (c) {
+      await guncelle(payload, kullaniciId, { taninanCihazlar: cihazEkle(k.taninanCihazlar, { ozet: o, ad: c.ad }, simdi) })
+      return 'yok'
+    }
+  }
+  return uygulama ? 'uygulama' : 'eposta'
 }
 
-/* ---------- Kurulum ---------- */
+/** Doğrulamadan sonra cihazı hatırlar. */
+export async function cihaziHatirla(payload: Payload, kullaniciId: number, cihazAnahtari: string, tarayici: string | null, simdi = new Date()) {
+  const k = await kayit(payload, kullaniciId)
+  await guncelle(payload, kullaniciId, { taninanCihazlar: cihazEkle(k.taninanCihazlar, { ozet: await ozet(cihazAnahtari), ad: cihazAdi(tarayici) }, simdi) })
+}
+
+export async function taninanCihazlar(payload: Payload, kullaniciId: number, cihazAnahtari?: string, simdi = new Date()) {
+  const k = await kayit(payload, kullaniciId)
+  const buCihaz = cihazAnahtari ? await ozet(cihazAnahtari) : null
+  return gecerliCihazlar(k.taninanCihazlar, simdi).map((c: TaninanCihaz) => ({ ...c, kimlik: c.ozet.slice(0, 16), buCihaz: c.ozet === buCihaz }))
+}
+
+/** Bir cihazı (kimliği özetin ilk 16 karakteri) veya hepsini unutur. */
+export async function cihazlariUnut(payload: Payload, k: Kullanici, kimlikOneki?: string) {
+  const kayitlar = await kayit(payload, Number(k.id))
+  const liste = Array.isArray(kayitlar.taninanCihazlar) ? (kayitlar.taninanCihazlar as TaninanCihaz[]) : []
+  const kalan = kimlikOneki ? liste.filter((c) => !c.ozet.startsWith(kimlikOneki)) : []
+  await guncelle(payload, Number(k.id), { taninanCihazlar: kalan })
+  await islemKaydet(await istekOlustur(payload, k), { islem: kimlikOneki ? 'Tanınan bir cihaz unutuldu' : 'Bütün tanınan cihazlar unutuldu', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: k.id })
+}
+
+/** Şifre yenilenince tanınan cihazlar unutulur (şifresi ele geçmiş hesapta açık cihaz kalmasın). */
+export async function cihazlariTemizle(payload: Payload, kullaniciId: number) {
+  await guncelle(payload, kullaniciId, { taninanCihazlar: [] })
+}
+
+/* ---------- E-posta kodu ---------- */
+
+/**
+ * Yeni cihaz için e-posta kodu üretir ve gönderir. Aynı kişiye en erken 60 saniyede bir, saatte en fazla 5 kod.
+ * Kodun yalnızca özeti saklanır. Yayın dışı ortamda kod, ekranda gösterilmek üzere döner.
+ */
+export async function epostaKoduGonder(payload: Payload, kullaniciId: number, simdi = new Date()): Promise<{ kod: string; eposta: boolean }> {
+  const k = await kayit(payload, kullaniciId)
+  const onceki = (k.epostaKodu?.gonderimler ?? []).filter((t) => simdi.getTime() - new Date(t).getTime() < 3_600_000)
+  const sonGonderim = onceki.at(-1)
+  if (sonGonderim && simdi.getTime() - new Date(sonGonderim).getTime() < YENIDEN_GONDER_SANIYE * 1000)
+    throw new IslemHatasi(`Yeni kod istemeden önce ${YENIDEN_GONDER_SANIYE} saniye bekleyin.`, 409)
+  if (onceki.length >= SAATTE_EN_FAZLA_KOD) throw new IslemHatasi('Bir saat içinde çok sayıda kod istendi. Biraz sonra yeniden deneyin.', 409)
+  const kod = epostaKoduUret()
+  await guncelle(payload, kullaniciId, {
+    epostaKodu: { ozet: await ozet(`${kullaniciId}:${kod}`), son: new Date(simdi.getTime() + EPOSTA_KODU_DAKIKA * 60_000).toISOString(), gonderimler: [...onceki, simdi.toISOString()] },
+  })
+  const e = girisKoduEpostasi({ ad: k.ad ?? '', kod, dakika: EPOSTA_KODU_DAKIKA, hitap: k.rol === 'aday' ? 'sen' : 'siz' })
+  try {
+    await payload.sendEmail({ to: k.email, subject: e.konu, html: e.html, text: e.metin })
+    return { kod, eposta: true }
+  } catch (err) {
+    console.error('Giriş kodu e-postası gönderilemedi', err)
+    return { kod, eposta: false }
+  }
+}
+
+/* ---------- Doğrulayıcı uygulama kurulumu ---------- */
 
 /** Kurulum için gizli anahtar. Kurulum bitmeden sayfa yenilenirse aynı anahtar gösterilir. */
 export async function kurulumBilgisi(payload: Payload, kullaniciId: number) {
   const k = await kayit(payload, kullaniciId)
-  if (k.ikiAsamaliAcik && k.totpGizli) throw new IslemHatasi('İki aşamalı doğrulama bu hesapta zaten kurulu.', 409)
+  if (uygulamaKurulu(k)) throw new IslemHatasi('Doğrulayıcı uygulama bu hesapta zaten kurulu.', 409)
   let gizli = k.totpGizli ? await coz(k.totpGizli, AMAC_GIZLI) : null
   if (!gizli) {
     gizli = gizliAnahtarUret()
@@ -121,7 +202,7 @@ async function yeniKurtarmaKodlari(): Promise<{ kodlar: string[]; ozetler: strin
 /** Uygulamadaki ilk kodla kurulumu tamamlar; kurtarma kodlarını bir kez döndürür. */
 export async function kurulumuTamamla(payload: Payload, kullaniciId: number, kod: string, simdi = new Date()): Promise<string[]> {
   const k = await kayit(payload, kullaniciId)
-  if (k.ikiAsamaliAcik) throw new IslemHatasi('İki aşamalı doğrulama bu hesapta zaten kurulu.', 409)
+  if (k.ikiAsamaliAcik) throw new IslemHatasi('Doğrulayıcı uygulama bu hesapta zaten kurulu.', 409)
   const gizli = k.totpGizli ? await coz(k.totpGizli, AMAC_GIZLI) : null
   if (!gizli) throw new IslemHatasi('Kurulum süresi doldu. Sayfayı yenileyip karekodu yeniden okutun.', 409)
   if (!/^\d{6}$/.test(kod.replace(/\s/g, ''))) throw new FormHatasi({ kod: 'Uygulamada görünen 6 haneli kodu yazın.' })
@@ -129,7 +210,7 @@ export async function kurulumuTamamla(payload: Payload, kullaniciId: number, kod
   if (adim === null) throw new FormHatasi({ kod: 'Kod tutmadı. Uygulamadaki güncel kodu yazın; kod 30 saniyede bir değişir. Telefonunuzun saati otomatik ayarlı olmalı.' })
   const { kodlar, ozetler } = await yeniKurtarmaKodlari()
   await guncelle(payload, kullaniciId, { ikiAsamaliAcik: true, ikiAsamaliTarih: simdi.toISOString(), totpSonAdim: adim, kurtarmaKodlari: ozetler, ikiAdimHata: 0, ikiAdimKilit: null })
-  await islemKaydet(await istekOlustur(payload, null), { islem: 'İki aşamalı doğrulama kuruldu', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: kullaniciId })
+  await islemKaydet(await istekOlustur(payload, null), { islem: 'Doğrulayıcı uygulama kuruldu', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: kullaniciId })
   return kodlar
 }
 
@@ -140,21 +221,42 @@ export interface DogrulamaSonucu {
   kalanKurtarma: number
 }
 
-/** Uygulama kodu (6 hane) veya kurtarma kodu. Hatalı denemeler sayılır; sınır aşılınca kilitlenir. */
-export async function ikinciAdimDogrula(payload: Payload, kullaniciId: number, girilen: string, simdi = new Date()): Promise<DogrulamaSonucu> {
+async function hataSay(payload: Payload, k: IkiAdimKaydi, simdi: Date, siz: boolean): Promise<never> {
+  const hata = (k.ikiAdimHata ?? 0) + 1
+  if (hata >= EN_FAZLA_HATA) {
+    await guncelle(payload, k.id, { ikiAdimHata: 0, ikiAdimKilit: new Date(simdi.getTime() + KILIT_DAKIKA * 60_000).toISOString(), epostaKodu: null })
+    await islemKaydet(await istekOlustur(payload, null), { islem: 'İkinci adım hatalı kodlar yüzünden kilitlendi', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: k.id })
+    throw new IslemHatasi(siz ? `Çok sayıda hatalı kod girildi. Güvenliğiniz için ${KILIT_DAKIKA} dakika beklemeniz gerekiyor.` : `Çok sayıda hatalı kod girildi. Güvenliğin için ${KILIT_DAKIKA} dakika beklemen gerekiyor.`, 403)
+  }
+  await guncelle(payload, k.id, { ikiAdimHata: hata })
+  throw new FormHatasi({ kod: siz ? `Kod tutmadı. ${EN_FAZLA_HATA - hata} deneme hakkınız kaldı.` : `Kod tutmadı. ${EN_FAZLA_HATA - hata} deneme hakkın kaldı.` })
+}
+
+/** İkinci adım: e-posta kodu, uygulama kodu veya kurtarma kodu. Hatalı denemeler sayılır; sınır aşılınca kilitlenir. */
+export async function ikinciAdimDogrula(payload: Payload, kullaniciId: number, girilen: string, yontem: Exclude<DogrulamaYontemi, 'yok'>, simdi = new Date()): Promise<DogrulamaSonucu> {
   const k = await kayit(payload, kullaniciId)
+  const siz = k.rol !== 'aday'
   if (k.pasif) throw new IslemHatasi('Bu hesap kapatıldı.', 403)
-  if (!k.ikiAsamaliAcik || !k.totpGizli) throw new IslemHatasi('Bu hesapta iki aşamalı doğrulama kurulu değil.', 409)
   if (k.ikiAdimKilit && new Date(k.ikiAdimKilit) > simdi) {
     const dk = Math.ceil((new Date(k.ikiAdimKilit).getTime() - simdi.getTime()) / 60_000)
-    throw new IslemHatasi(`Çok sayıda hatalı kod girildi. ${dk} dakika sonra yeniden deneyin.`, 403)
+    throw new IslemHatasi(siz ? `Çok sayıda hatalı kod girildi. ${dk} dakika sonra yeniden deneyin.` : `Çok sayıda hatalı kod girildi. ${dk} dakika sonra yeniden dene.`, 403)
   }
   const temiz = girilen.trim()
-  if (!temiz) throw new FormHatasi({ kod: 'Kodu yazın.' })
-  const gizli = (await coz(k.totpGizli, AMAC_GIZLI))!
+  if (!temiz) throw new FormHatasi({ kod: siz ? 'Kodu yazın.' : 'Kodu yaz.' })
   const ozetler = Array.isArray(k.kurtarmaKodlari) ? (k.kurtarmaKodlari as string[]) : []
-  const req = await istekOlustur(payload, null)
 
+  if (yontem === 'eposta') {
+    const ek = k.epostaKodu
+    if (!ek || new Date(ek.son) <= simdi) throw new FormHatasi({ kod: siz ? 'Kodun süresi doldu. “Yeni kod gönder” düğmesiyle yeni bir kod isteyin.' : 'Kodun süresi doldu. “Yeni kod gönder” düğmesiyle yeni bir kod iste.' })
+    if ((await ozet(`${kullaniciId}:${temiz.replace(/\s/g, '')}`)) === ek.ozet) {
+      await guncelle(payload, kullaniciId, { epostaKodu: { ...ek, ozet: '', son: simdi.toISOString() }, ikiAdimHata: 0, ikiAdimKilit: null })
+      return { kurtarmaKullanildi: false, kalanKurtarma: ozetler.length }
+    }
+    return hataSay(payload, k, simdi, siz)
+  }
+
+  if (!uygulamaKurulu(k)) throw new IslemHatasi('Bu hesapta doğrulayıcı uygulama kurulu değil.', 409)
+  const gizli = (await coz(k.totpGizli!, AMAC_GIZLI))!
   if (/^\d[\d\s]{5,7}$/.test(temiz)) {
     const adim = await totpDogrula(gizli, temiz, simdi, k.totpSonAdim ?? 0)
     if (adim !== null) {
@@ -166,27 +268,39 @@ export async function ikinciAdimDogrula(payload: Payload, kullaniciId: number, g
     if (ozetler.includes(o)) {
       const kalan = ozetler.filter((x) => x !== o)
       await guncelle(payload, kullaniciId, { kurtarmaKodlari: kalan, ikiAdimHata: 0, ikiAdimKilit: null })
-      await islemKaydet(req, { islem: 'Kurtarma koduyla giriş yapıldı', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: kullaniciId, ayrinti: { kalan: kalan.length } })
+      await islemKaydet(await istekOlustur(payload, null), { islem: 'Kurtarma koduyla giriş yapıldı', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: kullaniciId, ayrinti: { kalan: kalan.length } })
       return { kurtarmaKullanildi: true, kalanKurtarma: kalan.length }
     }
   }
-  const hata = (k.ikiAdimHata ?? 0) + 1
-  if (hata >= EN_FAZLA_HATA) {
-    await guncelle(payload, kullaniciId, { ikiAdimHata: 0, ikiAdimKilit: new Date(simdi.getTime() + KILIT_DAKIKA * 60_000).toISOString() })
-    await islemKaydet(req, { islem: 'İki aşamalı doğrulama hatalı kodlar yüzünden kilitlendi', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: kullaniciId })
-    throw new IslemHatasi(`Çok sayıda hatalı kod girildi. Güvenliğiniz için ${KILIT_DAKIKA} dakika beklemeniz gerekiyor.`, 403)
-  }
-  await guncelle(payload, kullaniciId, { ikiAdimHata: hata })
-  throw new FormHatasi({ kod: `Kod tutmadı. Uygulamadaki güncel kodu yazın. ${EN_FAZLA_HATA - hata} deneme hakkınız kaldı.` })
+  return hataSay(payload, k, simdi, siz)
 }
 
 /* ---------- Oturum açıkken ---------- */
 
+export interface GuvenlikDurumu {
+  /** Doğrulayıcı uygulama kurulu mu */
+  uygulama: boolean
+  /** Yeni cihazda e-posta kodu zorunlu mu (firma ve kurum) */
+  zorunlu: boolean
+  kurulumTarihi: string | null
+  kalanKurtarma: number
+}
+
+export async function guvenlikDurumu(payload: Payload, kullaniciId: number): Promise<GuvenlikDurumu> {
+  const k = await kayit(payload, kullaniciId)
+  return {
+    uygulama: uygulamaKurulu(k),
+    zorunlu: ikiAdimZorunluMu(k.rol),
+    kurulumTarihi: k.ikiAsamaliTarih ?? null,
+    kalanKurtarma: Array.isArray(k.kurtarmaKodlari) ? k.kurtarmaKodlari.length : 0,
+  }
+}
+
 /** Yeni kurtarma kodları (eskiler geçersiz olur). Güncel uygulama kodu istenir. */
 export async function kurtarmaKodlariniYenile(payload: Payload, k: Kullanici, kod: string, simdi = new Date()): Promise<string[]> {
   const kayitlar = await kayit(payload, Number(k.id))
-  if (!kayitlar.ikiAsamaliAcik || !kayitlar.totpGizli) throw new IslemHatasi('İki aşamalı doğrulama kurulu değil.', 409)
-  const gizli = (await coz(kayitlar.totpGizli, AMAC_GIZLI))!
+  if (!uygulamaKurulu(kayitlar)) throw new IslemHatasi('Doğrulayıcı uygulama kurulu değil.', 409)
+  const gizli = (await coz(kayitlar.totpGizli!, AMAC_GIZLI))!
   const adim = await totpDogrula(gizli, kod, simdi, kayitlar.totpSonAdim ?? 0)
   if (adim === null) throw new FormHatasi({ kod: 'Kod tutmadı. Uygulamadaki güncel 6 haneli kodu yazın.' })
   const { kodlar, ozetler } = await yeniKurtarmaKodlari()
@@ -195,29 +309,31 @@ export async function kurtarmaKodlariniYenile(payload: Payload, k: Kullanici, ko
   return kodlar
 }
 
-/** Aday isterse ikinci adımı kapatır (firma ve kurum hesaplarında kapatılamaz). */
+const UYGULAMAYI_TEMIZLE: Record<string, unknown> = { ikiAsamaliAcik: false, ikiAsamaliTarih: null, totpGizli: null, totpSonAdim: null, kurtarmaKodlari: null, ikiAdimHata: 0, ikiAdimKilit: null }
+
+/** Kişi doğrulayıcı uygulamayı kaldırır (önerilen ama isteğe bağlı; K33). Firma ve kurumda yeni cihazda e-posta kodu sürer. */
 export async function ikiAdimiKapat(payload: Payload, k: Kullanici, kod: string, simdi = new Date()) {
-  if (!adayMi(k)) throw new IslemHatasi('Firma ve Yönetici A.Ş. hesaplarında iki aşamalı doğrulama kapatılamaz.', 403)
   const kayitlar = await kayit(payload, Number(k.id))
-  if (!kayitlar.ikiAsamaliAcik || !kayitlar.totpGizli) throw new IslemHatasi('İki aşamalı doğrulama zaten kapalı.', 409)
-  const gizli = (await coz(kayitlar.totpGizli, AMAC_GIZLI))!
-  if ((await totpDogrula(gizli, kod, simdi, kayitlar.totpSonAdim ?? 0)) === null) throw new FormHatasi({ kod: 'Kod tutmadı. Uygulamadaki güncel 6 haneli kodu yaz.' })
-  await guncelle(payload, Number(k.id), { ikiAsamaliAcik: false, ikiAsamaliTarih: null, totpGizli: null, totpSonAdim: null, kurtarmaKodlari: null, ikiAdimHata: 0, ikiAdimKilit: null })
-  await islemKaydet(await istekOlustur(payload, k), { islem: 'İki aşamalı doğrulama kapatıldı', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: k.id })
+  if (!uygulamaKurulu(kayitlar)) throw new IslemHatasi('Doğrulayıcı uygulama zaten kurulu değil.', 409)
+  const gizli = (await coz(kayitlar.totpGizli!, AMAC_GIZLI))!
+  if ((await totpDogrula(gizli, kod, simdi, kayitlar.totpSonAdim ?? 0)) === null) throw new FormHatasi({ kod: k.rol === 'aday' ? 'Kod tutmadı. Uygulamadaki güncel 6 haneli kodu yaz.' : 'Kod tutmadı. Uygulamadaki güncel 6 haneli kodu yazın.' })
+  await guncelle(payload, Number(k.id), UYGULAMAYI_TEMIZLE)
+  await islemKaydet(await istekOlustur(payload, k), { islem: 'Doğrulayıcı uygulama kaldırıldı', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: k.id })
 }
 
 /**
- * Telefonu kaybeden kişi için sıfırlama: kişi bir sonraki girişte ikinci adımı yeniden kurar.
- * Tam yetkili Yönetici A.Ş. kullanıcısı herkesi, firmanın tam yetkilisi kendi ekibini sıfırlayabilir. Kimse kendini
- * sıfırlayamaz (kurtarma kodu bunun içindir). Kişiye bilgi e-postası gider.
+ * Telefonunu kaybeden veya şüpheli giriş gören kişi için sıfırlama: doğrulayıcı uygulama kaldırılır ve tanınan cihazlar
+ * unutulur; bir sonraki girişte (firma ve kurumda) e-posta kodu istenir. Tam yetkili Yönetici A.Ş. kullanıcısı herkesi,
+ * firmanın tam yetkilisi kendi ekibini sıfırlayabilir. Kimse kendini sıfırlayamaz. Kişiye bilgi e-postası gider.
  */
 export async function ikiAdimiSifirla(payload: Payload, yapan: Kullanici, hedefId: number) {
-  if (Number(yapan.id) === hedefId) throw new IslemHatasi('Kendi iki aşamalı doğrulamanızı sıfırlayamazsınız. Telefonunuz yoksa kurtarma kodlarınızdan birini kullanın.', 403)
+  if (Number(yapan.id) === hedefId) throw new IslemHatasi('Kendi doğrulamanızı buradan sıfırlayamazsınız. Hesap güvenliği sayfasını kullanın; telefonunuz yoksa kurtarma kodlarınızdan birini kullanın.', 403)
   const hedef = await kayit(payload, hedefId)
   const firmaYoneticisi = firmaYetkisiVarMi(yapan, ['yonetici']) && hedef.rol === 'firma' && kimlik(hedef.firma) === firmaKimligi(yapan)
-  if (!yoneticiMi(yapan) && !firmaYoneticisi) throw new IslemHatasi('Bu kişinin iki aşamalı doğrulamasını sıfırlama yetkiniz yok.', 403)
-  if (!hedef.ikiAsamaliAcik && !hedef.totpGizli) throw new IslemHatasi('Bu kişide iki aşamalı doğrulama zaten kurulu değil.', 409)
-  await guncelle(payload, hedefId, { ikiAsamaliAcik: false, ikiAsamaliTarih: null, totpGizli: null, totpSonAdim: null, kurtarmaKodlari: null, ikiAdimHata: 0, ikiAdimKilit: null })
+  if (!yoneticiMi(yapan) && !firmaYoneticisi) throw new IslemHatasi('Bu kişinin doğrulamasını sıfırlama yetkiniz yok.', 403)
+  const cihazVar = gecerliCihazlar(hedef.taninanCihazlar, new Date()).length > 0
+  if (!uygulamaKurulu(hedef) && !hedef.totpGizli && !cihazVar) throw new IslemHatasi('Bu kişide sıfırlanacak bir doğrulama yok.', 409)
+  await guncelle(payload, hedefId, { ...UYGULAMAYI_TEMIZLE, taninanCihazlar: [], epostaKodu: null })
   await islemKaydet(await istekOlustur(payload, yapan), { islem: 'İki aşamalı doğrulama sıfırlandı', tur: 'hesap', kayitTuru: 'kullanicilar', kayitId: hedefId })
   const e = ikiAdimSifirlandiEpostasi({ ad: hedef.ad ?? '', hitap: hedef.rol === 'aday' ? 'sen' : 'siz', sifirlayan: yapan.ad ?? 'Yönetici' })
   try {

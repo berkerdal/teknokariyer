@@ -6,7 +6,7 @@ import { Ust } from '@/arayuz/Ust'
 import { kurulumBilgisi } from '@/servisler/ikiAdim'
 import { oturum, payloadAl } from '@/veri/payload'
 
-export const metadata: Metadata = { title: 'İki aşamalı doğrulamayı aç', robots: { index: false } }
+export const metadata: Metadata = { title: 'Doğrulayıcı uygulama', robots: { index: false } }
 
 /** Oturum açıkken kurulum (adayın isteğe bağlı olarak açması). Zaten kuruluysa güvenlik sayfasına döner. */
 export default async function HesapKurulumSayfasi() {
@@ -21,8 +21,14 @@ export default async function HesapKurulumSayfasi() {
         <Link className="geri kucuk" href="/hesap-guvenligi">
           Hesap güvenliği
         </Link>
-        <h1 className="b1">{siz ? 'İki aşamalı doğrulamayı açın' : 'İki aşamalı doğrulamayı aç'}</h1>
-        <KurulumAdimlari gizli={gizli} adres={adres} siz={siz} yer="hesap" />
+        <p className="ust-etiket">Önerilen</p>
+        <h1 className="b1">{siz ? 'Doğrulayıcı uygulamayı kurun' : 'Doğrulayıcı uygulamayı kur'}</h1>
+        <p>
+          {siz
+            ? 'Kurduktan sonra yeni bir cihazdan girişte e-posta yerine telefonunuzdaki uygulamanın ürettiği kod istenir. Bu yöntem e-postadan daha güvenlidir: e-posta hesabınız ele geçse bile portala girilemez.'
+            : 'Kurduktan sonra yeni bir cihazdan girişte telefonundaki uygulamanın ürettiği kod istenir. Böylece şifren başkasının eline geçse bile hesabına girilemez.'}
+        </p>
+        <KurulumAdimlari gizli={gizli} adres={adres} siz={siz} />
       </main>
     </>
   )

@@ -54,3 +54,14 @@ export async function kurtarmaCerezi() {
 export async function kurtarmaCereziSil() {
   ;(await cookies()).delete(KURTARMA)
 }
+
+/** Cihaz anahtarı: tarayıcıya özgü rastgele değer (hesaba bağlı değil). Hesap yalnızca özetini “tanınan cihaz” olarak tutar. */
+const CIHAZ = 'tk-cihaz'
+export async function cihazAnahtari(olustur = false): Promise<string | undefined> {
+  const c = await cookies()
+  const v = c.get(CIHAZ)?.value
+  if (v || !olustur) return v
+  const yeni = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  c.set(CIHAZ, yeni, { ...kisaCerez(new Date(Date.now() + 400 * 86_400_000)) })
+  return yeni
+}

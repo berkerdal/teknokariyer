@@ -15,8 +15,8 @@ const YETKI_ADI = Object.fromEntries(YETKILER.map(([d, a]) => [d, a]))
 
 /** Firma ekibi (talimatlar 2): kim hangi yetkiyle çalışıyor; davet, yetki değişikliği, ekipten çıkarma. */
 const SONUC: Record<string, string> = {
-  'iki-adim-sifirlandi': 'İki aşamalı doğrulama sıfırlandı. Kişi bir sonraki girişinde doğrulayıcı uygulamayı yeniden kuracak; kendisine bilgi e-postası gönderildi.',
-  'iki-adim-sifirlandi-epostasiz': 'İki aşamalı doğrulama sıfırlandı, ancak bilgi e-postası gönderilemedi. Kişiye ayrıca haber verin.',
+  'iki-adim-sifirlandi': 'Doğrulama sıfırlandı. Kişinin doğrulayıcı uygulaması kaldırıldı ve tanınan cihazları unutuldu; bir sonraki girişinde e-postasına kod gidecek. Kendisine bilgi e-postası gönderildi.',
+  'iki-adim-sifirlandi-epostasiz': 'Doğrulama sıfırlandı, ancak bilgi e-postası gönderilemedi. Kişiye ayrıca haber verin.',
   yetki: 'Yetki değiştirildi.',
   cikar: 'Kişi ekipten çıkarıldı; artık giriş yapamaz. Notları ve işlem kayıtları korunur.',
   'geri-al': 'Kişi ekibe geri alındı; yeniden giriş yapabilir.',
@@ -89,13 +89,13 @@ export default async function Ekip({ searchParams }: { searchParams: Promise<{ s
                   <strong>{u.ad}</strong>
                   {Number(u.id) === Number(k.id) && <span className="etiket">Siz</span>}
                 </p>
-                <p className="kucuk ikincil">{[u.unvan, u.email, u.ikiAsamaliAcik ? 'iki aşamalı doğrulama açık' : 'iki aşamalı doğrulama ilk girişte kurulacak'].filter(Boolean).join(' · ')}</p>
+                <p className="kucuk ikincil">{[u.unvan, u.email, u.ikiAsamaliAcik ? 'doğrulayıcı uygulama kurulu' : 'yeni cihazda e-postayla doğrulama'].filter(Boolean).join(' · ')}</p>
               </div>
               {yonetir && Number(u.id) !== Number(k.id) ? (
                 <div className="ekip-islemleri">
                   <YetkiSecimi id={u.id} yetki={u.firmaYetkisi ?? 'degerlendirici'} ad={u.ad} />
                   <EkipIslemi id={u.id} islem="cikar" metin="Ekipten çıkar" tehlike onay={`${u.ad} ekipten çıkarılsın mı? Bu kişi artık giriş yapamaz.`} />
-                  {u.ikiAsamaliAcik && <IkiAdimSifirlaDugmesi kullaniciId={u.id} ad={u.ad} geri="/firma-paneli/ekip" />}
+                  {<IkiAdimSifirlaDugmesi kullaniciId={u.id} ad={u.ad} geri="/firma-paneli/ekip" />}
                 </div>
               ) : (
                 <span className="kucuk">{YETKI_ADI[u.firmaYetkisi ?? 'degerlendirici']}</span>

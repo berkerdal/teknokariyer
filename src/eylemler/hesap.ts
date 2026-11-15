@@ -5,9 +5,11 @@
 import { redirect } from 'next/navigation'
 import type { FormDurumu } from '@/arayuz/form'
 import { FormHatasi, adayKaydi, girisYap, sifreSifirlamaIste, sifreYenile, type GirisSonucu } from '@/servisler/hesap'
-import { bekleyenGirisPaketle, ikiAdimDurumu } from '@/servisler/ikiAdim'
+import { bekleyenGirisPaketle, cihazlariTemizle, epostaKoduGonder, girisDogrulamaYontemi } from '@/servisler/ikiAdim'
+import { epostaMaskele } from '@/alan/ikiAdim'
+import { ortam } from '@/altyapi/eposta'
 import { IslemHatasi } from '@/servisler/ortak'
-import { bekleyenGirisYaz, guvenliDonus, oturumAc, oturumKapat, rolAnaSayfasi } from '@/veri/cerez'
+import { bekleyenGirisYaz, cihazAnahtari, guvenliDonus, oturumAc, oturumKapat, rolAnaSayfasi } from '@/veri/cerez'
 import { payloadAl } from '@/veri/payload'
 import { davetiKabulEt } from '@/servisler/ekip'
 
@@ -21,19 +23,35 @@ function hataDurumu(e: unknown, degerler?: Record<string, string>): FormDurumu {
 }
 
 /**
- * Şifre doğrulandıktan sonra: ikinci adım gerekmiyorsa oturumu açar. Gerekiyorsa oturum anahtarını şifreli, kısa ömürlü
- * “bekleyen giriş” çerezine koyar ve ikinci adım (veya ilk kurulum) sayfasına yönlendirir. Dönülecek adresi verir.
+ * Şifre doğrulandıktan sonra (K33): bu cihaz tanınıyorsa veya ikinci adım gerekmiyorsa oturumu açar. Gerekiyorsa oturum
+ * anahtarını şifreli, kısa ömürlü “bekleyen giriş” çerezine koyar; e-posta yönteminde kodu gönderir ve ikinci adım
+ * sayfasına yönlendirir. Dönülecek adresi verir.
  */
-async function girisiSurdur(s: GirisSonucu, donus: string): Promise<string> {
+async function girisiSurdur(s: GirisSonucu, donus: string, eposta: string): Promise<string> {
   const payload = await payloadAl()
-  const d = await ikiAdimDurumu(payload, s.kullaniciId)
-  if (!d.gerekli) {
+  const yontem = await girisDogrulamaYontemi(payload, s.kullaniciId, await cihazAnahtari(true))
+  if (yontem === 'yok') {
     await oturumAc(s.token, s.bitis)
     return donus
   }
-  const { paket, son } = await bekleyenGirisPaketle({ kullaniciId: s.kullaniciId, token: s.token, bitis: s.bitis.toISOString(), rol: s.rol, donus })
+  let testKodu: string | undefined
+  if (yontem === 'eposta') {
+    const r = await epostaKoduGonder(payload, s.kullaniciId)
+    // E-postalar yayın dışı ortamda dışarı çıkmaz; kod yalnızca orada ekranda gösterilir
+    if (ortam() !== 'yayin') testKodu = r.kod
+  }
+  const { paket, son } = await bekleyenGirisPaketle({
+    kullaniciId: s.kullaniciId,
+    token: s.token,
+    bitis: s.bitis.toISOString(),
+    rol: s.rol,
+    donus,
+    yontem,
+    adres: yontem === 'eposta' ? epostaMaskele(eposta) : undefined,
+    testKodu,
+  })
   await bekleyenGirisYaz(paket, son)
-  return d.kurulu ? '/giris/ikinci-adim' : '/giris/iki-adim-kurulum'
+  return '/giris/ikinci-adim'
 }
 
 export async function girisEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
@@ -41,7 +59,7 @@ export async function girisEylemi(_: FormDurumu, f: FormData): Promise<FormDurum
   let hedef: string
   try {
     const s = await girisYap(await payloadAl(), eposta, metin(f, 'sifre'))
-    hedef = await girisiSurdur(s, guvenliDonus(f.get('donus'), rolAnaSayfasi(s.rol)))
+    hedef = await girisiSurdur(s, guvenliDonus(f.get('donus'), rolAnaSayfasi(s.rol)), eposta)
   } catch (e) {
     return hataDurumu(e, { eposta })
   }
@@ -77,8 +95,12 @@ export async function sifreSifirlamaEylemi(_: FormDurumu, f: FormData): Promise<
 export async function sifreYenileEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
   let hedef: string
   try {
-    const s = await sifreYenile(await payloadAl(), metin(f, 'anahtar'), metin(f, 'sifre'))
-    hedef = await girisiSurdur(s, rolAnaSayfasi(s.rol))
+    const payload = await payloadAl()
+    const s = await sifreYenile(payload, metin(f, 'anahtar'), metin(f, 'sifre'))
+    // Şifre yenilenince tanınan cihazlar unutulur; bu cihaz da yeniden doğrulanır
+    await cihazlariTemizle(payload, s.kullaniciId)
+    const u = await payload.findByID({ collection: 'kullanicilar', id: s.kullaniciId, depth: 0, overrideAccess: true })
+    hedef = await girisiSurdur(s, rolAnaSayfasi(s.rol), u.email)
   } catch (e) {
     return hataDurumu(e)
   }
@@ -98,8 +120,8 @@ export async function davetKabulEylemi(_: FormDurumu, f: FormData): Promise<Form
     const payload = await payloadAl()
     const u = await davetiKabulEt(payload, metin(f, 'anahtar'), { ...degerler, sifre: metin(f, 'sifre') })
     const s = await girisYap(payload, u.email, metin(f, 'sifre'))
-    // Firma hesabında ikinci adım zorunlu: ilk girişte kurulum sayfasına gider
-    hedef = await girisiSurdur(s, '/firma-paneli?hosgeldiniz=1')
+    // Firma hesabında yeni cihaz doğrulaması zorunlu: davet e-postasına kod gider
+    hedef = await girisiSurdur(s, '/firma-paneli?hosgeldiniz=1', u.email)
   } catch (e) {
     if (e instanceof FormHatasi) return { hatalar: e.alanlar, degerler }
     if (e instanceof IslemHatasi) return { genel: e.message, degerler }

@@ -13,8 +13,8 @@ export const metadata: Metadata = { title: 'Kullanıcılar · Yönetim' }
 type Props = { searchParams: Promise<{ sonuc?: string }> }
 
 const SONUC: Record<string, string> = {
-  'iki-adim-sifirlandi': 'İki aşamalı doğrulama sıfırlandı. Kişi bir sonraki girişinde doğrulayıcı uygulamayı yeniden kuracak; kendisine bilgi e-postası gönderildi.',
-  'iki-adim-sifirlandi-epostasiz': 'İki aşamalı doğrulama sıfırlandı, ancak bilgi e-postası gönderilemedi. Kişiye ayrıca haber verin.',
+  'iki-adim-sifirlandi': 'Doğrulama sıfırlandı. Kişinin doğrulayıcı uygulaması kaldırıldı ve tanınan cihazları unutuldu; bir sonraki girişinde e-postasına kod gidecek. Kendisine bilgi e-postası gönderildi.',
+  'iki-adim-sifirlandi-epostasiz': 'Doğrulama sıfırlandı, ancak bilgi e-postası gönderilemedi. Kişiye ayrıca haber verin.',
   eklendi: 'Hesap açıldı. Kişiye şifre belirleme bağlantısı gönderildi; bağlantı 7 gün geçerlidir.',
   rol: 'Yetki değiştirildi.',
   kapat: 'Hesap kapatıldı. Kişi artık giriş yapamaz; açık oturumu da sonlanır.',
@@ -86,7 +86,7 @@ export default async function Kullanicilar({ searchParams }: Props) {
                     <span className="kucuk ikincil">
                       {u.pasif ? 'Hesap kapalı' : KURUM_ROL_ADI[u.rol as KurumRolu]}
                       {u.teknikSorumlu ? ' · Teknik sorumlu' : ''} · {tarihYaz(u.createdAt, true)} tarihinde açıldı
-                      {!u.pasif && (u.ikiAsamaliAcik ? ' · iki aşamalı doğrulama açık' : ' · iki aşamalı doğrulama ilk girişte kurulacak')}
+                      {!u.pasif && (u.ikiAsamaliAcik ? ' · doğrulayıcı uygulama kurulu' : ' · yeni cihazda e-postayla doğrulama')}
                     </span>
                   </span>
                   {yonetici && !kendisi && (
@@ -96,7 +96,7 @@ export default async function Kullanicilar({ searchParams }: Props) {
                         {teknik && !u.pasif && (
                           <KullaniciIslemi kullaniciId={u.id} islem={u.teknikSorumlu ? 'teknik-al' : 'teknik-ver'} metin={u.teknikSorumlu ? 'Teknik sorumluluğu kaldır' : 'Teknik sorumlu yap'} />
                         )}
-                        {!u.pasif && u.ikiAsamaliAcik && <IkiAdimSifirlaDugmesi kullaniciId={u.id} ad={u.ad} geri="/yonetim/kullanicilar" />}
+                        {!u.pasif && <IkiAdimSifirlaDugmesi kullaniciId={u.id} ad={u.ad} geri="/yonetim/kullanicilar" />}
                         {u.pasif ? (
                           <KullaniciIslemi kullaniciId={u.id} islem="ac" metin="Hesabı yeniden aç" />
                         ) : (

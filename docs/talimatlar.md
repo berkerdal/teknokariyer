@@ -44,6 +44,7 @@ olursa bu bölüm geçerlidir.
 | K29 | Metin dili | Her alan ve mesaj profesyonel Türkçeyle yazılır: tam cümle, yüklemli, devriksiz. Örnek: “15 ilan, 13 firmadan.” değil “Şu anda 13 firmanın 15 ilanı yayında.” (14 Kasım 2026). |
 | K30 | Panellerde açıklama | Yönetici A.Ş. ve firma panellerinde her modülün ve alanın ne olduğu bir bilgi kutusuyla anlatılır; paneller kendini açıklar (14 Kasım 2026). |
 | K32 | KVKK araçları | Önerilen uygulama kabul edildi (15 Kasım 2026): hesap silmede ön yazı ve profil bağlantıları da silinir; eğitim, beceri ve ön eleme cevapları saklama süresine kadar firmada kalır. KVKK başvuruları ve işlem kayıtları yalnızca tam yetkili kullanıcılara açıktır. Hukuk birimi görüşü yine alınacak (19. bölüm sonu). |
+| K33 | İki aşamalı doğrulama | Doğrulayıcı uygulama zorunlu değil, “önerilen” seçenek olarak Hesap güvenliği sayfasında sunulur. Firma ve Yönetici A.Ş. hesaplarında tanınmayan bir cihazdan girişte e-postayla 6 haneli kod zorunludur; cihaz 90 gün hatırlanabilir (15 Kasım 2026). |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 

@@ -1,8 +1,11 @@
 /**
- * İki aşamalı doğrulama (talimatlar 12: firma ve Yönetici A.Ş. hesaplarında zorunlu, adaylarda isteğe bağlı).
+ * İki aşamalı doğrulama (talimatlar 12; kullanıcı kararı K33, 15.11.2026).
  *
- * Doğrulayıcı uygulama kodu (TOTP, RFC 6238: HMAC-SHA1, 30 saniye, 6 hane) ve tek kullanımlık kurtarma kodları.
- * Google Authenticator, Microsoft Authenticator ve benzerleriyle çalışır. WebCrypto kullanır; Workers ve Node'da aynı.
+ * - Firma ve Yönetici A.Ş. hesaplarında tanınmayan bir cihazdan girişte ikinci adım zorunludur: e-postaya 6 haneli kod.
+ *   “Bu cihazı hatırla” denirse aynı cihazda 90 gün kod istenmez (her girişte uzar).
+ * - Doğrulayıcı uygulama (TOTP, RFC 6238: HMAC-SHA1, 30 saniye, 6 hane) önerilen seçenektir; kuran kişiye yeni cihazda
+ *   e-posta yerine uygulama kodu sorulur. Adaylar da isterse kurar. Tek kullanımlık kurtarma kodları uygulamayla gelir.
+ * WebCrypto kullanır; Workers ve Node'da aynı.
  */
 
 export const ADIM_SANIYE = 30
@@ -113,5 +116,58 @@ export async function ozet(s: string): Promise<string> {
   return Array.from(new Uint8Array(h), (x) => x.toString(16).padStart(2, '0')).join('')
 }
 
-/** Rol için ikinci adım zorunlu mu? Firma ve Yönetici A.Ş. kullanıcıları için evet; aday isterse açar. */
+/** Bu rolde yeni cihazdan girişte ikinci adım zorunlu mu? Firma ve Yönetici A.Ş. kullanıcıları için evet. */
 export const ikiAdimZorunluMu = (rol: string | null | undefined) => rol === 'firma' || rol === 'yonetici' || rol === 'moderator' || rol === 'raporlayici'
+
+/* ---------- E-posta kodu ve tanınan cihazlar ---------- */
+
+export const EPOSTA_KODU_DAKIKA = 10
+export const YENIDEN_GONDER_SANIYE = 60
+/** Bir hesabın bir saatte isteyebileceği en fazla e-posta kodu */
+export const SAATTE_EN_FAZLA_KOD = 5
+export const CIHAZ_GUN = 90
+export const EN_FAZLA_CIHAZ = 10
+
+/** 6 haneli e-posta kodu (eşit dağılımlı). */
+export function epostaKoduUret(): string {
+  const r = crypto.getRandomValues(new Uint32Array(1))[0]!
+  return String(r % 1_000_000).padStart(6, '0')
+}
+
+/** “ay***@firma.com”: kodun nereye gittiğini, adresi açık etmeden söyler. */
+export function epostaMaskele(e: string): string {
+  const [ad, alan] = e.split('@')
+  if (!ad || !alan) return e
+  return `${ad.slice(0, Math.min(2, ad.length))}${'*'.repeat(Math.max(3, ad.length - 2))}@${alan}`
+}
+
+/** Tarayıcı kimliğinden kısa ve anlaşılır cihaz adı: “Chrome · Windows”. Kesin değildir; yalnızca listede tanımak için. */
+export function cihazAdi(ua: string | null | undefined): string {
+  const u = ua ?? ''
+  const tarayici = /Edg\//.test(u) ? 'Edge' : /OPR\//.test(u) ? 'Opera' : /Firefox\//.test(u) ? 'Firefox' : /Chrome\//.test(u) ? 'Chrome' : /Safari\//.test(u) ? 'Safari' : 'Tarayıcı'
+  const sistem = /iPhone|iPad/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'bilinmeyen sistem'
+  return `${tarayici} · ${sistem}`
+}
+
+export interface TaninanCihaz {
+  ozet: string
+  ad: string
+  ilk: string
+  son: string
+}
+
+/** Süresi dolmamış cihazlar; en yeni kullanılan önce. */
+export function gecerliCihazlar(liste: unknown, simdi: Date): TaninanCihaz[] {
+  if (!Array.isArray(liste)) return []
+  const sinir = simdi.getTime() - CIHAZ_GUN * 86_400_000
+  return (liste as TaninanCihaz[]).filter((c) => c && typeof c.ozet === 'string' && new Date(c.son).getTime() > sinir).sort((a, b) => b.son.localeCompare(a.son))
+}
+
+/** Cihazı listeye ekler veya son kullanımını günceller; en fazla 10 cihaz tutulur (en eskisi düşer). */
+export function cihazEkle(liste: unknown, c: { ozet: string; ad: string }, simdi: Date): TaninanCihaz[] {
+  const an = simdi.toISOString()
+  const mevcut = gecerliCihazlar(liste, simdi)
+  const eski = mevcut.find((x) => x.ozet === c.ozet)
+  const digerleri = mevcut.filter((x) => x.ozet !== c.ozet)
+  return [{ ozet: c.ozet, ad: c.ad, ilk: eski?.ilk ?? an, son: an }, ...digerleri].slice(0, EN_FAZLA_CIHAZ)
+}

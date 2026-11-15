@@ -176,6 +176,24 @@ export interface Kullanicilar {
     | null;
   ikiAdimHata?: number | null;
   ikiAdimKilit?: string | null;
+  taninanCihazlar?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  epostaKodu?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * Gelişmiş yönetim ekranına (Payload) girebilir. Yalnızca teknik bilgisi olan kişiye verin.
    */
@@ -876,6 +894,8 @@ export interface KullanicilarSelect<T extends boolean = true> {
   kurtarmaKodlari?: T;
   ikiAdimHata?: T;
   ikiAdimKilit?: T;
+  taninanCihazlar?: T;
+  epostaKodu?: T;
   teknikSorumlu?: T;
   pasif?: T;
   updatedAt?: T;
