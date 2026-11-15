@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { dilAdresleri } from '@/alan/dil'
 import { notFound } from 'next/navigation'
 import { Metin } from '@/arayuz/IlanParcalari'
 import { Ust } from '@/arayuz/Ust'
@@ -12,7 +13,7 @@ const bul = (k: string) => (k in METINLER ? METINLER[k as MetinKimligi] : null)
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const m = bul((await params).kimlik)
   if (!m) notFound()
-  return { title: m.baslik }
+  return { title: m.baslik, alternates: dilAdresleri(`/metin/${(await params).kimlik}`) }
 }
 
 /** Aydınlatma ve rıza metinleri: sürümü ve tarihiyle. Onaylanmamış metin “taslak” olarak işaretlenir. */

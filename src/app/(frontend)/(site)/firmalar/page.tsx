@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { dilAdresleri } from '@/alan/dil'
 import Link from 'next/link'
 import { FirmaKaro } from '@/arayuz/FirmaKaro'
 import { Ust } from '@/arayuz/Ust'
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'İlan veren firmalar',
   description: 'Pamukkale Teknokent’te şu anda iş veya staj ilanı bulunan firmalar.',
-  alternates: { canonical: '/firmalar' },
+  alternates: dilAdresleri('/firmalar'),
 }
 
 /** İlanı olan firmalar. Firma rehberinin tamamı değil: aday için anlamlı olan, açık ilanı olan firmalar. */

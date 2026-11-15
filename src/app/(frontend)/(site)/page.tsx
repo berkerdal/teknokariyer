@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+import { dilAdresleri } from '@/alan/dil'
 import Link from 'next/link'
 import { sirala } from '@/alan/ilanFiltre'
 import { Ikon } from '@/arayuz/Ikon'
@@ -7,6 +9,9 @@ import { Ust } from '@/arayuz/Ust'
 import { yayindakiIlanlar } from '@/veri/ilanlar'
 
 export const dynamic = 'force-dynamic'
+
+/** Başlık ve açıklama kök düzenden gelir; burada kanonik adres ve dil karşılıkları (hreflang). */
+export const metadata: Metadata = { alternates: dilAdresleri('/') }
 
 /** Ana sayfa: ilk ekranda arama, canlı sayılı hızlı filtreler ve gerçek son ilanlar. Dev slogan yok. */
 export default async function AnaSayfa() {

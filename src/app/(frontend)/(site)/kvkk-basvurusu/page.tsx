@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
+import { dilAdresleri } from '@/alan/dil'
 import Link from 'next/link'
 import { Ust } from '@/arayuz/Ust'
 import { KURUM } from '@/altyapi/kurum'
 
 export const metadata: Metadata = {
   title: 'KVKK başvurusu',
+  alternates: dilAdresleri('/kvkk-basvurusu'),
   description: 'TeknoKariyer’de işlenen kişisel verilerinizle ilgili haklarınızı nasıl kullanabileceğiniz.',
 }
 

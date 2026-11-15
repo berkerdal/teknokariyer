@@ -490,7 +490,17 @@ Claude tarafından yapılacak.
       Önce örnek verideki “Bilkent Üniversitesi” ve “Grafik Tasarım” resmî adlarına çevrildi, eski yazım eş anlamlı oldu.
     - Öğrenilen: kısa ad resmî adın sonu olabilir (“Bilkent” ⊂ “İhsan Doğramacı Bilkent”), ama sondan eşleme kuralı
       yanlış birleştirir (“Akdeniz” ⊂ “Doğu Akdeniz”). Kaynakta karşılığı olmayan mevcut adlar yüklemeden önce elle bakılır.
-  - **Sırada:** site haritası (sitemap) ve hreflang, `docs/goc-rehberi.md` ve test senaryoları belgesi.
+  - **Site haritası, robots ve hreflang (15.11.2026):** `src/app/sitemap.ts` (ana sayfa, ilan listesi ve staj sekmesi, açık
+    ilanlar, açık ilanı olan firmalar, KVKK başvurusu, metinler; ilan listesiyle aynı görünürlük kuralı, `src/veri/siteHaritasi.ts`,
+    girdiler saf fonksiyon `src/alan/siteHaritasi.ts`). `src/app/robots.ts`: yayında hesap, panel, akış ve yönetim yolları
+    (`TARANMAYAN_YOLLAR`) taranmaz ve site haritası bildirilir; **yayın dışında her şey kapalı**. Cloudflare'de `worker.ts`
+    yayın dışı ortamda her yanıta `X-Robots-Tag: noindex, nofollow` ekler (öncesinde test ortamı dizinlenebilirdi).
+    - hreflang: `src/alan/dil.ts` → `DILLER` (şimdilik yalnızca `tr`) ve `dilAdresleri(yol)` (kanonik + dil karşılıkları +
+      `x-default`). Next'te alt sayfanın `alternates` alanı üsttekini tamamen ezer; her dizinlenebilir sayfa kendisi verir.
+    - `metadataBase` artık `siteAdresi()` (SITE_ADRESI): site haritası, sayfa başlıkları ve e-postalar aynı kökü kullanır.
+    - **Açık soru (kullanıcıya soruldu):** Talimatlar 14 İngilizce arayüz ve `/tr/`, `/en/` adresleri istiyor; portal yalnızca
+      Türkçe. İngilizce eklenince `DILLER`e `{ kod: 'en', onEk: '/en' }` girer.
+  - **Sırada:** `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayın veritabanına YÖK listesi `scripts/liste-yukle.ts` veya

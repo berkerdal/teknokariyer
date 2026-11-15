@@ -12,6 +12,15 @@ import isleyici from './.open-next/worker.js'
 
 interface Ortam {
   ASSETS: { fetch: (istek: Request) => Promise<Response> }
+  ORTAM?: string
+}
+
+/** Yayın dışı ortam (test) arama motorlarında görünmez: her yanıta noindex başlığı eklenir. */
+function dizinlemeyiKapat(yanit: Response, env: Ortam): Response {
+  if ((env.ORTAM ?? '').toLowerCase() === 'yayin') return yanit
+  const y = new Response(yanit.body, yanit)
+  y.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  return y
 }
 
 const ZAMANLI_ANAHTAR = Symbol.for('teknokariyer.zamanli-anahtar')
@@ -36,7 +45,7 @@ export default {
       // (İlk sürümde yalnızca 200 kabul ediliyordu: ikinci istekte 304 Next'e düşüp 307 döngüsü başlatıyordu.)
       if (yanit.status !== 404) return yanit
     }
-    return isleyici.fetch(istek, env, ctx)
+    return dizinlemeyiKapat(await isleyici.fetch(istek, env, ctx), env)
   },
 
   /**

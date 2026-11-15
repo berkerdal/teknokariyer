@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { dilAdresleri } from '@/alan/dil'
 import Link from 'next/link'
 import { basvuruKaynagi } from '@/alan/basvuru'
 import { DENEYIM_ADI } from '@/alan/eslesme'
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: ad,
     description: `${ilan.firma.ad} (Pamukkale Teknokent, ${ilan.firma.konum}) ${ilan.tur === 'staj' ? 'staj' : 'iş'} ilanı. Son başvuru: ${tarihYaz(ilan.sonBasvuru, true)}.`,
-    alternates: { canonical: ilanAdresi(ilan) },
+    alternates: dilAdresleri(ilanAdresi(ilan)),
     robots: acikMi(ilan) ? undefined : { index: false, follow: true },
     openGraph: { title: ad, type: 'website', locale: 'tr_TR', siteName: 'TeknoKariyer' },
   }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { dilAdresleri } from '@/alan/dil'
 import { notFound } from 'next/navigation'
 import { sirala } from '@/alan/ilanFiltre'
 import { MODEL_ADI } from '@/alan/eslesme'
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${f.ad} · Pamukkale Teknokent`,
     description: f.kisaTanitim || `${f.unvan}, Pamukkale Teknokent ${f.konum}. Açık iş ve staj ilanları.`,
-    alternates: { canonical: `/firma/${f.slug}` },
+    alternates: dilAdresleri(`/firma/${f.slug}`),
   }
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { dilAdresleri } from '@/alan/dil'
 import Link from 'next/link'
 import Form from 'next/form'
 import {
@@ -31,7 +32,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return {
     title: staj ? 'Staj ilanları' : 'İş ve staj ilanları',
     description: 'Pamukkale Teknokent firmalarının yayındaki iş ve staj ilanları. Türe, çalışma modeline, deneyime ve pozisyon ailesine göre filtrele.',
-    alternates: { canonical: staj ? '/ilanlar?tur=staj' : '/ilanlar' },
+    alternates: dilAdresleri(staj ? '/ilanlar?tur=staj' : '/ilanlar'),
     // Filtre birleşimleri arama motorunda ayrı sayfa olarak dizinlenmez.
     robots: aktifFiltreSayisi(f) > (staj ? 1 : 0) || f.ara ? { index: false, follow: true } : undefined,
   }
