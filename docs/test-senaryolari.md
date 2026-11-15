@@ -82,6 +82,8 @@ firma değerlendirir. Sırayla uygulamanız önerilir. Her senaryonun başındak
    - *Beklenen:* Kayıt başarılı mesajı. Logo, kısa tanıtım ve sektör tamamlanınca Yönetici A.Ş. tarafındaki kurulum
      aşaması kendiliğinden “Profil tamam” olur.
    - *Ayrıca deneyin:* Logo olarak bir SVG veya PDF yükleyin. Anlaşılır bir hata mesajı görünmeli.
+   - *Ayrıca deneyin (Yönetici A.Ş.):* **Firmalar ve kurulum** → firmanın adı → **Logo** bölümünden başka bir logo
+     yükleyin. Yeni logo ilan listesinde, ilan sayfasında ve firma sayfasında eskisinin yerine görünmeli.
 2. **Ekip** sayfasında bir iş arkadaşınızı davet edin: ad, uydurma bir **İş e-posta adresi** ve yetki (**İlan sorumlusu**
    veya **Değerlendirici**) seçip **Davet gönder**'e basın.
    - *Beklenen:* Davet bekleyenler arasında görünür; e-posta test posta kutusuna düşer.
