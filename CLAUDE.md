@@ -533,7 +533,12 @@ Claude tarafından yapılacak.
     düğmesi (`epostaDogrulaEylemi`) doğrular. Kurumsal e-posta güvenlik tarayıcıları bağlantıları önceden açtığı için GET'te
     doğrulama anahtarı adaydan önce tüketiyordu. (Bu çalışma ortamındaki Chromium da belge isteğini iç 307 ile iki kez
     gönderiyor; hatayı o ortaya çıkardı.)
-  - **Sırada:** test senaryoları belgesi (`docs/test-senaryolari.md`).
+  - **Test senaryoları (15.11.2026):** `docs/test-senaryolari.md` (S1–S11: firma kurulumu, profil ve ekip, ilan ve onay,
+    aday kaydı, başvuru, havuz, hesap güvenliği, liste talepleri, KVKK ve hesap silme, raporlar, mobil; geri bildirim
+    şablonu). Ekran ve düğme adları yerelde tarayıcıyla adım adım uygulanarak alındı (S1, S3'ün başı, S4 doğrulandı).
+    Geri bildirim kanalı kurumca belirlenmedi: belge “test koordinatörüne” diyor.
+  - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
+    ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayın veritabanına YÖK listesi `scripts/liste-yukle.ts` veya
