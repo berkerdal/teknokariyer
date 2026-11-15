@@ -15,6 +15,7 @@ import { eskiSayaclariSil } from './istekSiniri'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { davetHatirlat } from './ekip'
 import { kaydedilenHatirlatmalari } from './kaydedilenler'
+import { havuzRizaHatirlatmalari } from './havuz'
 import { trafikOzetle } from './trafik'
 import { suresiDolanlariKapat } from './ilanIslemleri'
 import { gunlukOzetYaz } from './gunlukOzet'
@@ -33,6 +34,7 @@ export interface ZamanliSonuc {
   davetHatirlatma: number
   profilHatirlatma: number
   kaydedilenHatirlatma: number
+  havuzRizaHatirlatma: number
   hatalar: string[]
 }
 
@@ -122,7 +124,8 @@ export async function zamanliIsleriCalistir(payload: Payload, simdi = new Date()
   const davetHatirlatma = hatirlatmalar ? await guvenli('Davet hatırlatmaları', () => davetHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const profilHatirlatma = hatirlatmalar ? await guvenli('Profil hatırlatmaları', () => profilHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const kaydedilenHatirlatma = hatirlatmalar ? await guvenli('Kaydedilen ilan hatırlatmaları', () => kaydedilenHatirlatmalari(payload, simdi, hatalar)) : 0
-  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, silinenSayac, ozetlenenTrafik, kapananIlan, davetHatirlatma, profilHatirlatma, kaydedilenHatirlatma, hatalar }
+  const havuzRizaHatirlatma = hatirlatmalar ? await guvenli('Havuz rızası hatırlatmaları', () => havuzRizaHatirlatmalari(payload, simdi, hatalar)) : 0
+  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, silinenSayac, ozetlenenTrafik, kapananIlan, davetHatirlatma, profilHatirlatma, kaydedilenHatirlatma, havuzRizaHatirlatma, hatalar }
   await islemKaydet(await istekOlustur(payload, null), { islem: 'Zamanlanmış işler çalıştı', tur: 'ayarlar', ayrinti: sonuc }).catch((): undefined => undefined)
   return sonuc
 }

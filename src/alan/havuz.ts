@@ -13,6 +13,8 @@ export function basvuruAraligi(basvuruSayisi: number): string {
 
 /* ---------- Rıza (talimatlar 7) ---------- */
 
+import { trGunFarki as gunFarki } from './tarih'
+
 export const HAVUZ_RIZA_SURESI_AY = 12
 
 export function rizaBitisTarihi(verilis: Date, ay = HAVUZ_RIZA_SURESI_AY): Date {
@@ -28,6 +30,19 @@ export function rizaGecerliMi(verilis: Date | null | undefined, simdi: Date, ay 
 
 /** Yenileme hatırlatması, bitişten bu kadar gün önce gider. */
 export const RIZA_HATIRLATMA_GUN = 30
+
+/**
+ * Rıza yenileme hatırlatmaları: bitişe 30 ve 7 gün kala, bir de süre dolduğunda (0) birer kez. Kaçırılan günlerde
+ * yalnızca en yakın eşik gider (30 gün kala çalışmadıysa ve 5 gün kaldıysa yalnızca 7 günlük gider). Süresi 30 günden
+ * uzun zaman önce dolmuş rıza için bildirim gönderilmez.
+ */
+export const RIZA_HATIRLATMA_ESIKLERI = [RIZA_HATIRLATMA_GUN, 7, 0] as const
+export function rizaHatirlatmasi(verilis: Date, simdi: Date, ay: number, sonGonderilen: number | null | undefined): number | null {
+  const kalan = gunFarki(simdi, rizaBitisTarihi(verilis, ay))
+  if (kalan < -30) return null
+  const uygun = RIZA_HATIRLATMA_ESIKLERI.filter((e) => kalan <= e && (sonGonderilen == null || e < sonGonderilen))
+  return uygun.length ? Math.min(...uygun) : null
+}
 
 /* ---------- Görünürlük (K24, K25) ---------- */
 

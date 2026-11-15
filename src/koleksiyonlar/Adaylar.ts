@@ -198,6 +198,13 @@ export const Adaylar: CollectionConfig = {
           options: Object.entries(GORUNURLUK_ADI).map(([value, label]) => ({ value, label })),
         },
         { name: 'rizaTarihi', label: 'Açık rıza tarihi', type: 'date', access: { update: () => false } },
+        {
+          name: 'rizaHatirlatildi',
+          label: 'Gönderilen son rıza hatırlatması (bitişe kalan gün eşiği)',
+          type: 'number',
+          admin: { readOnly: true, description: '30, 7 veya 0 (süre doldu). Rıza yenilenince sıfırlanır.' },
+          access: { update: () => false },
+        },
         { name: 'gizlenenFirmalar', label: 'Gizlenen firmalar', type: 'relationship', relationTo: 'firmalar', hasMany: true },
       ],
     },

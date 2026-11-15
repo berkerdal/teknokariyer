@@ -329,6 +329,25 @@ export function kaydedilenIlanHatirlatmaEpostasi(d: { ad?: string | null; pozisy
   )
 }
 
+/** CV havuzu rızası yenileme hatırlatması (30 ve 7 gün kala) ve süre doldu bildirimi (0). */
+export function havuzRizaEpostasi(d: { ad?: string | null; kalan: number; bitis: string }): Eposta {
+  const doldu = d.kalan <= 0
+  return eposta(
+    doldu ? 'CV havuzu rızanın süresi doldu' : `CV havuzu rızanın süresi ${d.kalan} gün sonra doluyor`,
+    [
+      `Merhaba ${d.ad ?? ''},`.trim(),
+      doldu
+        ? `CV havuzu için verdiğin açık rızanın süresi ${d.bitis} tarihinde doldu. Profilin artık firmaların havuz aramalarında görünmüyor.`
+        : `CV havuzu için verdiğin açık rızanın süresi ${d.bitis} tarihinde doluyor. Bu tarihten sonra profilin firmaların havuz aramalarında görünmez.`,
+      doldu
+        ? 'Yeniden havuza katılmak istersen “CV havuzu” sayfasından rızanı yenileyebilirsin. Başvuruların bundan etkilenmez.'
+        : 'Havuzda kalmak istiyorsan “CV havuzu” sayfasından rızanı tek tıkla yenileyebilirsin. Yenilemezsen bir şey yapmana gerek yok; profilin süre dolunca havuzdan kendiliğinden çıkar.',
+    ],
+    { metin: doldu ? 'Havuza yeniden katıl' : 'Rızamı yenile', adres: `${siteAdresi()}/hesabim/havuz` },
+    ['Bu e-posta, CV havuzu rızanın süresiyle ilgili olduğu için gönderildi. Rızanı istediğin zaman geri alabilirsin.'],
+  )
+}
+
 export function kurumHesabiEpostasi(d: { ad: string; rolAdi: string; acan: string; anahtar: string; gun: number }): Eposta {
   return eposta(
     'TeknoKariyer yönetim hesabınız açıldı',

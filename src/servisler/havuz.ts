@@ -6,6 +6,10 @@
 import type { Payload, Where } from 'payload'
 import type { Adaylar } from '@/payload-types'
 import {
+  HAVUZ_RIZA_SURESI_AY,
+  RIZA_HATIRLATMA_GUN,
+  rizaBitisTarihi,
+  rizaHatirlatmasi,
   filtreAlaniIzinliMi,
   firmaGorebilirMi,
   havuzOzeti,
@@ -15,6 +19,9 @@ import {
 } from '@/alan/havuz'
 import { firmaKimligi, firmaYetkisiVarMi, kurumKullanicisiMi, adayMi } from '@/erisim'
 import { islemKaydet } from '@/altyapi/islemKaydi'
+import { havuzRizaEpostasi } from '@/altyapi/epostaSablonlari'
+import { trGunFarki as gunFarkiTr } from '@/alan/tarih'
+import { tarihYaz } from '@/arayuz/bicim'
 import { dosyaIcerigi } from '@/altyapi/depolama'
 import { filigranMetni, pdfFiligranla } from '@/altyapi/filigran'
 import { IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
@@ -173,4 +180,46 @@ export async function havuzBelgesi(payload: Payload, kullanici: Kullanici, adayI
   if (!(aday.sertifikalar ?? []).some((s) => s.dosya && kimlik(s.dosya) === dosyaId)) throw new IslemHatasi('Belge bulunamadı.', 404)
   const firma = await payload.findByID({ collection: 'firmalar', id: Number(firmaKimligi(kullanici)), depth: 0, overrideAccess: true })
   return belgeHazirla(payload, dosyaId, { k: kullanici, ad: firma.kisaAd, kayit: { kayitTuru: 'adaylar', kayitId: adayId } })
+}
+
+/**
+ * Rıza yenileme hatırlatmaları (zamanlanmış iş, mesai saatinde): bitişe 30 ve 7 gün kala ve süre dolunca birer kez
+ * (kural `rizaHatirlatmasi`). Görünürlüğü “gizli” olan adaya gönderilmez. Gönderilen eşik adayın kaydına yazılır;
+ * rıza yenilenince sıfırlanır.
+ */
+export async function havuzRizaHatirlatmalari(payload: Payload, simdi: Date, hatalar: string[]): Promise<number> {
+  const ay = (await ayarlar(payload)).saklama?.havuzRizaAy ?? HAVUZ_RIZA_SURESI_AY
+  const ust = new Date(simdi)
+  ust.setMonth(ust.getMonth() - ay)
+  ust.setDate(ust.getDate() + RIZA_HATIRLATMA_GUN + 1)
+  const alt = new Date(simdi)
+  alt.setMonth(alt.getMonth() - ay)
+  alt.setDate(alt.getDate() - 31)
+  const { docs } = await payload.find({
+    collection: 'adaylar',
+    where: { and: [{ 'havuz.rizaTarihi': { less_than: ust.toISOString() } }, { 'havuz.rizaTarihi': { greater_than: alt.toISOString() } }, { 'havuz.gorunurluk': { not_equals: 'gizli' } }] },
+    depth: 0,
+    limit: 2000,
+    pagination: false,
+    overrideAccess: true,
+    select: { kullanici: true, havuz: true },
+  })
+  let n = 0
+  for (const a of docs) {
+    const verilis = new Date(a.havuz!.rizaTarihi!)
+    const esik = rizaHatirlatmasi(verilis, simdi, ay, a.havuz?.rizaHatirlatildi)
+    if (esik === null) continue
+    try {
+      const u = await payload.findByID({ collection: 'kullanicilar', id: kimlik(a.kullanici), depth: 0, overrideAccess: true, disableErrors: true })
+      if (u?.email) {
+        const e = havuzRizaEpostasi({ ad: u.ad, kalan: esik === 0 ? 0 : gunFarkiTr(simdi, rizaBitisTarihi(verilis, ay)), bitis: tarihYaz(rizaBitisTarihi(verilis, ay).toISOString(), true) })
+        await payload.sendEmail({ to: u.email, subject: e.konu, html: e.html, text: e.metin })
+        n++
+      }
+      await payload.update({ collection: 'adaylar', id: a.id, data: { havuz: { ...a.havuz, rizaHatirlatildi: esik } } as never, overrideAccess: true, context: { sistem: true } })
+    } catch (e) {
+      hatalar.push(`Havuz rızası ${a.id}: ${e instanceof Error ? e.message : String(e)}`)
+    }
+  }
+  return n
 }

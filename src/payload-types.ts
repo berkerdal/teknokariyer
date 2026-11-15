@@ -598,6 +598,10 @@ export interface Adaylar {
   havuz?: {
     gorunurluk?: ('aktif' | 'acik' | 'gizli') | null;
     rizaTarihi?: string | null;
+    /**
+     * 30, 7 veya 0 (süre doldu). Rıza yenilenince sıfırlanır.
+     */
+    rizaHatirlatildi?: number | null;
     gizlenenFirmalar?: (number | Firmalar)[] | null;
   };
   updatedAt: string;
@@ -1291,6 +1295,7 @@ export interface AdaylarSelect<T extends boolean = true> {
     | {
         gorunurluk?: T;
         rizaTarihi?: T;
+        rizaHatirlatildi?: T;
         gizlenenFirmalar?: T;
       };
   updatedAt?: T;

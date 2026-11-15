@@ -13,6 +13,7 @@ import * as migration_20261115_153138_kaydedilenler_trafik from './20261115_1531
 import * as migration_20261115_161035_sertifika_ayrintilari from './20261115_161035_sertifika_ayrintilari';
 import * as migration_20261115_194523_egitimler from './20261115_194523_egitimler';
 import * as migration_20261115_200410_istatistik_izni from './20261115_200410_istatistik_izni';
+import * as migration_20261115_214546_havuz_riza_hatirlatma from './20261115_214546_havuz_riza_hatirlatma';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20261115_200410_istatistik_izni.up,
     down: migration_20261115_200410_istatistik_izni.down,
-    name: '20261115_200410_istatistik_izni'
+    name: '20261115_200410_istatistik_izni',
+  },
+  {
+    up: migration_20261115_214546_havuz_riza_hatirlatma.up,
+    down: migration_20261115_214546_havuz_riza_hatirlatma.down,
+    name: '20261115_214546_havuz_riza_hatirlatma'
   },
 ];

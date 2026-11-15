@@ -146,6 +146,7 @@ export async function basvur(payload: Payload, kullanici: Kullanici, girdi: Basv
         havuz: {
           ...aday.havuz,
           rizaTarihi: new Date().toISOString(),
+          rizaHatirlatildi: null,
           gorunurluk: aday.havuz?.gorunurluk && aday.havuz.gorunurluk !== 'gizli' ? aday.havuz.gorunurluk : 'acik',
           gizlenenFirmalar: (aday.havuz?.gizlenenFirmalar ?? []).map(kimlik),
         },

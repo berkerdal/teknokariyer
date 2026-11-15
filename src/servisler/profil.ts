@@ -119,7 +119,7 @@ export async function havuzaKatil(payload: Payload, kullanici: Kullanici, gorunu
   return payload.update({
     collection: 'adaylar',
     id: aday.id,
-    data: { havuz: { ...havuzAlani(aday), gorunurluk, rizaTarihi: new Date().toISOString() } },
+    data: { havuz: { ...havuzAlani(aday), gorunurluk, rizaTarihi: new Date().toISOString(), rizaHatirlatildi: null } },
     overrideAccess: true,
     req,
   })
@@ -151,7 +151,7 @@ export async function havuzRizasiniGeriAl(payload: Payload, kullanici: Kullanici
   return payload.update({
     collection: 'adaylar',
     id: aday.id,
-    data: { havuz: { ...havuzAlani(aday), gorunurluk: 'gizli', rizaTarihi: null } },
+    data: { havuz: { ...havuzAlani(aday), gorunurluk: 'gizli', rizaTarihi: null, rizaHatirlatildi: null } },
     overrideAccess: true,
     req,
   })

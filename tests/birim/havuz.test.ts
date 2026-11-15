@@ -61,3 +61,21 @@ describe('aday kodu', () => {
     expect(adayKoduUret(() => new Uint8Array([0, 1, 2, 3, 4, 5]))).toBe('A-234567')
   })
 })
+
+describe('havuz rızası yenileme hatırlatması', () => {
+  it('30 ve 7 gün kala, süre dolunca birer kez; kaçırılan günde yalnızca en yakın eşik', async () => {
+    const { rizaHatirlatmasi } = await import('@/alan/havuz')
+    const verilis = new Date('2025-12-01T09:00:00Z') // bitiş 1 Aralık 2026
+    const gun = (s: string) => new Date(`${s}T07:00:00Z`)
+    expect(rizaHatirlatmasi(verilis, gun('2026-10-15'), 12, null)).toBeNull() // 47 gün var
+    expect(rizaHatirlatmasi(verilis, gun('2026-11-01'), 12, null)).toBe(30)
+    expect(rizaHatirlatmasi(verilis, gun('2026-11-10'), 12, 30)).toBeNull() // 30'luk gitti, 7'ye daha var
+    expect(rizaHatirlatmasi(verilis, gun('2026-11-25'), 12, 30)).toBe(7)
+    expect(rizaHatirlatmasi(verilis, gun('2026-11-26'), 12, null)).toBe(7) // 30'luk kaçırıldı: yalnızca 7
+    expect(rizaHatirlatmasi(verilis, gun('2026-11-28'), 12, 7)).toBeNull()
+    expect(rizaHatirlatmasi(verilis, gun('2026-12-01'), 12, 7)).toBe(0) // süre doldu
+    expect(rizaHatirlatmasi(verilis, gun('2026-12-05'), 12, 0)).toBeNull()
+    expect(rizaHatirlatmasi(verilis, gun('2027-02-01'), 12, null)).toBeNull() // çok eski: bildirim yok
+    expect(rizaHatirlatmasi(verilis, gun('2026-05-26'), 6, null)).toBe(7) // süre ayarı 6 ay: bitiş 1 Haziran
+  })
+})

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { rizaBitisTarihi, rizaGecerliMi } from '@/alan/havuz'
+import { HAVUZ_RIZA_SURESI_AY, rizaBitisTarihi, rizaGecerliMi } from '@/alan/havuz'
 import { FirmaGizlemeFormu, GorunurlukFormu, HavuzaKatilFormu, RizaIslemleri } from '@/arayuz/aday/HavuzFormlari'
 import { tarihYaz } from '@/arayuz/bicim'
 import { METINLER } from '@/metinler'
 import { goruntuleyenFirmaSayisi } from '@/servisler/havuz'
 import { kendiAdayKaydi } from '@/servisler/profil'
-import { kimlik } from '@/servisler/ortak'
+import { ayarlar, kimlik } from '@/servisler/ortak'
 import { payloadAl } from '@/veri/payload'
 import { adayOturumu } from '@/veri/aday'
 
@@ -17,7 +17,9 @@ export default async function HavuzSayfasi() {
   const payload = await payloadAl()
   const a = await kendiAdayKaydi(payload, k)
   const riza = a.havuz?.rizaTarihi ? new Date(a.havuz.rizaTarihi) : null
-  const gecerli = rizaGecerliMi(riza, new Date())
+  // Rıza süresi Yönetici A.Ş. ayarından (varsayılan 12 ay); havuz araması da aynı süreyi kullanır.
+  const ay = (await ayarlar(payload)).saklama?.havuzRizaAy ?? HAVUZ_RIZA_SURESI_AY
+  const gecerli = rizaGecerliMi(riza, new Date(), ay)
   const { docs: firmalar } = await payload.find({ collection: 'firmalar', where: { asama: { not_equals: 'pasif' } }, limit: 500, depth: 0, sort: 'kisaAd', overrideAccess: true, select: { kisaAd: true } })
   const sayi = gecerli ? await goruntuleyenFirmaSayisi(payload, k) : 0
   const gorunenler = `bölümünü, okulunu, deneyimini, becerilerini, dillerini${a.cinsiyet ? ', tercihlerini ve cinsiyetini' : ' ve tercihlerini'}`
@@ -48,7 +50,7 @@ export default async function HavuzSayfasi() {
           <h2 className="b3 kare-bas">{riza ? 'Rızanın süresi doldu' : 'Havuza katıl'}</h2>
           <p>
             {riza
-              ? `Havuz rızan ${tarihYaz(rizaBitisTarihi(riza), true)} tarihinde doldu ve profilin havuzdan çıktı. Yeniden katılmak için rızanı yenile.`
+              ? `Havuz rızan ${tarihYaz(rizaBitisTarihi(riza, ay), true)} tarihinde doldu ve profilin havuzdan çıktı. Yeniden katılmak için rızanı yenile.`
               : 'Havuza katılırsan Teknokent firmaları ilan açmadan da seni bulabilir. Katılmak isteğe bağlıdır; ilanlara başvurmak için gerekmez.'}
           </p>
           <HavuzaKatilFormu surum={METINLER.havuz.surum} />
@@ -64,8 +66,8 @@ export default async function HavuzSayfasi() {
           <section className="profil-bolum">
             <h2 className="b3 kare-bas">Açık rızan</h2>
             <p>
-              Havuz rızan <strong>{tarihYaz(rizaBitisTarihi(riza!), true)}</strong> tarihine kadar geçerli. Süre dolmadan bir ay önce hatırlatacağız; yenilemezsen
-              havuzdan otomatik çıkarsın.
+              Havuz rızan <strong>{tarihYaz(rizaBitisTarihi(riza!, ay), true)}</strong> tarihine kadar geçerli. Süre dolmadan 30 gün ve 7 gün önce e-postayla hatırlatacağız;
+              yenilemezsen havuzdan kendiliğinden çıkarsın.
             </p>
             <RizaIslemleri surum={METINLER.havuz.surum} />
           </section>

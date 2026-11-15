@@ -12,9 +12,10 @@ import { zamanliIsleriCalistir } from '@/servisler/zamanli'
 let payload: Payload
 const ek = `z${Date.now().toString(36)}`
 let yonetici: any
-// Türkiye saatiyle 10.00'a denk gelen, bugünden n gün sonraki an
+// Türkiye saatiyle 10.00'a denk gelen, Türkiye'de bugünden n gün sonraki an. (UTC tarihiyle hesaplanınca TR gece
+// yarısından sonra test bir gün kayıyordu.)
 const gunSonra = (n: number) => {
-  const d = new Date(Date.now() + n * 86_400_000)
+  const d = new Date(Date.now() + 3 * 3_600_000 + n * 86_400_000)
   d.setUTCHours(7, 0, 0, 0)
   return d
 }
@@ -75,5 +76,36 @@ describe('profil hatırlatmaları', () => {
     expect(konular).toHaveLength(1)
     const posta = await payload.find({ collection: 'test-postalar', where: { and: [{ kime: { contains: `profil-${ek}` } }, { konu: { contains: 'profilini' } }] }, overrideAccess: true })
     expect(JSON.stringify(posta.docs[0])).toMatch(/logo, kısa tanıtım, sektör/)
+  })
+})
+
+describe('havuz rızası hatırlatmaları', () => {
+  it('bitişe 30 ve 7 gün kala birer kez gider; gizli adaya gitmez; rıza yenilenince yeniden başlar', async () => {
+    const { havuzaKatil } = await import('@/servisler/profil')
+    const yap = async (e: string, gorunurluk: 'acik' | 'gizli') => {
+      const u = await payload.create({ collection: 'kullanicilar', overrideAccess: true, data: { email: `${e}-${ek}@ornek.com`, password: 'Deneme-12345', ad: `Aday ${e}`, rol: 'aday', _verified: true } as any })
+      await payload.create({ collection: 'adaylar', overrideAccess: true, data: { kullanici: u.id, havuz: { gorunurluk } } as any })
+      await havuzaKatil(payload, u, 'acik')
+      const a = (await payload.find({ collection: 'adaylar', where: { kullanici: { equals: u.id } }, overrideAccess: true })).docs[0]!
+      // Rıza 11 ay 5 gün önce verilmiş gibi: bitişe ~25 gün
+      const eski = new Date()
+      eski.setMonth(eski.getMonth() - 11)
+      eski.setDate(eski.getDate() - 5)
+      await payload.update({ collection: 'adaylar', id: a.id, overrideAccess: true, data: { havuz: { ...a.havuz, gorunurluk, rizaTarihi: eski.toISOString() } } as any })
+      return u
+    }
+    const acik = await yap('hra', 'acik')
+    const gizli = await yap('hrg', 'gizli')
+    const postalar = async (kime: string) => (await payload.find({ collection: "test-postalar", where: { and: [{ kime: { contains: kime } }, { konu: { contains: "havuzu" } }] }, overrideAccess: true, limit: 20 })).docs.map((d: any) => d.konu as string)
+    await zamanliIsleriCalistir(payload, gunSonra(0), true)
+    await zamanliIsleriCalistir(payload, gunSonra(1), true) // ikinci kez gitmez
+    expect(await postalar(`hra-${ek}`)).toEqual([expect.stringMatching(/rızanın süresi \d+ gün sonra doluyor/)])
+    expect(await postalar(`hrg-${ek}`)).toEqual([])
+    await zamanliIsleriCalistir(payload, gunSonra(20), true) // ~5 gün kala: 7 günlük
+    expect(await postalar(`hra-${ek}`)).toHaveLength(2)
+    await havuzaKatil(payload, acik, 'acik') // yenileme sıfırlar
+    const a = (await payload.find({ collection: 'adaylar', where: { kullanici: { equals: acik.id } }, overrideAccess: true })).docs[0]!
+    expect(a.havuz?.rizaHatirlatildi ?? null).toBeNull()
+    void gizli
   })
 })
