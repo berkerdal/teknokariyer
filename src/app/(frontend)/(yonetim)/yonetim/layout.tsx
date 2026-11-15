@@ -7,6 +7,7 @@ import { cikisEylemi } from '@/eylemler/hesap'
 import { rolAnaSayfasi } from '@/veri/cerez'
 import { oturum } from '@/veri/payload'
 import { kullaniciSayilari } from '@/veri/yonetim'
+import { ortam } from '@/altyapi/eposta'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { robots: { index: false } }
@@ -24,6 +25,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
   if (!kurumKullanicisiMi(k)) redirect(rolAnaSayfasi(String(k.rol)))
   const yonetici = yoneticiMi(k)
   const sayilar = await kullaniciSayilari(yonetici)
+  const testPosta = yonetici && ortam() !== 'yayin'
   const kisi = `${k.ad ?? k.email} · ${ROL_ADI[String(k.rol)] ?? k.rol}`
   return (
     <>
@@ -38,7 +40,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
           </button>
         </form>
       </header>
-      <YonetimMenusu yer="sekme" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} />
+      <YonetimMenusu yer="sekme" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} testPosta={testPosta} />
       <div className="y-masa">
         <nav className="y-yan" aria-label="Yönetim menüsü">
           <div className="y-logo">
@@ -47,7 +49,7 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
             </Link>
             <span className="y-rol">Yönetici A.Ş.</span>
           </div>
-          <YonetimMenusu yer="yan" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} />
+          <YonetimMenusu yer="yan" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} testPosta={testPosta} />
           <div className="y-kisi">
             <p>{kisi}</p>
             <Link className="kucuk" href="/hesap-guvenligi">

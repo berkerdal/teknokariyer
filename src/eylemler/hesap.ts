@@ -4,7 +4,7 @@
  */
 import { redirect } from 'next/navigation'
 import type { FormDurumu } from '@/arayuz/form'
-import { FormHatasi, adayKaydi, girisYap, sifreSifirlamaIste, sifreYenile, type GirisSonucu } from '@/servisler/hesap'
+import { FormHatasi, adayKaydi, epostaDogrula, girisYap, sifreSifirlamaIste, sifreYenile, type GirisSonucu } from '@/servisler/hesap'
 import { bekleyenGirisPaketle, cihazlariTemizle, epostaKoduGonder, girisDogrulamaYontemi } from '@/servisler/ikiAdim'
 import { epostaMaskele } from '@/alan/ikiAdim'
 import { ortam } from '@/altyapi/eposta'
@@ -118,6 +118,15 @@ export async function sifreYenileEylemi(_: FormDurumu, f: FormData): Promise<For
     return hataDurumu(e)
   }
   redirect(hedef)
+}
+
+/**
+ * E-posta doğrulama onayı. Bağlantı yalnızca sayfayı açar; doğrulama bu düğmeyle (POST) yapılır. Kurumsal e-posta
+ * güvenlik tarayıcıları bağlantıları önceden açar; GET'te doğrulansaydı anahtar adaydan önce tüketilirdi.
+ */
+export async function epostaDogrulaEylemi(f: FormData): Promise<void> {
+  const tamam = await epostaDogrula(await payloadAl(), metin(f, 'anahtar'))
+  redirect(tamam ? '/giris?dogrulandi=1' : '/dogrula?gecersiz=1')
 }
 
 export async function cikisEylemi() {

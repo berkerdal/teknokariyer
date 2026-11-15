@@ -525,7 +525,15 @@ Claude tarafından yapılacak.
       pnpm indirmeye çalışıyordu (kapsayıcılar `node_modules/.bin/next` ve `tsx` çalıştırır).
     - Üretimde oturum çerezi Secure: HTTPS'siz (`http://ip:3000`) giriş yapılamaz; Playwright'ın `request` aracı da http
       üzerinden göndermez (tarayıcı `fetch` ile denenir).
-  - **Sırada:** test senaryoları belgesi.
+  - **Test posta kutusu (15.11.2026):** `/yonetim/test-postalari` (prototip “Yönetim: Test posta kutusu”; yalnızca yayın dışı
+    ortam ve rol `yonetici`, yayında 404). Liste + korumalı çerçevede (sandbox, betik yok, bağlantılar yeni sekmede) gövde,
+    arama, kutuyu boşaltma. Önceden e-postalar yalnızca Payload ekranındaydı ve o ekran teknik sorumluya kapanınca personel
+    davet/doğrulama e-postalarını göremez olmuştu.
+  - **E-posta doğrulama POST ile (15.11.2026):** `/dogrula?anahtar=` yalnızca sayfayı açar; “E-posta adresimi doğrula”
+    düğmesi (`epostaDogrulaEylemi`) doğrular. Kurumsal e-posta güvenlik tarayıcıları bağlantıları önceden açtığı için GET'te
+    doğrulama anahtarı adaydan önce tüketiyordu. (Bu çalışma ortamındaki Chromium da belge isteğini iç 307 ile iki kez
+    gönderiyor; hatayı o ortaya çıkardı.)
+  - **Sırada:** test senaryoları belgesi (`docs/test-senaryolari.md`).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayın veritabanına YÖK listesi `scripts/liste-yukle.ts` veya

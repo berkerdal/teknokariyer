@@ -15,12 +15,15 @@ export function YonetimMenusu({
   sayilar,
   teknik,
   yonetici,
+  testPosta = false,
 }: {
   yer: 'yan' | 'sekme'
   sayilar: { toplam: number; onay: number; degisiklik: number; talep: number; takip: number; kvkk: number }
   teknik: boolean
   /** KVKK başvuruları ve işlem kayıtları kişisel veri içerir; yalnızca tam yetkiliye görünür. */
   yonetici: boolean
+  /** Yayın dışı ortamda (test) giden e-postaların toplandığı kutu; yalnızca tam yetkiliye. */
+  testPosta?: boolean
 }) {
   const yol = usePathname()
   const ana: Oge[] = [
@@ -38,6 +41,7 @@ export function YonetimMenusu({
     { href: '/yonetim/kullanicilar', ad: 'Kullanıcılar' },
     { href: '/yonetim/ayarlar', ad: 'Ayarlar' },
     ...(yonetici ? [{ href: '/yonetim/kayitlar', ad: 'İşlem kayıtları' }] : []),
+    ...(testPosta ? [{ href: '/yonetim/test-postalari', ad: 'Test posta kutusu' }] : []),
   ]
   const baglanti = (o: Oge) => (
     <Link key={o.href} href={o.href} aria-current={etkinMi(yol, o.href) ? 'page' : undefined}>

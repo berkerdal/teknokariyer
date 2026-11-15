@@ -18,3 +18,18 @@ export async function ornekVeriEylemi(): Promise<FormDurumu> {
     return { genel: 'Örnek veri yüklenirken bir sorun oluştu. Sayfayı yenileyip yeniden deneyin.' }
   }
 }
+
+/** Test posta kutusunu boşaltır (yalnızca yayın dışı ortam ve tam yetkili). Silme toplu ve sayfalıdır (D1 parametre sınırı). */
+export async function testPostalariniBosaltEylemi(): Promise<void> {
+  if (ortam() === 'yayin') return
+  const k = await oturum()
+  if (!k || !yoneticiMi(k)) return
+  const payload = await payloadAl()
+  for (;;) {
+    const { docs } = await payload.find({ collection: 'test-postalar', limit: 80, depth: 0, select: {}, overrideAccess: true })
+    if (!docs.length) break
+    await payload.delete({ collection: 'test-postalar', where: { id: { in: docs.map((d) => d.id) } }, overrideAccess: true })
+  }
+  const { redirect } = await import('next/navigation')
+  redirect('/yonetim/test-postalari?bosaltildi=1')
+}
