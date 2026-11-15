@@ -41,6 +41,13 @@ export default async function GirisSayfasi({ searchParams }: Props) {
               Hesabınız kapatıldığı için oturumunuz sonlandırıldı. Yeniden erişim için Yönetici A.Ş.’de tam yetkili bir kullanıcıya başvurun.
             </div>
           )}
+          {p.ikinci === 'sure' && (
+            <div className="uyari-kutu" role="status">
+              {firma
+                ? 'Doğrulama için ayrılan süre doldu. Güvenliğiniz için e-posta adresinizi ve şifrenizi yeniden yazın.'
+                : 'Doğrulama için ayrılan süre doldu. Güvenliğin için e-posta adresini ve şifreni yeniden yaz.'}
+            </div>
+          )}
           {p.dogrulandi === '1' && (
             <div className="basari-kutu" role="status">
               E-posta adresin doğrulandı. Şimdi giriş yapabilirsin.

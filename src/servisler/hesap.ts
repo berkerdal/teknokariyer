@@ -59,6 +59,7 @@ export interface GirisSonucu {
   token: string
   bitis: Date
   rol: string
+  kullaniciId: number
 }
 
 /** Giriş. Hata mesajı hangi bilginin yanlış olduğunu söylemez. */
@@ -71,7 +72,7 @@ export async function girisYap(payload: Payload, epostaHam: string, sifre: strin
   try {
     const s = await payload.login({ collection: 'kullanicilar', data: { email: eposta, password: sifre }, overrideAccess: true })
     if (!s.token) throw new IslemHatasi('Giriş yapılamadı. Biraz sonra yeniden dene.', 400)
-    return { token: s.token, bitis: new Date((s.exp ?? Math.floor(Date.now() / 1000) + 8 * 3600) * 1000), rol: String(s.user?.rol ?? 'aday') }
+    return { token: s.token, bitis: new Date((s.exp ?? Math.floor(Date.now() / 1000) + 8 * 3600) * 1000), rol: String(s.user?.rol ?? 'aday'), kullaniciId: Number(s.user?.id) }
   } catch (e) {
     if (e instanceof IslemHatasi) throw e
     const ad = (e as Error)?.name ?? ''
@@ -98,8 +99,8 @@ export async function sifreYenile(payload: Payload, anahtar: string, sifre: stri
   try {
     const s = await payload.resetPassword({ collection: 'kullanicilar', data: { token: anahtar, password: sifre }, overrideAccess: true })
     if (!s.token) throw new Error('anahtar yok')
-    const user = s.user as { rol?: string }
-    return { token: s.token, bitis: new Date(Date.now() + 8 * 3600 * 1000), rol: String(user?.rol ?? 'aday') }
+    const user = s.user as { rol?: string; id?: number | string }
+    return { token: s.token, bitis: new Date(Date.now() + 8 * 3600 * 1000), rol: String(user?.rol ?? 'aday'), kullaniciId: Number(user?.id) }
   } catch {
     throw new IslemHatasi('Bu bağlantının süresi dolmuş veya bağlantı daha önce kullanılmış. Yeni bir bağlantı iste.', 400)
   }

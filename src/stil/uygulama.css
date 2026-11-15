@@ -568,3 +568,17 @@ p.y-oge-satir { padding: 10px 14px; }
 .sayfalama { display: flex; gap: 16px; align-items: center; justify-content: space-between; border-top: 1px solid var(--cizgi); }
 .kvkk-dokum { display: grid; gap: 6px; justify-items: start; margin-top: 8px; }
 .kayit-tarih > summary { color: var(--lacivert); }
+
+/* İki aşamalı doğrulama */
+.girdi--kod { max-width: 12ch; font-size: 22px; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
+.kurulum-adimlari { list-style: none; counter-reset: adim; margin: 24px 0 0; padding: 0; display: grid; gap: 24px; }
+.kurulum-adimlari > li { counter-increment: adim; position: relative; padding-left: 44px; }
+.kurulum-adimlari > li::before { content: counter(adim); position: absolute; left: 0; top: 0; width: 28px; height: 28px; display: grid; place-items: center; background: var(--lacivert); color: #fff; font-weight: 700; }
+.kurulum-adimlari h2 { margin: 2px 0 6px; }
+.karekod { width: 216px; max-width: 100%; margin: 12px 0; border: 1px solid var(--cizgi); background: #fff; }
+.karekod svg { display: block; width: 100%; height: auto; }
+.anahtar-kodu, .kurtarma-kodlari { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
+.anahtar-kodu { font-size: 17px; letter-spacing: 0.06em; background: var(--zemin); padding: 8px 10px; overflow-wrap: anywhere; }
+.kurtarma-kodlari { list-style: none; margin: 16px 0; padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; border: 1px dashed var(--cizgi-kontrol); font-size: 18px; }
+.iki-adim-sifirla { flex-wrap: wrap; gap: 8px; }
+@media print { .a-ust { display: none !important; } .kurtarma-kodlari { border-color: #000; } }

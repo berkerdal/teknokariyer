@@ -370,3 +370,20 @@ export function kvkkCevapEpostasi(d: { ad: string; turAdi: string; sonucAdi: str
     d.hitap,
   )
 }
+
+/** İki aşamalı doğrulama sıfırlandı (kişiye bilgi; kendisi istemediyse haber vermesi için). */
+export function ikiAdimSifirlandiEpostasi(d: { ad: string; hitap: EpostaHitabi; sifirlayan: string }): Eposta {
+  const sen = d.hitap === 'sen'
+  return eposta(
+    'İki aşamalı doğrulama sıfırlandı',
+    [
+      `Merhaba ${d.ad},`.replace(' ,', ','),
+      sen
+        ? `TeknoKariyer hesabındaki iki aşamalı doğrulama ${d.sifirlayan} tarafından sıfırlandı. Bir sonraki girişinde doğrulayıcı uygulamayı yeniden kurman istenecek.`
+        : `TeknoKariyer hesabınızdaki iki aşamalı doğrulama ${d.sifirlayan} tarafından sıfırlandı. Bir sonraki girişinizde doğrulayıcı uygulamayı yeniden kurmanız istenecek.`,
+    ],
+    { metin: 'Giriş yap', adres: `${siteAdresi()}/giris` },
+    [sen ? `Bu işlemi sen istemediysen hemen ${KURUM.eposta} adresine yaz.` : `Bu işlemi siz istemediyseniz hemen ${KURUM.eposta} adresine yazın.`],
+    d.hitap,
+  )
+}

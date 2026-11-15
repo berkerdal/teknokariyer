@@ -7,7 +7,10 @@ import { dogrulamaEpostasi, sifreSifirlamaEpostasi } from '../altyapi/epostaSabl
  * Kullanıcılar: aday, firma kullanıcısı ve Yönetici A.Ş. personeli tek koleksiyonda, role göre ayrılır.
  * - Rol ve firma ataması yalnızca yönetici tarafından değiştirilir (kişi kendini yükseltemez).
  * - Giriş denemeleri sınırlanır (talimatlar 12).
- * - İki aşamalı doğrulama (TOTP) firma ve kurum hesaplarında zorunlu; akış M5'te bağlanacak.
+ * - İki aşamalı doğrulama (TOTP) firma ve kurum hesaplarında zorunlu (src/servisler/ikiAdim.ts). Gizli alanlar API'den
+ *   okunamaz ve yazılamaz; yalnızca sunucu servisleri yerel API ile değiştirir.
+ * - Giriş, şifre sıfırlama ve kilit açma yalnızca portalın kendi akışıyla (yerel API) yapılır. REST ve GraphQL üzerinden
+ *   bu işlemler kapalıdır; aksi hâlde ikinci adım atlanabilirdi (Payload ekranının giriş sayfası /giris'e yönlenir).
  */
 export const Kullanicilar: CollectionConfig = {
   slug: 'kullanicilar',
@@ -49,6 +52,12 @@ export const Kullanicilar: CollectionConfig = {
     admin: ({ req }) => teknikSorumluMu(kullanici(req)),
   },
   hooks: {
+    beforeOperation: [
+      ({ operation, req }) => {
+        if (['login', 'resetPassword', 'forgotPassword', 'unlock'].includes(operation) && req.payloadAPI !== 'local')
+          throw new APIError('Giriş ve şifre işlemleri yalnızca portalın giriş sayfasından yapılabilir.', 403, undefined, true)
+      },
+    ],
     // Ekipten çıkarılan (pasif) kullanıcı giriş yapamaz.
     beforeLogin: [
       ({ user }) => {
@@ -126,9 +135,14 @@ export const Kullanicilar: CollectionConfig = {
       label: 'İki aşamalı doğrulama açık',
       type: 'checkbox',
       defaultValue: false,
-      access: { update: () => false }, // yalnızca doğrulama akışı değiştirir
+      access: { create: () => false, update: () => false }, // yalnızca doğrulama akışı değiştirir
     },
-    { name: 'totpGizli', type: 'text', hidden: true, access: { read: () => false, update: () => false } },
+    { name: 'totpGizli', type: 'text', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
+    { name: 'ikiAsamaliTarih', label: 'İki aşamalı doğrulamanın kurulduğu tarih', type: 'date', access: { create: () => false, update: () => false } },
+    { name: 'totpSonAdim', type: 'number', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
+    { name: 'kurtarmaKodlari', type: 'json', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
+    { name: 'ikiAdimHata', type: 'number', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
+    { name: 'ikiAdimKilit', type: 'date', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
     {
       name: 'teknikSorumlu',
       label: 'Teknik sorumlu',

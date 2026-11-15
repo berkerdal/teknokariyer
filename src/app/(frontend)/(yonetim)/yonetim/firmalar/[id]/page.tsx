@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { IkiAdimSifirlaDugmesi } from '@/arayuz/hesap/IkiAdimFormlari'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { DURUM_ADI, type IlanDurumu } from '@/alan/ilan'
@@ -17,6 +18,8 @@ export const metadata: Metadata = { title: 'Firma · Yönetim' }
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ sonuc?: string; kapanan?: string }> }
 
 const SONUC: Record<string, string> = {
+  'iki-adim-sifirlandi': 'İki aşamalı doğrulama sıfırlandı. Kişi bir sonraki girişinde doğrulayıcı uygulamayı yeniden kuracak; kendisine bilgi e-postası gönderildi.',
+  'iki-adim-sifirlandi-epostasiz': 'İki aşamalı doğrulama sıfırlandı, ancak bilgi e-postası gönderilemedi. Kişiye ayrıca haber verin.',
   olusturuldu: 'Firma kaydı oluşturuldu. Yetkili bilgisi tamamsa aşağıdan davet gönderebilirsiniz.',
   kaydedildi: 'Değişiklikler kaydedildi.',
   davet: 'Davet gönderildi. Firma “Davet gönderildi” aşamasına geçti; kabul edilince “Devralındı” olur.',
@@ -109,7 +112,13 @@ export default async function FirmaAyrintisi({ params, searchParams }: Props) {
                         <br />
                         <span className="kucuk">{u.email}</span>
                       </span>
-                      <span className="kucuk">{u.pasif ? 'Ekipten çıkarıldı' : YETKI_ADI[u.firmaYetkisi ?? ''] ?? ''}</span>
+                      <span className="y-davet-durum">
+                        <span className="kucuk">
+                          {u.pasif ? 'Ekipten çıkarıldı' : YETKI_ADI[u.firmaYetkisi ?? ''] ?? ''}
+                          {!u.pasif && (u.ikiAsamaliAcik ? ' · iki aşamalı doğrulama açık' : ' · iki aşamalı doğrulama henüz kurulmadı')}
+                        </span>
+                        {yonetici && !u.pasif && u.ikiAsamaliAcik && <IkiAdimSifirlaDugmesi kullaniciId={u.id} ad={u.ad} geri={`/yonetim/firmalar/${firma.id}`} />}
+                      </span>
                     </li>
                   ))}
                 </ul>

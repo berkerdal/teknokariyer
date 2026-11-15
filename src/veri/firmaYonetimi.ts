@@ -126,7 +126,7 @@ export async function firmaYonetimAyrintisi(id: number) {
   const firma = await payload.findByID({ collection: 'firmalar', id, depth: 1, overrideAccess: true }).catch((): null => null)
   if (!firma) return null
   const [uyeler, davetler, ilanlar, kayitlar, sektorler] = await Promise.all([
-    payload.find({ collection: 'kullanicilar', where: { firma: { equals: id } }, select: { ad: true, email: true, unvan: true, firmaYetkisi: true, pasif: true }, limit: 100, depth: 0, overrideAccess: true }),
+    payload.find({ collection: 'kullanicilar', where: { firma: { equals: id } }, select: { ad: true, email: true, unvan: true, firmaYetkisi: true, pasif: true, ikiAsamaliAcik: true }, limit: 100, depth: 0, overrideAccess: true }),
     payload.find({ collection: 'davetler', where: { firma: { equals: id } }, sort: '-createdAt', limit: 100, depth: 0, overrideAccess: true }),
     payload.find({ collection: 'ilanlar', where: { firma: { equals: id } }, select: { pozisyonAdi: true, durum: true, sonBasvuru: true, updatedAt: true }, sort: '-updatedAt', limit: 50, depth: 0, overrideAccess: true }),
     payload.find({ collection: 'islem-kayitlari', where: { and: [{ kayitTuru: { equals: 'firmalar' } }, { kayitId: { equals: String(id) } }] }, sort: '-createdAt', limit: 15, depth: 1, overrideAccess: true, populate: { kullanicilar: { ad: true } } }),

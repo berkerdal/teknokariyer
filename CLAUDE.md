@@ -172,6 +172,10 @@ Claude tarafından yapılacak.
   Power BI yalnızca görünüm örneğiydi (dış besleme yok); aylık otomatik rapor e-postası yok; firma panelinde firma raporu var;
   kurum şablonu yok, önerilen gösterge seti kullanılır. Raporlar kişisel veri içermez; 5'ten küçük gruplar gizlenir.
 
+- **K32 — KVKK araçları (15.11.2026):** Önerilen uygulama kabul edildi: hesap silmede ön yazı ve bağlantılar da silinir,
+  eğitim/beceri/cevaplar saklama süresine kadar firmada kalır; KVKK başvuruları ve işlem kayıtları yalnızca tam yetkiliye
+  açık. Hukuk birimi görüşü yine alınacak.
+
 **Kullanıcının ilk test geri bildirimi (14.11.2026; talimatlar K28–K30):**
 
 - **K28 — Profil:** Okunur özet + bölüm bazında “Düzenle” → açılır pencere (mobilde tam boy alt panel). Kaydedince kapanır,
@@ -403,8 +407,27 @@ Claude tarafından yapılacak.
       ile yeniden kurulur. Next’in sayfa duyurucusu da `role=alert` taşır; testlerde hata kutusu kapsamla seçilmeli.
     - Öğrenilen: Hesap silmede veri değişiklikleri sistem isteğiyle yapılır (aday rolüne özgü kanca kuralları uygulanmasın);
       kişi kendini sildiyse işlem kaydının `kim` alanı silinen hesaba bağlanamaz (yabancı anahtar), sistem adına yazılır.
-  - **Sırada:** iki aşamalı doğrulama (firma ve kurum hesaplarında zorunlu), Turnstile ve istek sınırlama, virüs taraması,
-    YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang, `docs/goc-rehberi.md` ve test senaryoları belgesi.
+  - **İki aşamalı doğrulama (15.11.2026):** Göç `20261115_081840_iki_adim` (yalnızca ADD COLUMN). Firma ve bütün kurum
+    rollerinde zorunlu, adayda isteğe bağlı (`ikiAdimZorunluMu`). Doğrulayıcı uygulama (TOTP, RFC 6238; `src/alan/ikiAdim.ts`,
+    RFC test değerleriyle birim testli) + 10 tek kullanımlık kurtarma kodu (yalnızca SHA-256 özeti saklanır).
+    - Gizli anahtar AES-GCM ile şifreli saklanır; anahtar `PAYLOAD_SECRET`'tan HKDF ile türetilir (`src/altyapi/sifreleme.ts`).
+      **PAYLOAD_SECRET değişirse herkes ikinci adımı yeniden kurar** (göç rehberine yazılacak). Alanlar API'den okunamaz.
+    - Giriş akışı (`src/eylemler/hesap.ts` → `girisiSurdur`): şifre doğruysa ve ikinci adım gerekiyorsa oturum çerezi
+      yazılmaz; oturum anahtarı şifreli, 10 dakikalık `tk-ikinci-adim` çerezinde bekler. `/giris/ikinci-adim` (kod veya
+      kurtarma kodu) ya da kurulu değilse `/giris/iki-adim-kurulum` (karekod `uqr` ile sunucuda SVG, telefondan açana
+      `otpauth://` bağlantısı, elle anahtar). Kurulumdan sonra kodlar `/giris/kurtarma-kodlari` sayfasında bir kez gösterilir.
+      Şifre yenileme ve davet kabulü de aynı yoldan geçer.
+    - Aynı kod iki kez geçmez (`totpSonAdim`), 5 hatada 15 dakika kilit. Kurtarma koduyla girişte `/hesap-guvenligi`
+      kalan kodu gösterir.
+    - **REST/GraphQL üzerinden giriş, şifre sıfırlama ve kilit açma kapalı** (Kullanicilar `beforeOperation`; yalnızca yerel
+      API). Payload ekranının giriş sayfası `/giris?donus=/admin`'e yönlenir (`src/app/(payload)/admin/login/page.tsx`).
+    - `/hesap-guvenligi`: durum, kurtarma kodlarını yenileme, aday için aç/kapat. Bağlantılar: aday hesap sayfası, firma
+      ekip sayfası (Bilgilerim), yönetim yan menüsü.
+    - Sıfırlama (telefon kaybı): tam yetkili kurum her kişiyi, firmanın tam yetkilisi kendi ekibini; kimse kendini
+      sıfırlayamaz; kişiye bilgi e-postası gider. Düğmeler `/yonetim/kullanicilar`, `/yonetim/firmalar/[id]`,
+      `/firma-paneli/ekip` listelerinde; listeler kurulu olup olmadığını gösterir.
+  - **Sırada:** Turnstile ve istek sınırlama, virüs taraması, YÖK listesi içe aktarma, site haritası (sitemap) ve hreflang,
+    `docs/goc-rehberi.md` ve test senaryoları belgesi.
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
     Bundan sonra şema değişikliği yeni bir göçle yapılır (`pnpm payload migrate:create ad`).
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayından önce YÖK üniversite ve

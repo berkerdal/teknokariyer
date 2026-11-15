@@ -5,6 +5,7 @@ import * as migration_20261114_130910_kullanici_pasif from './20261114_130910_ku
 import * as migration_20261114_174215_teknik_sorumlu from './20261114_174215_teknik_sorumlu';
 import * as migration_20261114_181314_gunluk_ozet_saklama from './20261114_181314_gunluk_ozet_saklama';
 import * as migration_20261114_194152_kvkk_talepleri from './20261114_194152_kvkk_talepleri';
+import * as migration_20261115_081840_iki_adim from './20261115_081840_iki_adim';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20261114_194152_kvkk_talepleri.up,
     down: migration_20261114_194152_kvkk_talepleri.down,
-    name: '20261114_194152_kvkk_talepleri'
+    name: '20261114_194152_kvkk_talepleri',
+  },
+  {
+    up: migration_20261115_081840_iki_adim.up,
+    down: migration_20261115_081840_iki_adim.down,
+    name: '20261115_081840_iki_adim'
   },
 ];

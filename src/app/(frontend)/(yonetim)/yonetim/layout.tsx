@@ -50,6 +50,9 @@ export default async function YonetimDuzeni({ children }: { children: React.Reac
           <YonetimMenusu yer="yan" sayilar={sayilar} teknik={teknikSorumluMu(k)} yonetici={yonetici} />
           <div className="y-kisi">
             <p>{kisi}</p>
+            <Link className="kucuk" href="/hesap-guvenligi">
+              Hesap güvenliği
+            </Link>
             <form action={cikisEylemi}>
               <button type="submit" className="dugme dugme--sade dugme--kucuk y-cikis">
                 Çıkış yap

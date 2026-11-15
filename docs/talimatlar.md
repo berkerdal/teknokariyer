@@ -43,6 +43,7 @@ olursa bu bölüm geçerlidir.
 | K28 | Profil sayfası | LinkedIn/ResearchGate usulü: bilgiler okunur özet olarak görünür; her bölümün “Düzenle” düğmesi açılır pencerede düzenleme açar (mobilde düzgün). Kaydedince pencere kapanır, özet güncel bilgiyle dolu görünür. Yeni adaya LinkedIn'deki gibi yol gösteren bir profil sihirbazı sunulur (14 Kasım 2026). |
 | K29 | Metin dili | Her alan ve mesaj profesyonel Türkçeyle yazılır: tam cümle, yüklemli, devriksiz. Örnek: “15 ilan, 13 firmadan.” değil “Şu anda 13 firmanın 15 ilanı yayında.” (14 Kasım 2026). |
 | K30 | Panellerde açıklama | Yönetici A.Ş. ve firma panellerinde her modülün ve alanın ne olduğu bir bilgi kutusuyla anlatılır; paneller kendini açıklar (14 Kasım 2026). |
+| K32 | KVKK araçları | Önerilen uygulama kabul edildi (15 Kasım 2026): hesap silmede ön yazı ve profil bağlantıları da silinir; eğitim, beceri ve ön eleme cevapları saklama süresine kadar firmada kalır. KVKK başvuruları ve işlem kayıtları yalnızca tam yetkili kullanıcılara açıktır. Hukuk birimi görüşü yine alınacak (19. bölüm sonu). |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 
@@ -915,7 +916,7 @@ Kurumun ilettiği listeye eleştirel yaklaşıldı. Liste çoğunlukla doğru te
 Bu konularda geçici bir uygulama seçildi; hukuk biriminin görüşüyle kesinleşecek. Seçilenler koda işlendi ve kolayca değişir.
 
 1. **[?] Saklama süreleri:** Başvurulardaki kişisel veri ilan kapandıktan 12 ay sonra, işlem kayıtları 24 ay sonra siliniyor (Ayarlar’dan değişir).
-2. **[?] Hesap silmede başvuru kaydı:** K27’ye göre ad, iletişim ve CV hemen silinir. Ayrıca ön yazı ve profil bağlantıları (LinkedIn vb.) da siliniyor; eğitim, beceri ve ön eleme cevapları firmanın değerlendirme kaydında saklama süresi dolana kadar kalıyor.
+2. **Hesap silmede başvuru kaydı (K32 ile kurumca kabul edildi; hukuk görüşü bekleniyor):** K27’ye göre ad, iletişim ve CV hemen silinir. Ayrıca ön yazı ve profil bağlantıları (LinkedIn vb.) da siliniyor; eğitim, beceri ve ön eleme cevapları firmanın değerlendirme kaydında saklama süresi dolana kadar kalıyor.
 3. **[?] Hesap silmede onay (rıza) kayıtları:** Hesapla birlikte siliniyor. Rızanın alındığını ispat için silinen hesabın onay kayıtları bir süre saklanmalı mı?
 4. **[?] KVKK başvuru kayıtlarının saklama süresi:** Başvuran adı, e-postası ve cevap şimdilik süresiz saklanıyor (ispat için). Ne kadar saklanmalı?
 5. **[?] Cevap taslakları ve “KVKK başvurusu” sayfası:** Metinler taslak; hukuk onayı gerekiyor.

@@ -43,8 +43,8 @@ export default async function HesapSayfasi({ searchParams }: Props) {
           </div>
         </dl>
         <div className="dugme-grubu">
-          <Link className="dugme dugme--ikincil dugme--kucuk" href="/sifremi-unuttum">
-            Şifremi değiştir
+          <Link className="dugme dugme--ikincil dugme--kucuk" href="/hesap-guvenligi">
+            Şifre ve iki aşamalı doğrulama
           </Link>
           <form action={cikisEylemi}>
             <GonderDugmesi className="dugme dugme--sade dugme--kucuk" bekleme="Çıkılıyor…">

@@ -163,6 +163,19 @@ export interface Kullanicilar {
   firmaYetkisi?: ('yonetici' | 'ilan-sorumlusu' | 'degerlendirici') | null;
   ikiAsamaliAcik?: boolean | null;
   totpGizli?: string | null;
+  ikiAsamaliTarih?: string | null;
+  totpSonAdim?: number | null;
+  kurtarmaKodlari?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  ikiAdimHata?: number | null;
+  ikiAdimKilit?: string | null;
   /**
    * Gelişmiş yönetim ekranına (Payload) girebilir. Yalnızca teknik bilgisi olan kişiye verin.
    */
@@ -858,6 +871,11 @@ export interface KullanicilarSelect<T extends boolean = true> {
   firmaYetkisi?: T;
   ikiAsamaliAcik?: T;
   totpGizli?: T;
+  ikiAsamaliTarih?: T;
+  totpSonAdim?: T;
+  kurtarmaKodlari?: T;
+  ikiAdimHata?: T;
+  ikiAdimKilit?: T;
   teknikSorumlu?: T;
   pasif?: T;
   updatedAt?: T;
