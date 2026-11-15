@@ -559,6 +559,29 @@ Claude tarafından yapılacak.
     - Öğrenilen: Yerelde Turnstile test anahtarlarıyla tarayıcı denemesi için geliştirme sunucusu
       `TURNSTILE_DOGRULAMA_ADRESI=http://localhost:4010/` ile ve sahte doğrulama sunucusuyla açılmalı; çok sayıda girişte
       yerel istek sınırı (10/15 dk) dolar, `istek-sinirlari` koleksiyonu temizlenir.
+  - **Kullanıcı geri bildirimi 3 (15.11.2026):**
+    - **Sayfa geçiş göstergesi** `src/arayuz/GezinmeGostergesi.tsx` (kök düzende): iç bağlantı veya GET formunda üstte
+      ince çubuk; 450 ms'yi aşarsa soluk örtü ve TeknoKariyer işareti (favicon “t”) çevresinde dönen halka. `Link`
+      `preventDefault` çağırdığı için tıklama yakalama aşamasında dinlenir; `download`, yeni sekme, `data-gostergesiz`
+      açmaz. Adres değişince React'in “önceki değere göre durum” kalıbıyla kapanır (efektte setState yok).
+    - **Firmalar** sayfası kart ızgarası + blok süzgeci (`?blok=B`). **İlan filtreleri** `FiltreGrubu`: açılır gruplar,
+      onay kutulu satırlar, ilk 5 + “Tümünü göster”, başlıkta seçili sayısı (kariyer.net usulü).
+    - **Kaydedilen ilanlar** (talimatlar 5): koleksiyon `kaydedilen-ilanlar` (kullanıcı+ilan benzersiz), servis
+      `src/servisler/kaydedilenler.ts`, düğme `KaydetDugmesi` (ilan satırı, ilan sayfası, önizleme, mobil alt çubuk;
+      ziyaretçide giriş bağlantısı, firma/kurumda yok), bağlam `src/veri/kaydedilenler.ts`, panel `/hesabim/kaydedilenler`.
+      2 gün kala bir kez hatırlatma (zamanlı iş, mesai saati; başvurulan ilana gitmez). Döküme girer, hesap silmede silinir.
+      En fazla 200 kayıt.
+    - **Site trafiği** (talimatlar 9: çerezsiz, kişisel verisiz; GA kullanılmadı: çerez izni ve yurt dışı aktarım
+      gerektirir, K2 taşınabilirliğine uymaz). Kurallar `src/alan/trafik.ts`, servis `src/servisler/trafik.ts`, uç
+      `POST /olcum` (`sec-fetch-site` başka siteyse sayılmaz; firma/kurum oturumu sayılmaz), istemci `SayfaOlcumu`
+      ((site) düzeninde; DNT/GPC'de ölçmez; yalnızca yol değişiminde, aynı yol iki kez gitmez). Ziyaret = dışarıdan
+      gelinen sayfa açılışı; tekil ziyaretçi yok (kimlik tutulmuyor). Ham olaylar `trafik-olaylari`, gece
+      `trafikOzetle` biten günleri `trafik-ozetleri`ne (gün × boyut × değer) yazar ve ham olayları tek sorguyla siler
+      (`payload.db.deleteMany`). Pano `/yonetim/ozet/trafik` (Portal / Site trafiği sekmeleri).
+    - Göç `20261115_153138_kaydedilenler_trafik` (D1) ve `20261115_153210_kaydedilenler_trafik` (PostgreSQL): yalnızca
+      yeni tablo ve sütun; test D1'ine koddan önce uygulandı.
+    - Öğrenilen: Geliştirme kipinde React efektleri iki kez çalıştırır; ölçüm gibi yan etkili efektler modül düzeyinde
+      son değerle tekrarı engellemeli.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

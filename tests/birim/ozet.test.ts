@@ -34,6 +34,8 @@ describe('yönetici özeti hesapları', () => {
     expect(degisim(3, 0)).toEqual({ fark: 3, yuzde: null })
     expect(eksenAdimlari(17)).toEqual([0, 5, 10, 15, 20])
     expect(eksenAdimlari(3)).toEqual([0, 1, 2, 3])
+    expect(eksenAdimlari(2)).toEqual([0, 1, 2])
+    expect(eksenAdimlari(1)).toEqual([0, 1])
     expect(eksenAdimlari(0)).toEqual([0, 1])
   })
 })

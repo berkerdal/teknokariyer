@@ -282,6 +282,13 @@
 .toplu-cubuk { background: var(--gece); }
 .bildirim { background: var(--gece); border-radius: var(--kose-panel); box-shadow: var(--golge-katman); }
 
+/* ---------- Yönetici özeti görünüm sekmeleri ---------- */
+.ozet-sekmeler { display: inline-flex; gap: 4px; padding: 4px; background: var(--yuzey); border-radius: var(--kose-panel); box-shadow: var(--golge-hafif); justify-self: start; }
+.ozet-sekmeler a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 16px; border-radius: var(--kose-kontrol); font-weight: 600; font-size: 15px;
+  color: var(--metin-2); text-decoration: none; transition: background-color var(--sure) ease, color var(--sure) ease; }
+.ozet-sekmeler a[aria-current="page"] { background: var(--lacivert); color: #FFFFFF; }
+@media (hover: hover) and (pointer: fine) { .ozet-sekmeler a:not([aria-current="page"]):hover { background: var(--yuzey-2); color: var(--metin); } }
+
 /* ---------- Kaydet düğmesi ---------- */
 .kaydet { position: relative; z-index: 2; color: var(--metin-2); }
 .ikon-dugme.kaydet { width: 36px; height: 36px; margin: -6px -6px 0 0; }

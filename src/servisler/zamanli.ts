@@ -15,6 +15,7 @@ import { eskiSayaclariSil } from './istekSiniri'
 import { islemKaydet } from '@/altyapi/islemKaydi'
 import { davetHatirlat } from './ekip'
 import { kaydedilenHatirlatmalari } from './kaydedilenler'
+import { trafikOzetle } from './trafik'
 import { suresiDolanlariKapat } from './ilanIslemleri'
 import { gunlukOzetYaz } from './gunlukOzet'
 import { basvurulariAnonimlestir, eskiIslemKayitlariniSil } from './saklama'
@@ -27,6 +28,7 @@ export interface ZamanliSonuc {
   anonimlestirilenBasvuru: number
   silinenIslemKaydi: number
   silinenSayac: number
+  ozetlenenTrafik: number
   kapananIlan: number
   davetHatirlatma: number
   profilHatirlatma: number
@@ -116,10 +118,11 @@ export async function zamanliIsleriCalistir(payload: Payload, simdi = new Date()
   const anonimlestirilenBasvuru = await guvenli('Başvuru saklama süresi', async () => (await basvurulariAnonimlestir(payload, simdi, Math.max(1, a?.saklama?.basvuruAnonimlestirmeAy ?? 12))).basvuru)
   const silinenIslemKaydi = await guvenli('İşlem kaydı saklama süresi', () => eskiIslemKayitlariniSil(payload, simdi, Math.max(12, a?.saklama?.islemKaydiAy ?? 24)))
   const silinenSayac = await guvenli('İstek sayaçları', () => eskiSayaclariSil(payload, simdi))
+  const ozetlenenTrafik = await guvenli('Site trafiği özeti', () => trafikOzetle(payload, simdi))
   const davetHatirlatma = hatirlatmalar ? await guvenli('Davet hatırlatmaları', () => davetHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const profilHatirlatma = hatirlatmalar ? await guvenli('Profil hatırlatmaları', () => profilHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const kaydedilenHatirlatma = hatirlatmalar ? await guvenli('Kaydedilen ilan hatırlatmaları', () => kaydedilenHatirlatmalari(payload, simdi, hatalar)) : 0
-  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, silinenSayac, kapananIlan, davetHatirlatma, profilHatirlatma, kaydedilenHatirlatma, hatalar }
+  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, silinenSayac, ozetlenenTrafik, kapananIlan, davetHatirlatma, profilHatirlatma, kaydedilenHatirlatma, hatalar }
   await islemKaydet(await istekOlustur(payload, null), { islem: 'Zamanlanmış işler çalıştı', tur: 'ayarlar', ayrinti: sonuc }).catch((): undefined => undefined)
   return sonuc
 }

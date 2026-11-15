@@ -107,7 +107,8 @@ export function eksenAdimlari(enBuyuk: number, hedef = 4): number[] {
   if (enBuyuk <= 0) return [0, 1]
   const kaba = enBuyuk / hedef
   const us = 10 ** Math.floor(Math.log10(kaba))
-  const adim = [1, 2, 5, 10].map((c) => c * us).find((a) => a >= kaba)!
+  // Sayılar adet olduğu için adım en az 1 (eksende “0,5” gibi kesirli değer çıkmaz)
+  const adim = Math.max(1, [1, 2, 5, 10].map((c) => c * us).find((a) => a >= kaba)!)
   const ust = Math.ceil(enBuyuk / adim) * adim
   return Array.from({ length: Math.round(ust / adim) + 1 }, (_, i) => Math.round(i * adim * 1000) / 1000)
 }

@@ -9,6 +9,7 @@ import { CanliYenileme } from '@/arayuz/grafik/CanliYenileme'
 import { Huni, SiraliCubuklar } from '@/arayuz/grafik/Cubuklar'
 import { SutunGrafik, type SutunVerisi } from '@/arayuz/grafik/SutunGrafik'
 import { ozetVerisi } from '@/veri/ozet'
+import { OzetSekmeleri } from '@/arayuz/yonetim/OzetSekmeleri'
 import { SIRALAMALAR, tabloyuSuz } from '@/veri/ozetTablo'
 import { yonetimOturumu } from '@/veri/yonetim'
 
@@ -80,6 +81,7 @@ export default async function YoneticiOzeti({ searchParams }: Props) {
         </div>
         <CanliYenileme zaman={zaman} />
       </div>
+      <OzetSekmeleri etkin="portal" donem={sp.donem} />
 
       <nav className="sekmeler y-suzgec" aria-label="Dönem">
         {DONEMLER.map(([k, ad]) => (
