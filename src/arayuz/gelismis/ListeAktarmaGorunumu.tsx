@@ -4,6 +4,7 @@
  * tutmaz; yalnızca teknik sorumluya açık bu ekrandadır. Yetki serviste de denetlenir.
  */
 import type { AdminViewServerProps } from 'payload'
+import { redirect } from 'next/navigation'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 import { teknikSorumluMu, type OturumKullanicisi } from '@/erisim'
@@ -13,6 +14,8 @@ import './gelismis.css'
 
 export async function ListeAktarmaGorunumu({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { req, locale, permissions, visibleEntities } = initPageResult
+  // Payload'un özel görünümleri kendiliğinden giriş istemez: oturumsuz ziyaretçi giriş sayfasına gider
+  if (!req.user) redirect('/giris?donus=%2Fadmin%2Fliste-aktar')
   const izinli = teknikSorumluMu(req.user as OturumKullanicisi | null)
   const sayilar = izinli
     ? await Promise.all(
