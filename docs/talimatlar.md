@@ -46,6 +46,7 @@ olursa bu bölüm geçerlidir.
 | K32 | KVKK araçları | Önerilen uygulama kabul edildi (15 Kasım 2026): hesap silmede ön yazı ve profil bağlantıları da silinir; eğitim, beceri ve ön eleme cevapları saklama süresine kadar firmada kalır. KVKK başvuruları ve işlem kayıtları yalnızca tam yetkili kullanıcılara açıktır. Hukuk birimi görüşü yine alınacak (19. bölüm sonu). |
 | K33 | İki aşamalı doğrulama | Doğrulayıcı uygulama zorunlu değil, “önerilen” seçenek olarak Hesap güvenliği sayfasında sunulur. Firma ve Yönetici A.Ş. hesaplarında tanınmayan bir cihazdan girişte e-postayla 6 haneli kod zorunludur; cihaz 90 gün hatırlanabilir (15 Kasım 2026). |
 | K34 | CV güvenliği | Ayrı virüs tarama hizmeti (ClamAV vb.) kullanılmaz; dış hizmet istenmiyor. Yüklenen PDF etkisizleştirilir (betik, açılış komutu, gömülü ek, program açma komutu çıkarılır; şifreli PDF reddedilir). Firmalar CV'yi portal içindeki, betik çalıştırmayan görüntüleyicide açar; indirme ve yazdırma oradan yapılır (15 Kasım 2026). |
+| K35 | İngilizce sürüm ve adresler | İngilizce arayüz bekleyebilir; pilot ve ilk yayın yalnızca Türkçe. Türkçe adresler ön eksiz kalır (`/ilanlar`); İngilizce eklendiğinde `/en/...` altında olur. hreflang ve site haritası buna göre kuruldu (15 Kasım 2026). |
 
 ### 0.1 İlan yönetiminde tam kontrol (K1'den)
 
@@ -746,7 +747,8 @@ Firma profili eksikse yayına girmez. En az şunlar gerekir: logo, kısa tanıt�
 
 - Arayüzün tamamı iki dilde olur: tarih seçici, hata mesajları, e-postalar dahil.
 - İlan içeriği firmanın seçtiği dilde yazılır. İngilizce arayüzde Türkçe ilan "Bu ilan Türkçe yayınlanmıştır" notuyla gösterilir.
-- Adresler: `/tr/...` ve `/en/...`. hreflang etiketleri ve iki dilli sitemap bulunur.
+- Adresler: Türkçe ön eksiz (`/ilanlar`), İngilizce `/en/...` (K35). hreflang etiketleri ve iki dilli sitemap bulunur.
+- **K35:** İngilizce sürüm bekleyebilir; pilot ve ilk yayın yalnızca Türkçe.
 - Arayüz metinlerinde Türkçe ve İngilizce asla karışmaz.
 
 ## 15. Tasarım ilkeleri ve "jenerik/AI tasarımı" yasakları

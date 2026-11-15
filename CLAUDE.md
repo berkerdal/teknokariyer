@@ -180,6 +180,9 @@ Claude tarafından yapılacak.
   sayfasında. Firma ve kurum hesaplarında tanınmayan cihazdan girişte e-posta kodu zorunlu; cihaz 90 gün hatırlanır.
   Kullanıcının gerekçesi: zorunlu harici uygulama insanları yıldırır.
 
+- **K35 — İngilizce (15.11.2026):** İngilizce sürüm bekleyebilir; pilot ve ilk yayın yalnızca Türkçe. Türkçe adresler
+  ön eksiz kalır; İngilizce eklendiğinde `/en/...` olur (`src/alan/dil.ts` → `DILLER`).
+
 - **K34 — CV güvenliği (15.11.2026):** Ayrı virüs tarayıcı (ClamAV) ve dış hizmet yok. Yüklenen PDF etkisizleştirilir;
   firmalar CV'yi portal içindeki betik çalıştırmayan görüntüleyicide (pdf.js, kendi dosyalarımızdan) açar, indirme ve
   yazdırma oradan.
@@ -498,8 +501,7 @@ Claude tarafından yapılacak.
     - hreflang: `src/alan/dil.ts` → `DILLER` (şimdilik yalnızca `tr`) ve `dilAdresleri(yol)` (kanonik + dil karşılıkları +
       `x-default`). Next'te alt sayfanın `alternates` alanı üsttekini tamamen ezer; her dizinlenebilir sayfa kendisi verir.
     - `metadataBase` artık `siteAdresi()` (SITE_ADRESI): site haritası, sayfa başlıkları ve e-postalar aynı kökü kullanır.
-    - **Açık soru (kullanıcıya soruldu):** Talimatlar 14 İngilizce arayüz ve `/tr/`, `/en/` adresleri istiyor; portal yalnızca
-      Türkçe. İngilizce eklenince `DILLER`e `{ kod: 'en', onEk: '/en' }` girer.
+    - **K35:** İngilizce sonraya kaldı; Türkçe adresler ön eksiz. İngilizce eklenince `DILLER`e `{ kod: 'en', onEk: '/en' }` girer.
   - **Türkiye'deki sunucuya göç (15.11.2026, K2):** Rehber `docs/goc-rehberi.md` (hedef mimari, kaynaklar, adımlar,
     yedekleme, geri dönüş, denetim listesi, prova sonucu).
     - **PostgreSQL göçleri ayrı:** `src/migrations-pg` (node yapılandırması `migrationDir` + `prodMigrations`). **Şema
