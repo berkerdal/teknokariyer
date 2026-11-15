@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Alt } from '@/arayuz/Alt'
+import { BulunamadiGovdesi } from '@/arayuz/BulunamadiGovdesi'
+import { IkonSeti } from '@/arayuz/Ikon'
 import './(frontend)/styles.css'
 
 export const metadata: Metadata = { title: 'Sayfa bulunamadı · TeknoKariyer', robots: { index: false } }
@@ -10,6 +12,7 @@ export default function GenelBulunamadi() {
   return (
     <html lang="tr">
       <body className="tk">
+        <IkonSeti />
         <header className="a-ust">
           <div className="a-ust-ic">
             <Link href="/" className="a-ust-logo">
@@ -17,19 +20,7 @@ export default function GenelBulunamadi() {
             </Link>
           </div>
         </header>
-        <main className="sayfa-dar">
-          <p className="ust-etiket">404</p>
-          <h1 className="b1">Aradığın sayfa bulunamadı</h1>
-          <p>Bağlantı yanlış yazılmış olabilir ya da sayfa kaldırılmış olabilir.</p>
-          <p className="dugme-grubu">
-            <Link className="dugme" href="/ilanlar">
-              İlanlara git
-            </Link>
-            <Link className="dugme dugme--ikincil" href="/">
-              Ana sayfa
-            </Link>
-          </p>
-        </main>
+        <BulunamadiGovdesi />
         <Alt />
       </body>
     </html>

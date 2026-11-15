@@ -347,6 +347,31 @@ dialog .oneri-panel { position: static; margin-top: 4px; max-height: 240px; }
 .y-ust .hm { margin-left: auto; }
 .f-hesap > .hm .hm-dugme { padding-right: 4px; }
 
+/* ---------- 404 ---------- */
+.bulunamadi { width: 100%; max-width: 1040px; margin: 0 auto; padding: var(--b5) 16px var(--b7); }
+.bn-kart { display: grid; background: var(--yuzey); border-radius: var(--kose-panel); box-shadow: var(--golge-panel); overflow: hidden; }
+.bn-pano { position: relative; display: grid; align-content: space-between; gap: 24px; padding: 24px; background: var(--gece); color: #FFFFFF; min-height: 200px; }
+.bn-sayi { font: 700 96px/.9 var(--font-baslik); letter-spacing: -.04em; color: var(--camgobegi); }
+.bn-pano img { width: 132px; height: auto; }
+.bn-govde { display: grid; gap: 16px; align-content: start; padding: 24px 20px 28px; }
+.bn-govde h1 { font-size: 30px; line-height: 1.12; letter-spacing: -.02em; }
+.bn-arama { margin-top: 4px; }
+.bn-baglantilar { display: grid; gap: 8px; margin-top: 4px; }
+.bn-baglantilar ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.bn-baglantilar a { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: var(--kose-kontrol); background: var(--zemin);
+  color: var(--metin); font-weight: 600; text-decoration: none; transition: background-color var(--sure) ease, color var(--sure) ease; }
+.bn-baglantilar a .ikon { color: var(--metin-3); }
+@media (hover: hover) and (pointer: fine) { .bn-baglantilar a:hover { background: var(--lacivert-acik); color: var(--lacivert-koyu); } }
+@media (min-width: 900px) {
+  .bulunamadi { padding: var(--b7) 32px; }
+  .bn-kart { grid-template-columns: 340px minmax(0, 1fr); min-height: 420px; }
+  .bn-pano { padding: 36px; }
+  .bn-sayi { font-size: 148px; }
+  .bn-govde { padding: 48px 48px 44px; align-content: center; }
+  .bn-govde h1 { font-size: 40px; }
+  .bn-arama { flex-direction: row; }
+}
+
 /* ---------- Kaydet düğmesi ---------- */
 .kaydet { position: relative; z-index: 2; color: var(--metin-2); }
 .ikon-dugme.kaydet { width: 36px; height: 36px; margin: -6px -6px 0 0; }
