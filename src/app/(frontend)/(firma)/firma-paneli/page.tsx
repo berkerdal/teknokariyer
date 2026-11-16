@@ -170,7 +170,7 @@ export default async function FirmaOzeti({ searchParams }: { searchParams: Promi
             {yayinda.length === 0 ? (
               <p className="ikincil">Şu anda yayında ilanınız yok.</p>
             ) : (
-              <div className="tablo-kap">
+              <div className="tablo-kap" tabIndex={0}>
                 <table className="tablo">
                   <thead>
                     <tr>

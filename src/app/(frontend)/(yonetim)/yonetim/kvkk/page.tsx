@@ -48,7 +48,7 @@ export default async function KvkkBasvurulari() {
       </ModulBilgisi>
 
       <section className="panel">
-        <div className="tablo-kap">
+        <div className="tablo-kap" tabIndex={0}>
           <table className="tablo y-tablo">
             <caption className="gizli">KVKK başvuruları; açık olanlar en az süresi kalandan başlayarak</caption>
             <thead>

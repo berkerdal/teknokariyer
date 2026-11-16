@@ -120,7 +120,7 @@ export default async function Firmalar({ searchParams }: Props) {
           {ozet.takip.length === 0 ? (
             <p className="panel-ic ikincil">Takip gerektiren firma yok.</p>
           ) : (
-            <div className="tablo-kap">
+            <div className="tablo-kap" tabIndex={0}>
               <table className="tablo y-tablo">
                 <thead>
                   <tr>

@@ -57,7 +57,7 @@ export default async function HesapSayfasi({ searchParams }: Props) {
       <section className="profil-bolum">
         <h2 className="b3 kare-bas">Verdiğin onaylar</h2>
         <p className="ikincil kucuk">Her onay, metnin sürümü ve tarihiyle kaydedilir. CV havuzu rızasını “CV havuzu” sayfasından geri alabilirsin.</p>
-        <div className="tablo-kap">
+        <div className="tablo-kap" tabIndex={0}>
           <table className="tablo">
             <thead>
               <tr>

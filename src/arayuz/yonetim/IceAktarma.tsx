@@ -111,7 +111,7 @@ export function IceAktarma({ mevcut, sektorler }: { mevcut: Array<{ unvan: strin
               <Link href="/yonetim/firmalar?asama=iskelet#liste">firma listesinde</Link> “İskelet” aşamasında.
             </p>
           )}
-          <div className="tablo-kap">
+          <div className="tablo-kap" tabIndex={0}>
             <table className="tablo y-tablo y-aktarma">
               <thead>
                 <tr>

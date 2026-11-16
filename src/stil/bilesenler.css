@@ -67,7 +67,7 @@
 .hata-ozeti a { color: var(--hata); font-weight: 600; }
 
 .secenek { display: flex; gap: 12px; align-items: flex-start; min-height: var(--dokunma); padding: 10px 0; cursor: pointer; }
-.secenek input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--lacivert); flex: none; }
+.secenek input { width: 24px; height: 24px; margin: 1px 0 0; accent-color: var(--lacivert); flex: none; }
 .secenek .ipucu { display: block; }
 .secenek-kutu { border: 1px solid var(--cizgi-kontrol); border-radius: var(--kose-kontrol); padding: 12px 14px; background: var(--yuzey); }
 .secenek-kutu:has(input:checked) { border: 2px solid var(--lacivert); padding: 11px 13px; background: var(--lacivert-acik); }

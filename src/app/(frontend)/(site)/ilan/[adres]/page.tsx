@@ -228,7 +228,7 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
           {(!k || adayMi(k)) && <IlanBildir ilanId={ilan.id} girisAdresi={k ? undefined : `/giris?donus=${encodeURIComponent(ilanAdresi(ilan))}`} />}
         </div>
       </main>
-      <div className="mobil-basvur id-mobil-eylem">
+      <div className="mobil-basvur id-mobil-eylem" role="region" aria-label="Başvuru">
         <p>
           <small>Son başvuru</small>
           <strong>

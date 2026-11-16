@@ -24,7 +24,7 @@ export function RaporGovdesi({ rapor: r }: { rapor: Pick<Rapor, 'ozet' | 'tablol
           {t.satirlar.length === 0 ? (
             <p className="panel-ic ikincil">{t.bos ?? 'Bu dönem için kayıt yok.'}</p>
           ) : (
-            <div className="tablo-kap">
+            <div className="tablo-kap" tabIndex={0}>
               <table className="tablo y-tablo">
                 <thead>
                   <tr>

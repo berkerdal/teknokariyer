@@ -711,6 +711,28 @@ Claude tarafından yapılacak.
       (`select`) + yarım saatlik saat listesi kullanır (tarayıcının `time` girdisi bazı cihazlarda ÖÖ/ÖS gösterir).
     - Göçler (D1 ve PG, yalnızca CREATE/ADD): `…_havuz_riza_hatirlatma`, `…_kayitli_aramalar`, `…_sikayetler`,
       `…_hesap_talepleri`, `…_gorusmeler`.
+  - **Kalite denetimi (16.11.2026, yol haritası 2. aşama):**
+    - **Güvenlik:** Payload REST API ziyaretçiye açıktı: `POST /api/kullanicilar` ile Turnstile, istek sınırı ve
+      aydınlatma onayı atlanarak hesap açılabiliyor (doğrulama e-postası rastgele adrese gidebiliyordu), `GET /api/ilanlar`
+      gizlenen ücreti, tam başvuru/görüntülenme sayısını (K23) ve moderasyon alanlarını veriyordu. **REST kapısı**
+      (`src/erisim/restKapisi.ts`, bütün koleksiyonlara `beforeOperation`): yerel API serbest, REST/GraphQL yalnızca
+      etkin teknik sorumluya (gelişmiş yönetim ekranı). Portal REST kullanmaz; yeni koleksiyon `restKapisiEkle` ile
+      otomatik korunur. Yönetici A.Ş. firma kaydındaki web adresi artık `webAdresi` ile doğrulanır (önce ham saklanıyordu).
+      Denetlenenler: bütün sunucu eylemleri oturumla başlar; indirme uçları rol/kiracı denetler; güvenlik başlıkları
+      (HSTS, nosniff, CSP frame-ancestors/object-src/base-uri/form-action, Referrer, Permissions) yerinde; oturum çerezi
+      HttpOnly + SameSite=Lax + üretimde Secure; dönüş adresi açık yönlendirmeye kapalı; JSON-LD `<` kaçışlı.
+      Kalan not: CSP'de `script-src` yok (Next satır içi betikleri nonce ister); `/cikis` GET ile çalışır (düşük risk).
+    - **Erişilebilirlik (axe, 37 sayfa × 390/1280 px):** metin içi bağlantıların altı çizili (sınıfsız bağlantılar;
+      `yenileme.css` sonu), test ortamı şeridi `aside`, mobil başvuru çubuğu bölge, seçenek kutuları 24 px, “?” düğmesi
+      24 px, alt bilgideki telefon/e-posta 24 px dokunma yüksekliği, “Devralındı” rozeti 4,7:1, kaydırılan tablolar
+      klavyeyle odaklanır (`tablo-kap` `tabIndex={0}`), firma raporu telefonda yatay taşmıyor (`.f-icerik` ve `.rapor`
+      sütunu `minmax(0, 1fr)`), yapışık form ayağında `scroll-padding-bottom`. Kalan tek bulgu: ilan formunda viewport
+      altındaki alanın yapışık ayakla kısmen örtülmesi (kaydırınca kalkar).
+    - **Performans:** Lighthouse mobil (ana sayfa) 82; LCP 3,4 sn. Sebep sunucu yanıtı (~3 sn): ölçüm bu ortamın ABD
+      çıkışından (EWR) yapılıyor, D1 Doğu Avrupa'da (EEUR), sayfa başına 7–15 sorgu okyanusu geçiyor. Türkiye'den gelen
+      istek EEUR'a yakın çalışır. Sayfa başına sorgu sayısı yerelde ölçüldü (Payload D1 adaptörünün `logger.logQuery`).
+      Smart Placement yalnızca Worker'ın daha önce çalıştığı yerleri aday sayar; burada işe yaramaz. Pilot başında
+      Türkiye'den ölçülmeli.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

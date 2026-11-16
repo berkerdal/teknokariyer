@@ -114,7 +114,7 @@ export function SutunGrafik({ baslik, veri, birim, tabloBasligi }: { baslik: str
       </p>
       <details className="grafik-tablo">
         <summary>Tablo olarak göster</summary>
-        <div className="tablo-kap">
+        <div className="tablo-kap" tabIndex={0}>
           <table className="tablo y-tablo">
             <caption className="gizli">{tabloBasligi}</caption>
             <thead>

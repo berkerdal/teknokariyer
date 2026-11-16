@@ -114,7 +114,7 @@ export default async function IslemKayitlariSayfasi({ searchParams }: Props) {
           <h2 className="b3">{suzgecli ? 'Süzgece uyan kayıtlar' : 'Bütün kayıtlar'}</h2>
           <span className="kucuk ikincil">{r.toplam.toLocaleString('tr-TR')} kayıt</span>
         </header>
-        <div className="tablo-kap">
+        <div className="tablo-kap" tabIndex={0}>
           <table className="tablo y-tablo kayit-tablo">
             <thead>
               <tr>

@@ -15,6 +15,7 @@ import { en } from '@payloadcms/translations/languages/en'
 
 import { globaller, koleksiyonlar } from './koleksiyonlar'
 import { epostaAdaptoru } from './altyapi/eposta'
+import { restKapisiEkle } from './erisim/restKapisi'
 
 const dosyaAdi = fileURLToPath(import.meta.url)
 const klasor = path.dirname(dosyaAdi)
@@ -43,7 +44,8 @@ export function ortakYapilandirma({
         },
       },
     },
-    collections: koleksiyonlar,
+    // REST yalnızca teknik sorumluya açık (src/erisim/restKapisi.ts); portal yerel API'yi kullanır.
+    collections: koleksiyonlar.map(restKapisiEkle),
     globals: globaller,
     // GraphQL kullanılmıyor; REST ve yerel API yeterli. Kapatmak paketi küçültür.
     graphQL: { disable: true },

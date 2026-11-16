@@ -52,7 +52,7 @@ export default async function Degisiklikler({ searchParams }: Props) {
             </span>
           </header>
           <div className="panel-ic">
-            <div className="tablo-kap">
+            <div className="tablo-kap" tabIndex={0}>
               <table className="tablo y-tablo">
                 <thead>
                   <tr>

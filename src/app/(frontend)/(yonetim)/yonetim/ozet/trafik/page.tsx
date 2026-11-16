@@ -177,7 +177,7 @@ export default async function SiteTrafigi({ searchParams }: Props) {
             <h2 className="b3">En çok görüntülenen sayfalar</h2>
           </header>
           {v.sayfalar.length ? (
-            <div className="tablo-kap">
+            <div className="tablo-kap" tabIndex={0}>
               <table className="tablo">
                 <thead>
                   <tr>
@@ -210,7 +210,7 @@ export default async function SiteTrafigi({ searchParams }: Props) {
             <h2 className="b3">Ziyaretlerin başladığı sayfalar</h2>
           </header>
           {v.girisSayfalari.length ? (
-            <div className="tablo-kap">
+            <div className="tablo-kap" tabIndex={0}>
               <table className="tablo">
                 <thead>
                   <tr>

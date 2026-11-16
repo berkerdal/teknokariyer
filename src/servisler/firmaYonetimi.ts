@@ -2,6 +2,7 @@
  * Yönetici A.Ş.'nin firma işleri (talimatlar 0.3; K3): iskelet kayıt, Yönetici A.Ş. alanları, yetkili, pasif yapma,
  * takip notu ve toplu davet. Davetin kendisi ekip servisindedir (`davetGonder`); burada yalnızca çağrılır.
  */
+import { webAdresi } from './firmaProfili'
 import { parcaliBul } from '@/altyapi/parcali'
 import type { Payload } from 'payload'
 import type { Firmalar } from '@/payload-types'
@@ -32,10 +33,11 @@ const tek = (s: string) => s.replace(/\s+/g, ' ').trim()
 
 async function dogrula(payload: Payload, g: FirmaKaydiGirdisi, haricId?: number) {
   const hatalar: Record<string, string> = {}
-  const v = { ...g, unvan: tek(g.unvan), kisaAd: tek(g.kisaAd), konum: tek(g.konum), yetkiliAd: tek(g.yetkiliAd), yetkiliTelefon: tek(g.yetkiliTelefon), web: g.web.trim() }
+  const v = { ...g, unvan: tek(g.unvan), kisaAd: tek(g.kisaAd), konum: tek(g.konum), yetkiliAd: tek(g.yetkiliAd), yetkiliTelefon: tek(g.yetkiliTelefon), web: webAdresi(g.web) ?? '' }
   const eposta = g.yetkiliEposta.trim() ? epostaNormallestir(g.yetkiliEposta) : ''
   if (v.unvan.length < 3) hatalar.unvan = 'Firmanın ticaret unvanını yazın. Örnek: Kodpit Teknoloji A.Ş.'
   if (v.kisaAd.length < 2 || v.kisaAd.length > 40) hatalar.kisaAd = 'Listelerde görünecek kısa adı 2 ile 40 karakter arasında yazın. Örnek: Kodpit Teknoloji'
+  if (g.web.trim() && !v.web) hatalar.web = 'Web adresini www.firma.com.tr veya https://www.firma.com.tr biçiminde yazın.'
   if (v.konum.length < 2) hatalar.konum = 'Firmanın Teknokent’teki yerini yazın. Örnek: D Blok 208'
   if (eposta && !epostaGecerliMi(eposta)) hatalar.yetkiliEposta = 'E-posta adresini ad.soyad@firma.com.tr biçiminde yazın.'
   if (Object.keys(hatalar).length) throw new FormHatasi(hatalar)

@@ -688,3 +688,15 @@ dialog.gr-pencere { width: min(560px, calc(100vw - 32px)); }
 .bv-gorusme { margin: 0; padding: 8px 12px; border-radius: var(--kose-kontrol); background: var(--yuzey-2); font-size: var(--boy-kucuk); }
 .bv-gorusme--eylem { background: var(--camgobegi-acik); font-weight: 600; }
 .posta-ek { margin-right: 12px; }
+.firma-satir a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Erişilebilirlik denetimi (16.11.2026, axe “link-in-text-block”): metin içindeki bağlantı yalnızca renkle ayrılmaz,
+   altı çizilir. Sınıfsız bağlantılar için; düğme, menü ve kart bağlantıları kendi sınıflarıyla yazılır. Alt bilgi hariç. */
+:where(main) :is(p, dd, .ipucu, .bilgi, ul:not([class]) > li) > a:not([class]),
+:where(main) :is(p, dd, .ipucu) > :is(strong, span) > a:not([class]),
+:where(dialog) :is(p, .ipucu) > a:not([class]) { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+/* Firma paneli içerik sütunu içeriğin en küçük genişliğiyle büyümesin (rapor tablosu telefonda yatay taşırıyordu). */
+.f-icerik { grid-template-columns: minmax(0, 1fr); }
+/* Odaklanan alan yapışık form ayağının altında kalmasın (WCAG 2.2, 2.4.11). */
+html:has(.yapiskan-alt) { scroll-padding-bottom: 96px; }
+.rapor { grid-template-columns: minmax(0, 1fr); }

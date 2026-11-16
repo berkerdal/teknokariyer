@@ -184,7 +184,7 @@ export default async function YoneticiOzeti({ searchParams }: Props) {
             </a>
           </form>
         </div>
-        <div className="tablo-kap">
+        <div className="tablo-kap" tabIndex={0}>
           <table className="tablo y-tablo ozet-tablo">
             <thead>
               <tr>
@@ -258,7 +258,7 @@ export default async function YoneticiOzeti({ searchParams }: Props) {
             <Link href="/yonetim/firmalar#liste">Firma listesinde kurulum aşamalarını görün</Link>
           </p>
           {v.firmalar.tablo.length > 0 && (
-            <div className="tablo-kap">
+            <div className="tablo-kap" tabIndex={0}>
               <table className="tablo y-tablo">
                 <caption className="kucuk ikincil ozet-baslik-alti">Dönemde en çok başvuru alan firmalar</caption>
                 <thead>
@@ -298,7 +298,7 @@ export default async function YoneticiOzeti({ searchParams }: Props) {
           {v.yetenek.length === 0 ? (
             <p className="kucuk ikincil">Yayında zorunlu beceri isteyen ilan yok.</p>
           ) : (
-            <div className="tablo-kap">
+            <div className="tablo-kap" tabIndex={0}>
               <table className="tablo y-tablo">
                 <thead>
                   <tr>
