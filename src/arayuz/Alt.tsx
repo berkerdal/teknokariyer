@@ -7,7 +7,7 @@ import { KURUM } from '@/altyapi/kurum'
  * haritası. Gece zemini yönetim paneliyle aynı tondur; logolar negatif (beyaz) sürümdür. Sloganlı logo kurumca
  * onaylanmadığı için kullanılmaz (CLAUDE.md 2).
  *
- * `sade`: başvuru akışı gibi odaklı sayfalar için yalnızca alt şerit.
+ * Bütün sayfalarda aynı alt bilgi kullanılır (başvuru akışı dahil; 16.11.2026 kullanıcı isteği).
  */
 
 type Baglanti = { ad: string; href: string; dis?: boolean }
@@ -72,13 +72,7 @@ function Taban() {
   )
 }
 
-export function Alt({ sade = false }: { sade?: boolean }) {
-  if (sade)
-    return (
-      <footer className="a-alt a-alt--sade">
-        <Taban />
-      </footer>
-    )
+export function Alt() {
   return (
     <footer className="a-alt">
       <div className="a-alt-ic">

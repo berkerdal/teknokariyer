@@ -254,7 +254,7 @@ Claude tarafından yapılacak.
   - **Kurumsal alt bilgi ve e-posta tasarımı (14.11.2026, kullanıcı isteği):**
     - Alt bilgi (`src/arayuz/Alt.tsx`): gece zemini, solda Teknokent (negatif) ve Pamukkale TTO (beyaz) logoları ile
       iletişim, sağda dört sütunlu site haritası (Adaylar, Firmalar, Pamukkale Teknokent, Kişisel veriler), altta telif şeridi.
-      Başvuru akışında yalnızca sade şerit (`<Alt sade />`). Firma ve Yönetici A.Ş. panelleri de aynı bileşeni kullanacak.
+      Başvuru akışı dahil bütün sayfalarda aynı tam alt bilgi (sade şerit 16.11.2026'da kullanıcı isteğiyle kaldırıldı).
     - Kurum bilgileri tek yerde: `src/altyapi/kurum.ts` (alt bilgi, e-posta, KVKK metinleri buradan okur).
     - Kurum logoları kaynak PDF'lerden üretildi: `docs/kimlik/kaynak/`, `tools/kimlik/kurum_logolari.py` + `kirp.cjs`
       → `public/logo/kurum/`. Kullanıcının gönderdiği sloganlı negatif logo (webp) onaysız olduğu için kullanılmadı.

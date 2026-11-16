@@ -191,7 +191,6 @@ html:has(dialog[open]) { overflow: hidden; }
 .a-alt-harita li a { display: inline-block; padding: 5px 0; }
 .a-alt-taban { max-width: 1200px; margin: 0 auto; padding: var(--b4) 16px calc(var(--b4) + env(safe-area-inset-bottom)); border-top: 1px solid var(--gece-2); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 24px; color: var(--gece-metin-2); font-size: var(--boy-etiket); line-height: var(--sat-etiket); }
 .a-alt-taban p { margin: 0; }
-.a-alt--sade .a-alt-taban { border-top: 0; }
 @media (min-width: 900px) {
   .a-alt-ic { grid-template-columns: minmax(260px, 4fr) 8fr; gap: var(--b7); padding-top: var(--b7); }
   .a-alt-harita { grid-template-columns: repeat(4, minmax(0, 1fr)); }
