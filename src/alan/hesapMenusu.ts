@@ -15,7 +15,7 @@ export function hesapMenusuOgeleri(rol: string, secenek: { yonetici?: boolean } 
   if (rol === 'aday')
     return [
       { href: '/hesabim', ad: 'Başvurularım', ikon: 'liste' },
-      { href: '/hesabim/kaydedilenler', ad: 'Kaydedilen ilanlar', ikon: 'yer-imi' },
+      { href: '/hesabim/kaydedilenler', ad: 'Kaydedilenler ve aramalar', ikon: 'yer-imi' },
       { href: '/hesabim/profil', ad: 'Profil ve CV’ler', ikon: 'kisi' },
       { href: '/hesabim/havuz', ad: 'CV havuzu', ikon: 'ara' },
       ayrac(1),

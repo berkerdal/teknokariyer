@@ -7,6 +7,10 @@ import { firmaYetkisiVarMi } from '@/erisim'
 import { havuzAra } from '@/servisler/havuz'
 import { firmaOturumu, ilanFormuSecenekleri } from '@/veri/firma'
 import { payloadAl } from '@/veri/payload'
+import { AramaKaydet } from '@/arayuz/AramaKaydet'
+import { KayitliAramaListesi } from '@/arayuz/KayitliAramaListesi'
+import { havuzSorgusu } from '@/alan/kayitliArama'
+import { kisininAramalari } from '@/servisler/kayitliAramalar'
 
 export const metadata: Metadata = { title: 'CV havuzu · Firma paneli' }
 
@@ -26,6 +30,10 @@ export default async function Havuz({ searchParams }: Props) {
     ? await Promise.all([havuzAra(payload, k, {}), seciliIdler.length ? havuzAra(payload, k, { beceriler: seciliIdler, beceriKosulu: kosul }) : null])
     : [[], null]
   const liste = sonuc ?? tumu
+  // Kayıtlı havuz aramaları: seçili becerilerle kaydedilir; haftada bir yeni uyan aday sayısı e-postayla gelir.
+  const aramalar = yetki ? await kisininAramalari(payload, k, 'havuz') : []
+  const arama = havuzSorgusu(new URLSearchParams([...seciliIdler.map((b) => ['beceri', String(b)]), ['kosul', kosul]]).toString())
+  const aramaOzeti = secili.map((s) => s.ad).join(kosul === 'hepsi' ? ' ve ' : ' veya ')
 
   return (
     <>
@@ -53,6 +61,9 @@ export default async function Havuz({ searchParams }: Props) {
       ) : (
         <>
           <HavuzSuzgeci beceriler={beceriler} secili={secili} kosul={kosul} />
+          {secili.length > 0 && (
+            <AramaKaydet tur="havuz" sorgu={arama.sorgu} ozet={aramaOzeti} durum={aramalar.some((a) => (a.sorgu ?? '') === arama.sorgu) ? 'kayitli' : 'kaydedebilir'} listeAdresi="#kayitli-aramalar" />
+          )}
           <p className="kucuk">
             <strong>{liste.length} aday</strong>
             {secili.length ? ` · ${secili.map((s) => s.ad).join(kosul === 'hepsi' ? ' ve ' : ' veya ')} becerisi olanlar` : ''}
@@ -115,6 +126,14 @@ export default async function Havuz({ searchParams }: Props) {
                 </li>
               ))}
             </ul>
+          )}
+          {aramalar.length > 0 && (
+            <section aria-labelledby="kayitli-aramalar" className="kd-aramalar">
+              <h2 id="kayitli-aramalar" className="b3">
+                Kayıtlı aramalarınız
+              </h2>
+              <KayitliAramaListesi aramalar={aramalar} sonucAdresi="/firma-paneli/havuz" />
+            </section>
           )}
         </>
       )}

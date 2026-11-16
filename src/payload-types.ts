@@ -84,6 +84,7 @@ export interface Config {
     'kvkk-talepleri': KvkkTalepleri;
     'istek-sinirlari': IstekSinirlari;
     'kaydedilen-ilanlar': KaydedilenIlanlar;
+    'kayitli-aramalar': KayitliAramalar;
     'trafik-olaylari': TrafikOlaylari;
     'trafik-ozetleri': TrafikOzetleri;
     'payload-kv': PayloadKv;
@@ -110,6 +111,7 @@ export interface Config {
     'kvkk-talepleri': KvkkTalepleriSelect<false> | KvkkTalepleriSelect<true>;
     'istek-sinirlari': IstekSinirlariSelect<false> | IstekSinirlariSelect<true>;
     'kaydedilen-ilanlar': KaydedilenIlanlarSelect<false> | KaydedilenIlanlarSelect<true>;
+    'kayitli-aramalar': KayitliAramalarSelect<false> | KayitliAramalarSelect<true>;
     'trafik-olaylari': TrafikOlaylariSelect<false> | TrafikOlaylariSelect<true>;
     'trafik-ozetleri': TrafikOzetleriSelect<false> | TrafikOzetleriSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -817,6 +819,27 @@ export interface KaydedilenIlanlar {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kayitli-aramalar".
+ */
+export interface KayitliAramalar {
+  id: number;
+  kullanici: number | Kullanicilar;
+  tur: 'ilan' | 'havuz';
+  ad: string;
+  /**
+   * Adres sorgusu, ör. tur=staj&ara=react. Boş: bütün ilanlar.
+   */
+  sorgu?: string | null;
+  siklik: 'anlik' | 'haftalik';
+  /**
+   * Son e-posta (haftalıkta bir sonraki özet bundan sonraki yenileri kapsar).
+   */
+  sonBildirim?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Bugünün ham sayfa görüntülemeleri. Kişisel veri içermez; gece özetlenip silinir.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -948,6 +971,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'kaydedilen-ilanlar';
         value: number | KaydedilenIlanlar;
+      } | null)
+    | ({
+        relationTo: 'kayitli-aramalar';
+        value: number | KayitliAramalar;
       } | null)
     | ({
         relationTo: 'trafik-olaylari';
@@ -1503,6 +1530,20 @@ export interface KaydedilenIlanlarSelect<T extends boolean = true> {
   kullanici?: T;
   ilan?: T;
   hatirlatildi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kayitli-aramalar_select".
+ */
+export interface KayitliAramalarSelect<T extends boolean = true> {
+  kullanici?: T;
+  tur?: T;
+  ad?: T;
+  sorgu?: T;
+  siklik?: T;
+  sonBildirim?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -23,6 +23,11 @@ import { IlanOnizleme } from '@/arayuz/IlanOnizleme'
 import { Ust } from '@/arayuz/Ust'
 import { yayindakiIlanlar } from '@/veri/ilanlar'
 import { kaydetmeBaglami } from '@/veri/kaydedilenler'
+import { AramaKaydet } from '@/arayuz/AramaKaydet'
+import { ilanAramaOzeti, ilanSorgusu } from '@/alan/kayitliArama'
+import { adayMi } from '@/erisim'
+import { kisininAramalari } from '@/servisler/kayitliAramalar'
+import { oturum, payloadAl } from '@/veri/payload'
 import { ilanAdresi } from '@/arayuz/bicim'
 
 export const dynamic = 'force-dynamic'
@@ -44,7 +49,16 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 export default async function IlanlarSayfasi({ searchParams }: Props) {
   const p = await searchParams
   const f = filtreOku(p)
-  const [tumu, kaydet] = await Promise.all([yayindakiIlanlar(), kaydetmeBaglami()])
+  const [tumu, kaydet, k] = await Promise.all([yayindakiIlanlar(), kaydetmeBaglami(), oturum()])
+  // Kayıtlı arama: aday kaydedebilir, ziyaretçi giriş sayfasına gider, firma ve kurum kullanıcısı düğmeyi görmez.
+  const arama = ilanSorgusu(filtreAdresi(f))
+  const aramaDurumu = !k
+    ? { giris: `/giris?donus=${encodeURIComponent(`/ilanlar${filtreAdresi(f)}`)}` }
+    : adayMi(k)
+      ? (await kisininAramalari(await payloadAl(), k, 'ilan')).some((a) => (a.sorgu ?? '') === arama.sorgu)
+        ? ('kayitli' as const)
+        : ('kaydedebilir' as const)
+      : null
   const sonuc = sirala(filtrele(tumu, f), f.sira)
   const secili = Number(Array.isArray(p.secili) ? p.secili[0] : p.secili) || sonuc[0]?.id
   const aktif = aktifFiltreSayisi(f)
@@ -97,6 +111,7 @@ export default async function IlanlarSayfasi({ searchParams }: Props) {
               <p aria-live="polite">
                 <strong>{sonuc.length}</strong> ilan bulundu
               </p>
+              {aramaDurumu && <AramaKaydet tur="ilan" sorgu={arama.sorgu} ozet={ilanAramaOzeti(arama.filtre)} durum={aramaDurumu} listeAdresi="/hesabim/kaydedilenler#aramalar" />}
               <label className="siralama kucuk">
                 Sırala
                 <select name="sira" className="secim secim--kucuk" defaultValue={f.sira}>

@@ -16,6 +16,7 @@ import { islemKaydet } from '@/altyapi/islemKaydi'
 import { davetHatirlat } from './ekip'
 import { kaydedilenHatirlatmalari } from './kaydedilenler'
 import { havuzRizaHatirlatmalari } from './havuz'
+import { haftalikAramaBildirimleri } from './kayitliAramalar'
 import { trafikOzetle } from './trafik'
 import { suresiDolanlariKapat } from './ilanIslemleri'
 import { gunlukOzetYaz } from './gunlukOzet'
@@ -35,6 +36,7 @@ export interface ZamanliSonuc {
   profilHatirlatma: number
   kaydedilenHatirlatma: number
   havuzRizaHatirlatma: number
+  aramaBildirimi: number
   hatalar: string[]
 }
 
@@ -125,7 +127,8 @@ export async function zamanliIsleriCalistir(payload: Payload, simdi = new Date()
   const profilHatirlatma = hatirlatmalar ? await guvenli('Profil hatırlatmaları', () => profilHatirlatmalari(payload, simdi, hatalar, gunler)) : 0
   const kaydedilenHatirlatma = hatirlatmalar ? await guvenli('Kaydedilen ilan hatırlatmaları', () => kaydedilenHatirlatmalari(payload, simdi, hatalar)) : 0
   const havuzRizaHatirlatma = hatirlatmalar ? await guvenli('Havuz rızası hatırlatmaları', () => havuzRizaHatirlatmalari(payload, simdi, hatalar)) : 0
-  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, silinenSayac, ozetlenenTrafik, kapananIlan, davetHatirlatma, profilHatirlatma, kaydedilenHatirlatma, havuzRizaHatirlatma, hatalar }
+  const aramaBildirimi = hatirlatmalar ? await guvenli('Kayıtlı arama özetleri', () => haftalikAramaBildirimleri(payload, simdi, hatalar)) : 0
+  const sonuc = { gunlukOzet, anonimlestirilenBasvuru, silinenIslemKaydi, silinenSayac, ozetlenenTrafik, kapananIlan, davetHatirlatma, profilHatirlatma, kaydedilenHatirlatma, havuzRizaHatirlatma, aramaBildirimi, hatalar }
   await islemKaydet(await istekOlustur(payload, null), { islem: 'Zamanlanmış işler çalıştı', tur: 'ayarlar', ayrinti: sonuc }).catch((): undefined => undefined)
   return sonuc
 }

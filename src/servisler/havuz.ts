@@ -27,7 +27,7 @@ import { filigranMetni, pdfFiligranla } from '@/altyapi/filigran'
 import { IslemHatasi, ayarlar, istekOlustur, kimlik, type Kullanici } from './ortak'
 import { belgeHazirla } from './sertifika'
 
-const HAVUZ_YETKISI = ['yonetici', 'ilan-sorumlusu'] as const
+export const HAVUZ_YETKISI = ['yonetici', 'ilan-sorumlusu'] as const
 
 export interface HavuzFiltresi {
   beceriler?: Array<number | string>

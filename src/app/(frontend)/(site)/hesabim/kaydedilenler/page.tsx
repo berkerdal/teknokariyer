@@ -5,16 +5,19 @@ import { tarihYaz } from '@/arayuz/bicim'
 import { KaydetDugmesi } from '@/arayuz/KaydetDugmesi'
 import { adayOturumu } from '@/veri/aday'
 import { kaydedilenIlanlar } from '@/veri/ilanlar'
+import { KayitliAramaListesi } from '@/arayuz/KayitliAramaListesi'
+import { kisininAramalari } from '@/servisler/kayitliAramalar'
+import { payloadAl } from '@/veri/payload'
 
-export const metadata: Metadata = { title: 'Kaydedilen ilanlar', robots: { index: false } }
+export const metadata: Metadata = { title: 'Kaydedilenler', robots: { index: false } }
 
 /**
  * Kaydedilen ilanlar (talimatlar 5). Açık ilanlar üstte; başvuruya kapanmış olanlar altta, ayrı başlıkla.
- * Son başvuruya 2 gün kala bir kez hatırlatma e-postası gider.
+ * Son başvuruya 2 gün kala bir kez hatırlatma e-postası gider. Kayıtlı aramalar da bu sayfada (alt menü kalabalıklaşmasın).
  */
 export default async function KaydedilenlerSayfasi() {
   const k = await adayOturumu('/hesabim/kaydedilenler')
-  const tumu = await kaydedilenIlanlar(Number(k.id))
+  const [tumu, aramalar] = await Promise.all([kaydedilenIlanlar(Number(k.id)), kisininAramalari(await payloadAl(), k, 'ilan')])
   const acik = tumu.filter((i) => i.acik)
   const kapali = tumu.filter((i) => !i.acik)
   return (
@@ -41,6 +44,19 @@ export default async function KaydedilenlerSayfasi() {
           </p>
         </div>
       )}
+      <section aria-labelledby="aramalar" className="kd-aramalar">
+        <h2 id="aramalar" className="b3">
+          Kayıtlı aramalar
+        </h2>
+        {aramalar.length ? (
+          <KayitliAramaListesi aramalar={aramalar} sonucAdresi="/ilanlar" />
+        ) : (
+          <p className="ikincil">
+            Henüz kayıtlı araman yok. <Link href="/ilanlar">İlanlar</Link> sayfasında filtreleri seçip “Aramayı kaydet”e basarsan uyan yeni ilanları sana
+            e-postayla bildiririz.
+          </p>
+        )}
+      </section>
       {kapali.length > 0 && (
         <section aria-labelledby="kd-kapali" className="kd-kapali">
           <h2 id="kd-kapali" className="b3">

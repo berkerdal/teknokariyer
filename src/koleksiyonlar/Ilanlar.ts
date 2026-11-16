@@ -124,6 +124,15 @@ export const Ilanlar: CollectionConfig = {
             kayitId: doc.id,
             ayrinti: { once: previousDoc?.durum, sonra: doc.durum },
           })
+        // İlan yayına (yeniden) girdiyse “anlık” kayıtlı aramalara e-posta gider. Hata yayını durdurmaz.
+        if (doc.durum === 'yayinda' && doc.yayinTarihi && doc.yayinTarihi !== previousDoc?.yayinTarihi) {
+          try {
+            const { yeniIlanBildirimleri } = await import('../servisler/kayitliAramalar')
+            await yeniIlanBildirimleri(req.payload, doc.id)
+          } catch (e) {
+            console.error('Kayıtlı arama bildirimi gönderilemedi', e)
+          }
+        }
       },
     ],
   },

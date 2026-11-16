@@ -329,6 +329,51 @@ export function kaydedilenIlanHatirlatmaEpostasi(d: { ad?: string | null; pozisy
   )
 }
 
+/** Arama adı zaten tırnaklıysa (“react” · Staj) ikinci kez tırnaklanmaz. */
+const tirnak = (ad: string) => (ad.includes('“') ? ad : `“${ad}”`)
+
+const ARAMA_SON = ['Bu e-posta, kaydettiğin aramaya uyan ilanlar için gönderildi. Aramayı “Kayıtlı aramalar” sayfasından değiştirebilir veya silebilirsin.']
+
+/** Kayıtlı aramaya uyan yeni ilan (anlık). */
+export function aramaAnlikEpostasi(d: { ad?: string | null; aramaAdi: string; pozisyonAdi: string; firma: string; sonGun: string; adres: string }): Eposta {
+  return eposta(
+    `Yeni ilan: ${d.pozisyonAdi} (${d.firma})`,
+    [`Merhaba ${d.ad ?? ''},`.trim(), `${tirnak(d.aramaAdi)} aramana uyan yeni bir ilan yayına girdi: ${d.firma} firmasının “${d.pozisyonAdi}” ilanı. Son başvuru tarihi ${d.sonGun}.`],
+    { metin: 'İlanı gör', adres: `${siteAdresi()}${d.adres}` },
+    ARAMA_SON,
+  )
+}
+
+/** Kayıtlı aramanın haftalık özeti. */
+export function aramaHaftalikEpostasi(d: { ad?: string | null; aramaAdi: string; ilanlar: Array<{ pozisyonAdi: string; firma: string }>; fazla: number; aramaAdresi: string }): Eposta {
+  const n = d.ilanlar.length + d.fazla
+  return eposta(
+    `${tirnak(d.aramaAdi)} aramana uyan ${n} yeni ilan`,
+    [
+      `Merhaba ${d.ad ?? ''},`.trim(),
+      `Geçen hafta ${tirnak(d.aramaAdi)} aramana uyan ${n} yeni ilan yayına girdi:`,
+      ...d.ilanlar.map((i) => `• ${i.pozisyonAdi}, ${i.firma}`),
+      ...(d.fazla ? [`ve ${d.fazla} ilan daha.`] : []),
+    ],
+    { metin: 'İlanları gör', adres: `${siteAdresi()}/ilanlar${d.aramaAdresi}` },
+    ARAMA_SON,
+  )
+}
+
+/** Firmanın kayıtlı havuz araması: yalnızca yeni aday sayısı (kişisel veri e-postaya yazılmaz). */
+export function havuzAramaEpostasi(d: { ad?: string | null; aramaAdi: string; sayi: number; aramaAdresi: string }): Eposta {
+  return eposta(
+    `CV havuzunda ${tirnak(d.aramaAdi)} aramanıza uyan ${d.sayi} yeni aday`,
+    [
+      `Merhaba ${d.ad ?? ''},`.trim(),
+      `Geçen hafta CV havuzuna katılan ${d.sayi} aday kayıtlı ${tirnak(d.aramaAdi)} aramanıza uyuyor. Adayların bilgileri yalnızca portalda, firma panelinizdeki CV havuzunda görünür.`,
+    ],
+    { metin: 'Adayları görün', adres: `${siteAdresi()}/firma-paneli/havuz${d.aramaAdresi}` },
+    ['Bu e-posta, kaydettiğiniz havuz araması için gönderildi. Aramayı CV havuzu sayfasından silebilirsiniz.'],
+    'siz',
+  )
+}
+
 /** CV havuzu rızası yenileme hatırlatması (30 ve 7 gün kala) ve süre doldu bildirimi (0). */
 export function havuzRizaEpostasi(d: { ad?: string | null; kalan: number; bitis: string }): Eposta {
   const doldu = d.kalan <= 0

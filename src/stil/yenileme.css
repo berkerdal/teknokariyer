@@ -652,3 +652,17 @@ div.cerez-tur { cursor: default; }
 /* Onay pencereleri (geri çekme, çerez tercihleri) ekranın ortasında açılır. Tailwind'in sıfırlaması (margin: 0) modal
    pencereyi sol üste yapıştırıyordu (kullanıcı geri bildirimi, 15.11.2026). */
 dialog.pencere-dialog:modal { margin: auto; inset: 0; max-height: calc(100dvh - 32px); overflow: auto; }
+
+/* Kayıtlı aramalar */
+.arama-kaydet { white-space: nowrap; }
+.ka-liste { list-style: none; margin: 0; padding: 0; display: grid; background: var(--yuzey); border-radius: var(--kose-panel); box-shadow: var(--golge-panel); }
+.ka-satir { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 1px solid var(--cizgi); }
+.ka-satir:first-child { border-top: 0; }
+.ka-govde { display: grid; gap: 2px; min-width: 0; flex: 1 1 260px; }
+.ka-ad { font-weight: 600; color: var(--baglanti); text-decoration: none; overflow-wrap: anywhere; }
+.ka-ad:hover { text-decoration: underline; }
+.ka-eylemler { display: flex; gap: 4px; flex-wrap: wrap; }
+.ka-eylemler form { display: contents; }
+.kd-aramalar { display: grid; gap: var(--b3); }
+.liste-bas { flex-wrap: wrap; gap: 8px 12px; }
+.liste-bas .arama-kaydet { margin-right: auto; }
