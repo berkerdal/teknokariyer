@@ -27,7 +27,7 @@ const SUTUNLAR: Array<{ baslik: string; baglantilar: Baglanti[] }> = [
     baslik: 'Firmalar',
     baglantilar: [
       { ad: 'Firma girişi', href: '/giris?firma=1' },
-      { ad: 'Firma hesabı talebi', href: `mailto:${KURUM.eposta}?subject=${encodeURIComponent('TeknoKariyer firma hesabı talebi')}` },
+      { ad: 'Firma hesabı talebi', href: '/firma-hesabi-talebi' },
     ],
   },
   {

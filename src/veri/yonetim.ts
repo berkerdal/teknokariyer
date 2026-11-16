@@ -320,8 +320,24 @@ export const sikayetKuyrugu = cache(async (): Promise<SikayetGrubu[]> => {
   return [...gruplar.values()]
 })
 
+/** Sonuç bekleyen firma hesap talepleri (en eski önce), benzer adlı kayıtlı firmalarla. */
+export const hesapTalepKuyrugu = cache(async () => {
+  const payload = await payloadAl()
+  const [{ docs }, firmalar] = await Promise.all([
+    payload.find({ collection: 'hesap-talepleri', where: { durum: { equals: 'yeni' } }, sort: 'createdAt', limit: 200, depth: 0, overrideAccess: true }),
+    payload.find({ collection: 'firmalar', where: { asama: { not_equals: 'pasif' } }, select: { kisaAd: true, unvan: true, konum: true, asama: true }, sort: 'kisaAd', limit: 1000, pagination: false, depth: 0, overrideAccess: true }),
+  ])
+  const { benzerFirmalar } = await import('@/alan/hesapTalebi')
+  const simdi = new Date()
+  const liste = firmalar.docs.map((f) => ({ id: f.id, kisaAd: f.kisaAd, unvan: f.unvan, konum: f.konum, asama: f.asama }))
+  return {
+    firmalar: liste,
+    talepler: docs.map((t) => ({ ...t, bekleme: beklemeMetni(t.createdAt, simdi), benzer: benzerFirmalar(t.firmaAdi, liste) })),
+  }
+})
+
 export const yonetimSayilari = cache(async () => {
-  const [onay, degisiklik, talep, tumBasvurusuz, sikayet] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), sikayetKuyrugu()])
+  const [onay, degisiklik, talep, tumBasvurusuz, sikayet, hesap] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), sikayetKuyrugu(), hesapTalepKuyrugu()])
   const basvurusuz = tumBasvurusuz.filter((i) => !i.hatirlatildi)
   const { kurulumOzeti } = await import('./firmaYonetimi')
   const takip = (await kurulumOzeti()).takip.length
@@ -334,9 +350,10 @@ export const yonetimSayilari = cache(async () => {
     degisiklik: degisiklik.length,
     talep: talep.length,
     sikayet: sikayet.length,
+    hesapTalebi: hesap.talepler.length,
     basvurusuz: basvurusuz.length,
     takip,
-    toplam: onay.length + degisiklik.length + talep.length + sikayet.length + basvurusuz.length + takip,
+    toplam: onay.length + degisiklik.length + talep.length + sikayet.length + hesap.talepler.length + basvurusuz.length + takip,
   }
 })
 

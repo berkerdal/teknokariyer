@@ -24,7 +24,7 @@ describe('site haritası', () => {
   )
   it('mutlak adresler, yalnızca herkese açık sayfalar', () => {
     expect(g.map((x) => x.url.replace(kok, ''))).toEqual([
-      '/', '/ilanlar', '/ilanlar?tur=staj', '/ilan/3-flutter', '/ilan/7-staj', '/firmalar', '/firma/kodpit', '/kvkk-basvurusu', '/metin/aday-aydinlatma',
+      '/', '/ilanlar', '/ilanlar?tur=staj', '/ilan/3-flutter', '/ilan/7-staj', '/firmalar', '/firma/kodpit', '/kvkk-basvurusu', '/firma-hesabi-talebi', '/metin/aday-aydinlatma',
     ])
     expect(g.every((x) => x.url.startsWith(kok) && x.alternates.languages['x-default'] === x.url && x.alternates.languages.tr === x.url)).toBe(true)
   })

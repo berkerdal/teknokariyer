@@ -62,7 +62,7 @@ export default async function GirisSayfasi({ searchParams }: Props) {
           <GirisFormu firma={firma} donus={donus} insan={insanDogrulamaSiteAnahtari()} />
           {firma ? (
             <p className="kucuk">
-              Firmanız için hesap yoksa Yönetici A.Ş. ile iletişime geçin: <a href="mailto:info@pauteknokent.com.tr">info@pauteknokent.com.tr</a>
+              Firmanız için hesap yoksa <Link href="/firma-hesabi-talebi">firma hesabı talep edin</Link>; Yönetici A.Ş. firmanızı doğrulayıp size davet gönderir.
             </p>
           ) : (
             <p>

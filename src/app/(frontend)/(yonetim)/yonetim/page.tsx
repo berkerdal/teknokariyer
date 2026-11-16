@@ -6,7 +6,7 @@ import { moderasyonYapabilirMi, yoneticiMi } from '@/erisim'
 import { tarihYaz } from '@/arayuz/bicim'
 import { acikKvkk } from '@/veri/kvkk'
 import { kurulumOzeti } from '@/veri/firmaYonetimi'
-import { sikayetKuyrugu, sonZamanliCalisma, basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, kullaniciSayilari, onayKuyrugu, yonetimOturumu } from '@/veri/yonetim'
+import { hesapTalepKuyrugu, sikayetKuyrugu, sonZamanliCalisma, basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, kullaniciSayilari, onayKuyrugu, yonetimOturumu } from '@/veri/yonetim'
 
 export const metadata: Metadata = { title: 'Bugün · Yönetim' }
 
@@ -40,7 +40,7 @@ export default async function Bugun({ searchParams }: Props) {
   const k = await yonetimOturumu()
   const karar = moderasyonYapabilirMi(k)
   const yonetici = yoneticiMi(k)
-  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum, zamanli, kvkk, sikayet] = await Promise.all([
+  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum, zamanli, kvkk, sikayet, hesapTalebi] = await Promise.all([
     onayKuyrugu(),
     bekleyenDegisiklikler(),
     bekleyenTalepler(),
@@ -50,6 +50,7 @@ export default async function Bugun({ searchParams }: Props) {
     sonZamanliCalisma(),
     yonetici ? acikKvkk() : Promise.resolve([]),
     sikayetKuyrugu(),
+    hesapTalepKuyrugu(),
   ])
   const enEski = onay[0]
   return (
@@ -167,6 +168,20 @@ export default async function Bugun({ searchParams }: Props) {
                   </span>
                 </span>
                 <span className="y-sure">{g.bekleme}</span>
+              </Link>
+            </li>
+          ))}
+        </Kuyruk>
+
+        <Kuyruk baslik="Firma hesap talepleri" sayi={hesapTalebi.talepler.length} bilgi="Daveti gelmemiş firmaların formdan gelen talepleri" hedef="/yonetim/firmalar/talepler" bos="Bekleyen hesap talebi yok.">
+          {hesapTalebi.talepler.slice(0, 6).map((t) => (
+            <li key={t.id}>
+              <Link href={`/yonetim/firmalar/talepler#ht-${t.id}`}>
+                <span>
+                  <strong>{t.firmaAdi}</strong>
+                  <span className="kucuk">{t.yetkiliAd}</span>
+                </span>
+                <span className="y-sure">{t.bekleme}</span>
               </Link>
             </li>
           ))}

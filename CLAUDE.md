@@ -673,6 +673,28 @@ Claude tarafından yapılacak.
     `--uygula`; yeni dosya kaydı + firma bağlantısı, eski kayıt ve nesne silinir; adres bir yıl önbellekli olduğu için
     aynı kimlik değiştirilmez). Test ortamında 6 logo kırpıldı (Time Travel yer imi öncesinde alındı).
     - Öğrenilen: `@pdf-lib/upng` CommonJS'te (tsx betikleri) iki kat `default` içinde gelir; `decode` taşıyan nesne aranır.
+  - **Yol haritası 1. aşama (15–16.11.2026; kullanıcı “1 ve 2. aşamaları sormadan yürütebilirsin” dedi):**
+    - **Havuz rızası yenileme:** `rizaHatirlatmasi` (`src/alan/havuz.ts`, eşikler 30/7/0 gün), `havuz.rizaHatirlatildi`,
+      zamanlı iş `havuzRizaHatirlatma` (`src/servisler/havuz.ts`). Süre ayardaki `havuzRizaAy`.
+    - **Kayıtlı aramalar** (aday ilan araması, firma havuz araması): kurallar `src/alan/kayitliArama.ts` (sorgu
+      normalleştirme, özet, uyum, en fazla 10), koleksiyon `kayitli-aramalar` (kişi+tür+sorgu benzersiz), servis
+      `src/servisler/kayitliAramalar.ts`. Aday araması “anında” (ilan yayına girince, Ilanlar kancası dinamik içe aktarmayla)
+      veya haftalık; firma havuz araması haftalık (zamanlı iş `aramaBildirimi`). Düğme `AramaKaydet` (GET filtre formunun
+      içinde olduğu için pencere `createPortal` ile dışarıda), liste `KayitliAramaListesi` (`/hesabim/kaydedilenler`,
+      `/firma-paneli/havuz`). Döküme girer, hesap silmede silinir.
+    - **İlan şikâyeti:** `src/alan/sikayet.ts` (nedenler, günde 5, “diğer”de açıklama), koleksiyon `sikayetler`, servis
+      `src/servisler/sikayet.ts`. Yalnızca aday, yalnızca yayındaki ilan, açık bildirim tekrarlanmaz; bildirenin kimliği
+      firmaya gitmez. `/yonetim/sikayetler` (“İlan bildirimleri”): bir ilanın bildirimleri birlikte sonuçlanır (yersiz /
+      firmaya uyarı / yayından kaldır); kaldırmada ilan kapanır, firmaya ve bildirenlere e-posta. İlan sayfasında `IlanBildir`.
+    - **Firma hesap talebi:** herkese açık `/firma-hesabi-talebi` (Turnstile, IP başına saatte 5, aydınlatma onayı ve
+      sürümü). Aynı adresten açık talep varsa yenisi açılmaz ama sonuç aynı görünür (adresin varlığı belli edilmez).
+      Kurallar `src/alan/hesapTalebi.ts` (`benzerFirmalar`: şirket ekleri ve büyük harf/ASCII “I” farkı önemsenmez),
+      koleksiyon `hesap-talepleri` (yalnızca moderasyon okur), servis `src/servisler/hesapTalebi.ts`. Karar
+      `/yonetim/firmalar/talepler` (moderasyon yetkisi): firmayla eşleştirip tam yetkili davet (ekip davet servisi; firmanın
+      yetkili bilgisi boşsa talepten dolar) veya ≥15 karakter gerekçeyle ret (e-posta). “Bugün”de kuyruk, menü sayacı
+      “Firmalar ve kurulum”da. Alt bilgideki “Firma hesabı talebi” ve giriş sayfasındaki firma metni buraya bağlanır.
+    - Göçler (D1 ve PG, yalnızca CREATE/ADD): `…_havuz_riza_hatirlatma`, `…_kayitli_aramalar`, `…_sikayetler`,
+      `…_hesap_talepleri`.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

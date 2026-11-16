@@ -86,6 +86,7 @@ export interface Config {
     'kaydedilen-ilanlar': KaydedilenIlanlar;
     'kayitli-aramalar': KayitliAramalar;
     sikayetler: Sikayetler;
+    'hesap-talepleri': HesapTalepleri;
     'trafik-olaylari': TrafikOlaylari;
     'trafik-ozetleri': TrafikOzetleri;
     'payload-kv': PayloadKv;
@@ -114,6 +115,7 @@ export interface Config {
     'kaydedilen-ilanlar': KaydedilenIlanlarSelect<false> | KaydedilenIlanlarSelect<true>;
     'kayitli-aramalar': KayitliAramalarSelect<false> | KayitliAramalarSelect<true>;
     sikayetler: SikayetlerSelect<false> | SikayetlerSelect<true>;
+    'hesap-talepleri': HesapTalepleriSelect<false> | HesapTalepleriSelect<true>;
     'trafik-olaylari': TrafikOlaylariSelect<false> | TrafikOlaylariSelect<true>;
     'trafik-ozetleri': TrafikOzetleriSelect<false> | TrafikOzetleriSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -867,6 +869,34 @@ export interface Sikayetler {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hesap-talepleri".
+ */
+export interface HesapTalepleri {
+  id: number;
+  firmaAdi: string;
+  /**
+   * Blok ve oda, ör. D Blok 208
+   */
+  konum?: string | null;
+  yetkiliAd: string;
+  unvan?: string | null;
+  eposta: string;
+  telefon?: string | null;
+  not?: string | null;
+  aydinlatmaSurumu: string;
+  durum: 'yeni' | 'davet' | 'red';
+  /**
+   * Eşleştirilen firma kaydı
+   */
+  firma?: (number | null) | Firmalar;
+  retGerekcesi?: string | null;
+  sonuclandiran?: (number | null) | Kullanicilar;
+  sonuclanmaTarihi?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Bugünün ham sayfa görüntülemeleri. Kişisel veri içermez; gece özetlenip silinir.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1006,6 +1036,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'sikayetler';
         value: number | Sikayetler;
+      } | null)
+    | ({
+        relationTo: 'hesap-talepleri';
+        value: number | HesapTalepleri;
       } | null)
     | ({
         relationTo: 'trafik-olaylari';
@@ -1591,6 +1625,27 @@ export interface SikayetlerSelect<T extends boolean = true> {
   sonuc?: T;
   firmaMesaji?: T;
   icNot?: T;
+  sonuclandiran?: T;
+  sonuclanmaTarihi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hesap-talepleri_select".
+ */
+export interface HesapTalepleriSelect<T extends boolean = true> {
+  firmaAdi?: T;
+  konum?: T;
+  yetkiliAd?: T;
+  unvan?: T;
+  eposta?: T;
+  telefon?: T;
+  not?: T;
+  aydinlatmaSurumu?: T;
+  durum?: T;
+  firma?: T;
+  retGerekcesi?: T;
   sonuclandiran?: T;
   sonuclanmaTarihi?: T;
   updatedAt?: T;

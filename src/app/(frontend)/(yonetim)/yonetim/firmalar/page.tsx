@@ -7,7 +7,7 @@ import { Ikon } from '@/arayuz/Ikon'
 import { tarihYaz } from '@/arayuz/bicim'
 import { yoneticiMi } from '@/erisim'
 import { firmaSatirlari, firmaSuz, kurulumOzeti } from '@/veri/firmaYonetimi'
-import { yonetimOturumu } from '@/veri/yonetim'
+import { hesapTalepKuyrugu, yonetimOturumu } from '@/veri/yonetim'
 
 export const metadata: Metadata = { title: 'Firmalar · Yönetim' }
 
@@ -28,7 +28,7 @@ const YETKILI_ADI = { tamam: '', eksik: 'Yetkili eksik', genel: 'Genel e-posta' 
 
 export default async function Firmalar({ searchParams }: Props) {
   const k = await yonetimOturumu('/yonetim/firmalar')
-  const [sp, tum, ozet] = await Promise.all([searchParams, firmaSatirlari(), kurulumOzeti()])
+  const [sp, tum, ozet, { talepler }] = await Promise.all([searchParams, firmaSatirlari(), kurulumOzeti(), hesapTalepKuyrugu()])
   const liste = firmaSuz(tum, sp)
   const etkin = tum.filter((f) => f.asama !== 'pasif')
   const sirali = [...etkin].sort((a, b) => b.huni - a.huni)
@@ -60,6 +60,12 @@ export default async function Firmalar({ searchParams }: Props) {
           </div>
         )}
       </div>
+
+      {talepler.length > 0 && (
+        <p className="bilgi">
+          {talepler.length} firma hesap talebi sonuç bekliyor. <Link href="/yonetim/firmalar/talepler">Talepleri değerlendirin</Link>
+        </p>
+      )}
 
       <ModulBilgisi kimlik="yonetim-firmalar" baslik="Firma kurulumu nasıl ilerler?">
         <p>Her firma portala beş adımda geçer. Hunide her kare bir firmadır; koyulaştıkça firma daha ileri bir adımdadır.</p>

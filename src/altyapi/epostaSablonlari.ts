@@ -374,6 +374,32 @@ export function havuzAramaEpostasi(d: { ad?: string | null; aramaAdi: string; sa
   )
 }
 
+/** Firma hesap talebi alındı (talep edene). */
+export function hesapTalebiAlindiEpostasi(d: { ad: string; firma: string }): Eposta {
+  return eposta(
+    'TeknoKariyer firma hesabı talebiniz alındı',
+    [
+      `Merhaba ${d.ad},`,
+      `${d.firma} için TeknoKariyer firma hesabı talebinizi aldık. Yönetici A.Ş. talebinizi firmanızın Pamukkale Teknokent kaydıyla karşılaştırıp size davet gönderecek. Bu genellikle 1 iş günü sürer.`,
+      'Davet e-postasındaki bağlantıyla şifrenizi belirleyip firma hesabınızı devralabilirsiniz.',
+    ],
+    undefined,
+    ['Bu talebi siz göndermediyseniz bu e-postayı dikkate almayın.'],
+    'siz',
+  )
+}
+
+/** Firma hesap talebi reddedildi (talep edene, gerekçeyle). */
+export function hesapTalebiRedEpostasi(d: { ad: string; firma: string; gerekce: string }): Eposta {
+  return eposta(
+    'TeknoKariyer firma hesabı talebiniz hakkında',
+    [`Merhaba ${d.ad},`, `${d.firma} için gönderdiğiniz firma hesabı talebini inceledik ancak şu an hesap açamıyoruz.`, `Gerekçe: ${d.gerekce}`, 'Sorunuz varsa bu e-postayı yanıtlayabilirsiniz.'],
+    undefined,
+    [],
+    'siz',
+  )
+}
+
 /** İlan şikâyeti sonucunda firmaya: uyarı veya yayından kaldırma (mesaj Yönetici A.Ş.'den). */
 export function sikayetFirmaEpostasi(d: { pozisyonAdi: string; kaldirildi: boolean; mesaj: string; adres: string }): Eposta {
   return eposta(

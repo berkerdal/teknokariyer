@@ -43,6 +43,7 @@ export function siteHaritasiGirdileri(v: SiteHaritasiVerisi, kok: string): SiteH
     girdi('/firmalar', { changeFrequency: 'weekly', priority: 0.6 }),
     ...v.firmalar.map((f) => girdi(f.yol, { changeFrequency: 'weekly', priority: 0.5, lastModified: tarih(f.guncelleme) })),
     girdi('/kvkk-basvurusu', { changeFrequency: 'yearly', priority: 0.2 }),
+    girdi('/firma-hesabi-talebi', { changeFrequency: 'yearly', priority: 0.2 }),
     ...v.metinler.map((m) => girdi(m.yol, { changeFrequency: 'yearly', priority: 0.2, lastModified: tarih(m.tarih) })),
   ]
 }

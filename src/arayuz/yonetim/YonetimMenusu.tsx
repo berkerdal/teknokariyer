@@ -18,7 +18,7 @@ export function YonetimMenusu({
   testPosta = false,
 }: {
   yer: 'yan' | 'sekme'
-  sayilar: { toplam: number; onay: number; degisiklik: number; talep: number; sikayet: number; takip: number; kvkk: number }
+  sayilar: { toplam: number; onay: number; degisiklik: number; talep: number; sikayet: number; hesapTalebi: number; takip: number; kvkk: number }
   teknik: boolean
   /** KVKK başvuruları ve işlem kayıtları kişisel veri içerir; yalnızca tam yetkiliye görünür. */
   yonetici: boolean
@@ -34,7 +34,7 @@ export function YonetimMenusu({
     { href: '/yonetim/degisiklikler', ad: 'İlan değişiklikleri', sayi: sayilar.degisiklik },
     { href: '/yonetim/talepler', ad: 'Liste talepleri', sayi: sayilar.talep },
     { href: '/yonetim/sikayetler', ad: 'İlan bildirimleri', sayi: sayilar.sikayet },
-    { href: '/yonetim/firmalar', ad: 'Firmalar ve kurulum', sayi: sayilar.takip },
+    { href: '/yonetim/firmalar', ad: 'Firmalar ve kurulum', sayi: sayilar.takip + sayilar.hesapTalebi },
     ...(yonetici ? [{ href: '/yonetim/kvkk', ad: 'KVKK başvuruları', sayi: sayilar.kvkk }] : []),
   ]
   const yonetim: Oge[] = [

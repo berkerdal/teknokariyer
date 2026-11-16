@@ -6,6 +6,7 @@ import * as migration_20261115_200413_istatistik_izni from './20261115_200413_is
 import * as migration_20261115_214551_havuz_riza_hatirlatma from './20261115_214551_havuz_riza_hatirlatma';
 import * as migration_20261116_004918_kayitli_aramalar from './20261116_004918_kayitli_aramalar';
 import * as migration_20261116_010112_sikayetler from './20261116_010112_sikayetler';
+import * as migration_20261116_011221_hesap_talepleri from './20261116_011221_hesap_talepleri';
 
 export const migrations = [
   {
@@ -46,6 +47,11 @@ export const migrations = [
   {
     up: migration_20261116_010112_sikayetler.up,
     down: migration_20261116_010112_sikayetler.down,
-    name: '20261116_010112_sikayetler'
+    name: '20261116_010112_sikayetler',
+  },
+  {
+    up: migration_20261116_011221_hesap_talepleri.up,
+    down: migration_20261116_011221_hesap_talepleri.down,
+    name: '20261116_011221_hesap_talepleri'
   },
 ];

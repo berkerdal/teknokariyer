@@ -5,7 +5,7 @@
  * sayıda istek kabul edilir. Hesap bazlı kilitler ayrıca vardır (Payload: 5 hatalı şifrede 15 dakika; ikinci adım).
  * Bu modül saf kurallardır; sayaçları `src/servisler/istekSiniri.ts` tutar.
  */
-export type SinirliEylem = 'giris' | 'kayit' | 'sifre-sifirlama' | 'ikinci-adim' | 'basvuru' | 'davet'
+export type SinirliEylem = 'giris' | 'kayit' | 'sifre-sifirlama' | 'ikinci-adim' | 'basvuru' | 'davet' | 'hesap-talebi'
 
 export const SINIRLAR: Record<SinirliEylem, { sayi: number; dakika: number; ne: string }> = {
   giris: { sayi: 10, dakika: 15, ne: 'giriş denemesi' },
@@ -14,6 +14,7 @@ export const SINIRLAR: Record<SinirliEylem, { sayi: number; dakika: number; ne: 
   'ikinci-adim': { sayi: 20, dakika: 15, ne: 'doğrulama denemesi' },
   basvuru: { sayi: 30, dakika: 60, ne: 'başvuru' },
   davet: { sayi: 10, dakika: 60, ne: 'davet kabul denemesi' },
+  'hesap-talebi': { sayi: 5, dakika: 60, ne: 'hesap talebi' },
 }
 
 /** Pencerenin başlangıcı (dakikanın katlarına hizalı). */
