@@ -17,6 +17,8 @@ import { ilanAdresi, tarihYaz } from '@/arayuz/bicim'
 import { eslesmeProfili, oturumdakiAday } from '@/veri/aday'
 import { ilanAyrintisi, yayindakiIlanlar, type IlanAyrintisi } from '@/veri/ilanlar'
 import { oturum } from '@/veri/payload'
+import { IlanBildir } from '@/arayuz/IlanBildir'
+import { adayMi } from '@/erisim'
 import { kaydetmeBaglami } from '@/veri/kaydedilenler'
 import { KaydetDugmesi } from '@/arayuz/KaydetDugmesi'
 
@@ -223,6 +225,7 @@ export default async function IlanSayfasi({ params, searchParams }: Props) {
               Firma sayfası
             </Link>
           </section>
+          {(!k || adayMi(k)) && <IlanBildir ilanId={ilan.id} girisAdresi={k ? undefined : `/giris?donus=${encodeURIComponent(ilanAdresi(ilan))}`} />}
         </div>
       </main>
       <div className="mobil-basvur id-mobil-eylem">

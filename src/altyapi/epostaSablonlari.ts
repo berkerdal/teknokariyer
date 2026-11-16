@@ -374,6 +374,39 @@ export function havuzAramaEpostasi(d: { ad?: string | null; aramaAdi: string; sa
   )
 }
 
+/** İlan şikâyeti sonucunda firmaya: uyarı veya yayından kaldırma (mesaj Yönetici A.Ş.'den). */
+export function sikayetFirmaEpostasi(d: { pozisyonAdi: string; kaldirildi: boolean; mesaj: string; adres: string }): Eposta {
+  return eposta(
+    d.kaldirildi ? `İlanınız yayından kaldırıldı: ${d.pozisyonAdi}` : `İlanınızla ilgili uyarı: ${d.pozisyonAdi}`,
+    [
+      'Merhaba,',
+      d.kaldirildi
+        ? `“${d.pozisyonAdi}” ilanınız hakkında gelen bildirimleri inceledik ve ilanı yayından kaldırdık. Adaylar artık bu ilana başvuramaz; gelen başvurular firma panelinizde durur.`
+        : `“${d.pozisyonAdi}” ilanınız hakkında gelen bildirimleri inceledik. İlan yayında kalıyor; aşağıdaki konuyu düzeltmenizi rica ederiz.`,
+      `Yönetici A.Ş.'nin notu: ${d.mesaj}`,
+      d.kaldirildi ? 'Sorunu giderip yeni bir ilan açabilirsiniz. Sorunuz varsa bu e-postayı yanıtlayabilirsiniz.' : 'İlanı firma panelinizden düzenleyebilirsiniz.',
+    ],
+    { metin: d.kaldirildi ? 'Firma panelini aç' : 'İlanı düzenle', adres: `${siteAdresi()}${d.adres}` },
+    ['Bildirimde bulunan kişilerin kimliği firmalarla paylaşılmaz.'],
+    'siz',
+  )
+}
+
+/** Bildirimde bulunan adaya sonuç. */
+export function sikayetSonucEpostasi(d: { ad?: string | null; pozisyonAdi: string; firma: string; sonuc: 'yersiz' | 'firma-uyarildi' | 'ilan-kaldirildi' }): Eposta {
+  const metin = {
+    yersiz: 'İnceledik; ilanda kurallarımıza aykırı bir durum bulmadık, ilan yayında kalıyor.',
+    'firma-uyarildi': 'İnceledik ve firmaya ilanını düzeltmesi için uyarıda bulunduk.',
+    'ilan-kaldirildi': 'İnceledik ve ilanı yayından kaldırdık.',
+  }[d.sonuc]
+  return eposta(
+    `Bildirimin sonuçlandı: ${d.pozisyonAdi}`,
+    [`Merhaba ${d.ad ?? ''},`.trim(), `${d.firma} firmasının “${d.pozisyonAdi}” ilanı hakkındaki bildirimin için teşekkür ederiz. ${metin}`, 'Kimliğin firmayla paylaşılmadı.'],
+    undefined,
+    ['Başka bir sorun görürsen ilan sayfasındaki “İlanı bildir” bağlantısını kullanabilirsin.'],
+  )
+}
+
 /** CV havuzu rızası yenileme hatırlatması (30 ve 7 gün kala) ve süre doldu bildirimi (0). */
 export function havuzRizaEpostasi(d: { ad?: string | null; kalan: number; bitis: string }): Eposta {
   const doldu = d.kalan <= 0

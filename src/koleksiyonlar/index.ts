@@ -21,6 +21,7 @@ import { KvkkTalepleri } from './KvkkTalepleri'
 import { IstekSinirlari } from './IstekSinirlari'
 import { KaydedilenIlanlar } from './KaydedilenIlanlar'
 import { KayitliAramalar } from './KayitliAramalar'
+import { Sikayetler } from './Sikayetler'
 import { TrafikOlaylari, TrafikOzetleri } from './Trafik'
 import { Ayarlar } from '../globaller/Ayarlar'
 
@@ -43,6 +44,7 @@ export const koleksiyonlar: CollectionConfig[] = [
   IstekSinirlari,
   KaydedilenIlanlar,
   KayitliAramalar,
+  Sikayetler,
   TrafikOlaylari,
   TrafikOzetleri,
 ]

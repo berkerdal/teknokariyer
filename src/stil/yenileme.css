@@ -666,3 +666,8 @@ dialog.pencere-dialog:modal { margin: auto; inset: 0; max-height: calc(100dvh - 
 .kd-aramalar { display: grid; gap: var(--b3); }
 .liste-bas { flex-wrap: wrap; gap: 8px 12px; }
 .liste-bas .arama-kaydet { margin-right: auto; }
+.ilan-bildir { justify-self: start; border: 0; background: none; padding: 4px 0; color: var(--metin-2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; font-size: var(--boy-kucuk); }
+.ilan-bildir:hover { color: var(--metin); }
+.y-sikayetler { list-style: none; margin: 0 0 var(--b4); padding: 0; display: grid; gap: 10px; }
+.y-sikayetler li { padding: 10px 12px; background: var(--yuzey-2); border-radius: var(--kose-kontrol); }
+.y-sikayetler p { margin: 4px 0 0; }

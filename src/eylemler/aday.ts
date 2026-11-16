@@ -221,3 +221,14 @@ export async function sertifikaBelgesiEylemi(f: FormData): Promise<{ id?: number
     return { hata: 'Belge yüklenemedi. Biraz sonra yeniden dene.' }
   }
 }
+
+/** İlanı bildirir (şikâyet). Alan hataları ve kural hataları Türkçe döner. */
+export async function sikayetEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu & { tamam?: string }> {
+  try {
+    const { sikayetEt } = await import('@/servisler/sikayet')
+    await sikayetEt(await payloadAl(), await oturum(), { ilanId: Number(f.get('ilan')), neden: String(f.get('neden') ?? ''), aciklama: String(f.get('aciklama') ?? '') })
+    return { tamam: 'Bildirimin alındı. Yönetici A.Ş. inceleyip sonucu sana e-postayla bildirecek. Kimliğin firmayla paylaşılmaz.' }
+  } catch (e) {
+    return hataDurumu(e)
+  }
+}

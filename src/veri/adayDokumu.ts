@@ -10,7 +10,7 @@ export async function adayVeriDokumu(payload: Payload, kullaniciId: number) {
   const ortak = { overrideAccess: true, depth: 0, limit: 1000 } as const
   const hesap = await payload.findByID({ collection: 'kullanicilar', id: kullaniciId, depth: 0, overrideAccess: true }).catch((): null => null)
   if (!hesap || hesap.rol !== 'aday') return null
-  const [aday, basvurular, rizalar, kvkk, kaydedilenler, aramalar] = await Promise.all([
+  const [aday, basvurular, rizalar, kvkk, kaydedilenler, aramalar, bildirimler] = await Promise.all([
     payload.find({ collection: 'adaylar', where: { kullanici: { equals: kullaniciId } }, ...ortak, depth: 1 }),
     payload.find({
       collection: 'basvurular',
@@ -24,6 +24,7 @@ export async function adayVeriDokumu(payload: Payload, kullaniciId: number) {
     payload.find({ collection: 'kvkk-talepleri', where: { kullanici: { equals: kullaniciId } }, ...ortak, select: { tur: true, basvuruTarihi: true, durum: true, sonuc: true, cevap: true, cevapTarihi: true } }),
     payload.find({ collection: 'kaydedilen-ilanlar', where: { kullanici: { equals: kullaniciId } }, ...ortak, depth: 1, populate: { ilanlar: { pozisyonAdi: true } } }),
     payload.find({ collection: 'kayitli-aramalar', where: { kullanici: { equals: kullaniciId } }, ...ortak, depth: 0 }),
+    payload.find({ collection: 'sikayetler', where: { gonderen: { equals: kullaniciId } }, ...ortak, depth: 1, populate: { ilanlar: { pozisyonAdi: true } } }),
   ])
   const profil = aday.docs[0] ?? null
   const goruntulenme = profil ? (await payload.count({ collection: 'havuz-goruntulemeleri', where: { aday: { equals: profil.id } }, overrideAccess: true })).totalDocs : 0
@@ -36,6 +37,7 @@ export async function adayVeriDokumu(payload: Payload, kullaniciId: number) {
     basvurular: basvurular.docs.map((b) => ({ ...b, ilan: ad(b.ilan, 'pozisyonAdi'), firma: ad(b.firma, 'kisaAd') })),
     kaydedilenIlanlar: kaydedilenler.docs.map((k) => ({ ilan: ad(k.ilan, 'pozisyonAdi'), tarih: k.createdAt, hatirlatma: k.hatirlatildi ?? null })),
     kayitliAramalar: aramalar.docs.map((a) => ({ ad: a.ad, sorgu: a.sorgu ?? '', siklik: a.siklik, tarih: a.createdAt, sonBildirim: a.sonBildirim ?? null })),
+    ilanBildirimleri: bildirimler.docs.map((b) => ({ ilan: ad(b.ilan, 'pozisyonAdi'), neden: b.neden, aciklama: b.aciklama ?? null, tarih: b.createdAt, sonuc: b.sonuc ?? null })),
     havuzProfilAcilmaSayisi: goruntulenme,
     onaylar: rizalar.docs.map((r) => ({ tur: r.tur, metinSurumu: r.metinSurumu, tarih: r.createdAt, geriAlinma: r.geriAlinma })),
     kvkkBasvurulari: kvkk.docs.map((t) => ({

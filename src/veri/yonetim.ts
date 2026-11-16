@@ -288,8 +288,40 @@ export const basvurusuzBitenler = cache(async (): Promise<BasvurusuzIlan[]> => {
 })
 
 /** Menüdeki sayılar ve “Bugün” başlığı. */
+/** Açık ilan bildirimleri, ilan başına toplanmış (en eski bildirim önce). Bildirenin kimliği gösterilmez. */
+export interface SikayetGrubu {
+  ilan: { id: number; pozisyonAdi: string; durum: string; firma: string }
+  bildirimler: Array<{ id: number; neden: string; aciklama: string | null; tarih: string }>
+  ilkTarih: string
+  bekleme: string
+}
+export const sikayetKuyrugu = cache(async (): Promise<SikayetGrubu[]> => {
+  const payload = await payloadAl()
+  const { docs } = await payload.find({
+    collection: 'sikayetler',
+    where: { durum: { equals: 'yeni' } },
+    sort: 'createdAt',
+    depth: 2,
+    limit: 500,
+    overrideAccess: true,
+    populate: { ilanlar: { pozisyonAdi: true, durum: true, firma: true }, firmalar: { kisaAd: true } },
+  })
+  const simdi = new Date()
+  const gruplar = new Map<number, SikayetGrubu>()
+  for (const s of docs) {
+    const i = typeof s.ilan === 'object' ? s.ilan : null
+    if (!i) continue
+    const g =
+      gruplar.get(i.id) ??
+      ({ ilan: { id: i.id, pozisyonAdi: i.pozisyonAdi, durum: i.durum, firma: firmaNesnesi(i.firma)?.kisaAd ?? '' }, bildirimler: [], ilkTarih: s.createdAt, bekleme: beklemeMetni(s.createdAt, simdi) } as SikayetGrubu)
+    g.bildirimler.push({ id: s.id, neden: s.neden, aciklama: s.aciklama ?? null, tarih: s.createdAt })
+    gruplar.set(i.id, g)
+  }
+  return [...gruplar.values()]
+})
+
 export const yonetimSayilari = cache(async () => {
-  const [onay, degisiklik, talep, tumBasvurusuz] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler()])
+  const [onay, degisiklik, talep, tumBasvurusuz, sikayet] = await Promise.all([onayKuyrugu(), bekleyenDegisiklikler(), bekleyenTalepler(), basvurusuzBitenler(), sikayetKuyrugu()])
   const basvurusuz = tumBasvurusuz.filter((i) => !i.hatirlatildi)
   const { kurulumOzeti } = await import('./firmaYonetimi')
   const takip = (await kurulumOzeti()).takip.length
@@ -301,9 +333,10 @@ export const yonetimSayilari = cache(async () => {
     onay: onay.length,
     degisiklik: degisiklik.length,
     talep: talep.length,
+    sikayet: sikayet.length,
     basvurusuz: basvurusuz.length,
     takip,
-    toplam: onay.length + degisiklik.length + talep.length + basvurusuz.length + takip,
+    toplam: onay.length + degisiklik.length + talep.length + sikayet.length + basvurusuz.length + takip,
   }
 })
 

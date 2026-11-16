@@ -15,6 +15,7 @@ import * as migration_20261115_194523_egitimler from './20261115_194523_egitimle
 import * as migration_20261115_200410_istatistik_izni from './20261115_200410_istatistik_izni';
 import * as migration_20261115_214546_havuz_riza_hatirlatma from './20261115_214546_havuz_riza_hatirlatma';
 import * as migration_20261116_004915_kayitli_aramalar from './20261116_004915_kayitli_aramalar';
+import * as migration_20261116_010107_sikayetler from './20261116_010107_sikayetler';
 
 export const migrations = [
   {
@@ -100,6 +101,11 @@ export const migrations = [
   {
     up: migration_20261116_004915_kayitli_aramalar.up,
     down: migration_20261116_004915_kayitli_aramalar.down,
-    name: '20261116_004915_kayitli_aramalar'
+    name: '20261116_004915_kayitli_aramalar',
+  },
+  {
+    up: migration_20261116_010107_sikayetler.up,
+    down: migration_20261116_010107_sikayetler.down,
+    name: '20261116_010107_sikayetler'
   },
 ];

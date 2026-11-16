@@ -6,7 +6,7 @@ import { moderasyonYapabilirMi, yoneticiMi } from '@/erisim'
 import { tarihYaz } from '@/arayuz/bicim'
 import { acikKvkk } from '@/veri/kvkk'
 import { kurulumOzeti } from '@/veri/firmaYonetimi'
-import { sonZamanliCalisma, basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, kullaniciSayilari, onayKuyrugu, yonetimOturumu } from '@/veri/yonetim'
+import { sikayetKuyrugu, sonZamanliCalisma, basvurusuzBitenler, bekleyenDegisiklikler, bekleyenTalepler, kullaniciSayilari, onayKuyrugu, yonetimOturumu } from '@/veri/yonetim'
 
 export const metadata: Metadata = { title: 'Bugün · Yönetim' }
 
@@ -40,7 +40,7 @@ export default async function Bugun({ searchParams }: Props) {
   const k = await yonetimOturumu()
   const karar = moderasyonYapabilirMi(k)
   const yonetici = yoneticiMi(k)
-  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum, zamanli, kvkk] = await Promise.all([
+  const [onay, degisiklik, talep, basvurusuz, sayilar, kurulum, zamanli, kvkk, sikayet] = await Promise.all([
     onayKuyrugu(),
     bekleyenDegisiklikler(),
     bekleyenTalepler(),
@@ -49,6 +49,7 @@ export default async function Bugun({ searchParams }: Props) {
     kurulumOzeti(),
     sonZamanliCalisma(),
     yonetici ? acikKvkk() : Promise.resolve([]),
+    sikayetKuyrugu(),
   ])
   const enEski = onay[0]
   return (
@@ -150,6 +151,22 @@ export default async function Bugun({ searchParams }: Props) {
                   </span>
                 </span>
                 <span className="y-sure">{t.bekleme}</span>
+              </Link>
+            </li>
+          ))}
+        </Kuyruk>
+
+        <Kuyruk baslik="İlan bildirimleri" sayi={sikayet.length} bilgi="Adayların sahte, ayrımcı veya ücret isteyen diye bildirdiği ilanlar" hedef="/yonetim/sikayetler" bos="Sonuç bekleyen bildirim yok.">
+          {sikayet.slice(0, 6).map((g) => (
+            <li key={g.ilan.id}>
+              <Link href="/yonetim/sikayetler">
+                <span>
+                  <strong>{g.ilan.pozisyonAdi}</strong>
+                  <span className="kucuk">
+                    {g.ilan.firma} · {g.bildirimler.length} bildirim
+                  </span>
+                </span>
+                <span className="y-sure">{g.bekleme}</span>
               </Link>
             </li>
           ))}

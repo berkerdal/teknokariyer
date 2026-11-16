@@ -85,6 +85,7 @@ export interface Config {
     'istek-sinirlari': IstekSinirlari;
     'kaydedilen-ilanlar': KaydedilenIlanlar;
     'kayitli-aramalar': KayitliAramalar;
+    sikayetler: Sikayetler;
     'trafik-olaylari': TrafikOlaylari;
     'trafik-ozetleri': TrafikOzetleri;
     'payload-kv': PayloadKv;
@@ -112,6 +113,7 @@ export interface Config {
     'istek-sinirlari': IstekSinirlariSelect<false> | IstekSinirlariSelect<true>;
     'kaydedilen-ilanlar': KaydedilenIlanlarSelect<false> | KaydedilenIlanlarSelect<true>;
     'kayitli-aramalar': KayitliAramalarSelect<false> | KayitliAramalarSelect<true>;
+    sikayetler: SikayetlerSelect<false> | SikayetlerSelect<true>;
     'trafik-olaylari': TrafikOlaylariSelect<false> | TrafikOlaylariSelect<true>;
     'trafik-ozetleri': TrafikOzetleriSelect<false> | TrafikOzetleriSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -840,6 +842,31 @@ export interface KayitliAramalar {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sikayetler".
+ */
+export interface Sikayetler {
+  id: number;
+  ilan: number | Ilanlar;
+  gonderen?: (number | null) | Kullanicilar;
+  neden: 'sahte' | 'ucret' | 'ayrimci' | 'yaniltici' | 'diger';
+  aciklama?: string | null;
+  durum: 'yeni' | 'sonuclandi';
+  sonuc?: ('yersiz' | 'firma-uyarildi' | 'ilan-kaldirildi') | null;
+  /**
+   * Uyarı veya kaldırmada firmaya giden mesaj.
+   */
+  firmaMesaji?: string | null;
+  /**
+   * Yalnızca Yönetici A.Ş. görür.
+   */
+  icNot?: string | null;
+  sonuclandiran?: (number | null) | Kullanicilar;
+  sonuclanmaTarihi?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Bugünün ham sayfa görüntülemeleri. Kişisel veri içermez; gece özetlenip silinir.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -975,6 +1002,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'kayitli-aramalar';
         value: number | KayitliAramalar;
+      } | null)
+    | ({
+        relationTo: 'sikayetler';
+        value: number | Sikayetler;
       } | null)
     | ({
         relationTo: 'trafik-olaylari';
@@ -1544,6 +1575,24 @@ export interface KayitliAramalarSelect<T extends boolean = true> {
   sorgu?: T;
   siklik?: T;
   sonBildirim?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sikayetler_select".
+ */
+export interface SikayetlerSelect<T extends boolean = true> {
+  ilan?: T;
+  gonderen?: T;
+  neden?: T;
+  aciklama?: T;
+  durum?: T;
+  sonuc?: T;
+  firmaMesaji?: T;
+  icNot?: T;
+  sonuclandiran?: T;
+  sonuclanmaTarihi?: T;
   updatedAt?: T;
   createdAt?: T;
 }

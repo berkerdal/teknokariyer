@@ -96,3 +96,18 @@ export async function hatirlatEylemi(_: FormDurumu, f: FormData): Promise<FormDu
   revalidatePath('/yonetim', 'layout')
   redirect(hedef) // satır “Hatırlatıldı”ya döner; sonuç sayfa düzeyinde gösterilir
 }
+
+/** İlan bildirimlerini (şikâyet) sonuçlandırır; sonuç sayfa düzeyinde gösterilir. */
+export async function sikayetKarariEylemi(_: FormDurumu, f: FormData): Promise<FormDurumu> {
+  const k = await yonetimOturumu()
+  let hedef: string
+  try {
+    const { sikayetleriSonuclandir } = await import('@/servisler/sikayet')
+    const s = await sikayetleriSonuclandir(await payloadAl(), k, Number(metin(f, 'ilan')), { sonuc: metin(f, 'sonuc'), firmaMesaji: metin(f, 'firmaMesaji'), icNot: metin(f, 'icNot') })
+    hedef = sonuc('/yonetim/sikayetler', { sonuc: metin(f, 'sonuc'), ilan: metin(f, 'pozisyon'), bildirim: String(s.bildirim), firmaya: String(s.firmaya) })
+  } catch (e) {
+    return hata(e)
+  }
+  revalidatePath('/yonetim', 'layout')
+  redirect(hedef)
+}
