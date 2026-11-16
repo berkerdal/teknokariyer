@@ -757,7 +757,10 @@ Claude tarafından yapılacak.
       Derleme `pnpm exec opennextjs-cloudflare build`, dağıtım `pnpm exec opennextjs-cloudflare deploy`; ön izleme kapalı.
     - `PAYLOAD_SECRET` Worker gizli değişkeni (API ile yazıldı; değeri hiçbir yerde yok).
     - İlk göç D1 API'si üzerinden elle uygulandı (Worker içinde yarım kalmıştı, aşağıda).
-    - Test yöneticisi `yonetici@kariyer.test` (şifre kullanıcıya iletildi; depoda yok). `.test` alan adı bilinçli:
+    - Test yöneticisi `yonetici@kariyer.test` (şifre kullanıcıya iletildi; depoda yok).
+    - Örnek firma yetkilisi `netinternet@kariyer.test` (Deniz Yalçın, Netinternet tam yetkili; 16.11.2026 kullanıcı isteği).
+      Kullanıcı 4–5 karakterlik basit şifre istedi; portalın 10 karakter kuralı atlanarak D1'e doğrudan yazıldı (şifre
+      kullanıcıda, depoda yok). Yalnızca test ortamı içindir; yayın veritabanına taşınmamalı. `.test` alan adı bilinçli:
       gerçek bir kişiye ait olamaz.
     - Örnek veri `POST /yonetim-islem/ornek-veri` ile yüklendi (yalnızca yönetici, yayında kapalı). curl ile çağrılırken
       `Origin` başlığı gerekir (serverURL ayarlı olduğu için Payload çerezli istekte kaynak adresini denetler).
