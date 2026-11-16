@@ -733,6 +733,12 @@ Claude tarafından yapılacak.
       istek EEUR'a yakın çalışır. Sayfa başına sorgu sayısı yerelde ölçüldü (Payload D1 adaptörünün `logger.logQuery`).
       Smart Placement yalnızca Worker'ın daha önce çalıştığı yerleri aday sayar; burada işe yaramaz. Pilot başında
       Türkiye'den ölçülmeli.
+  - **Tablet denetimi (16.11.2026, kullanıcı isteği):** iPad Mini ve iPad Pro 11, dikey ve yatay; 23 sayfa × 4 boyut,
+    hepsi oturumlu. Yatay taşma ve JS hatası yok. Dikey tablet (< 900 px) telefon düzenini kullanır ve düzgün görünür.
+    Düzeltilen: 900–1199 px'de ilan listesi üç sütundu (filtre + liste + önizleme), liste sütunu daralıp başlıklar üç
+    satıra bölünüyordu. Önizleme artık yalnızca ≥ 1200 px; arada filtre + liste, ilana dokununca ilan sayfası açılır
+    (`IlanBaglantisi` aynı eşik). Önizleme yokken seçili satır vurgusu gösterilmez. Betik: Playwright `devices['iPad Mini']`
+    vb., `scrollWidth` ve sağ kenarı aşan öğe denetimi.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

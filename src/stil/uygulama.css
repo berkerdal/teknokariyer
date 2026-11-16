@@ -40,7 +40,9 @@ body.tk > main { flex: 1 0 auto; }
 .il-filtre-ayak .dugme--genis { flex: 1; }
 .il-filtre-kapat { display: inline-grid; }
 @media (min-width: 900px) {
-  .il { grid-template-columns: 260px minmax(0, 1fr) minmax(0, 1.15fr); gap: 0; padding: 0; align-items: start; }
+  /* Önizleme sütunu yalnızca ≥ 1200 px (aşağıda). 900–1199 px'de (yatay tablet, küçük dizüstü) filtre + liste; ilan
+     kendi sayfasında açılır. Üç sütun 1024 px'de liste sütununu daraltıyordu (16.11.2026 tablet denetimi). */
+  .il { grid-template-columns: 240px minmax(0, 1fr); gap: 0; padding: 0; align-items: start; }
   .il-filtre, .il-filtre[data-acik='true'] { display: block; position: sticky; top: 65px; left: auto; right: auto; bottom: auto; z-index: auto; max-height: calc(100dvh - 65px);
     overflow: auto; padding: var(--b5) 20px; border-right: 1px solid var(--cizgi); background: transparent; border-radius: 0; box-shadow: none; animation: none; }
   .il-filtre-bas { padding: 0; border: 0; margin-bottom: var(--b4); }
@@ -51,9 +53,15 @@ body.tk > main { flex: 1 0 auto; }
   .il-liste { padding: var(--b5) 0; border-right: 1px solid var(--cizgi); }
   .il-liste .arama, .il-liste .secili-filtre, .il-liste .liste-bas { padding: 0 20px; }
   .il-liste .ilan-listesi { border-left: 0; border-right: 0; border-radius: 0; }
-  .il-onizleme { display: block; }
   .il .yapiskan-alt { display: none; }
 }
+@media (min-width: 900px) and (max-width: 1199px) { .il-liste { border-right: 0; } }
+@media (min-width: 1200px) {
+  .il { grid-template-columns: 260px minmax(0, 1fr) minmax(0, 1.15fr); }
+  .il-onizleme { display: block; }
+}
+/* Seçili satır vurgusu yalnızca önizleme görünürken anlamlıdır. */
+@media (max-width: 1199px) { .il .ilan-satiri[aria-current="true"] { background: transparent; box-shadow: none; } }
 .il-ortu { display: none; }
 .il-ortu[data-acik='true'] { display: block; }
 @media (min-width: 900px) { .il-ortu[data-acik='true'] { display: none; } }
