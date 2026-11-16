@@ -700,3 +700,23 @@ dialog.gr-pencere { width: min(560px, calc(100vw - 32px)); }
 /* Odaklanan alan yapışık form ayağının altında kalmasın (WCAG 2.2, 2.4.11). */
 html:has(.yapiskan-alt) { scroll-padding-bottom: 96px; }
 .rapor { grid-template-columns: minmax(0, 1fr); }
+
+/* ---------- Dikey tablet (600–899 px; kullanıcı isteği 16.11.2026) ----------
+   Telefon düzeni korunur; uzun tek sütunlu listeler iki sütuna bölünür. Her ilan satırı ayrı kart olur ve telefondaki
+   iç düzenini (tarih ve kaydet düğmesi altta) kullanır. Telefon (< 600) ve masaüstü (≥ 900) etkilenmez. */
+@media (min-width: 600px) and (max-width: 899px) {
+  .ilan-listesi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0 16px; background: transparent; box-shadow: none; }
+  .ilan-listesi .ilan-satiri, .ilan-listesi .ilan-satiri:last-child { background: var(--yuzey); border-bottom: 0; border-radius: var(--kose-panel);
+    box-shadow: var(--golge-panel); grid-template-columns: auto minmax(0, 1fr); padding: 14px 16px; gap: 2px 12px; align-content: start; }
+  .ilan-listesi .ilan-satiri > .firma-karo { --boy: 42px !important; }
+  .ilan-listesi .ilan-satiri .poz { font-size: 16px; }
+  .ilan-listesi .is-sag { grid-column: 2; display: flex; justify-content: space-between; width: 100%; margin-top: 6px; align-self: end; }
+  .ilan-listesi .is-sag .kaydet { order: 3; margin: -8px -8px -8px auto; }
+  .ilan-listesi .is-sag:has(.kaydet) { justify-content: flex-start; gap: 12px; }
+
+  .firma-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+  .firma-liste li:nth-child(2) a { border-top: 0; }
+
+  .bv-liste, .f-ilan-kartlar, .havuz-liste, .y-kuyruklar { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .bv-liste > *, .f-ilan-kartlar > *, .havuz-liste > * { min-width: 0; }
+}

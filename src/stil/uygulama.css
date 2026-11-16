@@ -61,7 +61,11 @@ body.tk > main { flex: 1 0 auto; }
   .il-onizleme { display: block; }
 }
 /* Seçili satır vurgusu yalnızca önizleme görünürken anlamlıdır. */
-@media (max-width: 1199px) { .il .ilan-satiri[aria-current="true"] { background: transparent; box-shadow: none; } }
+@media (max-width: 1199px) {
+  .il .ilan-satiri[aria-current="true"] { background: var(--yuzey); box-shadow: none; }
+  .il .ilan-satiri[aria-current="true"] .poz { color: var(--metin); }
+}
+@media (min-width: 600px) and (max-width: 899px) { .il .ilan-listesi .ilan-satiri[aria-current="true"] { box-shadow: var(--golge-panel); } }
 .il-ortu { display: none; }
 .il-ortu[data-acik='true'] { display: block; }
 @media (min-width: 900px) { .il-ortu[data-acik='true'] { display: none; } }

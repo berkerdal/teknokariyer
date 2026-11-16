@@ -739,6 +739,9 @@ Claude tarafından yapılacak.
     satıra bölünüyordu. Önizleme artık yalnızca ≥ 1200 px; arada filtre + liste, ilana dokununca ilan sayfası açılır
     (`IlanBaglantisi` aynı eşik). Önizleme yokken seçili satır vurgusu gösterilmez. Betik: Playwright `devices['iPad Mini']`
     vb., `scrollWidth` ve sağ kenarı aşan öğe denetimi.
+  - **Dikey tablet düzeni (16.11.2026, kullanıcı onayı):** 600–899 px'de uzun listeler iki sütun (`yenileme.css` sonu):
+    ilan kartları (her satır ayrı kart, telefondaki iç düzen), ana sayfa firma listesi, aday başvuruları, firma ilan
+    kartları, CV havuzu, “Bugün” kuyrukları. Telefon (< 600) ve masaüstü (≥ 900) değişmedi.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).
