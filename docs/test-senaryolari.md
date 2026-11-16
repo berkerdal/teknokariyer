@@ -8,7 +8,7 @@ görünmezse veya bir şey kafanızı karıştırırsa lütfen bildirin (bölüm
 
 ### 1.1 Test ortamı
 
-- **Adres:** https://teknokariyer-test.teknokariyer.workers.dev
+- **Adres:** https://kariyer.berkerdal.com.tr (eski adres https://teknokariyer-test.teknokariyer.workers.dev de çalışır)
 - Her sayfanın üstünde turuncu **TEST ORTAMI** şeridi görünür. Bu ortamdaki ilanlar ve kişiler örnektir.
 - **Test ortamında hiçbir e-posta gerçek alıcıya gitmez.** Davet, doğrulama, giriş kodu, başvuru ve hatırlatma
   e-postalarının hepsi Yönetici A.Ş. panelindeki **Test posta kutusu**na düşer (menüde “Yönetim” altında). Bu yüzden

@@ -18,8 +18,15 @@
   "vars": {
     "ORTAM": "test",
     // E-postalardaki bağlantılar ve sayfa adresleri bu kökü kullanır.
-    "SITE_ADRESI": "https://teknokariyer-test.teknokariyer.workers.dev",
+    "SITE_ADRESI": "https://kariyer.berkerdal.com.tr",
+    // Eski adres de çalışmaya devam eder (Payload oturum denetimi bu kaynağı da kabul eder).
+    "EK_SITE_ADRESLERI": "https://teknokariyer-test.teknokariyer.workers.dev",
   },
+  // Test ortamının alan adı (16.11.2026): kullanıcının berkerdal.com.tr alanı Cloudflare'de; kariyer alt alanı bu Worker'a
+  // bağlı (Workers Custom Domain, DNS kaydı ve sertifika otomatik). workers.dev adresi de açık kalır.
+  // Yayında alan adı kariyer.pauteknokent.com.tr olacak (K10).
+  "routes": [{ "pattern": "kariyer.berkerdal.com.tr", "custom_domain": true }],
+  "workers_dev": true,
   // Zamanlanmış işler (UTC): 21:05 = Türkiye 00:05, gün dönünce süresi dolan ilanlar kapanır;
   // 07:00 = Türkiye 10:00, davet ve profil hatırlatmaları gider (hatırlatmalar yalnızca 09.00–19.00 arasında gönderilir).
   // İşler tekrar çalıştırılabilir; ikinci çalışma yalnızca o ana kadar biriken işi yapar.

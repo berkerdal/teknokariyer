@@ -749,6 +749,10 @@ Claude tarafından yapılacak.
   - **Taksonomi:** Test ortamında temel üniversite/bölüm/dil listesi örnek veriyle geliyor. Yayın veritabanına YÖK listesi `scripts/liste-yukle.ts` veya
     gelişmiş ekrandaki “Liste aktarma” ile yüklenir (aksi hâlde aday okulunu bulamaz).
   - **Test ortamı yayında (14.11.2026):** https://teknokariyer-test.teknokariyer.workers.dev
+    - **Alan adı (16.11.2026):** https://kariyer.berkerdal.com.tr (kullanıcının kişisel alan adı; ad sunucuları
+      Türkticaret'ten Cloudflare'e taşındı, kişisel sitesinin GitHub Pages kayıtları gri bulutta korundu). Worker Custom
+      Domain olarak bağlı (`wrangler.jsonc` → `routes`, `workers_dev: true`). `SITE_ADRESI` yeni adres; eski adres
+      `EK_SITE_ADRESLERI` ile Payload CSRF listesinde (`src/payload.ortak.ts`), ikisi de çalışır.
     - Dağıtım Cloudflare **Workers Builds** ile: `claude/funny-cerf-r7h64q` dalına her gönderim derleyip yayınlar.
       Derleme `pnpm exec opennextjs-cloudflare build`, dağıtım `pnpm exec opennextjs-cloudflare deploy`; ön izleme kapalı.
     - `PAYLOAD_SECRET` Worker gizli değişkeni (API ile yazıldı; değeri hiçbir yerde yok).
