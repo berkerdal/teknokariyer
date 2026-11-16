@@ -494,6 +494,11 @@ Firma profili eksikse yayına girmez. En az şunlar gerekir: logo, kısa tanıt�
 - Takvim dosyası (.ics) gönderilir.
 - Bu özellik Faz 1'de basit tutulabilir.
 
+**Uygulama (16.11.2026):** Firma 1–3 seçenek önerir (en erken 2 saat, en geç 60 gün sonrası; Türkiye saati), biçim
+(yüz yüze, çevrim içi, telefon), süre ve not ekler. Aday birini seçer veya notla başka tarih ister. Seçilince adaya ve
+firmaya takvim dosyası gider; tarih değişikliği ve iptalde takvimden kaldıran dosya gönderilir. Davet ve iptal
+yalnızca tam yetkili ve ilan sorumlusundadır. Aday başvurusunu geri çekerse veya hesabını silerse görüşme iptal olur.
+
 ### İletişim
 
 **[E] Faz 1'de** platform üzerinden şablonlu e-posta gönderilir.

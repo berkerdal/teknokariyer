@@ -87,6 +87,7 @@ export interface Config {
     'kayitli-aramalar': KayitliAramalar;
     sikayetler: Sikayetler;
     'hesap-talepleri': HesapTalepleri;
+    gorusmeler: Gorusmeler;
     'trafik-olaylari': TrafikOlaylari;
     'trafik-ozetleri': TrafikOzetleri;
     'payload-kv': PayloadKv;
@@ -116,6 +117,7 @@ export interface Config {
     'kayitli-aramalar': KayitliAramalarSelect<false> | KayitliAramalarSelect<true>;
     sikayetler: SikayetlerSelect<false> | SikayetlerSelect<true>;
     'hesap-talepleri': HesapTalepleriSelect<false> | HesapTalepleriSelect<true>;
+    gorusmeler: GorusmelerSelect<false> | GorusmelerSelect<true>;
     'trafik-olaylari': TrafikOlaylariSelect<false> | TrafikOlaylariSelect<true>;
     'trafik-ozetleri': TrafikOzetleriSelect<false> | TrafikOzetleriSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -695,6 +697,18 @@ export interface TestPostalar {
   html?: string | null;
   metin?: string | null;
   ortam?: string | null;
+  /**
+   * Dosya adı, tür ve içerik (ör. takvim dosyası).
+   */
+  ekler?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -897,6 +911,41 @@ export interface HesapTalepleri {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gorusmeler".
+ */
+export interface Gorusmeler {
+  id: number;
+  basvuru: number | Basvurular;
+  firma: number | Firmalar;
+  ilan: number | Ilanlar;
+  adayKullanici?: (number | null) | Kullanicilar;
+  secenekler?:
+    | {
+        baslangic: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Dakika: 15, 30, 45, 60, 90, 120
+   */
+  sure: number;
+  bicim: 'yuz-yuze' | 'cevrim-ici' | 'telefon';
+  yer?: string | null;
+  not?: string | null;
+  durum: 'bekliyor' | 'onaylandi' | 'yeni-tarih' | 'iptal';
+  secilen?: string | null;
+  /**
+   * Adayın başka tarih isterken yazdığı not.
+   */
+  adayNotu?: string | null;
+  iptalNedeni?: string | null;
+  takvimNo?: number | null;
+  olusturan?: (number | null) | Kullanicilar;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Bugünün ham sayfa görüntülemeleri. Kişisel veri içermez; gece özetlenip silinir.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1040,6 +1089,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hesap-talepleri';
         value: number | HesapTalepleri;
+      } | null)
+    | ({
+        relationTo: 'gorusmeler';
+        value: number | Gorusmeler;
       } | null)
     | ({
         relationTo: 'trafik-olaylari';
@@ -1500,6 +1553,7 @@ export interface TestPostalarSelect<T extends boolean = true> {
   html?: T;
   metin?: T;
   ortam?: T;
+  ekler?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1648,6 +1702,34 @@ export interface HesapTalepleriSelect<T extends boolean = true> {
   retGerekcesi?: T;
   sonuclandiran?: T;
   sonuclanmaTarihi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gorusmeler_select".
+ */
+export interface GorusmelerSelect<T extends boolean = true> {
+  basvuru?: T;
+  firma?: T;
+  ilan?: T;
+  adayKullanici?: T;
+  secenekler?:
+    | T
+    | {
+        baslangic?: T;
+        id?: T;
+      };
+  sure?: T;
+  bicim?: T;
+  yer?: T;
+  not?: T;
+  durum?: T;
+  secilen?: T;
+  adayNotu?: T;
+  iptalNedeni?: T;
+  takvimNo?: T;
+  olusturan?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -12,6 +12,9 @@ import { tarihYaz } from '@/arayuz/bicim'
 import { DurumFormu, NotFormu, PuanFormu } from '@/arayuz/firma/Degerlendirme'
 import { firmaYetkisiVarMi } from '@/erisim'
 import { basvuruyuAc } from '@/servisler/degerlendirme'
+import { GorusmePaneli, type GorusmeGorunumu } from '@/arayuz/firma/GorusmePaneli'
+import { gorusmeHali, gunSecenekleri, type GorusmeBicimi } from '@/alan/gorusme'
+import { basvurununGorusmesi, gorusmeOzu } from '@/servisler/gorusme'
 import { IslemHatasi } from '@/servisler/ortak'
 import { basvuruAyrintisi, firmaBasvurulari, ilanKosullari, kopyaProfili, type ProfilKopyasi } from '@/veri/basvuruDegerlendirme'
 import { firmaOturumu } from '@/veri/firma'
@@ -22,10 +25,10 @@ export const metadata: Metadata = { title: 'Başvuru · Firma paneli', robots: {
 const KAYNAK_ADI: Record<string, string> = { portal: 'portal araması', linkedin: 'LinkedIn', google: 'Google', dogrudan: 'doğrudan bağlantı' }
 const SEVIYE_ADI: Record<string, string> = { baslangic: 'Başlangıç', orta: 'Orta', iyi: 'İyi', uzman: 'Uzman' }
 
-type Props = { params: Promise<{ id: string }> }
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ gorusme?: string }> }
 
-export default async function BasvuruAyrintisi({ params }: Props) {
-  const { id } = await params
+export default async function BasvuruAyrintisi({ params, searchParams }: Props) {
+  const [{ id }, sp] = await Promise.all([params, searchParams])
   const k = await firmaOturumu(`/firma-paneli/basvurular/${id}`)
   const payload = await payloadAl()
   // Açılış: kiracı denetimi burada; ilk açılışta “Alındı” → “İnceleniyor”.
@@ -56,6 +59,25 @@ export default async function BasvuruAyrintisi({ params }: Props) {
         })
       ).docs[0]
     : undefined
+  const [gorusmeKaydi, firmaKaydi] = await Promise.all([
+    basvurununGorusmesi(payload, b.id),
+    payload.findByID({ collection: 'firmalar', id: Number(typeof b.firma === 'object' ? b.firma.id : b.firma), depth: 0, overrideAccess: true, select: { konum: true } }),
+  ])
+  const simdi = new Date()
+  const gorusme: GorusmeGorunumu | null = gorusmeKaydi
+    ? {
+        id: gorusmeKaydi.id,
+        hal: gorusmeHali(gorusmeOzu(gorusmeKaydi), simdi),
+        secenekler: (gorusmeKaydi.secenekler ?? []).map((x) => x.baslangic),
+        secilen: gorusmeKaydi.secilen ?? null,
+        sure: gorusmeKaydi.sure,
+        bicim: gorusmeKaydi.bicim as GorusmeBicimi,
+        yer: gorusmeKaydi.yer ?? null,
+        not: gorusmeKaydi.not ?? null,
+        adayNotu: gorusmeKaydi.adayNotu ?? null,
+        iptalNedeni: gorusmeKaydi.iptalNedeni ?? null,
+      }
+    : null
   const p = (b.profilKopyasi ?? {}) as ProfilKopyasi
   const silindi = !b.adayKullanici
   const eslesme = b.anonimlestirildi ? null : eslesmeHesapla(ilanKosullari(ilan), kopyaProfili(p), 'firma')
@@ -281,6 +303,27 @@ export default async function BasvuruAyrintisi({ params }: Props) {
               </p>
             )}
           </section>
+          {sp.gorusme && (
+            <p className="basari-kutu" role="status">
+              {{ davet: 'Görüşme daveti adaya gönderildi.', degisti: 'Yeni tarihler adaya gönderildi.', iptal: 'Görüşme iptal edildi; adaya bildirildi.' }[sp.gorusme] ?? ''}
+            </p>
+          )}
+          <GorusmePaneli
+            basvuruId={b.id}
+            gorusme={gorusme}
+            yetki={durumYetkisi && !silindi && !['geri-cekti', 'olumlu', 'olumsuz'].includes(b.durum)}
+            kapaliNedeni={
+              silindi
+                ? 'Aday hesabını sildiği için görüşmeye davet edilemez.'
+                : ['geri-cekti', 'olumlu', 'olumsuz'].includes(b.durum)
+                  ? 'Sonuçlanmış veya geri çekilmiş başvuru için görüşme daveti gönderilemez.'
+                  : durumYetkisi
+                    ? undefined
+                    : 'Görüşme davetini firmanın tam yetkili ve ilan sorumlusu kullanıcıları gönderir.'
+            }
+            gunler={gunSecenekleri(simdi)}
+            varsayilanAdres={`Pamukkale Teknokent, ${firmaKaydi.konum}`}
+          />
           <section className="panel f-blok ekip-notu">
             <h2 className="b3 kare-bas">Ekip değerlendirmesi</h2>
             <p className="kucuk ikincil">Puanı ve notları yalnızca firma ekibiniz görür; aday görmez.</p>

@@ -46,6 +46,7 @@ export async function basvurulariAnonimlestir(payload: Payload, simdi: Date, ay:
   for (const b of docs) {
     if (b.cv) dosyalar.add(kimlik(b.cv))
     for (const x of b.belgeler ?? []) dosyalar.add(kimlik(x))
+    await payload.delete({ collection: 'gorusmeler', where: { basvuru: { equals: b.id } }, overrideAccess: true, req })
     await payload.update({
       collection: 'basvurular',
       id: b.id,

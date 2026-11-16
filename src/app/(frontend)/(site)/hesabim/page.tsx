@@ -9,6 +9,8 @@ import { adayOturumu, oturumdakiAday } from '@/veri/aday'
 import { profilEksikleri } from '@/veri/profil'
 import { cvOzetleri } from '@/veri/basvuru'
 import { payloadAl } from '@/veri/payload'
+import { GORUSME_HALI_ADI, gorusmeHali, gorusmeZamani } from '@/alan/gorusme'
+import { gorusmeOzu } from '@/servisler/gorusme'
 
 export const metadata: Metadata = { title: 'Başvurularım', robots: { index: false } }
 
@@ -23,7 +25,21 @@ export default async function BasvurularimSayfasi() {
   const [liste, aday] = await Promise.all([basvurularim(k), oturumdakiAday()])
   const eksikler = aday ? profilEksikleri(aday, cvOzetleri(aday).length) : []
   const havuzda = Boolean(aday?.havuz?.rizaTarihi) && aday?.havuz?.gorunurluk !== 'gizli'
-  const sayi = havuzda ? await goruntuleyenFirmaSayisi(await payloadAl(), k) : 0
+  const payload = await payloadAl()
+  const sayi = havuzda ? await goruntuleyenFirmaSayisi(payload, k) : 0
+  // Başvuru başına en son görüşme (iptal edilmiş olanlar listede gösterilmez).
+  const simdi = new Date()
+  const gorusmeler = new Map<number, { id: number; metin: string; eylem: boolean }>()
+  for (const g of (await payload.find({ collection: 'gorusmeler', where: { adayKullanici: { equals: k.id } }, sort: 'createdAt', limit: 200, depth: 0, overrideAccess: true })).docs) {
+    const hal = gorusmeHali(gorusmeOzu(g), simdi)
+    const basvuru = Number(typeof g.basvuru === 'object' ? g.basvuru.id : g.basvuru)
+    if (hal === 'iptal') {
+      gorusmeler.delete(basvuru)
+      continue
+    }
+    const metin = hal === 'onaylandi' && g.secilen ? `Görüşme: ${gorusmeZamani(new Date(g.secilen))}` : `Görüşme: ${GORUSME_HALI_ADI[hal].aday}`
+    gorusmeler.set(basvuru, { id: g.id, metin, eylem: hal === 'bekliyor' })
+  }
   return (
     <>
       <h1 className="b1">Başvurularım</h1>
@@ -72,6 +88,11 @@ export default async function BasvurularimSayfasi() {
                   <i key={n} className={s || undefined} title={ADIM_ADI[n]} />
                 ))}
               </div>
+              {gorusmeler.get(b.id) && (
+                <p className={gorusmeler.get(b.id)!.eylem ? 'bv-gorusme bv-gorusme--eylem' : 'bv-gorusme'}>
+                  <Link href={`/hesabim/gorusme/${gorusmeler.get(b.id)!.id}`}>{gorusmeler.get(b.id)!.eylem ? 'Görüşme daveti: tarih seç' : gorusmeler.get(b.id)!.metin}</Link>
+                </p>
+              )}
               <p className="kucuk ikincil">Başvuru tarihi: {tarihYaz(b.tarih, true)}</p>
               {b.durum === 'olumsuz' && <p className="kucuk">Firma bu pozisyon için başka bir adayla devam etmeye karar verdi. İlgin için teşekkür ederiz.</p>}
               {geriCekilebilirMi(b.durum) && <GeriCek basvuruId={b.id} pozisyon={b.ilan.pozisyonAdi} sonHak={liste.some((x) => x.id !== b.id && x.ilan.id === b.ilan.id)} />}

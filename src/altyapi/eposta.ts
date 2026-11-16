@@ -36,6 +36,16 @@ const adresler = (deger: unknown): string => {
     .join(', ')
 }
 
+/** Ekleri test posta kutusunda gösterilebilecek biçime çevirir (yalnızca metin ekler; ör. takvim dosyası). */
+const ekler = (deger: unknown) => {
+  if (!Array.isArray(deger) || !deger.length) return null
+  return deger.map((e: { filename?: string; content?: unknown; contentType?: string }) => ({
+    dosyaAdi: String(e.filename ?? 'ek'),
+    tur: String(e.contentType ?? 'application/octet-stream'),
+    icerik: typeof e.content === 'string' ? e.content : '',
+  }))
+}
+
 export const epostaAdaptoru = (): EmailAdapter => ({ payload }) => ({
   name: 'teknokariyer',
   defaultFromAddress: GONDEREN_ADRES,
@@ -51,6 +61,7 @@ export const epostaAdaptoru = (): EmailAdapter => ({ payload }) => ({
           html: typeof mesaj.html === 'string' ? mesaj.html : '',
           metin: typeof mesaj.text === 'string' ? mesaj.text : '',
           ortam: ortam(),
+          ekler: ekler(mesaj.attachments),
         },
       })
       return { testKutusunaYazildi: true }

@@ -16,6 +16,8 @@ export interface Eposta {
   konu: string
   html: string
   metin: string
+  /** Metin ekler (ör. takvim dosyası) */
+  ekler?: Array<{ dosyaAdi: string; icerik: string; tur: string }>
 }
 
 export type EpostaHitabi = 'sen' | 'siz'
@@ -545,4 +547,94 @@ export function girisKoduEpostasi(d: { ad: string; kod: string; dakika: number; 
     ],
     d.hitap,
   )
+}
+
+// ——— Görüşme daveti (src/servisler/gorusme.ts) ———
+
+/** Adaya: firma görüşme tarihleri önerdi (ilk davet veya tarih değişikliği). */
+export function gorusmeDavetiEpostasi(d: {
+  ad?: string | null
+  firma: string
+  pozisyonAdi: string
+  secenekler: string[]
+  bicim: string
+  yer?: string | null
+  not?: string | null
+  adres: string
+  degisiklik: boolean
+}): Eposta {
+  return eposta(
+    d.degisiklik ? `Görüşme tarihi değişti: ${d.pozisyonAdi}` : `Görüşme daveti: ${d.pozisyonAdi}`,
+    [
+      `Merhaba ${d.ad ?? ''},`.trim(),
+      d.degisiklik
+        ? `${d.firma}, “${d.pozisyonAdi}” görüşmesi için yeni tarihler önerdi. Daha önceki tarih geçerli değil; aşağıdaki seçeneklerden sana uyanı seç.`
+        : `${d.firma}, “${d.pozisyonAdi}” başvurun için seni görüşmeye davet ediyor. Aşağıdaki seçeneklerden sana uyanı seç.`,
+      ...d.secenekler.map((s, i) => `${i + 1}. seçenek: ${s}`),
+      `Görüşme biçimi: ${d.bicim}${d.yer ? ` (${d.yer})` : ''}.`,
+      ...(d.not ? [`Firmanın notu: ${d.not}`] : []),
+      'Seçeneklerin hiçbiri sana uymuyorsa aynı sayfadan başka tarih isteyebilirsin.',
+    ],
+    { metin: 'Tarih seç', adres: d.adres },
+    ['Tarihi seçtiğinde sana ve firmaya takvim dosyası gönderilir.'],
+  )
+}
+
+/** Aday tarih seçti: adaya (sen) ve firmaya (siz); takvim dosyası ekli. */
+export function gorusmeKesinlestiEpostasi(d: {
+  hitap: EpostaHitabi
+  ad?: string | null
+  firma: string
+  pozisyonAdi: string
+  zaman: string
+  bicim: string
+  yer?: string | null
+  adres: string
+  ics: string
+}): Eposta {
+  const sen = d.hitap === 'sen'
+  const e = eposta(
+    `Görüşme tarihi kesinleşti: ${d.pozisyonAdi}`,
+    [
+      sen ? `Merhaba ${d.ad ?? ''},`.trim() : 'Merhaba,',
+      sen
+        ? `${d.firma} ile “${d.pozisyonAdi}” görüşmen ${d.zaman} tarihinde.`
+        : `${d.ad ?? 'Aday'}, “${d.pozisyonAdi}” görüşmesi için ${d.zaman} tarihini seçti.`,
+      `Görüşme biçimi: ${d.bicim}${d.yer ? ` (${d.yer})` : ''}.`,
+      sen ? 'Takvim dosyası bu e-postanın ekinde. Açarsan görüşme takvimine eklenir.' : 'Takvim dosyası bu e-postanın ekinde.',
+    ],
+    { metin: sen ? 'Görüşmeyi gör' : 'Başvuruyu aç', adres: d.adres },
+    [sen ? 'Bu saatte katılamayacaksan aynı sayfadan başka tarih isteyebilirsin.' : 'Tarihi değiştirmek veya görüşmeyi iptal etmek için başvuru sayfasını kullanabilirsiniz.'],
+    d.hitap,
+  )
+  return { ...e, ekler: [{ dosyaAdi: 'gorusme.ics', icerik: d.ics, tur: 'text/calendar; charset=utf-8; method=PUBLISH' }] }
+}
+
+/** Firmaya: aday önerilen tarihlerin hiçbirine uyamıyor veya kesinleşen saatte katılamıyor. */
+export function gorusmeYeniTarihEpostasi(d: { aday: string; pozisyonAdi: string; not: string; adres: string; ics?: string }): Eposta {
+  const e = eposta(
+    `Aday başka bir görüşme tarihi istiyor: ${d.pozisyonAdi}`,
+    ['Merhaba,', `${d.aday}, “${d.pozisyonAdi}” görüşmesi için önerdiğiniz tarihlere katılamayacağını bildirdi.`, `Adayın notu: ${d.not}`, 'Başvuru sayfasından yeni tarihler önerebilirsiniz.'],
+    { metin: 'Yeni tarih öner', adres: d.adres },
+    d.ics ? ['Daha önce kesinleşen görüşme iptal edildi; ekteki dosya takviminizden kaldırır.'] : [],
+    'siz',
+  )
+  return d.ics ? { ...e, ekler: [{ dosyaAdi: 'gorusme-iptal.ics', icerik: d.ics, tur: 'text/calendar; charset=utf-8; method=CANCEL' }] } : e
+}
+
+/** Görüşme iptali: firma iptal etti (adaya) veya aday başvurusunu geri çekti / hesabını sildi (firmaya). */
+export function gorusmeIptalEpostasi(d: { hitap: EpostaHitabi; ad?: string | null; firma: string; pozisyonAdi: string; neden: string; adres?: string; ics?: string; baslik?: string }): Eposta {
+  const sen = d.hitap === 'sen'
+  const e = eposta(
+    d.baslik ?? `Görüşme iptal edildi: ${d.pozisyonAdi}`,
+    [
+      sen ? `Merhaba ${d.ad ?? ''},`.trim() : 'Merhaba,',
+      ...(d.baslik ? [] : [sen ? `${d.firma}, “${d.pozisyonAdi}” görüşmesini iptal etti.` : `“${d.pozisyonAdi}” görüşmesi iptal oldu.`]),
+      sen && !d.baslik ? `Firmanın açıklaması: ${d.neden}` : d.neden,
+    ],
+    d.adres ? { metin: sen ? 'Başvurularımı gör' : 'Başvuruyu aç', adres: d.adres } : undefined,
+    d.ics ? [sen ? 'Ekteki dosya görüşmeyi takviminden kaldırır.' : 'Ekteki dosya görüşmeyi takviminizden kaldırır.'] : [],
+    d.hitap,
+  )
+  return d.ics ? { ...e, ekler: [{ dosyaAdi: 'gorusme-iptal.ics', icerik: d.ics, tur: 'text/calendar; charset=utf-8; method=CANCEL' }] } : e
 }

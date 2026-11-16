@@ -22,7 +22,7 @@ export type FirmaDurumu = (typeof FIRMA_DURUMLARI)[number]
 const BILDIRIMLI = ['gorusme', 'teklif', 'olumlu', 'olumsuz'] as const
 
 /** Başvuruyu okur; başka firmanın başvurusuysa veya yoksa 404 (varlığı da belli edilmez). */
-async function firmaninBasvurusu(payload: Payload, k: Kullanici, id: number): Promise<Basvurular> {
+export async function firmaninBasvurusu(payload: Payload, k: Kullanici, id: number): Promise<Basvurular> {
   if (!firmaKullanicisiMi(k) && !moderasyonYapabilirMi(k)) throw new IslemHatasi('Bu sayfa yalnızca firma kullanıcılarına açık.', 403)
   const b = await payload.findByID({ collection: 'basvurular', id, depth: 0, overrideAccess: false, user: k }).catch((): null => null)
   if (!b || (firmaKullanicisiMi(k) && kimlik(b.firma) !== Number(firmaKimligi(k)))) throw new IslemHatasi('Başvuru bulunamadı.', 404)

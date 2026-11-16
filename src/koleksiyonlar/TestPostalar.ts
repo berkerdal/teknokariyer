@@ -20,5 +20,6 @@ export const TestPostalar: CollectionConfig = {
     { name: 'html', label: 'HTML gövde', type: 'textarea' },
     { name: 'metin', label: 'Düz metin gövde', type: 'textarea' },
     { name: 'ortam', label: 'Ortam', type: 'text' },
+    { name: 'ekler', label: 'Ekler', type: 'json', admin: { description: 'Dosya adı, tür ve içerik (ör. takvim dosyası).' } },
   ],
 }

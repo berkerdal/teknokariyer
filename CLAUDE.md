@@ -693,8 +693,24 @@ Claude tarafından yapılacak.
       `/yonetim/firmalar/talepler` (moderasyon yetkisi): firmayla eşleştirip tam yetkili davet (ekip davet servisi; firmanın
       yetkili bilgisi boşsa talepten dolar) veya ≥15 karakter gerekçeyle ret (e-posta). “Bugün”de kuyruk, menü sayacı
       “Firmalar ve kurulum”da. Alt bilgideki “Firma hesabı talebi” ve giriş sayfasındaki firma metni buraya bağlanır.
+    - **Görüşme daveti** (talimatlar 6): kurallar `src/alan/gorusme.ts` (1–3 seçenek, en erken 2 saat, en geç 60 gün,
+      biçim yüz yüze/çevrim içi/telefon, süre 15–120 dk, Türkiye saati, gün listesi `gunSecenekleri`, `.ics` üretimi:
+      CRLF, 75 bayt katlama, kaçış, METHOD PUBLISH/CANCEL), koleksiyon `gorusmeler` (firma kendi firmasınınkini, aday
+      kendisininkini, kurumdan yalnızca tam yetkili okur), servis `src/servisler/gorusme.ts`. Davet/değişiklik/iptal
+      yalnızca firma `yonetici` ve `ilan-sorumlusu`; davet başvuruyu “Görüşme”ye taşır (genel durum e-postası ayrıca
+      gitmez). Bir başvuruda tek süren görüşme; tarih değişikliği aynı kayıtta. Aday `/hesabim/gorusme/[id]`: tarih seçer
+      (iki tarafa `.ics` ekli e-posta; firmada değerlendiriciye gitmez) veya notla başka tarih ister (kesinleşmişse iptal
+      dosyası gider). UID `gorusme-<id>-<takvimNo>@…`; `takvimNo` her kesinleşmede artar, iptal aynı UID + SEQUENCE 1.
+      Aday geri çekerse veya hesabını silerse süren görüşme iptal olur, firmaya bildirilir; hesap silmede ve saklama
+      anonimleştirmesinde görüşme kayıtları silinir. Takvim dosyası uçları `/hesabim/gorusme/[id]/takvim`,
+      `/firma-paneli/gorusme/[id]/takvim` (`src/altyapi/takvimYaniti.ts`). Firma ekranı `GorusmePaneli` (başvuru
+      ayrıntısında yan sütun); aday başvuru kartında “Görüşme daveti: tarih seç”.
+    - E-posta ekleri: `Eposta.ekler` → `epostaGonder` (`src/servisler/bildirim.ts`) `attachments` olarak iletir; test
+      posta kutusu ekleri `test_postalar.ekler` (JSON) alanında tutar ve indirme bağlantısı gösterir.
+    - Öğrenilen: Satır içi `TarihSecici` üç seçenekli formda çok yer kaplıyordu; görüşme formu Türkçe gün listesi
+      (`select`) + yarım saatlik saat listesi kullanır (tarayıcının `time` girdisi bazı cihazlarda ÖÖ/ÖS gösterir).
     - Göçler (D1 ve PG, yalnızca CREATE/ADD): `…_havuz_riza_hatirlatma`, `…_kayitli_aramalar`, `…_sikayetler`,
-      `…_hesap_talepleri`.
+      `…_hesap_talepleri`, `…_gorusmeler`.
   - **Sırada:** `docs/kurulum.md` (talimatlar 0.5: Cloudflare ve yerel sunucu için yayına alma adımları; göç rehberine
     ve teknoloji önerisinin 9. bölümüne dayanır), yayın öncesi kalanlar (e-posta servisi, TTO adresi, kaydedilen ilanlar).
   - **İlk göç oluşturuldu (14.11.2026):** `src/migrations/20261114_022255_ilk_sema`. Worker ilk istekte uygular (prodMigrations).

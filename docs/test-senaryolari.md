@@ -176,6 +176,27 @@ firma değerlendirir. Sırayla uygulamanız önerilir. Her senaryonun başındak
    - *Beklenen:* Adaya durum e-postası gider; aday **Başvurularım**'da yeni durumu görür. Ekip notu ve puan adaya
      görünmez.
 
+### S5a. Görüşme daveti
+
+**Kim:** Firma → aday
+
+1. Firma olarak S5'teki başvuruyu açın; sağdaki **Görüşme** bölümünde **Görüşmeye davet et**'e basın. İki seçenek
+   için gün ve saat seçin, biçimi “Yüz yüze” bırakın ve **Daveti gönder**'e basın.
+   - *Beklenen:* Başvurunun durumu “Görüşme” olur. Bölümde “Adayın tarih seçmesi bekleniyor” ve iki seçenek görünür.
+     Test posta kutusunda adaya “Görüşme daveti” e-postası düşer.
+2. Aday olarak **Başvurularım**'da “Görüşme daveti: tarih seç” bağlantısını açın, bir seçenek işaretleyip
+   **Bu tarihi seç**'e basın.
+   - *Beklenen:* “Tarih kesinleşti” görünür; **Takvimine ekle (.ics)** dosyası indirilir ve takvim uygulamasında doğru
+     gün ve saatte açılır. Adaya ve firmaya “Görüşme tarihi kesinleşti” e-postası gider; test posta kutusunda ekte
+     `gorusme.ics` görünür.
+3. Aday **Bu saatte katılamıyorum**'a basıp kısa bir not yazsın.
+   - *Beklenen:* Firmaya “Aday başka bir görüşme tarihi istiyor” e-postası gider; firmanın bölümünde adayın notu ve
+     **Yeni tarih öner** düğmesi görünür.
+4. Firma yeni tarih önersin, ardından **Görüşmeyi iptal et**'e basıp açıklama yazsın.
+   - *Beklenen:* Adaya “Görüşme tarihi değişti”, sonra “Görüşme iptal edildi” e-postası gider.
+5. “Değerlendirici” yetkili bir ekip üyesiyle aynı başvuruyu açın.
+   - *Beklenen:* Görüşme durumu görünür ama davet ve iptal düğmeleri görünmez.
+
 ### S6. CV havuzu
 
 **Kim:** Aday → firma

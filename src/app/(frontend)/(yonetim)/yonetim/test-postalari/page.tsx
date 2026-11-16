@@ -106,6 +106,16 @@ export default async function TestPostaKutusuSayfasi({ searchParams }: Props) {
                 Kime: {secili.kime} · {ZAMAN.format(new Date(secili.createdAt))}
               </p>
               <h2 className="b3">{secili.konu || '(konusuz)'}</h2>
+              {Array.isArray(secili.ekler) && secili.ekler.length > 0 && (
+                <p className="kucuk">
+                  Ekler:{' '}
+                  {(secili.ekler as Array<{ dosyaAdi: string; tur: string; icerik: string }>).map((e) => (
+                    <a key={e.dosyaAdi} className="posta-ek" href={`data:${e.tur.split(';')[0]};charset=utf-8,${encodeURIComponent(e.icerik)}`} download={e.dosyaAdi}>
+                      {e.dosyaAdi}
+                    </a>
+                  ))}
+                </p>
+              )}
               {secili.html ? (
                 <PostaGovdesi html={secili.html} baslik={secili.konu ?? ''} />
               ) : (

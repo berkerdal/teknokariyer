@@ -5,6 +5,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { getPayload, type Payload } from 'payload'
 import { PDFDocument } from 'pdf-lib'
+import { trGunMetni } from '@/alan/tarih'
 import config from '@/payload.config'
 import { ilanFormunuOku } from '@/alan/ilanFormu'
 import { basvur } from '@/servisler/basvuru'
@@ -44,6 +45,8 @@ beforeAll(async () => {
 describe('günlük özet', () => {
   it('biten gün için bir kez yazılır; kişisel veri içermez', async () => {
     const yarin = new Date(Date.now() + 86_400_000)
+    // Paylaşılan test veritabanında zamanlanmış iş testleri aynı günün özetini önceden yazmış olabilir (saate bağlı).
+    await payload.delete({ collection: 'gunluk-ozetler', where: { tarih: { equals: trGunMetni(new Date()) } }, overrideAccess: true })
     const tarih = await gunlukOzetYaz(payload, yarin)
     expect(tarih).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     expect(await gunlukOzetYaz(payload, yarin)).toBeNull()

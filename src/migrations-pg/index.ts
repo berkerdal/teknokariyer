@@ -7,6 +7,7 @@ import * as migration_20261115_214551_havuz_riza_hatirlatma from './20261115_214
 import * as migration_20261116_004918_kayitli_aramalar from './20261116_004918_kayitli_aramalar';
 import * as migration_20261116_010112_sikayetler from './20261116_010112_sikayetler';
 import * as migration_20261116_011221_hesap_talepleri from './20261116_011221_hesap_talepleri';
+import * as migration_20261116_012819_gorusmeler from './20261116_012819_gorusmeler';
 
 export const migrations = [
   {
@@ -52,6 +53,11 @@ export const migrations = [
   {
     up: migration_20261116_011221_hesap_talepleri.up,
     down: migration_20261116_011221_hesap_talepleri.down,
-    name: '20261116_011221_hesap_talepleri'
+    name: '20261116_011221_hesap_talepleri',
+  },
+  {
+    up: migration_20261116_012819_gorusmeler.up,
+    down: migration_20261116_012819_gorusmeler.down,
+    name: '20261116_012819_gorusmeler'
   },
 ];

@@ -15,6 +15,17 @@ export async function firmaEkibineGonder(payload: Payload, firmaId: number, e: E
     depth: 0,
     overrideAccess: true,
   })
-  for (const u of docs) await payload.sendEmail({ to: u.email, subject: e.konu, html: e.html, text: e.metin })
+  for (const u of docs) await epostaGonder(payload, u.email, e)
   return docs.length
+}
+
+/** Tek alıcıya e-posta; ekler (takvim dosyası gibi) varsa iletilir. */
+export function epostaGonder(payload: Payload, kime: string, e: Eposta) {
+  return payload.sendEmail({
+    to: kime,
+    subject: e.konu,
+    html: e.html,
+    text: e.metin,
+    ...(e.ekler?.length ? { attachments: e.ekler.map((x) => ({ filename: x.dosyaAdi, content: x.icerik, contentType: x.tur })) } : {}),
+  })
 }

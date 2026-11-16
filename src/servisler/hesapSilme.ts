@@ -38,7 +38,7 @@ export function kopyadanKimligiCikar(p: unknown): Record<string, unknown> {
 }
 
 /** Sorgu sonucunu 80'lik parçalar hâlinde siler (D1 en fazla 100 parametre kabul eder). */
-async function hepsiniSil(payload: Payload, collection: 'havuz-goruntulemeleri' | 'rizalar' | 'test-postalar' | 'kaydedilen-ilanlar' | 'kayitli-aramalar', where: Record<string, unknown>): Promise<number> {
+async function hepsiniSil(payload: Payload, collection: 'havuz-goruntulemeleri' | 'rizalar' | 'test-postalar' | 'kaydedilen-ilanlar' | 'kayitli-aramalar' | 'gorusmeler', where: Record<string, unknown>): Promise<number> {
   let toplam = 0
   for (let i = 0; i < 1000; i++) {
     const { docs } = await payload.find({ collection, where: where as never, limit: PARCA, depth: 0, overrideAccess: true })
@@ -65,6 +65,11 @@ export async function adayHesabiniSil(payload: Payload, yapan: Kullanici, adayKu
   const { docs: profiller } = await payload.find({ collection: 'adaylar', where: { kullanici: { equals: adayKullaniciId } }, depth: 0, limit: 1, overrideAccess: true })
   const profil = profiller[0]
   for (const c of profil?.cvler ?? []) if (c.dosya) dosyalar.add(kimlik(c.dosya))
+
+  // 2a. Süren görüşmeler iptal olur (firmaya bildirilir); görüşme kayıtları (adayın notu dahil) silinir.
+  const { adayGorusmeleriniKapat } = await import('./gorusme')
+  await adayGorusmeleriniKapat(payload, adayKullaniciId, 'hesap-silindi')
+  await hepsiniSil(payload, 'gorusmeler', { adayKullanici: { equals: adayKullaniciId } })
 
   // 2. Başvurular firmada kalır; kimlik bilgileri, ön yazı ve CV çıkarılır
   let basvuru = 0

@@ -196,7 +196,7 @@ export async function basvur(payload: Payload, kullanici: Kullanici, girdi: Basv
 /** Aday başvurusunu geri çeker (yalnızca alındı veya inceleniyor aşamasında). */
 export async function geriCek(payload: Payload, kullanici: Kullanici, basvuruId: number | string) {
   const req = await istekOlustur(payload, kullanici)
-  return payload.update({
+  const b = await payload.update({
     collection: 'basvurular',
     id: basvuruId,
     data: { durum: 'geri-cekti' },
@@ -204,4 +204,8 @@ export async function geriCek(payload: Payload, kullanici: Kullanici, basvuruId:
     overrideAccess: false,
     req,
   })
+  // Süren görüşme iptal olur, firmaya bildirilir (döngüsel içe aktarmayı önlemek için dinamik).
+  const { adayGorusmeleriniKapat } = await import('./gorusme')
+  await adayGorusmeleriniKapat(payload, Number(kullanici.id), 'geri-cekti', Number(basvuruId))
+  return b
 }
